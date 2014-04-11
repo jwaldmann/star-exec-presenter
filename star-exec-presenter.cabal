@@ -20,6 +20,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
+                     StarExec.StarExecCommands
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -67,6 +68,7 @@ library
                  , monad-logger                  >= 0.3        && < 0.4
                  , fast-logger                   >= 2.1.4      && < 2.2
                  , wai-logger                    >= 2.1        && < 2.2
+                 , transformers
 
 executable         star-exec-presenter
     if flag(library-only)
