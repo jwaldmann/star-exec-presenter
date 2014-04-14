@@ -20,6 +20,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
+                     Handler.StarExecLogout
                      StarExec.StarExecCommands
 
     if flag(dev) || flag(library-only)
