@@ -9,7 +9,7 @@ $else
         <div class="panel-heading">
           <h3 class="panel-title"><strong>Sign in </strong>
         <div class="panel-body">
-          <form role="form" action=@{HomeR} method="post">
+          <form role="form" action=@{StarExecLoginR} method="post">
             <div class="form-group">
               <label for="inputEmail">Username or Email</label>
               <input type="email" class="form-control" style="border-radius:0px" id="inputEmail" placeholder="Enter email" name="email">

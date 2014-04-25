@@ -10,6 +10,7 @@ import Import
 import Prelude (head)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Control.Monad.IO.Class
 import Control.Monad.Catch
@@ -34,10 +35,16 @@ loginPath = "starexec/secure/j_security_check"
 logoutPath :: BS.ByteString
 logoutPath = "starexec/services/session/logout"
 
+userIDPath :: BS.ByteString
+userIDPath = "starexec/services/users/getid"
+
 -- Methods
 
 parseCookies :: Text -> [Cookie]
 parseCookies sCookies = read (T.unpack sCookies)
+
+packCookies :: [Cookie] -> Text
+packCookies cookies = T.pack $ show cookies
 
 sendRequest :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   (RequestHandler m b) -> m b
@@ -100,7 +107,7 @@ login user pass sCookies = do
                       }
     resp <- httpLbs req man
     let respCookies = responseCookieJar resp
-    return $ T.pack $ show $ destroyCookieJar respCookies
+    return $ packCookies $ destroyCookieJar respCookies
 
 logout :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Maybe Text -> m Text
 logout sCookies = do
@@ -115,4 +122,19 @@ logout sCookies = do
                   }
     resp <- httpLbs req man
     let respCookies = responseCookieJar resp
-    return $ T.pack $ show $ destroyCookieJar respCookies
+    return $ packCookies $ destroyCookieJar respCookies
+
+getUserID :: (MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Maybe Text -> m (Text, Text)
+getUserID sCookies = do
+  let cookies = case sCookies of
+                     Nothing -> []
+                     Just sc -> parseCookies sc
+  sendRequest $ \sec man -> do
+    newCookies <- index sec man $ createCookieJar cookies
+    let req = sec { method = "GET"
+                  , path = userIDPath
+                  , cookieJar = Just newCookies
+                  }
+    resp <- httpLbs req man
+    let respCookies = responseCookieJar resp
+    return $ (packCookies $ destroyCookieJar respCookies, TE.decodeUtf8 $ BSL.toStrict $ responseBody resp)

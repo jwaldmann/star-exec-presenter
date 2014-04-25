@@ -22,13 +22,13 @@ getHomeR = do
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
 
-postHomeR :: Handler Html
-postHomeR = do
-    (email, pass) <- runInputPost $ (,) <$> ireq textField "email" <*> ireq textField "password"
-    session <- lookupSession "SESSION"
-    cookies <- SEC.login email pass session
-    setSession "SESSION" cookies
-    redirect HomeR
+--postHomeR :: Handler Html
+--postHomeR = do
+--    (email, pass) <- runInputPost $ (,) <$> ireq textField "email" <*> ireq textField "password"
+--    session <- lookupSession "SESSION"
+--    cookies <- SEC.login email pass session
+--    setSession "SESSION" cookies
+--    redirect HomeR
 
 sampleForm :: Form (FileInfo, Text)
 sampleForm = renderDivs $ (,)

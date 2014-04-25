@@ -4,5 +4,6 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/ HomeR GET POST
+/ HomeR GET
 /logout StarExecLogoutR GET
+/login StarExecLoginR POST

@@ -21,6 +21,7 @@ library
                      Settings.Development
                      Handler.Home
                      Handler.StarExecLogout
+                     Handler.StarExecLogin
                      StarExec.StarExecCommands
 
     if flag(dev) || flag(library-only)
