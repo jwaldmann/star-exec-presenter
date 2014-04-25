@@ -70,6 +70,8 @@ library
                  , fast-logger                   >= 2.1.4      && < 2.2
                  , wai-logger                    >= 2.1        && < 2.2
                  , transformers
+                 , exceptions
+                 , resourcet
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -100,3 +102,5 @@ test-suite test
                  , monad-logger
                  , transformers
                  , hspec
+                 , exceptions
+                 , resourcet
