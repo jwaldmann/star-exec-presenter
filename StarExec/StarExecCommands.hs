@@ -1,12 +1,19 @@
-{-# LANGUAGE TupleSections, OverloadedStrings #-}
+{-
+  StarExecCommands: Module that contains and handles all request to the
+  starexec-cluster
+-}
 
 module StarExec.StarExecCommands
   ( login
   , logout
   , checkLogin
+  , getConnection
+  , getSessionCookies
+  , setSessionCookies
+  , deleteSessionCookies
   ) where
 
-import Import
+import Import hiding (getSession)
 import Prelude (head)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
@@ -16,15 +23,25 @@ import Control.Monad.IO.Class
 import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
 import qualified Data.ByteString as BS
+import Yesod.Core hiding (getSession)
+import Data.Maybe
 
 -- internals
 
 type RequestHandler m b = Request -> Manager -> ResourceT m b
+type Cookies = [Cookie]
+type StarExecConnection = (Request, Manager)
 
--- Static-Paths
+-- Statics
+
+starExecSessionID :: Text
+starExecSessionID = "SESESSION"
 
 starExecUrl :: String
 starExecUrl = "https://www.starexec.org/"
+
+starExecSpacesPath :: BS.ByteString
+starExecSpacesPath = "https://www.starexec.org/starexec/secure/explore/spaces.jsp"
 
 indexPath :: BS.ByteString
 indexPath = "starexec/secure/index.jsp"
@@ -35,16 +52,32 @@ loginPath = "starexec/secure/j_security_check"
 logoutPath :: BS.ByteString
 logoutPath = "starexec/services/session/logout"
 
+spacesPath :: BS.ByteString
+spacesPath = "starexec/secure/explore/spaces.jsp"
+
 userIDPath :: BS.ByteString
 userIDPath = "starexec/services/users/getid"
 
--- Methods
+-- internal Methods
 
-parseCookies :: Text -> [Cookie]
-parseCookies sCookies = read (T.unpack sCookies)
+getSession :: MonadHandler m => m (Maybe Cookies)
+getSession = do
+  session <- lookupSession starExecSessionID
+  case session of
+        Nothing -> return Nothing
+        Just sCookies -> return $ Just $ parseCookies sCookies
 
-packCookies :: [Cookie] -> Text
-packCookies cookies = T.pack $ show cookies
+isLoggedIn :: Maybe BS.ByteString -> Bool
+isLoggedIn Nothing = False
+isLoggedIn (Just loc) = if loc == starExecSpacesPath
+                          then True
+                          else False
+
+parseCookies :: Text -> Cookies
+parseCookies = read . T.unpack
+
+packCookies :: Cookies -> Text
+packCookies = T.pack . show
 
 sendRequest :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   (RequestHandler m b) -> m b
@@ -58,30 +91,51 @@ getLocation resp =
     in
       if null locs then Nothing else Just $ snd $ head locs
 
-checkLogin :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Maybe Text -> m Bool
-checkLogin Nothing = return False
-checkLogin (Just sCookies) = do
-  let cookies = parseCookies sCookies
-  loggedIn <- sendRequest $ \sec man -> do
-    newCookies <- index sec man $ createCookieJar cookies
-    let req = sec { method = "HEAD"
-                  , path = "starexec/secure/index.jsp"
-                  , cookieJar = Just newCookies
-                  , redirectCount = 0
-                  , checkStatus = (\_ _ _ -> Nothing)
-                  }
-    resp <- httpLbs req man
-    let loc = getLocation resp
-    let loggedIn = case loc of
-                        Just location -> if location == "https://www.starexec.org/starexec/secure/explore/spaces.jsp"
-                                                then True
-                                                else False
-                        Nothing            -> False
-    return loggedIn
-  return loggedIn
+-- external Methods
 
-index :: MonadIO m => Request -> Manager -> CookieJar -> m CookieJar
-index sec man cookies = do
+getConnection :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  m StarExecConnection
+getConnection = do
+  sec <- parseUrl starExecUrl
+  cookies <- getSessionCookies
+  man <- withManager return
+  newCookies <- index (sec, man) cookies
+  setSessionCookies newCookies
+  return (sec, man)
+
+getSessionCookies :: ( MonadHandler m ) => m CookieJar
+getSessionCookies = do
+  session <- getSession
+  return $ createCookieJar $ fromMaybe [] session
+
+setSessionCookies :: ( MonadHandler m ) => CookieJar -> m ()
+setSessionCookies cookies = do
+  setSession starExecSessionID $ packCookies $ destroyCookieJar cookies
+
+deleteSessionCookies :: ( MonadHandler m ) => m ()
+deleteSessionCookies = do
+  deleteSession starExecSessionID
+
+checkLogin :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection -> m Bool
+checkLogin (sec, man) = do
+  session <- getSession
+  case session of
+        Nothing -> return False
+        Just cookies -> do
+          --newCookies <- index (sec, man) $ createCookieJar cookies
+          let req = sec { method = "HEAD"
+                        , path = "starexec/secure/index.jsp"
+                        , cookieJar = Just $ createCookieJar cookies
+                        , redirectCount = 0
+                        , checkStatus = (\_ _ _ -> Nothing)
+                        }
+          resp <- httpLbs req man
+          setSessionCookies $ responseCookieJar resp
+          return $ isLoggedIn $ getLocation resp
+
+index :: MonadIO m => StarExecConnection -> CookieJar -> m CookieJar
+index (sec, man) cookies = do
   let req = sec { method = "GET"
                 , path = indexPath
                 , cookieJar = Just cookies
@@ -90,51 +144,45 @@ index sec man cookies = do
   let respCookies = responseCookieJar resp
   return respCookies
 
-login :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Text -> Text -> Maybe Text -> m Text
-login user pass sCookies = do
-  let cookies = case sCookies of
-                     Nothing -> []
-                     Just sc -> parseCookies sc
-  sendRequest $ \sec man -> do
-    newCookies <- index sec man $ createCookieJar cookies
-    let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 user)
-                             , ("j_password", TE.encodeUtf8 pass) 
-                             , ("cookieexists", "false")
-                             ] 
-                $ sec { method = "POST"
-                      , path = loginPath
-                      , cookieJar = Just newCookies
-                      }
-    resp <- httpLbs req man
-    let respCookies = responseCookieJar resp
-    return $ packCookies $ destroyCookieJar respCookies
+login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection -> Text -> Text -> m CookieJar
+login (sec, man) user pass = do
+  cookies <- getSessionCookies
+  --newCookies <- index (sec, man) cookies
+  let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 user)
+                           , ("j_password", TE.encodeUtf8 pass) 
+                           , ("cookieexists", "false")
+                           ] 
+              $ sec { method = "POST"
+                    , path = loginPath
+                    , cookieJar = Just cookies
+                    }
+  resp <- httpLbs req man
+  let respCookies = responseCookieJar resp
+  setSessionCookies respCookies
+  return respCookies
 
-logout :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Maybe Text -> m Text
-logout sCookies = do
-  let cookies = case sCookies of
-                     Nothing -> []
-                     Just sc -> parseCookies sc
-  sendRequest $ \sec man -> do
-    newCookies <- index sec man $ createCookieJar cookies
-    let req = sec { method = "POST"
-                  , path = logoutPath
-                  , cookieJar = Just newCookies
-                  }
-    resp <- httpLbs req man
-    let respCookies = responseCookieJar resp
-    return $ packCookies $ destroyCookieJar respCookies
+logout :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection -> m ()
+logout (sec, man) = do
+  cookies <- getSessionCookies
+  --newCookies <- index (sec, man) cookies
+  let req = sec { method = "POST"
+                , path = logoutPath
+                , cookieJar = Just cookies
+                }
+  resp <- httpLbs req man
+  deleteSessionCookies
+  return ()
 
-getUserID :: (MonadIO m, MonadBaseControl IO m, MonadThrow m ) => Maybe Text -> m (Text, Text)
-getUserID sCookies = do
-  let cookies = case sCookies of
-                     Nothing -> []
-                     Just sc -> parseCookies sc
-  sendRequest $ \sec man -> do
-    newCookies <- index sec man $ createCookieJar cookies
-    let req = sec { method = "GET"
-                  , path = userIDPath
-                  , cookieJar = Just newCookies
-                  }
-    resp <- httpLbs req man
-    let respCookies = responseCookieJar resp
-    return $ (packCookies $ destroyCookieJar respCookies, TE.decodeUtf8 $ BSL.toStrict $ responseBody resp)
+getUserID :: (MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection -> CookieJar -> m (Text, Text)
+getUserID (sec, man) cookies = do
+  --newCookies <- index (sec, man) cookies
+  let req = sec { method = "GET"
+                , path = userIDPath
+                , cookieJar = Just cookies
+                }
+  resp <- httpLbs req man
+  let respCookies = responseCookieJar resp
+  return $ (packCookies $ destroyCookieJar respCookies, TE.decodeUtf8 $ BSL.toStrict $ responseBody resp)
