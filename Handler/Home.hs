@@ -2,7 +2,6 @@
 module Handler.Home where
 
 import Import
-import Network.HTTP.Conduit
 import qualified StarExec.StarExecCommands as SEC
 
 -- This is a handler function for the GET request method on the HomeR
@@ -15,15 +14,19 @@ import qualified StarExec.StarExecCommands as SEC
 
 getHomeR :: Handler Html
 getHomeR = do
+    liftIO $ print "entering HomeR"
     defaultLayout $ do
         con <- SEC.getConnection
         loggedIn <- SEC.checkLogin con
-        aDomId <- newIdent
         sess <- getSession
+        userID <- do
+            if loggedIn
+                then SEC.getUserID con
+                else return ""
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
 
-sampleForm :: Form (FileInfo, Text)
-sampleForm = renderDivs $ (,)
-    <$> fileAFormReq "Choose a file"
-    <*> areq textField "What's on the file?" Nothing
+--sampleForm :: Form (FileInfo, Text)
+--sampleForm = renderDivs $ (,)
+--    <$> fileAFormReq "Choose a file"
+--    <*> areq textField "What's on the file?" Nothing

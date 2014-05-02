@@ -23,7 +23,10 @@ import           Data.Monoid          as Import
 import           Data.Monoid          as Import
                                                  (Monoid (mappend, mempty, mconcat))
 
+import ErrorID
+
 infixr 5 <>
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 #endif
+

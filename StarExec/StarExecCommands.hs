@@ -8,21 +8,25 @@ module StarExec.StarExecCommands
   , logout
   , checkLogin
   , getConnection
-  , getSessionCookies
-  , setSessionCookies
-  , deleteSessionCookies
+  , getUserID
+  , getSessionUserID
+  , isSessionValid
+  --, getSessionCookies
+  --, setSessionCookies
+  --, deleteSessionCookies
   ) where
 
 import Import hiding (getSession)
 import Prelude (head)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Control.Monad.IO.Class
 import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
-import qualified Data.ByteString as BS
 import Yesod.Core hiding (getSession)
 import Data.Maybe
 
@@ -36,6 +40,9 @@ type StarExecConnection = (Request, Manager)
 
 starExecSessionID :: Text
 starExecSessionID = "SESESSION"
+
+starExecUserID :: Text
+starExecUserID = "SEUSERID"
 
 starExecUrl :: String
 starExecUrl = "https://www.starexec.org/"
@@ -116,6 +123,24 @@ deleteSessionCookies :: ( MonadHandler m ) => m ()
 deleteSessionCookies = do
   deleteSession starExecSessionID
 
+getSessionUserID :: ( MonadHandler m ) => m (Maybe Text)
+getSessionUserID = do
+  userID <- lookupSession starExecSessionID
+  return userID
+
+setSessionUserID :: ( MonadHandler m ) => Text -> m ()
+setSessionUserID userID = do
+  setSession starExecUserID userID
+
+deleteSessionUserID :: ( MonadHandler m ) => m ()
+deleteSessionUserID = do
+  deleteSession starExecUserID
+
+isSessionValid :: ( MonadHandler m ) => m Bool
+isSessionValid = do
+  userID <- getSessionUserID
+  return $ if userID /= Nothing then True else False
+
 checkLogin :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> m Bool
 checkLogin (sec, man) = do
@@ -145,10 +170,9 @@ index (sec, man) cookies = do
   return respCookies
 
 login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  StarExecConnection -> Text -> Text -> m CookieJar
+  StarExecConnection -> Text -> Text -> m Bool
 login (sec, man) user pass = do
   cookies <- getSessionCookies
-  --newCookies <- index (sec, man) cookies
   let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 user)
                            , ("j_password", TE.encodeUtf8 pass) 
                            , ("cookieexists", "false")
@@ -160,29 +184,39 @@ login (sec, man) user pass = do
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
   setSessionCookies respCookies
-  return respCookies
+  liftIO $ print "posted login data"
+  loggedIn <- checkLogin (sec, man)
+  liftIO $ print $ "is logged in? " ++ show loggedIn
+  if loggedIn
+    then do
+      userID <- getUserID (sec, man)
+      setSessionUserID userID
+    else deleteSessionUserID
+  return loggedIn
 
 logout :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> m ()
 logout (sec, man) = do
   cookies <- getSessionCookies
-  --newCookies <- index (sec, man) cookies
   let req = sec { method = "POST"
                 , path = logoutPath
                 , cookieJar = Just cookies
                 }
   resp <- httpLbs req man
   deleteSessionCookies
+  deleteSessionUserID
   return ()
 
-getUserID :: (MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  StarExecConnection -> CookieJar -> m (Text, Text)
-getUserID (sec, man) cookies = do
-  --newCookies <- index (sec, man) cookies
+getUserID :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection  -> m Text
+getUserID (sec, man) = do
+  cookies <- getSessionCookies
   let req = sec { method = "GET"
                 , path = userIDPath
                 , cookieJar = Just cookies
                 }
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
-  return $ (packCookies $ destroyCookieJar respCookies, TE.decodeUtf8 $ BSL.toStrict $ responseBody resp)
+  liftIO $ print "got response for getUserID"
+  setSessionCookies respCookies
+  return $ read $ BSC.unpack $ BSL.toStrict $ responseBody resp

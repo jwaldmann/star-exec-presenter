@@ -1,12 +1,23 @@
+-- User
+--     ident Text
+--     password Text Maybe
+--     UniqueUser ident
+--     deriving Typeable
+-- Email
+--     email Text
+--     user UserId Maybe
+--     verkey Text Maybe
+--     UniqueEmail email
+
 User
-    ident Text
-    password Text Maybe
-    UniqueUser ident
-    deriving Typeable
-Email
-    email Text
-    user UserId Maybe
-    verkey Text Maybe
-    UniqueEmail email
+    seId Text
+    spaces [SpaceId]
+    UniqueUser seId
+    deriving Typeable Show
+
+Space
+    seId Text
+    UniqueSpace seId
+    users [UserId]
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
