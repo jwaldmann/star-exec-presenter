@@ -19,7 +19,6 @@ getHomeR = do
         con <- SEC.getConnection
         loggedIn <- SEC.checkLogin con
         aDomId <- newIdent
-        sess <- getSession
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
 

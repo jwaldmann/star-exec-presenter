@@ -6,4 +6,5 @@
 
 / HomeR GET
 /logout StarExecLogoutR GET
-/login StarExecLoginR POST
+/login StarExecLoginR GET POST
+/error/#ErrorID ErrorR GET

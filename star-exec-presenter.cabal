@@ -22,7 +22,9 @@ library
                      Handler.Home
                      Handler.StarExecLogout
                      Handler.StarExecLogin
+                     Handler.Error
                      StarExec.StarExecCommands
+                     StarExec.ErrorID
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
