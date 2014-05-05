@@ -23,7 +23,9 @@ library
                      Handler.StarExecLogout
                      Handler.StarExecLogin
                      Handler.Error
-                     StarExec.StarExecCommands
+                     Handler.User
+                     Handler.RegisterSpace
+                     StarExec.Commands
                      StarExec.ErrorID
 
     if flag(dev) || flag(library-only)

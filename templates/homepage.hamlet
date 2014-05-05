@@ -1,6 +1,8 @@
 <h1>_{MsgHello}
 
 $if loggedIn
+  $maybe userID <- mUserID
+    <p>User-ID: #{userID}
   <a href=@{StarExecLogoutR}>logout from StarExec
 $else
   <div class="container" style="margin-top:30px">

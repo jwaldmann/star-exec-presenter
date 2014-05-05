@@ -3,7 +3,7 @@
   starexec-cluster
 -}
 
-module StarExec.StarExecCommands
+module StarExec.Commands
   ( login
   , logout
   , checkLogin
@@ -21,8 +21,8 @@ import Prelude (head)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as BS
-import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BSC
+import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Control.Monad.IO.Class
 import Control.Monad.Catch
@@ -110,7 +110,7 @@ getConnection = do
   setSessionCookies newCookies
   return (sec, man)
 
--- StarExec Session Cookies
+-- StarExec Session-Cookies
 
 getSessionCookies :: ( MonadHandler m ) => m CookieJar
 getSessionCookies = do
@@ -118,27 +118,25 @@ getSessionCookies = do
   return $ createCookieJar $ fromMaybe [] session
 
 setSessionCookies :: ( MonadHandler m ) => CookieJar -> m ()
-setSessionCookies cookies = do
+setSessionCookies cookies =
   setSession starExecSessionID $ packCookies $ destroyCookieJar cookies
 
 deleteSessionCookies :: ( MonadHandler m ) => m ()
-deleteSessionCookies = do
-  deleteSession starExecSessionID
+deleteSessionCookies = deleteSession starExecSessionID
 
--- StarExec User ID
+-- StarExec UserID
 
 getSessionUserID :: ( MonadHandler m ) => m (Maybe Text)
-getSessionUserID = do
-  userID <- lookupSession starExecSessionID
-  return userID
+getSessionUserID = lookupSession starExecUserID
+  --do
+  --userID <- lookupSession starExecUserID
+  --return userID
 
 setSessionUserID :: ( MonadHandler m ) => Text -> m ()
-setSessionUserID userID = do
-  setSession starExecUserID userID
+setSessionUserID userID = setSession starExecUserID userID
 
 deleteSessionUserID :: ( MonadHandler m ) => m ()
-deleteSessionUserID = do
-  deleteSession starExecUserID
+deleteSessionUserID = deleteSession starExecUserID
 
 isSessionValid :: ( MonadHandler m ) => m Bool
 isSessionValid = do
@@ -169,6 +167,7 @@ index (sec, man) cookies = do
                 , path = indexPath
                 , cookieJar = Just cookies
                 }
+  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
   return respCookies
@@ -185,19 +184,17 @@ login (sec, man) user pass = do
                     , path = loginPath
                     , cookieJar = Just cookies
                     }
+  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
   setSessionCookies respCookies
-  liftIO $ print "posted login data"
   loggedIn <- checkLogin (sec, man)
-  liftIO $ print $ "is logged in? " ++ show loggedIn
-  --if loggedIn
-  --  then do
-  --    userID <- getUserID (sec, man)
-  --    setSessionUserID userID
-  --  else deleteSessionUserID
+  if loggedIn
+    then do
+      userID <- getUserID (sec, man)
+      setSessionUserID userID
+    else deleteSessionUserID
   return loggedIn
-
 
 logout :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> m ()
@@ -207,23 +204,23 @@ logout (sec, man) = do
                 , path = logoutPath
                 , cookieJar = Just cookies
                 }
+  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
   resp <- httpLbs req man
   deleteSessionCookies
-  --deleteSessionUserID
+  deleteSession starExecUserID
+  deleteSessionUserID
   return ()
 
 getUserID :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  StarExecConnection -> m Text
+  StarExecConnection  -> m Text
 getUserID (sec, man) = do
   cookies <- getSessionCookies
   let req = sec { method = "GET"
                 , path = userIDPath
                 , cookieJar = Just cookies
                 }
+  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
-  --return $ (packCookies $ destroyCookieJar respCookies, TE.decodeUtf8 $ BSL.toStrict $ responseBody resp)
-  liftIO $ print "got response for getUserID"
   setSessionCookies respCookies
-  return $ read $ BSC.unpack $ BSL.toStrict $ responseBody resp
-
+  return $ TE.decodeUtf8 $ BSL.toStrict $ responseBody resp

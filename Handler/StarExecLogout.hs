@@ -1,7 +1,7 @@
 module Handler.StarExecLogout where
 
 import Import
-import qualified StarExec.StarExecCommands as SEC
+import qualified StarExec.Commands as SEC
 
 getStarExecLogoutR :: Handler Html
 getStarExecLogoutR = do

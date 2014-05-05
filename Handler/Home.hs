@@ -2,8 +2,7 @@
 module Handler.Home where
 
 import Import
-import Network.HTTP.Conduit
-import qualified StarExec.StarExecCommands as SEC
+import qualified StarExec.Commands as SEC
 
 -- This is a handler function for the GET request method on the HomeR
 -- resource pattern. All of your resource patterns are defined in
@@ -18,11 +17,14 @@ getHomeR = do
     defaultLayout $ do
         con <- SEC.getConnection
         loggedIn <- SEC.checkLogin con
-        aDomId <- newIdent
+        mUserID <- do
+            if loggedIn
+                then SEC.getSessionUserID
+                else return Nothing
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
 
-sampleForm :: Form (FileInfo, Text)
-sampleForm = renderDivs $ (,)
-    <$> fileAFormReq "Choose a file"
-    <*> areq textField "What's on the file?" Nothing
+--sampleForm :: Form (FileInfo, Text)
+--sampleForm = renderDivs $ (,)
+--    <$> fileAFormReq "Choose a file"
+--    <*> areq textField "What's on the file?" Nothing

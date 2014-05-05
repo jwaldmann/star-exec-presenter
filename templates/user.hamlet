@@ -1,0 +1,11 @@
+<h1>This is an overview of your registered spaces on StarExec
+
+<div class="container" style="margin-top:30px">
+    <div class="panel-heading">
+          <h3 class="panel-title"><strong>Register a Space</strong>
+        <div class="panel-body">
+          <form role="form" action=@{RegisterSpaceR} method="post" class="form-inline">
+            <div class="form-group">
+              <label class="sr-only" for="inputSpaceID">Space ID</label>
+              <input type="number" class="form-control" style="border-radius:0px" id="inputSpaceID" placeholder="Enter Space ID" name="spaceId">
+            <button type="submit" class="btn btn-sm btn-default">Register Space
