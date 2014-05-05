@@ -128,9 +128,6 @@ deleteSessionCookies = deleteSession starExecSessionID
 
 getSessionUserID :: ( MonadHandler m ) => m (Maybe Text)
 getSessionUserID = lookupSession starExecUserID
-  --do
-  --userID <- lookupSession starExecUserID
-  --return userID
 
 setSessionUserID :: ( MonadHandler m ) => Text -> m ()
 setSessionUserID userID = setSession starExecUserID userID
@@ -150,7 +147,6 @@ checkLogin (sec, man) = do
   case session of
         Nothing -> return False
         Just cookies -> do
-          --newCookies <- index (sec, man) $ createCookieJar cookies
           let req = sec { method = "HEAD"
                         , path = "starexec/secure/index.jsp"
                         , cookieJar = Just $ createCookieJar cookies
