@@ -14,11 +14,9 @@ import qualified StarExec.StarExecCommands as SEC
 
 getHomeR :: Handler Html
 getHomeR = do
-    liftIO $ print "entering HomeR"
     defaultLayout $ do
         con <- SEC.getConnection
         loggedIn <- SEC.checkLogin con
-        sess <- getSession
         userID <- do
             if loggedIn
                 then SEC.getUserID con

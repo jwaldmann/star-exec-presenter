@@ -70,6 +70,8 @@ userIDPath = "starexec/services/users/getid"
 getSession :: MonadHandler m => m (Maybe Cookies)
 getSession = do
   session <- lookupSession starExecSessionID
+  --liftIO $ print "SEC.getSession:" 
+  --liftIO $ print $ show session
   case session of
         Nothing -> return Nothing
         Just sCookies -> return $ Just $ parseCookies sCookies
@@ -117,6 +119,9 @@ getSessionCookies = do
 
 setSessionCookies :: ( MonadHandler m ) => CookieJar -> m ()
 setSessionCookies cookies = do
+  --let sCookies = packCookies $ destroyCookieJar cookies
+  --liftIO $ print "SEC.setSessionCookies:"
+  --liftIO $ print $ show sCookies
   setSession starExecSessionID $ packCookies $ destroyCookieJar cookies
 
 deleteSessionCookies :: ( MonadHandler m ) => m ()
