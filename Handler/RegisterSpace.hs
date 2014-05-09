@@ -4,10 +4,7 @@ import Import
 import qualified StarExec.Commands as SEC
 
 updateSpace spaceID = do
-    space <- runDB $ getBy $ UniqueSpace spaceID
-    _ <- case space of
-        Nothing -> runDB $ insertUnique $ Space spaceID []
-        Just sid -> runDB $ return Nothing
+    _ <- runDB $ insertUnique $ Space spaceID []
     return ()
 
 postRegisterSpaceR :: Handler Html

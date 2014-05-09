@@ -11,6 +11,7 @@ module StarExec.Commands
   , getUserID
   , getSessionUserID
   , isSessionValid
+  , listPrim
   --, getSessionCookies
   --, setSessionCookies
   --, deleteSessionCookies
@@ -21,6 +22,7 @@ import Prelude (head)
 import qualified Data.Text as T
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Search as BSS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
@@ -29,10 +31,13 @@ import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
 import Yesod.Core hiding (getSession)
 import Data.Maybe
+import StarExec.Types
+import qualified Data.List as List
+import Data.Char
 
 -- internals
 
-type RequestHandler m b = Request -> Manager -> ResourceT m b
+--type RequestHandler m b = Request -> Manager -> ResourceT m b
 type Cookies = [Cookie]
 type StarExecConnection = (Request, Manager)
 
@@ -65,6 +70,33 @@ spacesPath = "starexec/secure/explore/spaces.jsp"
 userIDPath :: BS.ByteString
 userIDPath = "starexec/services/users/getid"
 
+primPath :: BS.ByteString
+primPath = "starexec/services/space/{id}/{type}/pagination"
+
+getPrimURL :: BS.ByteString -> [(String, String)] -> BS.ByteString
+getPrimURL url patterns = List.foldl' (\path (pattern, sub) ->
+    BSL.toStrict $ BSS.replace
+      (BSC.pack pattern)
+      (BSC.pack sub)
+      path
+  ) url patterns
+
+getPostData :: Int -> [(BS.ByteString, BS.ByteString)]
+--getPostData :: Int -> [(String, String)]
+getPostData columns =
+  [ ("sEcho", "1")
+  , ("iColumns", BSC.pack $ show columns)
+  --, ("iColumns", show columns)
+  , ("sColumns", "")
+  , ("iDisplayStart", "0")
+  , ("iDisplayLength", "2147483647")
+  , ("iSortCol_0", "0")
+  , ("sSearch", "")
+  , ("sSortDir_0", "asc") ]
+
+decodeUtf8Body :: Response BSL.ByteString -> Text
+decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
+
 -- internal Methods
 
 getSession :: MonadHandler m => m (Maybe Cookies)
@@ -86,11 +118,11 @@ parseCookies = read . T.unpack
 packCookies :: Cookies -> Text
 packCookies = T.pack . show
 
-sendRequest :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  (RequestHandler m b) -> m b
-sendRequest secFunc = do
-  sec <- parseUrl starExecUrl
-  withManager $ secFunc sec
+--sendRequest :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+--  (RequestHandler m b) -> m b
+--sendRequest secFunc = do
+--  sec <- parseUrl starExecUrl
+--  withManager $ secFunc sec
 
 getLocation :: Response body -> Maybe BS.ByteString
 getLocation resp = 
@@ -201,14 +233,14 @@ logout (sec, man) = do
                 , cookieJar = Just cookies
                 }
   -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
-  resp <- httpLbs req man
+  _ <- httpLbs req man
   deleteSessionCookies
   deleteSession starExecUserID
   deleteSessionUserID
   return ()
 
 getUserID :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  StarExecConnection  -> m Text
+  StarExecConnection -> m Text
 getUserID (sec, man) = do
   cookies <- getSessionCookies
   let req = sec { method = "GET"
@@ -219,4 +251,28 @@ getUserID (sec, man) = do
   resp <- httpLbs req man
   let respCookies = responseCookieJar resp
   setSessionCookies respCookies
-  return $ TE.decodeUtf8 $ BSL.toStrict $ responseBody resp
+  return $ decodeUtf8Body resp
+
+getRequestBody ( RequestBodyBS body ) = show body
+getRequestBody ( RequestBodyLBS body ) = show body
+
+listPrim :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+  StarExecConnection -> Int -> StarExecListType -> Int -> m Text
+listPrim (sec, man) primID primType columns = do
+  cookies <- getSessionCookies
+  let sType = map toLower $ show primType
+      path = getPrimURL
+              primPath
+              [ ("{id}", show primID)
+              , ("{type}", sType) ]
+      req = sec { method = "POST"
+                , path = path
+                --, requestBody = RequestBodyBS $ BSC.pack $ show $ getPostData columns
+                }
+      postData = getPostData columns
+      withData = urlEncodedBody postData req
+  liftIO $ print $ show $ getRequestBody $ requestBody req
+  resp <- httpLbs req man
+  let respCookies = responseCookieJar resp
+  setSessionCookies respCookies
+  return $ decodeUtf8Body resp

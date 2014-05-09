@@ -25,8 +25,10 @@ library
                      Handler.Error
                      Handler.User
                      Handler.RegisterSpace
+                     Handler.ViewSpace
                      StarExec.Commands
                      StarExec.ErrorID
+                     StarExec.Types
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -77,6 +79,7 @@ library
                  , transformers
                  , exceptions
                  , resourcet
+                 , stringsearch
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -109,3 +112,4 @@ test-suite test
                  , hspec
                  , exceptions
                  , resourcet
+                 , stringsearch
