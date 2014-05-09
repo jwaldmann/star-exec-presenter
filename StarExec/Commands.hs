@@ -26,6 +26,7 @@ import qualified Data.ByteString.Search as BSS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
+import Network.HTTP.Client.MultipartFormData
 import Control.Monad.IO.Class
 import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
@@ -253,9 +254,6 @@ getUserID (sec, man) = do
   setSessionCookies respCookies
   return $ decodeUtf8Body resp
 
-getRequestBody ( RequestBodyBS body ) = show body
-getRequestBody ( RequestBodyLBS body ) = show body
-
 listPrim :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> Int -> StarExecListType -> Int -> m Text
 listPrim (sec, man) primID primType columns = do
@@ -267,12 +265,13 @@ listPrim (sec, man) primID primType columns = do
               , ("{type}", sType) ]
       req = sec { method = "POST"
                 , path = path
-                --, requestBody = RequestBodyBS $ BSC.pack $ show $ getPostData columns
                 }
-      postData = getPostData columns
-      withData = urlEncodedBody postData req
-  liftIO $ print $ show $ getRequestBody $ requestBody req
-  resp <- httpLbs req man
+      postData = map (\(k, v) ->
+          partBS (TE.decodeUtf8 k) v
+        ) $ getPostData columns
+  withData <- formDataBody postData req
+  liftIO $ print withData
+  resp <- httpLbs withData man
   let respCookies = responseCookieJar resp
   setSessionCookies respCookies
   return $ decodeUtf8Body resp

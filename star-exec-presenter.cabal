@@ -80,6 +80,7 @@ library
                  , exceptions
                  , resourcet
                  , stringsearch
+                 , http-client
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -113,3 +114,4 @@ test-suite test
                  , exceptions
                  , resourcet
                  , stringsearch
+                 , http-client
