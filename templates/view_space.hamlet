@@ -1,3 +1,5 @@
 <h1>Overview of the space #{spaceId}
 
-#{spaceContent}
+<ul>
+    $forall subspace <- subspaces
+        <li><a href=@{ViewSpaceR (sId subspace)}>#{sName subspace}

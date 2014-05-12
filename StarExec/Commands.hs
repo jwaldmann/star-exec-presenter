@@ -3,6 +3,8 @@
   starexec-cluster
 -}
 
+{-# LANGUAGE DeriveGeneric #-}
+
 module StarExec.Commands
   ( login
   , logout
@@ -12,14 +14,12 @@ module StarExec.Commands
   , getSessionUserID
   , isSessionValid
   , listPrim
-  --, getSessionCookies
-  --, setSessionCookies
-  --, deleteSessionCookies
   ) where
 
 import Import hiding (getSession)
 import Prelude (head)
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
 import qualified Data.Text.Encoding as TE
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Search as BSS
@@ -27,6 +27,7 @@ import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Network.HTTP.Client.MultipartFormData
+import Network.HTTP.Types.Header
 import Control.Monad.IO.Class
 import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
@@ -35,12 +36,31 @@ import Data.Maybe
 import StarExec.Types
 import qualified Data.List as List
 import Data.Char
+import Data.Aeson
+import GHC.Generics
+import Text.XML
+import Text.XML.Cursor
 
 -- internals
 
---type RequestHandler m b = Request -> Manager -> ResourceT m b
 type Cookies = [Cookie]
 type StarExecConnection = (Request, Manager)
+type PrimIdent = (Text, Text)
+
+{-
+aaData: [[,…], [,…]]
+iTotalDisplayRecords: 2
+iTotalRecords: 2
+sEcho: 1
+-}
+data ListPrimResult = ListPrimResult
+  { aaData :: ![[Text]]
+  , iTotalDisplayRecords :: Int
+  , iTotalRecords :: Int
+  , sEcho :: Int
+  } deriving (Show, Generic)
+
+instance FromJSON ListPrimResult
 
 -- Statics
 
@@ -87,7 +107,6 @@ getPostData :: Int -> [(BS.ByteString, BS.ByteString)]
 getPostData columns =
   [ ("sEcho", "1")
   , ("iColumns", BSC.pack $ show columns)
-  --, ("iColumns", show columns)
   , ("sColumns", "")
   , ("iDisplayStart", "0")
   , ("iDisplayLength", "2147483647")
@@ -97,6 +116,37 @@ getPostData columns =
 
 decodeUtf8Body :: Response BSL.ByteString -> Text
 decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
+
+getInput :: Cursor -> Cursor
+getInput c = head $ descendant c >>= element "input"
+
+getNodeValue :: Cursor -> Text
+getNodeValue = head . attribute "value"
+
+getAnchor :: Cursor -> Cursor
+getAnchor c = head $ descendant c >>= element "a" >>= child
+
+wrapHtml :: TL.Text -> TL.Text
+wrapHtml html = 
+  let (+>) = TL.append
+  in "<div>" +> html +> "</div>"
+
+parseListPrimResult :: ( MonadIO m ) =>
+  Int -> StarExecListType -> ListPrimResult -> m (Maybe [PrimIdent])
+parseListPrimResult primID primType jsonObj = do
+  let zipped = map (\[a,b] -> (a,b)) $ aaData jsonObj
+      htmls = map (\(html, desc) ->
+                  (parseText_ def $ wrapHtml $ TL.fromStrict html, desc))
+                zipped
+      infos = map (\(doc, desc) ->
+                  let cursor = fromDocument doc
+                      input = getInput cursor
+                      anchor = getAnchor cursor
+                      inputID = getNodeValue input
+                      anchorContent = head $ content anchor
+                  in (anchorContent, inputID))
+                htmls
+  return $ Just infos
 
 -- internal Methods
 
@@ -119,12 +169,6 @@ parseCookies = read . T.unpack
 packCookies :: Cookies -> Text
 packCookies = T.pack . show
 
---sendRequest :: ( MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
---  (RequestHandler m b) -> m b
---sendRequest secFunc = do
---  sec <- parseUrl starExecUrl
---  withManager $ secFunc sec
-
 getLocation :: Response body -> Maybe BS.ByteString
 getLocation resp = 
     let locs = filter (\(n,_) -> n == "Location" ) (responseHeaders resp)
@@ -137,11 +181,18 @@ getConnection :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow 
   m StarExecConnection
 getConnection = do
   sec <- parseUrl starExecUrl
-  cookies <- getSessionCookies
   man <- withManager return
-  newCookies <- index (sec, man) cookies
-  setSessionCookies newCookies
+  index (sec, man)
   return (sec, man)
+
+sendRequest :: ( MonadHandler m ) =>
+  StarExecConnection -> m (Response BSL.ByteString)
+sendRequest (req, man) = do
+  cookies <- getSessionCookies
+  let req' =  req { cookieJar = Just cookies }
+  resp <- httpLbs req' man
+  setSessionCookies $ responseCookieJar resp
+  return resp
 
 -- StarExec Session-Cookies
 
@@ -182,41 +233,32 @@ checkLogin (sec, man) = do
         Just cookies -> do
           let req = sec { method = "HEAD"
                         , path = "starexec/secure/index.jsp"
-                        , cookieJar = Just $ createCookieJar cookies
                         , redirectCount = 0
                         , checkStatus = (\_ _ _ -> Nothing)
                         }
-          resp <- httpLbs req man
-          setSessionCookies $ responseCookieJar resp
+          resp <- sendRequest (req, man)
           return $ isLoggedIn $ getLocation resp
 
-index :: MonadIO m => StarExecConnection -> CookieJar -> m CookieJar
-index (sec, man) cookies = do
+index :: ( MonadHandler m, MonadIO m ) =>
+  StarExecConnection -> m ()
+index (sec, man) = do
   let req = sec { method = "GET"
                 , path = indexPath
-                , cookieJar = Just cookies
                 }
-  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
-  resp <- httpLbs req man
-  let respCookies = responseCookieJar resp
-  return respCookies
+  _ <- sendRequest (req, man)
+  return ()
 
 login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> Text -> Text -> m Bool
 login (sec, man) user pass = do
-  cookies <- getSessionCookies
   let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 user)
                            , ("j_password", TE.encodeUtf8 pass) 
                            , ("cookieexists", "false")
                            ] 
               $ sec { method = "POST"
                     , path = loginPath
-                    , cookieJar = Just cookies
                     }
-  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
-  resp <- httpLbs req man
-  let respCookies = responseCookieJar resp
-  setSessionCookies respCookies
+  resp <- sendRequest (req, man)
   loggedIn <- checkLogin (sec, man)
   if loggedIn
     then do
@@ -228,13 +270,11 @@ login (sec, man) user pass = do
 logout :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> m ()
 logout (sec, man) = do
-  cookies <- getSessionCookies
   let req = sec { method = "POST"
                 , path = logoutPath
-                , cookieJar = Just cookies
                 }
   -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
-  _ <- httpLbs req man
+  _ <- sendRequest (req, man)
   deleteSessionCookies
   deleteSession starExecUserID
   deleteSessionUserID
@@ -243,35 +283,40 @@ logout (sec, man) = do
 getUserID :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
   StarExecConnection -> m Text
 getUserID (sec, man) = do
-  cookies <- getSessionCookies
   let req = sec { method = "GET"
                 , path = userIDPath
-                , cookieJar = Just cookies
                 }
-  -- resp :: Response Data.ByteString.Lazy.Internal.ByteString
-  resp <- httpLbs req man
-  let respCookies = responseCookieJar resp
-  setSessionCookies respCookies
+  resp <- sendRequest (req, man)
   return $ decodeUtf8Body resp
 
-listPrim :: (MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
-  StarExecConnection -> Int -> StarExecListType -> Int -> m Text
+listPrim :: ( MonadHandler m ) =>
+  StarExecConnection -> Int -> StarExecListType -> Int -> m (Maybe [PrimIdent])
 listPrim (sec, man) primID primType columns = do
-  cookies <- getSessionCookies
   let sType = map toLower $ show primType
-      path = getPrimURL
+      reqPath = getPrimURL
               primPath
               [ ("{id}", show primID)
               , ("{type}", sType) ]
-      req = sec { method = "POST"
-                , path = path
+      (+>) = BS.append
+      postData = foldl (\bs (k, v) ->
+          bs +> "&" +> k +> "=" +> v
+        ) "" $ getPostData columns
+      req = sec {
+                  method = "POST"
+                , path = reqPath
+                , requestHeaders = [ (
+                    hContentType,
+                    "application/x-www-form-urlencoded"
+                  ) ]
+                , requestBody = RequestBodyBS $ BS.tail postData
                 }
-      postData = map (\(k, v) ->
-          partBS (TE.decodeUtf8 k) v
-        ) $ getPostData columns
-  withData <- formDataBody postData req
-  liftIO $ print withData
-  resp <- httpLbs withData man
-  let respCookies = responseCookieJar resp
-  setSessionCookies respCookies
-  return $ decodeUtf8Body resp
+  resp <- sendRequest (req, man)
+  let jsonObj = eitherDecode
+        $ responseBody resp :: (Either String ListPrimResult)
+  mPrims <- case jsonObj of
+                Right result ->
+                  parseListPrimResult primID primType result
+                Left msg -> do
+                  liftIO $ print $ show msg
+                  return Nothing
+  return mPrims

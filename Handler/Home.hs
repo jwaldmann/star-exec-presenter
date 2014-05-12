@@ -23,8 +23,3 @@ getHomeR = do
                 else return Nothing
         setTitle "Welcome To Yesod!"
         $(widgetFile "homepage")
-
---sampleForm :: Form (FileInfo, Text)
---sampleForm = renderDivs $ (,)
---    <$> fileAFormReq "Choose a file"
---    <*> areq textField "What's on the file?" Nothing

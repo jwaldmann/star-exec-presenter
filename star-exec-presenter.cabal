@@ -81,6 +81,8 @@ library
                  , resourcet
                  , stringsearch
                  , http-client
+                 , http-types
+                 , xml-conduit
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -115,3 +117,5 @@ test-suite test
                  , resourcet
                  , stringsearch
                  , http-client
+                 , http-types
+                 , xml-conduit
