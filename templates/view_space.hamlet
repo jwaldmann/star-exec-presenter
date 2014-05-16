@@ -1,5 +1,11 @@
 <h1>Overview of the space #{spaceId}
 
+<h2>List of subspaces in this space
 <ul>
     $forall subspace <- subspaces
-        <li><a href=@{ViewSpaceR (sId subspace)}>#{sName subspace}
+        <li><a href=@{ViewSpaceR (sId subspace)}>#{sName subspace}</a>
+
+<h2>List of jobs in this space
+<ul>
+    $forall job <- jobs
+        <li>#{sName job} (#{sId job})

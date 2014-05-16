@@ -8,6 +8,4 @@
 /logout StarExecLogoutR GET
 /login StarExecLoginR GET POST
 /error/#ErrorID ErrorR GET
-/user UserR GET
-/register_space RegisterSpaceR POST
 /view_space/#Int ViewSpaceR GET

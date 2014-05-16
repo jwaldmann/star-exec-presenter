@@ -31,8 +31,6 @@ import Handler.Home
 import Handler.StarExecLogout
 import Handler.StarExecLogin
 import Handler.Error
-import Handler.User
-import Handler.RegisterSpace
 import Handler.ViewSpace
 
 -- This line actually creates our YesodDispatch instance. It is the second half

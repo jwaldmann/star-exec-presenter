@@ -94,6 +94,9 @@ userIDPath = "starexec/services/users/getid"
 primPath :: BS.ByteString
 primPath = "starexec/services/space/{id}/{type}/pagination"
 
+downloadPath :: BS.ByteString
+downloadPath = "starexec/secure/download"
+
 getPrimURL :: BS.ByteString -> [(String, String)] -> BS.ByteString
 getPrimURL url patterns = List.foldl' (\path (pattern, sub) ->
     BSL.toStrict $ BSS.replace
@@ -134,8 +137,12 @@ wrapHtml html =
 parseListPrimResult :: ( MonadIO m ) =>
   Int -> StarExecListType -> ListPrimResult -> m (Maybe [PrimIdent])
 parseListPrimResult primID primType jsonObj = do
-  let zipped = map (\[a,b] -> (a,b)) $ aaData jsonObj
+  liftIO $ print $ show $ aaData jsonObj
+  let zipped = map (\(a:b:cs) -> (a,b)) $ aaData jsonObj
       htmls = map (\(html, desc) ->
+                  -- as the responding html-text is no valid xml
+                  -- (multiple root elements) wrapHtml wraps the
+                  -- html in a div
                   (parseText_ def $ wrapHtml $ TL.fromStrict html, desc))
                 zipped
       infos = map (\(doc, desc) ->
@@ -320,3 +327,13 @@ listPrim (sec, man) primID primType columns = do
                   liftIO $ print $ show msg
                   return Nothing
   return mPrims
+
+getJobInfo (sec, man) jobId = do
+  let (+>) = BS.append
+      req = sec { method = "GET"
+                , path = downloadPath
+                , queryString = "id=" +> (BSC.pack $ show jobId)
+                                +> "&type=job&returnids=true"
+                }
+  resp <- sendRequest (req, man)
+  return ()

@@ -5,24 +5,30 @@ import qualified StarExec.Commands as SEC
 import StarExec.Types
 import qualified Data.Text as T
 
-data StarExecSpace = StarExecSpace { sId :: Int
-                                   , sName :: Text
-                                   }
+data StarExecPrim = StarExecPrim { sId :: Int
+                                 , sName :: Text
+                                 }
 
-getLinkList :: [(Text, Text)] -> [StarExecSpace]
-getLinkList spaces = map (\(name, sid) ->
-        StarExecSpace { sId = read $ T.unpack sid
-                      , sName = name
-                      }
-    ) spaces
+getPrimList :: [(Text, Text)] -> [StarExecPrim]
+getPrimList prims = map (\(name, sid) ->
+        StarExecPrim { sId = read $ T.unpack sid
+                     , sName = name
+                     }
+    ) prims
 
 getViewSpaceR :: Int -> Handler Html
 getViewSpaceR spaceId = do
     con <- SEC.getConnection
-    spaceContent <- SEC.listPrim con spaceId Spaces 2
+    spaceList <- SEC.listPrim con spaceId Spaces 2
+    jobList <- SEC.listPrim con spaceId Jobs 6
+
     defaultLayout $ do
         let subspaces =
-                case spaceContent of
-                    Just spaces -> getLinkList spaces
+                case spaceList of
+                    Just spaces -> getPrimList spaces
+                    Nothing -> []
+            jobs =
+                case jobList of
+                    Just js -> getPrimList js
                     Nothing -> []
         $(widgetFile "view_space")

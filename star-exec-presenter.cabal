@@ -23,8 +23,6 @@ library
                      Handler.StarExecLogout
                      Handler.StarExecLogin
                      Handler.Error
-                     Handler.User
-                     Handler.RegisterSpace
                      Handler.ViewSpace
                      StarExec.Commands
                      StarExec.ErrorID
@@ -83,6 +81,7 @@ library
                  , http-client
                  , http-types
                  , xml-conduit
+                 , zip-archive                   >= 0.2.3.1
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -111,11 +110,3 @@ test-suite test
                  , persistent-postgresql
                  , resourcet
                  , monad-logger
-                 , transformers
-                 , hspec
-                 , exceptions
-                 , resourcet
-                 , stringsearch
-                 , http-client
-                 , http-types
-                 , xml-conduit
