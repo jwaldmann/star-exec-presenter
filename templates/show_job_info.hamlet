@@ -1,0 +1,22 @@
+<h1>Overview of the job-info #{jobId}
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Benchmark
+            <th>Solver
+            <th>Config
+            <th>Status
+            <th>CPU-Time
+            <th>Wallclock-Time
+            <th>Result
+    <tbody>
+        $forall info <- jobinfos
+            <tr class="#{getClass info}">
+                <td>#{benchmark info}
+                <td>#{solver info}
+                <td>#{configuration info}
+                <td>#{status info}
+                <td>#{toFixed 6 $ cpuTime info}
+                <td>#{toFixed 6 $ wallclockTime info}
+                <td>#{result info}

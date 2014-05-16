@@ -14,6 +14,7 @@ module StarExec.Commands
   , getSessionUserID
   , isSessionValid
   , listPrim
+  , getJobInfo
   ) where
 
 import Import hiding (getSession)
@@ -28,18 +29,23 @@ import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Network.HTTP.Client.MultipartFormData
 import Network.HTTP.Types.Header
+import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Catch
 import Control.Monad.Trans.Resource.Internal
 import Yesod.Core hiding (getSession)
 import Data.Maybe
 import StarExec.Types
+import StarExec.JobInfo
 import qualified Data.List as List
 import Data.Char
 import Data.Aeson
 import GHC.Generics
 import Text.XML
 import Text.XML.Cursor
+import qualified Codec.Archive.Zip as Zip
+import qualified Data.Csv as CSV
+import qualified Data.Vector as Vector
 
 -- internals
 
@@ -137,7 +143,7 @@ wrapHtml html =
 parseListPrimResult :: ( MonadIO m ) =>
   Int -> StarExecListType -> ListPrimResult -> m (Maybe [PrimIdent])
 parseListPrimResult primID primType jsonObj = do
-  liftIO $ print $ show $ aaData jsonObj
+  -- liftIO $ print $ show $ aaData jsonObj
   let zipped = map (\(a:b:cs) -> (a,b)) $ aaData jsonObj
       htmls = map (\(html, desc) ->
                   -- as the responding html-text is no valid xml
@@ -328,6 +334,12 @@ listPrim (sec, man) primID primType columns = do
                   return Nothing
   return mPrims
 
+decodeCSV ::
+  BSL.ByteString -> Either String (CSV.Header, (Vector.Vector JobInfo))
+decodeCSV csv = CSV.decodeByName csv
+
+getJobInfo :: ( MonadHandler m ) =>
+ StarExecConnection -> Int -> m (Maybe [JobInfo])
 getJobInfo (sec, man) jobId = do
   let (+>) = BS.append
       req = sec { method = "GET"
@@ -336,4 +348,16 @@ getJobInfo (sec, man) jobId = do
                                 +> "&type=job&returnids=true"
                 }
   resp <- sendRequest (req, man)
-  return ()
+  let archive = Zip.toArchive $ responseBody resp
+  liftIO $ print $ Zip.filesInArchive archive
+  jobs <- case Zip.zEntries archive of
+            entry:entries -> do
+              let eitherVector = decodeCSV $ Zip.fromEntry entry
+              case eitherVector of
+                Left msg -> do
+                  liftIO $ print msg
+                  return Nothing
+                Right (header, jobInfos) ->
+                  return $ Just $ Vector.toList jobInfos
+            [] -> return Nothing
+  return jobs

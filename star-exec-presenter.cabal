@@ -24,9 +24,11 @@ library
                      Handler.StarExecLogin
                      Handler.Error
                      Handler.ViewSpace
+                     Handler.ShowJobInfo
                      StarExec.Commands
                      StarExec.ErrorID
                      StarExec.Types
+                     StarExec.JobInfo
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -81,7 +83,10 @@ library
                  , http-client
                  , http-types
                  , xml-conduit
-                 , zip-archive                   >= 0.2.3.1
+                 , zip-archive
+                 , vector
+                 , cassava
+                 , double-conversion
 
 executable         star-exec-presenter
     if flag(library-only)
