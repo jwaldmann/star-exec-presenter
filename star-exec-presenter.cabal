@@ -115,3 +115,5 @@ test-suite test
                  , persistent-postgresql
                  , resourcet
                  , monad-logger
+                 , hspec
+                 , transformers
