@@ -28,7 +28,9 @@ library
                      StarExec.Commands
                      StarExec.ErrorID
                      StarExec.Types
-                     StarExec.JobInfo
+                     StarExec.JobResultInfo
+                     StarExec.SolverResult
+                     StarExec.JobStatus
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -87,6 +89,7 @@ library
                  , vector
                  , cassava
                  , double-conversion
+                 , blaze-markup
 
 executable         star-exec-presenter
     if flag(library-only)

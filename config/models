@@ -9,4 +9,26 @@ User
 --     verkey Text Maybe
 --     UniqueEmail email
 
+JobResult
+    starExecJobId Int
+    pairId Int
+    UniqueJobResult pairId
+    benchmark Text
+    benchmarkId Int
+    solver Text
+    solverId Int
+    configuration Text
+    configurationId Int
+    status Text
+    cpuTime Double
+    wallclockTime Double
+    result SolverResult
+    deriving Show
+
+Job
+    starExecId Int
+    UniqueJob starExecId
+    status JobStatus
+    deriving Show
+
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

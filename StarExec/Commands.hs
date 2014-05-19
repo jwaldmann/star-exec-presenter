@@ -36,7 +36,7 @@ import Control.Monad.Trans.Resource.Internal
 import Yesod.Core hiding (getSession)
 import Data.Maybe
 import StarExec.Types
-import StarExec.JobInfo
+import StarExec.JobResultInfo
 import qualified Data.List as List
 import Data.Char
 import Data.Aeson
@@ -335,11 +335,11 @@ listPrim (sec, man) primID primType columns = do
   return mPrims
 
 decodeCSV ::
-  BSL.ByteString -> Either String (CSV.Header, (Vector.Vector JobInfo))
+  BSL.ByteString -> Either String (CSV.Header, (Vector.Vector JobResultInfo))
 decodeCSV csv = CSV.decodeByName csv
 
 getJobInfo :: ( MonadHandler m ) =>
- StarExecConnection -> Int -> m (Maybe [JobInfo])
+ StarExecConnection -> Int -> m (Maybe [JobResultInfo])
 getJobInfo (sec, man) jobId = do
   let (+>) = BS.append
       req = sec { method = "GET"
@@ -349,7 +349,6 @@ getJobInfo (sec, man) jobId = do
                 }
   resp <- sendRequest (req, man)
   let archive = Zip.toArchive $ responseBody resp
-  liftIO $ print $ Zip.filesInArchive archive
   jobs <- case Zip.zEntries archive of
             entry:entries -> do
               let eitherVector = decodeCSV $ Zip.fromEntry entry

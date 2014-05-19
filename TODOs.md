@@ -19,3 +19,11 @@ returnids -> true
 getJobPair:
 https://www.starexec.org/starexec/secure/download?id=12185856&type=jp_output
 id -> job-pair-id (see result of getJobInfo)
+
+###
+
+2D-Overview of solver and benchmarks
+
+(incremental updates of running jobs)
+
+caching of job-pairs via seperate url
