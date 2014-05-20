@@ -9,10 +9,10 @@ User
 --     verkey Text Maybe
 --     UniqueEmail email
 
-JobResult
+PersistJobResultInfo
     starExecJobId Int
     pairId Int
-    UniqueJobResult pairId
+    UniquePersistJobResultInfo pairId
     benchmark Text
     benchmarkId Int
     solver Text
@@ -25,9 +25,9 @@ JobResult
     result SolverResult
     deriving Show
 
-Job
+PersistJobInfo
     starExecId Int
-    UniqueJob starExecId
+    UniquePersistJobInfo starExecId
     status JobStatus
     deriving Show
 

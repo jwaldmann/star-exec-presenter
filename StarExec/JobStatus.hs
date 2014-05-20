@@ -6,7 +6,7 @@ import Database.Persist.TH
 import Text.Blaze
 import Text.Blaze.Internal
 
-data JobStatus = Complete | Incomplete Text
+data JobStatus = Complete | Incomplete
     deriving (Show, Read, Eq)
 derivePersistField "JobStatus"
 

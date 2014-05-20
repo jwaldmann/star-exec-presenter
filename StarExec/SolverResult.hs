@@ -9,7 +9,7 @@ import Control.Applicative
 import Text.Blaze
 import Text.Blaze.Internal
 
-data SolverResult = YES | NO | MAYBE | ERROR | OTHER Text
+data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER Text
     deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 
@@ -18,11 +18,12 @@ instance FromField SolverResult where
         where
             s = toLower $ decodeUtf8 result
             parseResult r
-                | r == "yes"    = pure YES
-                | r == "no"     = pure NO
-                | r == "maybe"  = pure MAYBE
-                | r == "error"  = pure ERROR
-                | otherwise     = pure $ OTHER $ decodeUtf8 result
+                | r == "yes"        = pure YES
+                | r == "no"         = pure NO
+                | r == "maybe"      = pure MAYBE
+                | r == "certified"  = pure CERTIFIED
+                | r == "error"      = pure ERROR
+                | otherwise         = pure $ OTHER $ decodeUtf8 result
 
 instance ToMarkup SolverResult where
     toMarkup = string . show

@@ -20,11 +20,11 @@ updateDB jobId results = do
     mapM (\sr -> do
             let pId = pairId sr
             _ <- runDB $ do
-                mSolverResult <- getBy $ UniqueJobResult pId
+                mSolverResult <- getBy $ UniquePersistJobResultInfo pId
                 case mSolverResult of
                     Just solverResult -> return Nothing
                     Nothing -> do
-                        jobResultId <- insertUnique $ JobResult
+                        jobResultId <- insertUnique $ PersistJobResultInfo
                             jobId
                             (pairId sr)
                             (benchmark sr)
@@ -40,7 +40,7 @@ updateDB jobId results = do
                         return Nothing
             return result
         ) results
-    _ <- runDB $ insertUnique $ Job jobId Complete
+    _ <- runDB $ insertUnique $ PersistJobInfo jobId Complete
     return results
 
 getResultsFromStarExec :: ( MonadHandler m, MonadBaseControl IO m )
@@ -55,17 +55,17 @@ getResultsFromStarExec jobId = do
 toJobResultInfo results = map (\entity ->
     let jobResult = entityVal entity
     in JobResultInfo
-        { pairId = jobResultPairId jobResult
-        , benchmark = jobResultBenchmark jobResult
-        , benchmarkId = jobResultBenchmarkId jobResult
-        , solver = jobResultSolver jobResult
-        , solverId = jobResultSolverId jobResult
-        , configuration = jobResultConfiguration jobResult
-        , configurationId = jobResultConfigurationId jobResult
-        , status = jobResultStatus jobResult
-        , cpuTime = jobResultCpuTime jobResult
-        , wallclockTime = jobResultWallclockTime jobResult
-        , result = jobResultResult jobResult
+        { pairId = persistJobResultInfoPairId jobResult
+        , benchmark = persistJobResultInfoBenchmark jobResult
+        , benchmarkId = persistJobResultInfoBenchmarkId jobResult
+        , solver = persistJobResultInfoSolver jobResult
+        , solverId = persistJobResultInfoSolverId jobResult
+        , configuration = persistJobResultInfoConfiguration jobResult
+        , configurationId = persistJobResultInfoConfigurationId jobResult
+        , status = persistJobResultInfoStatus jobResult
+        , cpuTime = persistJobResultInfoCpuTime jobResult
+        , wallclockTime = persistJobResultInfoWallclockTime jobResult
+        , result = persistJobResultInfoResult jobResult
         }
     ) results
 
