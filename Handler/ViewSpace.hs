@@ -1,7 +1,8 @@
 module Handler.ViewSpace where
 
 import Import
-import qualified StarExec.Commands as SEC
+import StarExec.Prims
+import StarExec.Connection
 import StarExec.Types
 import qualified Data.Text as T
 
@@ -17,18 +18,12 @@ getPrimList prims = map (\(name, sid) ->
     ) prims
 
 getViewSpaceR :: Int -> Handler Html
-getViewSpaceR spaceId = do
-    con <- SEC.getConnection
-    spaceList <- SEC.listPrim con spaceId Spaces 2
-    jobList <- SEC.listPrim con spaceId Jobs 6
+getViewSpaceR sId = do
+    con <- getConnection
+    spaceList <- listPrim con sId Spaces
+    jobList <- listPrim con sId Jobs
 
     defaultLayout $ do
-        let subspaces =
-                case spaceList of
-                    Just spaces -> getPrimList spaces
-                    Nothing -> []
-            jobs =
-                case jobList of
-                    Just js -> getPrimList js
-                    Nothing -> []
+        let subspaces = map toSpaceInfo $ fromEither spaceList
+            jobs = map toJobInfo $ fromEither jobList
         $(widgetFile "view_space")

@@ -2,23 +2,22 @@ module Handler.ShowJobInfo where
 
 import Import
 import qualified StarExec.Commands as SEC
-import StarExec.JobResultInfo
-import StarExec.SolverResult
-import StarExec.JobStatus
+import StarExec.Types
 import Data.Double.Conversion.Text
 
 getClass :: JobResultInfo -> Text
 getClass info =
-    case result info of
-        YES    -> "success"
-        NO     -> "success"
-        MAYBE  -> "success"
-        ERROR  -> "danger"
-        _      -> "warning"
+    case jriResult info of
+        YES       -> "success"
+        NO        -> "success"
+        MAYBE     -> "success"
+        CERTIFIED -> "success"
+        ERROR     -> "danger"
+        _         -> "warning"
 
 updateDB jobId results = do
     mapM (\sr -> do
-            let pId = pairId sr
+            let pId = jriPairId sr
             _ <- runDB $ do
                 mSolverResult <- getBy $ UniquePersistJobResultInfo pId
                 case mSolverResult of
@@ -26,19 +25,19 @@ updateDB jobId results = do
                     Nothing -> do
                         jobResultId <- insertUnique $ PersistJobResultInfo
                             jobId
-                            (pairId sr)
-                            (benchmark sr)
-                            (benchmarkId sr)
-                            (solver sr)
-                            (solverId sr)
-                            (configuration sr)
-                            (configurationId sr)
-                            (status sr)
-                            (cpuTime sr)
-                            (wallclockTime sr)
-                            (result sr)
+                            (jriPairId sr)
+                            (jriBenchmark sr)
+                            (jriBenchmarkId sr)
+                            (jriSolver sr)
+                            (jriSolverId sr)
+                            (jriConfiguration sr)
+                            (jriConfigurationId sr)
+                            (jriStatus sr)
+                            (jriCpuTime sr)
+                            (jriWallclockTime sr)
+                            (jriResult sr)
                         return Nothing
-            return result
+            return jriResult
         ) results
     _ <- runDB $ insertUnique $ PersistJobInfo jobId Complete
     return results
@@ -55,17 +54,17 @@ getResultsFromStarExec jobId = do
 toJobResultInfo results = map (\entity ->
     let jobResult = entityVal entity
     in JobResultInfo
-        { pairId = persistJobResultInfoPairId jobResult
-        , benchmark = persistJobResultInfoBenchmark jobResult
-        , benchmarkId = persistJobResultInfoBenchmarkId jobResult
-        , solver = persistJobResultInfoSolver jobResult
-        , solverId = persistJobResultInfoSolverId jobResult
-        , configuration = persistJobResultInfoConfiguration jobResult
-        , configurationId = persistJobResultInfoConfigurationId jobResult
-        , status = persistJobResultInfoStatus jobResult
-        , cpuTime = persistJobResultInfoCpuTime jobResult
-        , wallclockTime = persistJobResultInfoWallclockTime jobResult
-        , result = persistJobResultInfoResult jobResult
+        { jriPairId = persistJobResultInfoPairId jobResult
+        , jriBenchmark = persistJobResultInfoBenchmark jobResult
+        , jriBenchmarkId = persistJobResultInfoBenchmarkId jobResult
+        , jriSolver = persistJobResultInfoSolver jobResult
+        , jriSolverId = persistJobResultInfoSolverId jobResult
+        , jriConfiguration = persistJobResultInfoConfiguration jobResult
+        , jriConfigurationId = persistJobResultInfoConfigurationId jobResult
+        , jriStatus = persistJobResultInfoStatus jobResult
+        , jriCpuTime = persistJobResultInfoCpuTime jobResult
+        , jriWallclockTime = persistJobResultInfoWallclockTime jobResult
+        , jriResult = persistJobResultInfoResult jobResult
         }
     ) results
 

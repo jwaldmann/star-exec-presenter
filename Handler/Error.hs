@@ -1,7 +1,7 @@
 module Handler.Error where
 
 import Import
-import StarExec.ErrorID
+import StarExec.Types (ErrorID (..))
 
 getErrorR :: ErrorID -> Handler Html
 getErrorR Login = error "Wrong Login-Credentials?"

@@ -26,11 +26,12 @@ library
                      Handler.ViewSpace
                      Handler.ShowJobInfo
                      StarExec.Commands
-                     StarExec.ErrorID
+                     StarExec.Connection
                      StarExec.Types
-                     StarExec.JobResultInfo
-                     StarExec.SolverResult
-                     StarExec.JobStatus
+                     StarExec.Persist
+                     StarExec.Urls
+                     StarExec.Session
+                     StarExec.Prims
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

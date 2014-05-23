@@ -5,8 +5,7 @@ import Yesod
 import Data.Text (Text)
 import Database.Persist.Quasi
 import Data.Typeable (Typeable)
-import StarExec.SolverResult
-import StarExec.JobStatus
+import StarExec.Types (JobStatus, SolverResult)
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

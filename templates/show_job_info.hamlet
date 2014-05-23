@@ -13,10 +13,10 @@
     <tbody>
         $forall info <- jobinfos
             <tr class="#{getClass info}">
-                <td>#{benchmark info}
-                <td>#{solver info}
-                <td>#{configuration info}
-                <td>#{status info}
-                <td>#{toFixed 6 $ cpuTime info}
-                <td>#{toFixed 6 $ wallclockTime info}
-                <td>#{result info}
+                <td>#{jriBenchmark info}
+                <td>#{jriSolver info}
+                <td>#{jriConfiguration info}
+                <td>#{jriStatus info}
+                <td>#{toFixed 6 $ jriCpuTime info}
+                <td>#{toFixed 6 $ jriWallclockTime info}
+                <td>#{jriResult info}

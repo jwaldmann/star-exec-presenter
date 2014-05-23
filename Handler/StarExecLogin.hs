@@ -2,7 +2,7 @@ module Handler.StarExecLogin where
 
 import Import
 import qualified StarExec.Commands as SEC
-import StarExec.ErrorID
+import StarExec.Types (ErrorID (..))
 
 getStarExecLoginR :: Handler Html
 getStarExecLoginR = redirect HomeR
