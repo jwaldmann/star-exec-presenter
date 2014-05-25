@@ -1,4 +1,4 @@
-<h1>Overview of the space #{sId}
+<h1>Overview of the space #{_spaceId}
 
 <h2>List of subspaces in this space
 <ul>

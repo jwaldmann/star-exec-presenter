@@ -10,3 +10,4 @@
 /error/#ErrorID ErrorR GET
 /view_space/#Int ViewSpaceR GET
 /show_job_info/#Int ShowJobInfoR GET
+/find_prim FindPrimR GET POST

@@ -1,11 +1,21 @@
-module StarExec.Prims where
+module StarExec.Prims
+  ( listPrim
+  , fromEither
+  , eitherToJobInfos
+  , eitherToSpaceInfos
+  , eitherToSolverInfos
+  , eitherToBenchmarkInfos
+  , eitherToUserInfos
+  , searchPrimInHierchy
+  , searchPrim
+  ) where
 
 import Import
 import Prelude
-import Data.Maybe
 import Data.Char
 import Data.Aeson
 import Data.Either
+import Data.Maybe
 import Text.XML
 import Text.XML.Cursor
 import qualified Data.ByteString as BS
@@ -18,8 +28,6 @@ import StarExec.Urls
 import StarExec.Connection
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Header
-
-type PrimIdent = (Text, Text)
 
 getPostData :: Int -> [(BS.ByteString, BS.ByteString)]
 --getPostData :: Int -> [(String, String)]
@@ -59,14 +67,71 @@ listPrim (sec, man) primID primType = do
   let jsonObj = eitherDecode
         $ responseBody resp :: (Either String ListPrimResult)
   case jsonObj of
-    Right result ->
+    Right result -> do
+      liftIO $ putStrLn "found result"
+      liftIO $ putStrLn $ show $ map (map T.unpack) $ aaData result
       return $ parsePrimInfos primType $ aaData result
     Left msg -> do
-      liftIO $ print $ show msg
+      liftIO $ putStrLn msg
       return []
+
+findPrim :: [PrimInfo] -> Int -> Maybe PrimInfo
+findPrim primInfos _primId = List.find isPrim primInfos
+    where isPrim prim = primInfoId prim == _primId
+
+findInM :: ( MonadHandler m ) => (a -> m (Maybe b)) -> [a] -> m (Maybe b)
+findInM _ [] = return Nothing
+findInM _pred (x:xs) = do
+    result <- _pred x
+    case result of
+        Nothing -> findInM _pred xs
+        Just _ -> return result
+
+searchPrimInHierchy :: ( MonadHandler m ) =>
+    StarExecConnection -> Int -> Int -> StarExecListType -> m (Maybe PrimInfo)
+searchPrimInHierchy con _spaceId _primId primType = do
+    mPrimList <- listPrim con _spaceId primType
+    let primList = fromEither mPrimList
+        mPrim = findPrim primList _primId
+    liftIO $ putStrLn "### searchPrimInHierchy -> ###"
+    liftIO $ print $ show mPrimList
+    liftIO $ putStrLn "### <- searchPrimInHierchy ###"
+    case mPrim of
+        Just _ -> do
+          --liftIO $ putStrLn $ "Found Primitive in space " ++ (show _spaceId)
+          return mPrim
+        Nothing -> do
+            --liftIO $ putStrLn $ "Couldn't find Primitive in space " ++ (show _spaceId)
+            subSpaces <- listPrim con _spaceId Spaces
+            let spaceList = eitherToSpaceInfos subSpaces
+                searchPrimInHierchy' :: ( MonadHandler m ) =>
+                    SpaceInfo -> m ( Maybe PrimInfo )
+                searchPrimInHierchy' space =
+                    searchPrimInHierchy con (spaceId space) _primId primType
+            findInM searchPrimInHierchy' spaceList
+
+searchPrim :: MonadHandler m =>
+  StarExecConnection -> Int -> StarExecListType -> m (Maybe PrimInfo)
+searchPrim con _primId primType =
+    searchPrimInHierchy con 1128 _primId primType
 
 fromEither :: [Either String PrimInfo] -> [PrimInfo]
 fromEither = rights
+
+eitherToJobInfos :: [Either String PrimInfo] -> [JobInfo]
+eitherToJobInfos = toJobInfos . fromEither
+
+eitherToSpaceInfos :: [Either String PrimInfo] -> [SpaceInfo]
+eitherToSpaceInfos = toSpaceInfos . fromEither
+
+eitherToSolverInfos :: [Either String PrimInfo] -> [SolverInfo]
+eitherToSolverInfos = toSolverInfos . fromEither
+
+eitherToBenchmarkInfos :: [Either String PrimInfo] -> [BenchmarkInfo]
+eitherToBenchmarkInfos = toBenchmarkInfos . fromEither
+
+eitherToUserInfos :: [Either String PrimInfo] -> [UserInfo]
+eitherToUserInfos = toUserInfos . fromEither
 
 eitherInfo :: (Either String a) -> (a -> b) -> Either String b
 eitherInfo (Right info) dataConst = Right $ dataConst info
@@ -122,20 +187,23 @@ parseDouble text =
 
 parseInt :: Text -> Int
 parseInt text =
-    let cursor = getCursor text
-        childNode = head $ descendant cursor
-        childContent = head $ content childNode
-    in read $ T.unpack childContent
+  let cursor = getCursor text
+      childNode = head $ descendant cursor
+      childContent = head $ content childNode
+  in read $ T.unpack childContent
 
 parseMail :: Text -> Text
 parseMail text =
-    let cursor = getCursor text
-        childContent = head $ descendant cursor
-    in head $ content childContent
+  let cursor = getCursor text
+      childContent = head $ descendant cursor
+  in head $ content childContent
+
+parseBenchmarkType :: Text -> Text
+parseBenchmarkType = parseMail
 
 getJobInfoFromTexts :: [Text] -> Either String JobInfo
 getJobInfoFromTexts
-  (idAndName:status:pairsCompleted:pairsNum:pairsFailed:date:rest) =
+  (idAndName:status:pairsCompleted:pairsNum:pairsFailed:date:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
         status' = getStatus status
         pairsCompleted' = parseDouble pairsCompleted
@@ -143,6 +211,7 @@ getJobInfoFromTexts
         pairsFailed' = parseDouble pairsFailed
     in Right $ JobInfo
         { jobId = pid
+        , jobSpaceId = Nothing
         , jobName = pname
         , jobStatus = status'
         , jobPairsCompleted = pairsCompleted'
@@ -152,37 +221,37 @@ getJobInfoFromTexts
         }
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
 
-
 getBenchmarkInfoFromTexts :: [Text] -> Either String BenchmarkInfo
 getBenchmarkInfoFromTexts
-  (idAndName:bType:rest) =
+  (idAndName:bType:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
     in Right $ BenchmarkInfo
         { benchmarkId = pid
         , benchmarkName = pname
-        , benchmarkType = bType
+        , benchmarkType = parseBenchmarkType bType
         }
 getBenchmarkInfoFromTexts _ = Left "parse error in getBenchmarkInfoFromTexts"
 
 getUserInfoFromTexts :: [Text] -> Either String UserInfo
 getUserInfoFromTexts
-  (idAndName:institution:mail:rest) =
+  (idAndName:institution:mail:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
-        mail = parseMail mail
+        pMail = parseMail mail
     in Right $ UserInfo
         { userId = pid
         , userName = pname
         , userInstitution = institution
-        , userMail = mail
+        , userMail = pMail
         }
 getUserInfoFromTexts _ = Left "parse error in getUserInfoFromTexts"
 
 getSpaceInfoFromTexts :: [Text] -> Either String SpaceInfo
 getSpaceInfoFromTexts 
-  (idAndName:desc:rest) = 
+  (idAndName:desc:_) = 
     let (pid, pname) = parsePrimIdAndName idAndName
     in Right $ SpaceInfo
         { spaceId = pid
+        , spaceParentId = Nothing
         , spaceName = pname
         , spaceDescription = desc
         }
@@ -190,7 +259,7 @@ getSpaceInfoFromTexts _ = Left "parse error in getSpaceInfoFromTexts"
 
 getSolverInfoFromTexts :: [Text] -> Either String SolverInfo
 getSolverInfoFromTexts
-  (idAndName:desc:rest) =
+  (idAndName:desc:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
     in Right $ SolverInfo
         { solverId = pid

@@ -4,8 +4,9 @@ module StarExec.Types where
 
 import Prelude
 import Yesod
-import Data.Text
+import qualified Data.Text as T
 import Data.Text.Encoding
+import Data.Maybe
 import Database.Persist.TH
 import Control.Applicative
 import Text.Blaze
@@ -57,7 +58,7 @@ iTotalRecords: 2
 sEcho: 1
 -}
 data ListPrimResult = ListPrimResult
-  { aaData :: ![[Text]]
+  { aaData :: ![[T.Text]]
   , iTotalDisplayRecords :: Int
   , iTotalRecords :: Int
   , sEcho :: Int
@@ -72,67 +73,105 @@ data PrimInfo = PrimJobInfo JobInfo
                 | PrimBenchmarkInfo BenchmarkInfo
                 | PrimUserInfo UserInfo
                 | PrimSpaceInfo SpaceInfo
+  deriving (Show, Eq)
 
 toJobInfo :: PrimInfo -> JobInfo
 toJobInfo (PrimJobInfo info) = info
 
+toJobInfos :: [PrimInfo] -> [JobInfo]
+toJobInfos = map toJobInfo
+
 toSolverInfo :: PrimInfo -> SolverInfo
 toSolverInfo (PrimSolverInfo info) = info
+
+toSolverInfos :: [PrimInfo] -> [SolverInfo]
+toSolverInfos = map toSolverInfo
 
 toBenchmarkInfo :: PrimInfo -> BenchmarkInfo
 toBenchmarkInfo (PrimBenchmarkInfo info) = info
 
+toBenchmarkInfos :: [PrimInfo] -> [BenchmarkInfo]
+toBenchmarkInfos = map toBenchmarkInfo
+
 toUserInfo :: PrimInfo -> UserInfo
 toUserInfo (PrimUserInfo info) = info
+
+toUserInfos :: [PrimInfo] -> [UserInfo]
+toUserInfos = map toUserInfo
 
 toSpaceInfo :: PrimInfo -> SpaceInfo
 toSpaceInfo (PrimSpaceInfo info) = info
 
+toSpaceInfos :: [PrimInfo] -> [SpaceInfo]
+toSpaceInfos = map toSpaceInfo
+
 data JobInfo = JobInfo
   { jobId :: Int
-  , jobName :: Text
+  , jobSpaceId :: Maybe Int
+  , jobName :: T.Text
   , jobStatus :: JobStatus
   , jobPairsCompleted :: Double
   , jobPairsNum :: Int
   , jobPairsFailed :: Double
-  , jobDate :: Text
-  }
+  , jobDate :: T.Text
+  } deriving (Show, Eq)
 
 data SolverInfo = SolverInfo
   { solverId :: Int
-  , solverName :: Text
-  , solverDescription :: Text
-  }
+  , solverName :: T.Text
+  , solverDescription :: T.Text
+  } deriving (Show, Eq)
 
 data BenchmarkInfo = BenchmarkInfo
   { benchmarkId :: Int
-  , benchmarkName :: Text
-  , benchmarkType :: Text
-  }
+  , benchmarkName :: T.Text
+  , benchmarkType :: T.Text
+  } deriving (Show, Eq)
 
 data UserInfo = UserInfo
   { userId :: Int
-  , userName :: Text
-  , userInstitution :: Text
-  , userMail :: Text
-  }
+  , userName :: T.Text
+  , userInstitution :: T.Text
+  , userMail :: T.Text
+  } deriving (Show, Eq)
 
 data SpaceInfo = SpaceInfo
   { spaceId :: Int
-  , spaceName :: Text
-  , spaceDescription :: Text
-  }
+  , spaceParentId :: Maybe Int
+  , spaceName :: T.Text
+  , spaceDescription :: T.Text
+  } deriving (Show, Eq)
+
+primInfoId :: PrimInfo -> Int
+primInfoId primInfo =
+  case primInfo of
+    PrimJobInfo info       -> jobId info
+    PrimSpaceInfo info     -> spaceId info
+    PrimBenchmarkInfo info -> benchmarkId info
+    PrimSolverInfo info    -> solverId info
+    PrimSpaceInfo info     -> spaceId info
+    PrimUserInfo info      -> userId info
+
+primInfoName :: PrimInfo -> T.Text
+primInfoName primInfo =
+  case primInfo of
+    PrimJobInfo info       -> jobName info
+    PrimSpaceInfo info     -> spaceName info
+    PrimBenchmarkInfo info -> benchmarkName info
+    PrimSolverInfo info    -> solverName info
+    PrimSpaceInfo info     -> spaceName info
+    PrimUserInfo info      -> userName info
 
 {-
 -}
-data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER Text
+data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER T.Text
     deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 
 instance CSV.FromField SolverResult where
     parseField result = parseResult s
         where
-            s = toLower $ decodeUtf8 result
+            s = T.toLower $ decodeUtf8 result
             parseResult r
                 | r == "yes"        = pure YES
                 | r == "no"         = pure NO
@@ -149,13 +188,13 @@ instance ToMarkup SolverResult where
 -}
 data JobResultInfo = JobResultInfo
   { jriPairId :: Int
-  , jriBenchmark :: Text
+  , jriBenchmark :: T.Text
   , jriBenchmarkId :: Int
-  , jriSolver :: Text
+  , jriSolver :: T.Text
   , jriSolverId :: Int
-  , jriConfiguration :: Text
+  , jriConfiguration :: T.Text
   , jriConfigurationId :: Int
-  , jriStatus :: Text
+  , jriStatus :: T.Text
   , jriCpuTime :: Double
   , jriWallclockTime :: Double
   , jriResult :: SolverResult

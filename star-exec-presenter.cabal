@@ -25,6 +25,7 @@ library
                      Handler.Error
                      Handler.ViewSpace
                      Handler.ShowJobInfo
+                     Handler.FindPrim
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types

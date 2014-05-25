@@ -1,4 +1,4 @@
-<h1>Overview of the job-info #{jobId}
+<h1>Overview of the job-info #{_jobId}
 
 <table class="table">
     <thead>
