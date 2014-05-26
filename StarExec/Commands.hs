@@ -9,8 +9,6 @@ module StarExec.Commands
   , checkLogin
   , getConnection
   , getUserID
-  , getSessionUserID
-  , isSessionValid
   , getJobInfo
   ) where
 

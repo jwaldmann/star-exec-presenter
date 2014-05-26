@@ -49,7 +49,7 @@ setSessionUserID userID = setSession starExecUserID userID
 deleteSessionUserID :: ( MonadHandler m ) => m ()
 deleteSessionUserID = deleteSession starExecUserID
 
-isSessionValid :: ( MonadHandler m ) => m Bool
-isSessionValid = do
+hasValidSession :: ( MonadHandler m ) => m Bool
+hasValidSession = do
   userID <- getSessionUserID
   return $ if userID /= Nothing then True else False

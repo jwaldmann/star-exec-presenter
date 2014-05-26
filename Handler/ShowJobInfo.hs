@@ -3,6 +3,7 @@ module Handler.ShowJobInfo where
 import Import
 import qualified StarExec.Commands as SEC
 import StarExec.Types
+import StarExec.Session
 import Data.Double.Conversion.Text
 
 getClass :: JobResultInfo -> Text
@@ -26,13 +27,17 @@ getResultsFromStarExec _jobId = do
 
 getShowJobInfoR :: Int -> Handler Html
 getShowJobInfoR _jobId = do
-    --mJobId <- runDB $ getBy $ UniqueJob jobId
-    --jobinfos <- case mJobId of
-    --    Just jid -> runDB $ do
-    --        results <- selectList [ JobResultStarExecJobId ==. jobId ] []
-    --        toJobResultInfo results
-    --    Nothing -> do
-    jobinfos <- getResultsFromStarExec _jobId
-            --updateDB jobId infos
-    defaultLayout $ do
-        $(widgetFile "show_job_info")
+    loggedIn <- hasValidSession
+    if not loggedIn
+        then redirect HomeR
+        else do
+            --mJobId <- runDB $ getBy $ UniqueJob jobId
+            --jobinfos <- case mJobId of
+            --    Just jid -> runDB $ do
+            --        results <- selectList [ JobResultStarExecJobId ==. jobId ] []
+            --        toJobResultInfo results
+            --    Nothing -> do
+            jobinfos <- getResultsFromStarExec _jobId
+                    --updateDB jobId infos
+            defaultLayout $ do
+                $(widgetFile "show_job_info")

@@ -25,7 +25,8 @@ library
                      Handler.Error
                      Handler.ViewSpace
                      Handler.ShowJobInfo
-                     Handler.FindPrim
+                     Handler.SearchPrim
+                     Handler.CompareJobs
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -92,6 +93,7 @@ library
                  , cassava
                  , double-conversion
                  , blaze-markup
+                 , containers
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -122,3 +124,4 @@ test-suite test
                  , monad-logger
                  , hspec
                  , transformers
+                 , containers
