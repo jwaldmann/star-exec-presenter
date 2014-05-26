@@ -3,20 +3,15 @@
 <table class="table">
     <thead>
         <tr>
-            <th>Benchmark
-            <th>Solver
-            <th>Config
-            <th>Status
-            <th>CPU-Time
-            <th>Wallclock-Time
-            <th>Result
+            <th>Benchmarks
+            $forall solverName <- solverNames
+                <th>#{solverName}
     <tbody>
-        $forall info <- jobinfos
-            <tr class="#{getClass info}">
-                <td>#{jriBenchmark info}
-                <td>#{jriSolver info}
-                <td>#{jriConfiguration info}
-                <td>#{jriStatus info}
-                <td>#{toFixed 6 $ jriCpuTime info}
-                <td>#{toFixed 6 $ jriWallclockTime info}
-                <td>#{jriResult info}
+        $forall ((_,bName), results) <- benchmarkResults
+            <tr>
+                <td>#{bName}
+                $forall mResult <- results
+                    $maybe result <- mResult
+                        <td class="#{getClass result}">#{result}
+                    $nothing
+                        <td>

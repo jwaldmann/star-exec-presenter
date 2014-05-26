@@ -1,0 +1,74 @@
+.table > thead > tr,
+.table > tbody > tr,
+.table > tfoot > tr {
+    > td.solver-yes,
+    > th.solver-yes {
+        background-color: #5cb85c
+    }
+
+    > td.solver-no,
+    > th.solver-no {
+        background-color: #f0ad4e
+    }
+
+    > td.solver-maybe,
+    > th.solver-maybe {
+        background-color: #5bc0de
+    }
+
+    > td.solver-certified,
+    > th.solver-certified {
+        background-color: #428bca
+    }
+
+    > td.solver-error,
+    > th.solver-error {
+        background-color: #d9534f
+    }
+
+    > td.solver-nothing,
+    > th.solver-nothing {
+        background-color: #ffffff
+    }
+}
+
+.table > thead,
+.table > tbody,
+.table > tfoot {
+    > tr.solver-yes > td,
+    > tr.solver-yes > th {
+        background-color: #5cb85c
+    }
+
+    > tr.solver-no > td,
+    > tr.solver-no > th {
+        background-color: #f0ad4e
+    }
+
+    > tr.solver-maybe > td,
+    > tr.solver-maybe > th {
+        background-color: #5bc0de
+    }
+
+    > tr.solver-certified > td,
+    > tr.solver-certified > th {
+        background-color: #428bca
+    }
+
+    > tr.solver-error > td,
+    > tr.solver-error > th {
+        background-color: #d9534f
+    }
+
+    > tr.solver-nothing > td,
+    > tr.solver-nothing > th {
+        background-color: #ffffff
+    }
+}
+
+th, td {
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 20%;
+}

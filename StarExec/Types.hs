@@ -36,8 +36,8 @@ instance ToMarkup JobStatus where
 
 {-
 -}
-data StarExecPrimType = Solver | Benchmark | Job | User | Space
-    deriving (Eq, Show, Read)
+--data StarExecPrimType = Solver | Benchmark | Job | User | Space
+--    deriving (Eq, Show, Read)
 
 {-
 -}
