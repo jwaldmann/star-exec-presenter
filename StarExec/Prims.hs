@@ -68,8 +68,8 @@ listPrim (sec, man) primID primType = do
         $ responseBody resp :: (Either String ListPrimResult)
   case jsonObj of
     Right result -> do
-      liftIO $ putStrLn "found result"
-      liftIO $ putStrLn $ show $ map (map T.unpack) $ aaData result
+      --liftIO $ putStrLn "found result"
+      --liftIO $ putStrLn $ show $ map (map T.unpack) $ aaData result
       return $ parsePrimInfos primType $ aaData result
     Left msg -> do
       liftIO $ putStrLn msg

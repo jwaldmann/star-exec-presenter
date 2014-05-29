@@ -164,7 +164,7 @@ primInfoName primInfo =
 
 {-
 -}
-data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER T.Text
+data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER
     deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 
@@ -178,7 +178,7 @@ instance CSV.FromField SolverResult where
                 | r == "maybe"      = pure MAYBE
                 | r == "certified"  = pure CERTIFIED
                 | r == "error"      = pure ERROR
-                | otherwise         = pure $ OTHER $ decodeUtf8 result
+                | otherwise         = pure OTHER
 
 instance ToMarkup SolverResult where
     toMarkup = string . show

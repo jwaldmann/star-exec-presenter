@@ -28,7 +28,41 @@ PersistJobResultInfo
 PersistJobInfo
     starExecId Int
     UniquePersistJobInfo starExecId
+    spaceId Int
+    name Text
     status JobStatus
+    pairsCompleted Double
+    pairsNum Int
+    pairsFailed Double
+    date Text
     deriving Show
+
+PersistSolverInfo
+    starExecId Int
+    UniquePersistSolverInfo starExecId
+    name Text
+    description Text
+    deriving Show
+
+PersistBenchmarkInfo
+    starExecId Int
+    UniquePersistBenchmarkInfo starExecId
+    name Text
+    type Text
+    deriving Show
+
+PersistUserInfo
+    starExecId Int
+    UniquePersistUserInfo starExecId
+    name Text
+    institution Text
+    mail Text
+
+PersistSpaceInfo
+    starExecId Int
+    UniquePersistSpaceInfo starExecId
+    parentId Int Maybe
+    name Text
+    description Text
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
