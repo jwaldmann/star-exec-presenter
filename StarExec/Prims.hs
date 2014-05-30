@@ -46,7 +46,7 @@ listPrim :: ( MonadHandler m ) =>
 listPrim (sec, man) primID primType = do
   let columns = getColumns primType
       sType = map toLower $ show primType
-      reqPath = getPrimURL
+      reqPath = getURL
               primPath
               [ ("{id}", show primID)
               , ("{type}", sType) ]

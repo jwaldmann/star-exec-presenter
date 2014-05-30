@@ -1,0 +1,9 @@
+<h1>Overview of the job-pairs #{_pairId}
+
+$maybe pair <- mPair
+  <h3>Stdout:
+  <pre>#{jpiStdout pair}
+  <h3>Log:
+  <pre>#{jpiLog pair}
+$nothing
+  <p>It appears that there are no infos found. Maybe your Pair-ID is wrong

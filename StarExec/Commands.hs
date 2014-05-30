@@ -10,6 +10,7 @@ module StarExec.Commands
   , getConnection
   , getUserID
   , getJobInfo
+  , getJobPairInfo
   ) where
 
 import Import hiding (getSession)
@@ -24,6 +25,7 @@ import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Network.HTTP.Client.MultipartFormData
 import Network.HTTP.Types.Header
+import Network.HTTP.Types.Status
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Catch
@@ -147,3 +149,25 @@ getJobInfo (sec, man) jobId = do
                   return $ Just $ Vector.toList jobInfos
             [] -> return Nothing
   return jobs
+
+getJobPairInfo :: ( MonadHandler m ) =>
+  StarExecConnection -> Int -> m (Maybe JobPairInfo)
+getJobPairInfo (sec, man) _pairId = do
+  let reqStdout = sec { method = "GET"
+                      , queryString = "limit=-1"
+                      , path = getURL pairStdoutPath [("{pairId}", show _pairId)]
+                      , checkStatus = (\_ _ _ -> Nothing)
+                      }
+      reqLog = sec { method = "GET"
+                   , path = getURL pairLogPath [("{pairId}", show _pairId)]
+                   , checkStatus = (\_ _ _ -> Nothing)
+                   }
+  respStdout <- sendRequest (reqStdout, man)
+  if 200 /= (statusCode $ responseStatus respStdout)
+    then return Nothing
+    else do
+      respLog <- sendRequest (reqLog, man)
+      return $ Just $ JobPairInfo { jpiPairId = _pairId
+                                  , jpiStdout = decodeUtf8Body respStdout
+                                  , jpiLog = decodeUtf8Body respLog
+                                  }

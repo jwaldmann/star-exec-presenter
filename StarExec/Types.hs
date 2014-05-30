@@ -220,7 +220,7 @@ data JobPairInfo = JobPairInfo
   { jpiPairId :: Int
   , jpiStdout :: T.Text
   , jpiLog :: T.Text
-  }
+  } deriving (Show, Read)
 
 {-
 -}

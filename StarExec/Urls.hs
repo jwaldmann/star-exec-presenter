@@ -31,8 +31,14 @@ userIDPath = "starexec/services/users/getid"
 primPath :: ByteString
 primPath = "starexec/services/space/{id}/{type}/pagination"
 
-getPrimURL :: ByteString -> [(String, String)] -> ByteString
-getPrimURL url patterns = List.foldl' (\path (pattern, sub) ->
+pairStdoutPath :: ByteString
+pairStdoutPath = "starexec/services/jobs/pairs/{pairId}/stdout"
+
+pairLogPath :: ByteString
+pairLogPath = "starexec/services/jobs/pairs/{pairId}/log"
+
+getURL :: ByteString -> [(String, String)] -> ByteString
+getURL url patterns = List.foldl' (\path (pattern, sub) ->
     BSL.toStrict $ BSS.replace
       (BSC.pack pattern)
       (BSC.pack sub)
