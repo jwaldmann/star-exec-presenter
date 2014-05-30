@@ -6,12 +6,13 @@ import qualified Data.ByteString as BS
 import Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as TL
 import StarExec.Types
+import StarExec.Connection
 import StarExec.Commands
 import Codec.Compression.GZip
 
-getResultsFromStarExec :: ( MonadHandler m, MonadBaseControl IO m )
+getJobResultsFromStarExec :: ( MonadHandler m, MonadBaseControl IO m )
   => Int -> m [JobResultInfo]
-getResultsFromStarExec _jobId = do
+getJobResultsFromStarExec _jobId = do
   con <- getConnection
   mInfo <- getJobInfo con _jobId
   return $ case mInfo of
@@ -62,7 +63,7 @@ getJobResults _jobId = do
   pResults <- runDB $ selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
   if null pResults
     then do
-      jobInfos <- getResultsFromStarExec _jobId
+      jobInfos <- getJobResultsFromStarExec _jobId
       pResults' <- runDB $ do
         _ <- mapM (dbInsertJobResult _jobId) jobInfos
         selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
@@ -78,15 +79,15 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 compressText :: Text -> BS.ByteString
 compressText = BSL.toStrict . compress . encodeUtf8 . TL.fromStrict
 
-getJobPair _pairId = do
-  mPair <- runDB $ getBy $ UniquePersistJobPairInfo _pairId
+getJobPair _pairId = runDB $ do
+  mPair <- getBy $ UniquePersistJobPairInfo _pairId
   case mPair of
     Just pair -> return $ Just $ fromPersistJobPairInfo $ entityVal pair
     Nothing -> do
       con <- getConnection
       mPairInfo <- getJobPairInfo con _pairId
       case mPairInfo of
-        Just pairInfo -> runDB $ do
+        Just pairInfo -> do
           mKey <- insertUnique $ PersistJobPairInfo
                                   _pairId
                                   (compressText $ jpiStdout pairInfo)

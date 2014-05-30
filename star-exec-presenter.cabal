@@ -20,8 +20,6 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
-                     Handler.StarExecLogout
-                     Handler.StarExecLogin
                      Handler.Error
                      Handler.ViewSpace
                      Handler.ShowJobResults

@@ -48,17 +48,13 @@ getCompareJobsR = do
 
 postCompareJobsR :: Handler Html
 postCompareJobsR = do
-    loggedIn <- hasValidSession
-    if not loggedIn
-        then redirect HomeR
-        else do
-            ids <- runInputPost $ ireq textField "ids"
-            let idList = parseIds ids
-            jobs <- mapM getResultsFromStarExec idList
-            let bencharkIds = S.toList $ S.fromList $
-                    L.foldr (++) [] $ map getBenchmarkIds jobs
-                solverIds = map getSolverIds jobs
+  ids <- runInputPost $ ireq textField "ids"
+  let idList = parseIds ids
+  jobs <- mapM getResultsFromStarExec idList
+  let bencharkIds = S.toList $ S.fromList $
+          L.foldr (++) [] $ map getBenchmarkIds jobs
+      solverIds = map getSolverIds jobs
 
-            defaultLayout $ do
-                --let mTable = Just $ zip ids jobs
-                $(widgetFile "compare_jobs")
+  defaultLayout $ do
+      --let mTable = Just $ zip ids jobs
+      $(widgetFile "compare_jobs")

@@ -43,7 +43,7 @@ getPostData columns =
 
 listPrim :: ( MonadHandler m ) =>
   StarExecConnection -> Int -> StarExecListType -> m [Either String PrimInfo]
-listPrim (sec, man) primID primType = do
+listPrim (sec, man, cookies) primID primType = do
   let columns = getColumns primType
       sType = map toLower $ show primType
       reqPath = getURL
@@ -63,7 +63,7 @@ listPrim (sec, man) primID primType = do
                   ) ]
                 , requestBody = RequestBodyBS $ BS.tail postData
                 }
-  resp <- sendRequest (req, man)
+  resp <- sendRequest (req, man, cookies)
   let jsonObj = eitherDecode
         $ responseBody resp :: (Either String ListPrimResult)
   case jsonObj of

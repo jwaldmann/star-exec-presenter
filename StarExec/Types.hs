@@ -16,13 +16,15 @@ import Network.HTTP.Conduit
 import GHC.Generics
 import qualified Data.Csv as CSV
 
+data Login = Login T.Text T.Text deriving (Show, Read)
+
 {-
 -}
 type Cookies = [Cookie]
 
 {-
 -}
-type StarExecConnection = (Request, Manager)
+type StarExecConnection = (Request, Manager, CookieJar)
 
 {-
 -}
@@ -224,7 +226,7 @@ data JobPairInfo = JobPairInfo
 
 {-
 -}
-data ErrorID = Login | Unkown
+data ErrorID = LoginError | Unkown
     deriving (Eq, Show, Read)
 
 instance PathPiece ErrorID where

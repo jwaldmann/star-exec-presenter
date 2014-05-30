@@ -2,7 +2,6 @@ module Handler.ShowJobResults where
 
 import Import
 import StarExec.Types
-import StarExec.Session
 import StarExec.Persist
 import Data.Double.Conversion.Text
 import qualified Data.Text as T
@@ -60,21 +59,17 @@ compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
 getShowJobResultsR :: Int -> Handler Html
 getShowJobResultsR _jobId = do
-  loggedIn <- hasValidSession
-  if not loggedIn
-    then redirect HomeR
-    else do
-      pJobInfos <- getJobResults _jobId
-      let 
-        jobinfos = fromPersistJobResultInfos pJobInfos
-        benchmarks = getInfo extractBenchmark jobinfos
-        solvers = getInfo extractSolver jobinfos
-        benchmarkResults = getBenchmarkResults
-                            solvers
-                            jobinfos
-                            (L.sortBy compareBenchmarks benchmarks)
-        solverNames = map snd solvers
-      --liftIO $ putStrLn $ show $ length benchmarkResults
-      --liftIO $ mapM (putStrLn . show) benchmarkResults
-      defaultLayout $ do
-        $(widgetFile "show_job_results")
+  pJobInfos <- getJobResults _jobId
+  let 
+    jobinfos = fromPersistJobResultInfos pJobInfos
+    benchmarks = getInfo extractBenchmark jobinfos
+    solvers = getInfo extractSolver jobinfos
+    benchmarkResults = getBenchmarkResults
+                        solvers
+                        jobinfos
+                        (L.sortBy compareBenchmarks benchmarks)
+    solverNames = map snd solvers
+  --liftIO $ putStrLn $ show $ length benchmarkResults
+  --liftIO $ mapM (putStrLn . show) benchmarkResults
+  defaultLayout $ do
+    $(widgetFile "show_job_results")

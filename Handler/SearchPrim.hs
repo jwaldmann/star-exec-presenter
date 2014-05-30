@@ -29,16 +29,12 @@ getSearchPrimR = do
 
 postSearchPrimR :: Handler Html
 postSearchPrimR = do
-    loggedIn <- hasValidSession
-    if not loggedIn
-        then redirect HomeR
-        else do
-            (tPrimType, tPrimId) <- runInputPost $ (,) <$> ireq textField "primType"
-                                                       <*> ireq textField "id"
-            let primType = parsePrimType tPrimType
-                primId = parsePrimId tPrimId
-            con <- getConnection
-            mPrimInfo <- searchPrim con primId primType
-            defaultLayout $ do
-                $(widgetFile "search_prim")
+  (tPrimType, tPrimId) <- runInputPost $ (,) <$> ireq textField "primType"
+                                             <*> ireq textField "id"
+  let primType = parsePrimType tPrimType
+      primId = parsePrimId tPrimId
+  con <- getConnection
+  mPrimInfo <- searchPrim con primId primType
+  defaultLayout $ do
+      $(widgetFile "search_prim")
 

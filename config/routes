@@ -5,8 +5,8 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
-/logout StarExecLogoutR GET
-/login StarExecLoginR GET POST
+-- /logout StarExecLogoutR GET
+-- /login StarExecLoginR GET POST
 /error/#ErrorID ErrorR GET
 /view_space/#Int ViewSpaceR GET
 /show_job_results/#Int ShowJobResultsR GET
