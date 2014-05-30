@@ -8,4 +8,4 @@
 <h2>List of jobs in this space
 <ul>
     $forall job <- jobs
-        <li><a href=@{ShowJobInfoR (jobId job)}>#{jobName job}</a>
+        <li><a href=@{ShowJobResultsR (jobId job)}>#{jobName job}</a>

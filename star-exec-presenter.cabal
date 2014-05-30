@@ -24,9 +24,7 @@ library
                      Handler.StarExecLogin
                      Handler.Error
                      Handler.ViewSpace
-                     Handler.ShowJobInfo
-                     Handler.SearchPrim
-                     Handler.CompareJobs
+                     Handler.ShowJobResults
                      Handler.ShowJobPair
                      StarExec.Commands
                      StarExec.Connection

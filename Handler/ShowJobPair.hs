@@ -3,4 +3,7 @@ module Handler.ShowJobPair where
 import Import
 
 getShowJobPairR :: Int -> Handler Html
-getShowJobPairR = error "Not yet implemented: getShowJobPairR"
+getShowJobPairR _pairId = do
+
+  defaultLayout $ do
+    $(widgetFile "show_job_pair")

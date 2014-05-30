@@ -6,10 +6,6 @@ $if loggedIn
   <div>
     <a href=@{ViewSpaceR 1}>browse Spaces</a>
   <div>
-    <a href=@{SearchPrimR}>find a primitive</a>
-  <div>
-    <a href=@{CompareJobsR}>compare jobs</a>
-  <div>
     <a href=@{StarExecLogoutR}>logout from StarExec</a>
 $else
   <div class="container" style="margin-top:30px">

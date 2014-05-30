@@ -32,9 +32,9 @@ import Handler.StarExecLogout
 import Handler.StarExecLogin
 import Handler.Error
 import Handler.ViewSpace
-import Handler.ShowJobInfo
-import Handler.SearchPrim
-import Handler.CompareJobs
+import Handler.ShowJobResults
+--import Handler.SearchPrim
+--import Handler.CompareJobs
 import Handler.ShowJobPair
 
 -- This line actually creates our YesodDispatch instance. It is the second half

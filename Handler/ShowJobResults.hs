@@ -1,4 +1,4 @@
-module Handler.ShowJobInfo where
+module Handler.ShowJobResults where
 
 import Import
 import StarExec.Types
@@ -58,8 +58,8 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getShowJobInfoR :: Int -> Handler Html
-getShowJobInfoR _jobId = do
+getShowJobResultsR :: Int -> Handler Html
+getShowJobResultsR _jobId = do
   loggedIn <- hasValidSession
   if not loggedIn
     then redirect HomeR
@@ -77,4 +77,4 @@ getShowJobInfoR _jobId = do
       --liftIO $ putStrLn $ show $ length benchmarkResults
       --liftIO $ mapM (putStrLn . show) benchmarkResults
       defaultLayout $ do
-        $(widgetFile "show_job_info")
+        $(widgetFile "show_job_results")
