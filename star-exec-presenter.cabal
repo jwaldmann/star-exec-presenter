@@ -27,6 +27,7 @@ library
                      Handler.ShowJobInfo
                      Handler.SearchPrim
                      Handler.CompareJobs
+                     Handler.ShowJobPair
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types

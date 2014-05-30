@@ -216,6 +216,14 @@ instance CSV.FromNamedRecord JobResultInfo where
 
 {-
 -}
+data JobPairInfo = JobPairInfo
+  { jpiPairId :: Int
+  , jpiStdout :: T.Text
+  , jpiLog :: T.Text
+  }
+
+{-
+-}
 data ErrorID = Login | Unkown
     deriving (Eq, Show, Read)
 

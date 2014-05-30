@@ -25,6 +25,12 @@ PersistJobResultInfo
     result SolverResult
     deriving Show
 
+PersistJobPairInfo
+    pairId Int
+    UniquePersistJobPairInfo pairId
+    stdout ByteString
+    log ByteString
+
 PersistJobInfo
     starExecId Int
     UniquePersistJobInfo starExecId

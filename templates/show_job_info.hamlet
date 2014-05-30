@@ -1,17 +1,34 @@
 <h1>Overview of the job-info #{_jobId}
 
 <table class="table">
-    <thead>
-        <tr>
-            <th>Benchmarks
-            $forall solverName <- solverNames
-                <th>#{solverName}
+  <thead>
+    <tr>
+      <th>Benchmarks
+      $forall solverName <- solverNames
+        <th>#{solverName}
+  <tbody>
+    $forall ((_,bName), results) <- benchmarkResults
+      <tr>
+        <td>#{bName}
+        $forall mResult <- results
+          $maybe result <- mResult
+            <td class="#{getClass result}">
+              <a class="pair-link" href=@{ShowJobPairR (jriPairId result)}>
+                #{toFixed 6 $ jriCpuTime result} /
+                #{toFixed 6 $ jriWallclockTime result}
+          $nothing
+            <td>
+
+<h3>Legend
+<div>
+  <table class="table legend">
     <tbody>
-        $forall ((_,bName), results) <- benchmarkResults
-            <tr>
-                <td>#{bName}
-                $forall mResult <- results
-                    $maybe result <- mResult
-                        <td class="#{getClass result}">#{result}
-                    $nothing
-                        <td>
+      <tr>
+        <td class="solver-yes">YES
+        <td class="solver-no">NO
+        <td class="solver-maybe">MAYBE
+        <td class="solver-certified">CERTIFIED
+        <td class="solver-error">ERROR
+        <td class="solver-nothing">OTHER / Nothing
+  The results are displayed in the following pattern:
+  <code> cpu-time / wallclock-time

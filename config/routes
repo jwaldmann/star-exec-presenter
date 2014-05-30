@@ -12,3 +12,4 @@
 /show_job_info/#Int ShowJobInfoR GET
 /search_prim SearchPrimR GET POST
 /compare_jobs CompareJobsR GET POST
+/show_job_pair/#Int ShowJobPairR GET
