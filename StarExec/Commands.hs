@@ -45,7 +45,7 @@ getJobInfo (sec, man, cookies) _jobId = do
               let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
               case eitherVector of
                 Left msg -> do
-                  liftIO $ print msg
+                  liftIO $ putStrLn msg
                   return Nothing
                 Right (_, jobInfos) ->
                   return $ Just $ Vector.toList jobInfos

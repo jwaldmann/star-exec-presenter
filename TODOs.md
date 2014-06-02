@@ -37,3 +37,27 @@ id -> job-pair-id (see result of getJobInfo)
 ## (implement a in-app-user and deactivate the StarExec-Login-Process)
   * ask for .user- and .pass-Files on app-startup
   * save starexec-session in db
+
+
+## 140602
+
+* issue that zip of job-pair couldn't be downloaded
+
+* top-level:
+
+```
+data Competition = Competition Text [Metacategory] 
+data Metacategory = Metacategory Text [Category] -> solver nach rang in den categories
+data Category = Category Text [JobId] -> solver nach YES/CERTIFIED/NO sortiert, evtl mit scoring -> SolverResult
+
+instance PathPiece Competition where ... 
+
+
+c :: Competition 
+c = Competition "2014" 
+[ Metacategory "Termination" 
+[ Category "TRS_Standard" [ 13,14,15 ] 
+, Category "SRS_Standard" [16,17,18] 
+] 
+... ] 
+```

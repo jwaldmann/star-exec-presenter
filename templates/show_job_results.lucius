@@ -77,3 +77,21 @@
   height: 100%;
   color: #000;
 }
+
+.container {
+  input {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+  }
+
+  .checked-container {
+    display: none;
+  }
+
+  input:checked + .checked-container {
+    display: block;
+  }
+}

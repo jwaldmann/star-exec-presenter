@@ -85,10 +85,10 @@ getConnection :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow 
 getConnection = do
   sec <- parseUrl starExecUrl
   man <- withManager return
-  liftIO $ putStrLn "requesting index-page"
+  --liftIO $ putStrLn "requesting index-page"
   con <- index (sec, man, createCookieJar [])
   creds <- getLoginCredentials
-  liftIO $ putStrLn "performing login"
+  --liftIO $ putStrLn "performing login"
   login con creds
   --return (sec, man)
 
