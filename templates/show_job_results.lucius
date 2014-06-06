@@ -1,34 +1,41 @@
+@colorYes: #80FFB0;
+@colorNo: #228B22;
+@colorMaybe: #FFFF99;
+@colorCertified: #5CB85C;
+@colorError: #FFCC66;
+@colorNothing: #FFFFFF;
+
 .table > thead > tr,
 .table > tbody > tr,
 .table > tfoot > tr {
     > td.solver-yes,
     > th.solver-yes {
-        background-color: #5cb85c
+        background-color: #{colorYes};
     }
 
     > td.solver-no,
     > th.solver-no {
-        background-color: #f0ad4e
+        background-color: #{colorNo}
     }
 
     > td.solver-maybe,
     > th.solver-maybe {
-        background-color: #5bc0de
+        background-color: #{colorMaybe};
     }
 
     > td.solver-certified,
     > th.solver-certified {
-        background-color: #428bca
+        background-color: #{colorCertified};
     }
 
     > td.solver-error,
     > th.solver-error {
-        background-color: #d9534f
+        background-color: #{colorError};
     }
 
     > td.solver-nothing,
     > th.solver-nothing {
-        background-color: #ffffff
+        background-color: #{colorNothing};
     }
 }
 
@@ -37,32 +44,32 @@
 .table > tfoot {
     > tr.solver-yes > td,
     > tr.solver-yes > th {
-        background-color: #5cb85c
+        background-color: #{colorYes};
     }
 
     > tr.solver-no > td,
     > tr.solver-no > th {
-        background-color: #f0ad4e
+        background-color: #{colorNo};
     }
 
     > tr.solver-maybe > td,
     > tr.solver-maybe > th {
-        background-color: #5bc0de
+        background-color: #{colorMaybe};
     }
 
     > tr.solver-certified > td,
     > tr.solver-certified > th {
-        background-color: #428bca
+        background-color: #{colorCertified};
     }
 
     > tr.solver-error > td,
     > tr.solver-error > th {
-        background-color: #d9534f
+        background-color: #{colorError};
     }
 
     > tr.solver-nothing > td,
     > tr.solver-nothing > th {
-        background-color: #ffffff
+        background-color: #{colorNothing};
     }
 }
 
