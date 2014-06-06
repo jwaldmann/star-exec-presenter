@@ -24,6 +24,7 @@ library
                      Handler.ViewSpace
                      Handler.ShowJobResults
                      Handler.ShowJobPair
+                     Handler.ShowManyJobResults
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -31,6 +32,7 @@ library
                      StarExec.Urls
                      StarExec.Session
                      StarExec.Prims
+                     StarExec.JobResultsTable
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

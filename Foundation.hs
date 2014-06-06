@@ -19,7 +19,7 @@ import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
-import StarExec.Types (ErrorID)
+import StarExec.Types (ErrorID, JobIds)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application

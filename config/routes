@@ -13,3 +13,4 @@
 -- /search_prim SearchPrimR GET POST
 -- /compare_jobs CompareJobsR GET POST
 /show_job_pair/#Int ShowJobPairR GET
+/show_many_job_results/*JobIds ShowManyJobResultsR GET

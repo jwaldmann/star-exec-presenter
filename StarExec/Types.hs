@@ -6,9 +6,6 @@ import Prelude
 import Yesod
 import qualified Data.Text as T
 import Data.Text.Encoding
-import Data.Maybe
-import Database.Persist.TH
-import Control.Applicative
 import Text.Blaze
 import Text.Blaze.Internal
 import Control.Applicative
@@ -234,3 +231,16 @@ instance PathPiece ErrorID where
     fromPathPiece e = do
         err <- fromPathPiece e
         return $ read err
+
+newtype JobIds = JobIds [Int]
+  deriving (Show, Eq, Read)
+
+instance PathMultiPiece JobIds where
+  toPathMultiPiece (JobIds ints) = toPathMultiPiece $ map show $ ints
+  fromPathMultiPiece (i:is) = do
+    int <- fromPathPiece i
+    (JobIds ints) <- case is of
+                          [] -> return $ JobIds []
+                          _ -> fromPathMultiPiece is
+    return $ JobIds (int:ints)
+  fromPathMultiPiece _ = Nothing
