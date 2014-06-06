@@ -12,8 +12,9 @@ Testing:
   <<: *defaults
 
 Staging:
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomptest"
   <<: *defaults
 
 Production:
-  #approot: "http://www.example.com"
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp"
   <<: *defaults
