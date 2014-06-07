@@ -1,9 +1,11 @@
-module Handler.ShowJobResults where
+module Handler.ShowJobResults
+  ( getShowJobResultsR
+  ) where
 
 import Import
 import StarExec.Types
 import StarExec.Persist
-import StarExec.JobResultsTable
+import StarExec.JobData
 import Data.Double.Conversion.Text
 import qualified Data.List as L
 

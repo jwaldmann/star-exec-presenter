@@ -6,15 +6,20 @@ Default: &defaults
   #analytics: UA-YOURCODE
 
 Development:
+  #approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
   <<: *defaults
 
 Testing:
+  port: 3002
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-testing"
   <<: *defaults
 
 Staging:
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomptest"
+  port: 3003
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-staging"
   <<: *defaults
 
 Production:
+  port: 3004
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp"
   <<: *defaults

@@ -14,7 +14,6 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Text.IO as TIO
 import StarExec.Types
 import StarExec.Urls
-import StarExec.Session
 import Control.Monad.Catch
 
 getLoginCredentials :: ( MonadIO m ) => m Login
@@ -63,7 +62,6 @@ login con@(sec, man, cookies) creds = do
               $ sec { method = "POST"
                     , path = loginPath
                     }
-  --liftIO $ putStrLn $ show req
   resp <- sendRequest (req, man, cookies)
   return (sec, man, responseCookieJar resp)
   --loggedIn <- checkLogin con
@@ -85,17 +83,13 @@ getConnection :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow 
 getConnection = do
   sec <- parseUrl starExecUrl
   man <- withManager return
-  --liftIO $ putStrLn "requesting index-page"
   con <- index (sec, man, createCookieJar [])
   creds <- getLoginCredentials
-  --liftIO $ putStrLn "performing login"
   login con creds
-  --return (sec, man)
 
 sendRequest :: ( MonadHandler m ) =>
   StarExecConnection -> m (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do
   let req' =  req { cookieJar = Just cookies }
-  resp <- httpLbs req' man
-  setSessionCookies $ responseCookieJar resp
-  return resp
+  httpLbs req' man
+  --return resp

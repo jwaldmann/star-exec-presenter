@@ -10,15 +10,6 @@ import StarExec.Connection
 import StarExec.Commands
 import Codec.Compression.GZip
 
-getJobResultsFromStarExec :: ( MonadHandler m, MonadBaseControl IO m )
-  => Int -> m [JobResultInfo]
-getJobResultsFromStarExec _jobId = do
-  con <- getConnection
-  mInfo <- getJobInfo con _jobId
-  return $ case mInfo of
-    Just info -> info
-    Nothing   -> []
-
 fromPersistJobResultInfos :: [PersistJobResultInfo] -> [JobResultInfo]
 fromPersistJobResultInfos = map fromPersistJobResultInfo
 
@@ -59,44 +50,8 @@ dbInsertJobResult _jobId jobResult = do
     (jriWallclockTime jobResult)
     (jriResult jobResult)
 
-getJobResults _jobId = do
-  pResults <- runDB $ selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
-  if null pResults
-    then do
-      jobInfos <- getJobResultsFromStarExec _jobId
-      pResults' <- runDB $ do
-        _ <- mapM (dbInsertJobResult _jobId) jobInfos
-        selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
-      --liftIO $ print $ show pResults
-      return $ map entityVal pResults'
-      --return pResults'
-    else do
-      return $ map entityVal pResults
-
 decompressText :: BS.ByteString -> Text
 decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 
 compressText :: Text -> BS.ByteString
 compressText = BSL.toStrict . compress . encodeUtf8 . TL.fromStrict
-
-getJobPair _pairId = runDB $ do
-  mPair <- getBy $ UniquePersistJobPairInfo _pairId
-  case mPair of
-    Just pair -> return $ Just $ fromPersistJobPairInfo $ entityVal pair
-    Nothing -> do
-      con <- getConnection
-      mPairInfo <- getJobPairInfo con _pairId
-      case mPairInfo of
-        Just pairInfo -> do
-          mKey <- insertUnique $ PersistJobPairInfo
-                                  _pairId
-                                  (compressText $ jpiStdout pairInfo)
-                                  (compressText $ jpiLog pairInfo)
-          case mKey of
-            Just key -> do
-              mVal <- get key
-              case mVal of
-                Just val -> return $ Just $ fromPersistJobPairInfo val
-                Nothing -> return Nothing
-            Nothing -> return Nothing
-        Nothing -> return Nothing

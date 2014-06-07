@@ -1,8 +1,8 @@
 module Handler.ShowJobPair where
 
 import Import
-import StarExec.Persist
 import StarExec.Types
+import StarExec.JobData
 
 getShowJobPairR :: Int -> Handler Html
 getShowJobPairR _pairId = do

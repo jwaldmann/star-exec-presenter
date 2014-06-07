@@ -30,9 +30,8 @@ library
                      StarExec.Types
                      StarExec.Persist
                      StarExec.Urls
-                     StarExec.Session
                      StarExec.Prims
-                     StarExec.JobResultsTable
+                     StarExec.JobData
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
