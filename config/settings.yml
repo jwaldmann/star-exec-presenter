@@ -10,16 +10,16 @@ Development:
   <<: *defaults
 
 Testing:
-  port: 3002
+  port: 3001
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp-testing"
   <<: *defaults
 
 Staging:
-  port: 3003
+  port: 3002
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp-staging"
   <<: *defaults
 
 Production:
-  port: 3004
+  port: 3003
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp"
   <<: *defaults
