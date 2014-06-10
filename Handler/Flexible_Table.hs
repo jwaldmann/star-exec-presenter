@@ -7,42 +7,119 @@ import Table.Data
 import Table.Query
 import Table.Get
 
+import qualified Data.Map.Strict as M
+import qualified Data.Set as S
+import Data.Function (on)
+import Data.List (sortBy)
+
 getFlexible_TableR :: Query -> JobIds -> Handler Html
-getFlexible_TableR q @ (Query ts) (JobIds ids) = do
+getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
   tab <- Table.Get.getManyJobCells ids
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget 
         [hamlet|
-            our query: #{show q}
+            <pre>#{show q}
         |]
-    display ts tab
+    display jids [] ts tab 
 
 -- display :: [Transform] -> Table -> Handler Html
-display ts tab = do
-  summary tab
+display jids previous ts tab  = do
+  summary jids previous tab
+  [whamlet| 
+      <a href=@{Flexible_TableR (Query []) jids}>remove following #{show (length ts)} transformations
+  |]
   case ts of
-    (t:ts') -> do
+    (t:later) -> do
+
         [whamlet|
-            must apply transformation #{show t}
+            <h3>apply transformation
+               <pre>#{show t}
         |]
-        display ts $ apply t tab
+
+        display jids (previous ++ [t]) later $ apply t tab
         
     [] -> do
     -- no more transformers, display actual data
         let rs = rows tab
         [whamlet|
-                <table class="table">
-                    <tbody>
+             <h3>data
+             <table class="table">
+                <tbody>
                       $forall row <- rs
                         <tr> 
                           $forall cell <- row
-                            <td> #{tag cell}
+                            <td> #{contents cell} #{tag cell}
             |]
 
-summary tab = do
+summary jids previous tab = do
+    let total = length $ rows tab
+        column_stats = M.fromListWith (+) $ do
+            row <- rows tab
+            (i,cell) <- zip [0..] row
+            return ((tag cell, i),1)        
+        tags = S.fromList $ map fst $ M.keys column_stats         
+        width = length (header tab) 
+        column_stats_table = for (S.toList tags) $ \ t ->          
+            for [0 .. width - 1 ] $ \ i -> 
+                let n = M.findWithDefault 0 (t, i) column_stats 
+                    (pre, _ : post) = splitAt i $ replicate width Any
+                    p = And $ pre ++ Equals t : post
+                    these = Query $ previous ++ [ Filter_Rows p ]
+                    others =  Query $ previous ++ [ Filter_Rows (Not p) ]
+                in  (t,i,n, (these, others))
+        positive n = n > 0
+        row_type_stats = M.fromListWith (+) $ do
+            row <- rows tab
+            return (map tag row, 1)
+        row_type_table = for ( sortBy (compare `on` snd) $ M.toList row_type_stats ) 
+            $ \ (rt, n) -> 
+                (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] ) 
+                      , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] ) 
+                )
     [whamlet|
-        summary: length tab = #{show (length (rows tab))}
+        <h3>summary
+        total number of rows: #{show total}
+        <h3>columns, by tags
+        <table class="table">
+          <thead>
+           <tr>             
+             $forall h <- header tab
+                <th> #{contents h}
+          <tbody>
+             $forall r <- column_stats_table
+               <tr>
+                 $forall (t,i,n, (these, others)) <- r
+                    $if positive n
+                        <td> 
+                          #{t} #{show n}
+                          <a href=@{Flexible_TableR these jids}>these
+                          | <a href=@{Flexible_TableR others jids}>others
+                    $else 
+                        <td>
+        <h3>row types
+        <table class="table">
+          <tbody>
+            $forall (rt, n, these,others) <- row_type_table
+              <tr>
+                $forall t <- rt
+                    <td> #{t}
+                <td> #{show n}
+                <td> 
+                   <a href=@{Flexible_TableR these jids}>these
+                <td>
+                   <a href=@{Flexible_TableR others jids}>others
     |]
     
-apply t tab = tab
+apply t tab = case t of
+    Filter_Rows p -> 
+            tab { rows = filter ( \ row -> predicate p $ map tag row ) $ rows tab }
+
+predicate p tags = case p of
+    And fs -> and $ zipWith matches fs tags
+    Not q -> not $ predicate q tags
+
+matches f c = case f of
+    Any -> True
+    Equals s -> s == c
+    Not_Equals s -> s /= c

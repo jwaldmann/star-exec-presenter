@@ -10,7 +10,11 @@ data Query = Query [ Transform ]
     deriving (Read,Show, Eq)
 
 data Transform = Choose_Columns [ Int ]
-               | Filter_Rows [ Cell_Filter ]
+               | Filter_Rows Predicate 
+    deriving (Read,Show, Eq)               
+
+data Predicate = And [ Cell_Filter ]
+               | Not Predicate
     deriving (Read,Show, Eq)               
 
 data Cell_Filter = Any 

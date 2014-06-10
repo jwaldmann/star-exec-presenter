@@ -10,6 +10,8 @@ import Data.Double.Conversion.Text
 import qualified Data.List as L
 import qualified Data.Text as T
 
+import Table.Query
+
 countResults result (_jobId,(sid,_)) = do
   count [ PersistJobResultInfoStarExecJobId ==. _jobId
         , PersistJobResultInfoSolverId ==. sid
@@ -19,7 +21,7 @@ toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
 
 getShowManyJobResultsR :: JobIds -> Handler Html
-getShowManyJobResultsR (JobIds ids) = do
+getShowManyJobResultsR jids @ (JobIds ids) = do
   pJobs <- getManyJobResults ids
   let jobs = map fromPersistJobResultInfos pJobs
       jobResults = concat jobs
@@ -43,4 +45,8 @@ getShowManyJobResultsR (JobIds ids) = do
   others <- runDB $ mapM (countResults OTHER) jobSolvers
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
+    [whamlet| 
+        <h3> 
+          <a href=@{Flexible_TableR (Query []) jids}>flexible query (experimental) 
+    |]
     $(widgetFile "show_many_job_results")
