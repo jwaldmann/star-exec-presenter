@@ -14,3 +14,4 @@
 -- /compare_jobs CompareJobsR GET POST
 /show_job_pair/#Int ShowJobPairR GET
 /show_many_job_results/*JobIds ShowManyJobResultsR GET
+/flexible-table/#Query/*JobIds Flexible_TableR GET

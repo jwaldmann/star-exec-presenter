@@ -25,6 +25,7 @@ library
                      Handler.ShowJobResults
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
+                     Handler.Flexible_Table
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -32,6 +33,9 @@ library
                      StarExec.Urls
                      StarExec.Prims
                      StarExec.JobData
+                     Table.Data
+                     Table.Get
+                     Table.Query
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
