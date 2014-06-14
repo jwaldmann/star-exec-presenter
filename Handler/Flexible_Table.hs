@@ -7,6 +7,8 @@ import Table.Data
 import Table.Query
 import Table.Get
 
+import Text.Lucius (luciusFile)
+
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import Data.Function (on)
@@ -17,8 +19,8 @@ getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
   tab <- Table.Get.getManyJobCells ids
   defaultLayout $ do
     setTitle "Flexible Table"
-    toWidget 
-        [hamlet|
+    toWidget $(luciusFile "templates/show_job_results.lucius")
+    [whamlet|
             <pre>#{show q}
         |]
     display jids [] ts tab 
@@ -45,11 +47,15 @@ display jids previous ts tab  = do
         [whamlet|
              <h3>data
              <table class="table">
-                <tbody>
-                      $forall row <- rs
+              <thead>
+                <tr>             
+                    $forall h <- header tab
+                        <th> ^{contents h}
+              <tbody>
+                    $forall row <- rs
                         <tr> 
                           $forall cell <- row
-                            <td> #{contents cell} #{tag cell}
+                            <td class="#{tdclass cell}"> ^{contents cell} 
             |]
 
 summary jids previous tab = do
@@ -85,13 +91,13 @@ summary jids previous tab = do
           <thead>
            <tr>             
              $forall h <- header tab
-                <th> #{contents h}
+                <th> ^{contents h}
           <tbody>
              $forall r <- column_stats_table
                <tr>
                  $forall (t,i,n, (these, others)) <- r
                     $if positive n
-                        <td> 
+                        <td class="#{t}"> 
                           #{t} #{show n}
                           <a href=@{Flexible_TableR these jids}>these
                           | <a href=@{Flexible_TableR others jids}>others
@@ -99,11 +105,15 @@ summary jids previous tab = do
                         <td>
         <h3>row types
         <table class="table">
+          <thead>
+           <tr>             
+             $forall h <- header tab
+                <th> ^{contents h}
           <tbody>
             $forall (rt, n, these,others) <- row_type_table
               <tr>
                 $forall t <- rt
-                    <td> #{t}
+                    <td class="#{t}"> #{t}
                 <td> #{show n}
                 <td> 
                    <a href=@{Flexible_TableR these jids}>these
