@@ -40,8 +40,9 @@ getManyJobCells ids = do
 for = flip map
 
 empty_cell = 
-    Cell { contents = [whamlet| |]
-         , url = T.pack "nothing", tag = T.pack "OTHER" }
+    Cell { contents = [whamlet| |], tdclass = T.pack "empty"
+         , url = T.pack "nothing"
+         , tag = T.pack "OTHER" }
 
 cell_for_bench b = Cell { contents = [whamlet| #{b} |]
                         , tdclass = T.pack "bench"
