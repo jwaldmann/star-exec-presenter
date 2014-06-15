@@ -26,6 +26,8 @@ library
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
                      Handler.Flexible_Table
+                     Handler.Competition
+                     Handler.CompetitionWithConfig
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -33,6 +35,7 @@ library
                      StarExec.Urls
                      StarExec.Prims
                      StarExec.JobData
+                     StarExec.CompetitionResults
                      Table.Data
                      Table.Get
                      Table.Query

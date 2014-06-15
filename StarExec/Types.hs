@@ -12,8 +12,14 @@ import Control.Applicative
 import Network.HTTP.Conduit
 import GHC.Generics
 import qualified Data.Csv as CSV
+import Debug.Trace
 
-data Login = Login T.Text T.Text deriving (Show, Read)
+type Email = T.Text
+type Password = T.Text
+type Name = T.Text
+type Description = T.Text
+
+data Login = Login Email Password deriving (Show, Read)
 
 {-
 -}
@@ -107,7 +113,7 @@ toSpaceInfos = map toSpaceInfo
 data JobInfo = JobInfo
   { jobId :: Int
   , jobSpaceId :: Maybe Int
-  , jobName :: T.Text
+  , jobName :: Name
   , jobStatus :: JobStatus
   , jobPairsCompleted :: Double
   , jobPairsNum :: Int
@@ -117,28 +123,28 @@ data JobInfo = JobInfo
 
 data SolverInfo = SolverInfo
   { solverId :: Int
-  , solverName :: T.Text
-  , solverDescription :: T.Text
+  , solverName :: Name
+  , solverDescription :: Description
   } deriving (Show, Eq)
 
 data BenchmarkInfo = BenchmarkInfo
   { benchmarkId :: Int
-  , benchmarkName :: T.Text
+  , benchmarkName :: Name
   , benchmarkType :: T.Text
   } deriving (Show, Eq)
 
 data UserInfo = UserInfo
   { userId :: Int
-  , userName :: T.Text
-  , userInstitution :: T.Text
-  , userMail :: T.Text
+  , userName :: Name
+  , userInstitution :: Name
+  , userMail :: Email
   } deriving (Show, Eq)
 
 data SpaceInfo = SpaceInfo
   { spaceId :: Int
   , spaceParentId :: Maybe Int
-  , spaceName :: T.Text
-  , spaceDescription :: T.Text
+  , spaceName :: Name
+  , spaceDescription :: Description
   } deriving (Show, Eq)
 
 primInfoId :: PrimInfo -> Int
@@ -187,13 +193,13 @@ instance ToMarkup SolverResult where
 -}
 data JobResultInfo = JobResultInfo
   { jriPairId :: Int
-  , jriBenchmark :: T.Text
+  , jriBenchmark :: Name
   , jriBenchmarkId :: Int
-  , jriSolver :: T.Text
+  , jriSolver :: Name
   , jriSolverId :: Int
-  , jriConfiguration :: T.Text
+  , jriConfiguration :: Name
   , jriConfigurationId :: Int
-  , jriStatus :: T.Text
+  , jriStatus :: Name
   , jriCpuTime :: Double
   , jriWallclockTime :: Double
   , jriResult :: SolverResult
@@ -232,6 +238,8 @@ instance PathPiece ErrorID where
         err <- fromPathPiece e
         return $ read err
 
+{-
+-}
 newtype JobIds = JobIds [Int]
   deriving (Show, Eq, Read)
 
@@ -244,3 +252,57 @@ instance PathMultiPiece JobIds where
                           _ -> fromPathMultiPiece is
     return $ JobIds (int:ints)
   fromPathMultiPiece _ = Nothing
+
+{-
+-}
+data Competition = Competition Name [MetaCategory]
+  deriving (Show, Read, Eq)
+
+getCompetitionName :: Competition -> Name
+getCompetitionName (Competition name _) = name
+
+getMetaCategories :: Competition -> [MetaCategory]
+getMetaCategories (Competition _ ms) = ms
+
+{-
+  solver nach rang in den categories
+-}
+data MetaCategory = MetaCategory Name [Category]
+  deriving (Show, Read, Eq)
+
+getMetaCategoryName :: MetaCategory -> Name
+getMetaCategoryName (MetaCategory name _) = name
+
+getCategories :: MetaCategory -> [Category]
+getCategories (MetaCategory _ cs) = cs
+
+{-
+  solver nach YES/CERTIFIED/NO sortiert, evtl mit scoring -> SolverResult
+-}
+data Category = Category Name [SolverResult] [Int]
+  deriving (Show, Read, Eq)
+
+getCategoryName :: Category -> Name
+getCategoryName (Category name _ _) = name
+
+getCategoryFilter :: Category -> [SolverResult]
+getCategoryFilter (Category _ srs _) = srs
+
+getJobIds :: Category -> [Int]
+getJobIds (Category _ _ jis) = jis
+
+instance PathPiece Competition where
+  toPathPiece comp = T.pack $ show comp
+    --where encodeChar ' ' = '+'
+    --      encodeChar '"' = '.'
+    --      encodeChar '[' = '/'
+    --      encodeChar ']' = '~'
+    --      encodeChar c   = c
+  fromPathPiece t = case reads (T.unpack t) of
+      [(c, "")] -> return c
+      _ -> Nothing
+    --where decodeChar '+' = ' '
+    --      decodeChar '.' = '"'
+    --      decodeChar '/' = '['
+    --      decodeChar '~' = ']'
+    --      decodeChar c   = c

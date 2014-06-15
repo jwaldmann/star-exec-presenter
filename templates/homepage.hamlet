@@ -2,3 +2,7 @@
 
 <div>
   <a href=@{ViewSpaceR 1}>browse Spaces</a>
+<div>
+  <a href=@{CompetitionR "2014"}>view Competition "2014"</a>
+<div>
+  <a href=@{ShowManyJobResultsR $ JobIds [1095, 1217]}>Show Many Job Results of Jobs 1095 and 1217</a>

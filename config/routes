@@ -5,13 +5,11 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
--- /logout StarExecLogoutR GET
--- /login StarExecLoginR GET POST
 /error/#ErrorID ErrorR GET
 /view_space/#Int ViewSpaceR GET
 /show_job_results/#Int ShowJobResultsR GET
--- /search_prim SearchPrimR GET POST
--- /compare_jobs CompareJobsR GET POST
 /show_job_pair/#Int ShowJobPairR GET
 /show_many_job_results/*JobIds ShowManyJobResultsR GET
 /flexible-table/#Query/*JobIds Flexible_TableR GET
+/competition/#Text CompetitionR GET
+/competition_with_config/#Competition CompetitionWithConfigR GET
