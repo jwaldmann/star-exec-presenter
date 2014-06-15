@@ -3,7 +3,7 @@ module Table.Get where
 import Import
 
 import Table.Data
-import StarExec.JobData ( getManyJobResults )
+import StarExec.JobData ( getManyJobResults, getClass )
 import StarExec.Types
 import StarExec.Persist ( fromPersistJobResultInfo )
 
@@ -11,6 +11,8 @@ import StarExec.Persist ( fromPersistJobResultInfo )
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+
+import Data.Double.Conversion.Text
 
 getManyJobCells ids = do
     iss <- getManyJobResults ids
@@ -24,7 +26,8 @@ getManyJobCells ids = do
         headers = M.keys cells
         benchmarks = M.keys $ foldr M.union M.empty $ M.elems cells
     return $ Table 
-           { header = Cell { contents = T.pack "Benchmark", url = T.pack "nothing"
+           { header = Cell { contents = [whamlet| Benchmark |]
+                           , url = T.pack "nothing"
                            , tag = T.pack "nothing"
                            } : map cell_for_solver headers
            , rows = for benchmarks $ \ bench -> 
@@ -37,19 +40,31 @@ getManyJobCells ids = do
 for = flip map
 
 empty_cell = 
-    Cell { contents = T.pack "empty", url = T.pack "nothing", tag = T.pack "OTHER" }
+    Cell { contents = [whamlet| |], tdclass = T.pack "empty"
+         , url = T.pack "nothing"
+         , tag = T.pack "OTHER" }
 
-cell_for_bench b = Cell { contents = b , url = T.pack $ "URL for bench " ++ T.unpack b
+cell_for_bench b = Cell { contents = [whamlet| #{b} |]
+                        , tdclass = T.pack "bench"
+                        , url = T.pack $ "URL for bench " ++ T.unpack b
                         , tag = T.pack "nothing"
                         }
 
-cell_for_solver (s,c) = Cell { contents = T.append s c
+cell_for_solver (s,c) = Cell { contents = [whamlet| #{s}/#{c} |] 
+                        , tdclass = T.pack "solver"
                         , url = T.intercalate (T.pack " ")
                           [ T.pack "URL for solver/config" , s, c ]
                         , tag = T.pack "nothing"
                         }
-cell_for_job_pair i = 
-    Cell { contents = T.pack $ show ( jriCpuTime i, jriWallclockTime i )
-                          , url = T.pack $ "URL for jriPairId " ++ show (jriPairId i )
-                          , tag = T.pack $ show $ jriResult i
-                          }
+
+cell_for_job_pair result = 
+    Cell { mjri = Just result
+         , contents = [whamlet|
+            <a class="pair-link" href=@{ShowJobPairR (jriPairId result)}>
+                #{toFixed 1 $ jriCpuTime result} /
+                #{toFixed 1 $ jriWallclockTime result}
+             |]
+         , tdclass = getClass result
+         , url = T.pack $ "nothing"
+         , tag = getClass result
+         }

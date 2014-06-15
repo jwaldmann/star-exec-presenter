@@ -31,14 +31,15 @@ instance PathPiece Query where
 
 
 -- FIXME: 
+-- note: cannot use '-', since getClass returns "solver-certified" etc.
 quote :: String -> T.Text
 quote s = T.pack $ map ( \ c -> case c of
-         ' ' -> '-'
+         ' ' -> '='
          '"' -> '+'
          _   -> c  ) s
 
 unquote :: T.Text -> String
 unquote t = map ( \ c -> case c of
-         '-' -> ' '
+         '=' -> ' '
          '+' -> '"'
          _ -> c ) $ T.unpack t
