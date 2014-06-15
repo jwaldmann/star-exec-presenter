@@ -10,6 +10,24 @@ import StarExec.Connection
 import StarExec.Commands
 import Codec.Compression.GZip
 
+updateJobInfo jobInfo = runDB $ do
+  let _id = jobId jobInfo
+      _name = jobName jobInfo
+      _status = jobStatus jobInfo
+      _date = jobDate jobInfo
+      pJobInfo = PersistJobInfo _id _name _status _date False
+  mPersistJobInfo <- getBy $ UniquePersistJobInfo $ jobId jobInfo
+  case mPersistJobInfo of
+    Nothing -> do
+      insert pJobInfo
+      return ()
+    Just en -> do
+      let jobInfo = entityVal en
+      replace
+        (entityKey en) $
+        pJobInfo { persistJobInfoFullyPulled = persistJobInfoFullyPulled jobInfo }
+  return pJobInfo
+
 fromPersistJobResultInfos :: [PersistJobResultInfo] -> [JobResultInfo]
 fromPersistJobResultInfos = map fromPersistJobResultInfo
 
@@ -27,6 +45,21 @@ fromPersistJobResultInfo p = JobResultInfo
   , jriWallclockTime = persistJobResultInfoWallclockTime p
   , jriResult = persistJobResultInfoResult p
   }
+
+toPersistJobResultInfo :: Int -> JobResultInfo -> PersistJobResultInfo
+toPersistJobResultInfo _jobId j = PersistJobResultInfo
+  _jobId
+  (jriPairId j)
+  (jriBenchmark j)
+  (jriBenchmarkId j)
+  (jriSolver j)
+  (jriSolverId j)
+  (jriConfiguration j)
+  (jriConfigurationId j)
+  (jriStatus j)
+  (jriCpuTime j)
+  (jriWallclockTime j)
+  (jriResult j)
 
 fromPersistJobPairInfo :: PersistJobPairInfo -> JobPairInfo
 fromPersistJobPairInfo p = JobPairInfo

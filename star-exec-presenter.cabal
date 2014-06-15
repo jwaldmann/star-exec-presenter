@@ -100,6 +100,7 @@ library
                  , double-conversion
                  , blaze-markup
                  , containers
+                 , html-conduit
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -131,3 +132,4 @@ test-suite test
                  , hspec
                  , transformers
                  , containers
+                 , html-conduit

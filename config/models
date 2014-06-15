@@ -34,13 +34,14 @@ PersistJobPairInfo
 PersistJobInfo
     starExecId Int
     UniquePersistJobInfo starExecId
-    spaceId Int
+    -- spaceId Int
     name Text
     status JobStatus
-    pairsCompleted Double
-    pairsNum Int
-    pairsFailed Double
+    -- pairsCompleted Double
+    -- pairsNum Int
+    -- pairsFailed Double
     date Text
+    fullyPulled Bool
     deriving Show
 
 PersistSolverInfo

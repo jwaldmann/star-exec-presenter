@@ -112,12 +112,12 @@ toSpaceInfos = map toSpaceInfo
 
 data JobInfo = JobInfo
   { jobId :: Int
-  , jobSpaceId :: Maybe Int
+  --, jobSpaceId :: Maybe Int
   , jobName :: Name
   , jobStatus :: JobStatus
-  , jobPairsCompleted :: Double
-  , jobPairsNum :: Int
-  , jobPairsFailed :: Double
+  --, jobPairsCompleted :: Double
+  --, jobPairsNum :: Int
+  --, jobPairsFailed :: Double
   , jobDate :: T.Text
   } deriving (Show, Eq)
 

@@ -38,7 +38,7 @@ pairLogPath :: ByteString
 pairLogPath = "starexec/services/jobs/pairs/{pairId}/log"
 
 jobInfoPath :: ByteString
-jobInfoPath = "starexec/secure/details/job.jsp?id={jobId}"
+jobInfoPath = "starexec/secure/details/job.jsp"
 
 getURL :: ByteString -> [(String, String)] -> ByteString
 getURL url patterns = List.foldl' (\path (pattern, sub) ->

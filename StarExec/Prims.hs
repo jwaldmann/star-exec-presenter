@@ -206,17 +206,17 @@ getJobInfoFromTexts
   (idAndName:status:pairsCompleted:pairsNum:pairsFailed:date:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
         status' = getStatus status
-        pairsCompleted' = parseDouble pairsCompleted
-        pairsNum' = parseInt pairsNum
-        pairsFailed' = parseDouble pairsFailed
+        --pairsCompleted' = parseDouble pairsCompleted
+        --pairsNum' = parseInt pairsNum
+        --pairsFailed' = parseDouble pairsFailed
     in Right $ JobInfo
         { jobId = pid
-        , jobSpaceId = Nothing
+        --, jobSpaceId = Nothing
         , jobName = pname
         , jobStatus = status'
-        , jobPairsCompleted = pairsCompleted'
-        , jobPairsNum = pairsNum'
-        , jobPairsFailed = pairsFailed'
+        --, jobPairsCompleted = pairsCompleted'
+        --, jobPairsNum = pairsNum'
+        --, jobPairsFailed = pairsFailed'
         , jobDate = date
         }
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"

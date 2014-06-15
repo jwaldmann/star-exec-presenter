@@ -91,17 +91,41 @@ selectListByJobId _jobId = selectList [ PersistJobResultInfoStarExecJobId ==. _j
 --    else do
 --      return $ map entityVal pResults
 
+getJobInfo _jobId = do
+  pJobInfo <- runDB $ getBy $ UniquePersistJobInfo _jobId
+  case pJobInfo of
+    Nothing -> do
+      con <- getConnection
+      mJobInfo <- SEC.getJobInfo con _jobId
+      case mJobInfo of
+        Nothing -> return Nothing
+        Just ji -> do
+          persistJobInfo <- updateJobInfo ji
+          return $ Just persistJobInfo
+    Just pji -> return $ Just $ entityVal pji
+
 getJobResults _jobId = do
-  pResults <- runDB $ selectListByJobId _jobId
-  if null pResults
-    then do
-      jobInfos <- getJobResultsFromStarExec _jobId
-      pResults' <- runDB $ do
-        _ <- mapM (dbInsertJobResult _jobId) jobInfos
-        selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
-      return $ map entityVal pResults'
-    else do
-      return $ map entityVal pResults
+  pJobInfo <- getJobInfo _jobId
+  case pJobInfo of
+    Nothing -> error $ "No such Job: " ++ (show _jobId)
+    Just pji ->
+      if persistJobInfoStatus pji == Complete
+        then if persistJobInfoFullyPulled pji
+          then do
+            pResults <- runDB $ selectListByJobId _jobId
+            return $ map entityVal pResults
+          else do
+            jobInfos <- getJobResultsFromStarExec _jobId
+            pResults' <- runDB $ do
+              _ <- mapM (dbInsertJobResult _jobId) jobInfos
+              updateWhere
+                [ PersistJobInfoStarExecId ==. _jobId ]
+                [ PersistJobInfoFullyPulled =. True ]
+              selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
+            return $ map entityVal pResults'
+        else do
+          jobInfos <- getJobResultsFromStarExec _jobId
+          return $ map (toPersistJobResultInfo _jobId) jobInfos
 
 getManyJobResultsWithConnection con _jobIds = do
   pResults <- runDB $ mapM selectListByJobId _jobIds
