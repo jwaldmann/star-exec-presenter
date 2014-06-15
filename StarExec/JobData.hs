@@ -3,7 +3,7 @@ module StarExec.JobData where
 import Import
 import StarExec.Types
 import StarExec.Connection
-import StarExec.Commands
+import qualified StarExec.Commands as SEC
 import StarExec.Persist
 import qualified Data.Text as T
 import qualified Data.List as L
@@ -66,7 +66,7 @@ compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 getJobResultsWithConnection :: ( MonadHandler m, MonadBaseControl IO m )
   => StarExecConnection -> Int -> m [JobResultInfo]
 getJobResultsWithConnection con _jobId = do
-  mInfo <- getJobInfo con _jobId
+  mInfo <- SEC.getJobResults con _jobId
   return $ case mInfo of
     Just info -> info
     Nothing   -> []
@@ -79,6 +79,18 @@ getJobResultsFromStarExec _jobId = do
 
 selectListByJobId _jobId = selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
 
+--getJobResultsWithConnection con _jobId = do
+--  pResults <- runDB $ selectListByJobId _jobId
+--  if null pResults
+--    then do
+--      jobInfos <- getJobResultsWithConnection con _jobId
+--      pResults' <- runDB $ do
+--        _ <- mapM (dbInsertJobResult _jobId) jobInfos
+--        selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
+--      return $ map entityVal pResults'
+--    else do
+--      return $ map entityVal pResults
+
 getJobResults _jobId = do
   pResults <- runDB $ selectListByJobId _jobId
   if null pResults
@@ -90,6 +102,21 @@ getJobResults _jobId = do
       return $ map entityVal pResults'
     else do
       return $ map entityVal pResults
+
+getManyJobResultsWithConnection con _jobIds = do
+  pResults <- runDB $ mapM selectListByJobId _jobIds
+  let getJobResults' = getJobResultsWithConnection con
+      processResult (_jobId, pResult) =
+        if null pResult
+          then do
+            jobInfos <- getJobResults' _jobId
+            pResults' <- runDB $ do
+              _ <- mapM (dbInsertJobResult _jobId) jobInfos
+              selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
+            return $ map entityVal pResults'
+          else do
+            return $ map entityVal pResult
+  mapM processResult $ zip _jobIds pResults
 
 getManyJobResults _jobIds = do
   pResults <- runDB $ mapM selectListByJobId _jobIds
@@ -115,7 +142,7 @@ getJobPair _pairId = runDB $ do
     Just pair -> return $ Just $ fromPersistJobPairInfo $ entityVal pair
     Nothing -> do
       con <- getConnection
-      mPairInfo <- getJobPairInfo con _pairId
+      mPairInfo <- SEC.getJobPairInfo con _pairId
       case mPairInfo of
         Just pairInfo -> do
           mKey <- insertUnique $ PersistJobPairInfo

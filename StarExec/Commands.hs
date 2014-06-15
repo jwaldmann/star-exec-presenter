@@ -4,7 +4,7 @@
 -}
 
 module StarExec.Commands
-  ( getJobInfo
+  ( getJobResults
   , getJobPairInfo
   ) where
 
@@ -29,9 +29,9 @@ decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
 
 -- API
 
-getJobInfo :: ( MonadHandler m ) =>
+getJobResults :: ( MonadHandler m ) =>
  StarExecConnection -> Int -> m (Maybe [JobResultInfo])
-getJobInfo (sec, man, cookies) _jobId = do
+getJobResults (sec, man, cookies) _jobId = do
   let (+>) = BS.append
       req = sec { method = "GET"
                 , path = downloadPath
