@@ -1,6 +1,8 @@
 module StarExec.Persist where
 
 import Import
+import Control.Monad.IO.Class
+import Data.Time.Clock
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import Data.Text.Lazy.Encoding
@@ -10,23 +12,19 @@ import StarExec.Connection
 import StarExec.Commands
 import Codec.Compression.GZip
 
-updateJobInfo jobInfo = runDB $ do
+insertJobInfo jobInfo = runDB $ do
   let _id = jobId jobInfo
       _name = jobName jobInfo
       _status = jobStatus jobInfo
       _date = jobDate jobInfo
-      pJobInfo = PersistJobInfo _id _name _status _date False
-  mPersistJobInfo <- getBy $ UniquePersistJobInfo $ jobId jobInfo
-  case mPersistJobInfo of
-    Nothing -> do
-      insert pJobInfo
-      return ()
-    Just en -> do
-      let jobInfo = entityVal en
-      replace
-        (entityKey en) $
-        pJobInfo { persistJobInfoFullyPulled = persistJobInfoFullyPulled jobInfo }
-  return pJobInfo
+      pJobInfo = PersistJobInfo _id _name _status _date
+  insert_ pJobInfo
+
+getPersistJobInfo _jobId = runDB $ do
+  pEntity <- getBy $ UniquePersistJobInfo _jobId
+  case pEntity of
+    Nothing -> return Nothing
+    Just en -> return $ Just $ entityVal en
 
 fromPersistJobResultInfos :: [PersistJobResultInfo] -> [JobResultInfo]
 fromPersistJobResultInfos = map fromPersistJobResultInfo

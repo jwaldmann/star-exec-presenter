@@ -6,13 +6,13 @@ import Prelude
 import Yesod
 import qualified Data.Text as T
 import Data.Text.Encoding
+import Data.Time.Clock
 import Text.Blaze
 import Text.Blaze.Internal
 import Control.Applicative
 import Network.HTTP.Conduit
 import GHC.Generics
 import qualified Data.Csv as CSV
-import Debug.Trace
 
 type Email = T.Text
 type Password = T.Text
@@ -20,6 +20,11 @@ type Name = T.Text
 type Description = T.Text
 
 data Login = Login Email Password deriving (Show, Read)
+
+data SessionData = SessionData
+  { cookieData :: T.Text
+  , date :: UTCTime
+  } deriving (Show, Read)
 
 {-
 -}

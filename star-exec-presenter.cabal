@@ -101,6 +101,7 @@ library
                  , blaze-markup
                  , containers
                  , html-conduit
+                 , time
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -133,3 +134,4 @@ test-suite test
                  , transformers
                  , containers
                  , html-conduit
+                 , time

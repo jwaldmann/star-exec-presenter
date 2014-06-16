@@ -23,9 +23,7 @@ getShowJobResultsR _jobId = do
   case mJobInfo of
     Nothing -> error $ "No such Job: " ++ show _jobId
     Just jobInfo -> do
-      updateJobInfo jobInfo
       pJobInfos <- getJobResults _jobId
-      --liftIO $ putStrLn $ show mJobInfo
       let jobinfos = fromPersistJobResultInfos pJobInfos
           benchmarks = getInfo extractBenchmark jobinfos
           solvers = getInfo extractSolver jobinfos

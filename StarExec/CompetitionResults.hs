@@ -8,20 +8,20 @@ import StarExec.Connection
 import StarExec.JobData
 import StarExec.Persist
 
-getCategoriesResult con cat = do
+getCategoriesResult cat = do
   let catFilter = getCategoryFilter cat
       catJobIds = getJobIds cat
-  pResults <- getManyJobResultsWithConnection con catJobIds
+  pResults <- getManyJobResults catJobIds
   let results = concat $ map fromPersistJobResultInfos pResults
       solver = getInfo extractSolver results
       --scores = 
   return undefined
 
-getMetaResults con metaCat = do
-  catResults <- mapM (getCategoriesResult con) $ getCategories metaCat
+getMetaResults metaCat = do
+  catResults <- mapM getCategoriesResult $ getCategories metaCat
   return undefined
 
 getCompetitionResults comp = do
   con <- getConnection
-  metaResults <- mapM (getMetaResults con) $ getMetaCategories comp
+  metaResults <- mapM getMetaResults $ getMetaCategories comp
   return undefined
