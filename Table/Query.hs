@@ -24,22 +24,7 @@ data Cell_Filter = Any
 
 
 instance PathPiece Query where
-    fromPathPiece t = case reads (unquote t) of
+    fromPathPiece t = case reads (T.unpack t) of
         [ (q, "") ] -> return q
         _ -> Nothing
-    toPathPiece q = quote $ show q
-
-
--- FIXME: 
--- note: cannot use '-', since getClass returns "solver-certified" etc.
-quote :: String -> T.Text
-quote s = T.pack $ map ( \ c -> case c of
-         ' ' -> '='
-         '"' -> '+'
-         _   -> c  ) s
-
-unquote :: T.Text -> String
-unquote t = map ( \ c -> case c of
-         '=' -> ' '
-         '+' -> '"'
-         _ -> c ) $ T.unpack t
+    toPathPiece q = T.pack $ show q
