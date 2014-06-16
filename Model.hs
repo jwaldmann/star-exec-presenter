@@ -8,6 +8,7 @@ import Database.Persist.Quasi
 import Data.Typeable (Typeable)
 import StarExec.Types (JobStatus, SolverResult)
 import Table.Query
+import Data.Time.Clock
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities

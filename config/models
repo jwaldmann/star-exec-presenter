@@ -9,6 +9,12 @@ User
 --     verkey Text Maybe
 --     UniqueEmail email
 
+StarExecSessionData
+  key Int
+  UniqueStarExecSessionData key
+  cookies Text
+  date UTCTime
+
 PersistJobResultInfo
     starExecJobId Int
     pairId Int

@@ -81,53 +81,23 @@ selectListByJobId _jobId = runDB $ do
   results <- selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
   return $ map entityVal results
 
---getJobResultsWithConnection con _jobId = do
---  pResults <- runDB $ selectListByJobId _jobId
---  if null pResults
---    then do
---      jobInfos <- getJobResultsWithConnection con _jobId
---      pResults' <- runDB $ do
---        _ <- mapM (dbInsertJobResult _jobId) jobInfos
---        selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
---      return $ map entityVal pResults'
---    else do
---      return $ map entityVal pResults
-
-{-
-  m True -> Job is completed
-  m False -> Job isn't completed
-  inserts JobInfo into db, when job is completed
--}
-isJobComplete _jobId = do
-  pJobInfo <- runDB $ getBy $ UniquePersistJobInfo _jobId
-  case pJobInfo of
+getJobInfo _jobId = do
+  mPersistJobInfo <- runDB $ getBy $ UniquePersistJobInfo _jobId
+  case mPersistJobInfo of
     Nothing -> do
       con <- getConnection
       mJobInfo <- SEC.getJobInfo con _jobId
       case mJobInfo of
-        Nothing -> error $ "No such Job: " ++ (show _jobId)
-        Just jobInfo -> do
-          let jobComplete = jobStatus jobInfo == Complete
-          if jobComplete
-            then insertJobInfo jobInfo
-            else return ()
-          return jobComplete
-    _ -> return True
-
---getJobInfo _jobId = do
---  mPeristJobInfo <- getPersistJobInfo _jobId
---  case mPeristJobInfo of
---    Nothing -> do
---      con <- getConnection
---      mJobInfo <- SEC.getJobInfo con _jobId
---      case mJobInfo of
---        Nothing -> return Nothing
---        Just ji -> do
---          if jobStatus ji == Complete
---            then insertJobInfo ji
---            else return ()
---          return $ Just ji
---    Just pji -> return $ Just pji
+        Nothing -> return Nothing
+        Just ji -> return $ Just ji
+    Just en -> do
+      let persistJobInfo = entityVal en
+      return $ Just $ JobInfo
+        { jobId = persistJobInfoStarExecId persistJobInfo
+        , jobName = persistJobInfoName persistJobInfo
+        , jobStatus = persistJobInfoStatus persistJobInfo
+        , jobDate = persistJobInfoDate persistJobInfo
+        }
 
 getJobResults _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
@@ -149,64 +119,8 @@ getJobResults _jobId = do
               return $ map (toPersistJobResultInfo _jobId) jobResults
     -- job is completed
     Just persistJobInfo -> selectListByJobId _jobId
-    -- mapM entityVal $
-    --   selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
-    -- Just pji ->
-    --   if persistJobInfoStatus pji == Complete
-    --     then if persistJobInfoFullyPulled pji
-    --       then do
-    --         pResults <- runDB $ selectListByJobId _jobId
-    --         return $ map entityVal pResults
-    --       else do
-    --         jobInfos <- getJobResultsFromStarExec _jobId
-    --         pResults' <- runDB $ do
-    --           _ <- mapM (dbInsertJobResult _jobId) jobInfos
-    --           updateWhere
-    --             [ PersistJobInfoStarExecId ==. _jobId ]
-    --             [ PersistJobInfoFullyPulled =. True ]
-    --           selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
-    --         return $ map entityVal pResults'
-    --     else do
-    --       jobInfos <- getJobResultsFromStarExec _jobId
-    --       return $ map (toPersistJobResultInfo _jobId) jobInfos
-
--- getManyJobResultsWithConnection con _jobIds = do
---   mapM 
- 
--- getManyJobResultsWithConnection con _jobIds = do
---   pResults <- mapM selectListByJobId _jobIds
---   let getJobResults' = getJobResultsWithConnection con
---       processResult (_jobId, pResult) =
---         if null pResult
---           then do
---             jobInfos <- getJobResults' _jobId
---             pResults' <- runDB $ do
---               _ <- mapM (dbInsertJobResult _jobId) jobInfos
---               selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
---             return $ map entityVal pResults'
---           else do
---             return $ map pResult
---   mapM processResult $ zip _jobIds pResults
 
 getManyJobResults = mapM getJobResults
-
--- getManyJobResults _jobIds = do
---   pResults <- mapM selectListByJobId _jobIds
---   con <- if any null pResults
---             then getConnection
---             else return undefined
---   let getJobResults' = getJobResultsWithConnection con
---       processResult (_jobId, pResult) =
---         if null pResult
---           then do
---             jobInfos <- getJobResults' _jobId
---             pResults' <- runDB $ do
---               _ <- mapM (dbInsertJobResult _jobId) jobInfos
---               selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
---             return $ map entityVal pResults'
---           else do
---             return $ map entityVal pResult
---   mapM processResult $ zip _jobIds pResults
 
 getJobPair _pairId = runDB $ do
   mPair <- getBy $ UniquePersistJobPairInfo _pairId

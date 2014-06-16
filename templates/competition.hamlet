@@ -1,3 +1,15 @@
 <h1>Competition #{compName}
 
-#{show comp}
+<ul>
+  $forall compMetaResults <- compResults
+    <li>
+      <ul>
+        $forall (jobInfos, compCatResult) <- compMetaResults
+          <li>
+            <a href=@{ShowManyJobResultsR $ JobIds $ map jobId jobInfos}>Show JobResults</a>
+            <ul>
+              $forall jobInfo <- jobInfos
+                <li>#{jobName jobInfo} (show $ #{jobId jobInfo}): #{show $ jobStatus jobInfo} 
+            <ul>
+              $forall result <- compCatResult
+                <li>#{show result}

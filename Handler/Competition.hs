@@ -8,18 +8,18 @@ currentCompetition compName = Competition compName
   [ MetaCategory "Termination"
       [ Category "TRS_Standard"
           [ YES ]
-          [ 1095, 1217 ]
+          [ 2166, 2168 ]
       , Category "SRS_Standard"
           [ CERTIFIED ]
-          [ 1095, 1217 ]
+          [ 2166, 2168 ]
       ]
   , MetaCategory "Termination 2"
       [ Category "TRS_Standard 2"
           [ NO ]
-          [ 1095, 1217 ]
+          [ 2166, 2168 ]
       , Category "SRS_Standard 2"
           [ MAYBE ]
-          [ 1095, 1217 ]
+          [ 2166, 2168 ]
       ]
   ]
 

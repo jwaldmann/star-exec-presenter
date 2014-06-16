@@ -15,7 +15,6 @@ import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 import StarExec.Types
 import StarExec.Urls
-import Control.Monad.Catch
 import Data.Time.Clock
 
 getLoginCredentials :: ( MonadIO m ) => m Login
@@ -24,7 +23,21 @@ getLoginCredentials = liftIO $ do
   slogin <- readFile $ home ++ "/.star_exec"
   return $ read slogin
 
-getSessionData :: (MonadIO m) => m (Maybe SessionData)
+getSessionData' :: Handler (Maybe StarExecSessionData)
+getSessionData' = do
+  mSessionData <- runDB $ getBy $ UniqueStarExecSessionData 0
+  case mSessionData of
+    Nothing -> return Nothing
+    Just en -> return $ Just $ entityVal en
+
+writeSessionData' cookieJar date = do
+  let sessionData = StarExecSessionData 0 (T.pack $ show cookieJar) date
+  runDB $ do
+    deleteBy $ UniqueStarExecSessionData 0
+    insert_ sessionData
+  return ()
+
+getSessionData :: ( MonadIO m ) => m (Maybe SessionData)
 getSessionData = liftIO $ do
   home <- getHomeDirectory
   let filePath = home ++ "/.star_exec_session"
@@ -60,7 +73,7 @@ getLocation resp =
     in
       if null locs then Nothing else Just $ snd $ head locs
 
-checkLogin :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+checkLogin :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m ) =>
   StarExecConnection -> m Bool
 checkLogin (sec, man, cookies) = do
   let req = sec { method = "HEAD"
@@ -71,7 +84,7 @@ checkLogin (sec, man, cookies) = do
   resp <- sendRequest (req, man, cookies)
   return $ isLoggedIn $ getLocation resp
 
-login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m, MonadThrow m ) =>
+login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m ) =>
   StarExecConnection -> Login -> m StarExecConnection
 login con@(sec, man, cookies) creds = do
   _ <- checkLogin con
@@ -114,7 +127,7 @@ getConnection = do
     Just session -> do
       let diffTime = fromRational $ toRational $ diffUTCTime currentTime $ date session :: Double
           cookies = read $ T.unpack $ cookieData session
-      if diffTime < 300.0
+      if diffTime < 3300.0
         then index (sec, man, cookies)
         else do
           con <- index (sec, man, createCookieJar [])
