@@ -102,6 +102,9 @@ library
                  , containers
                  , html-conduit
                  , time
+                 -- , wl-pprint-text
+                 , wl-pprint
+                 , parsec
 
 executable         star-exec-presenter
     if flag(library-only)
