@@ -18,6 +18,8 @@ type Email = T.Text
 type Password = T.Text
 type Name = T.Text
 type Description = T.Text
+type Rank = Int
+type Score = Int
 
 data Login = Login Email Password deriving (Show, Read)
 
@@ -270,7 +272,7 @@ getMetaCategories :: Competition -> [MetaCategory]
 getMetaCategories (Competition _ ms) = ms
 
 {-
-  solver nach rang in den categories
+  solver by rank in the categories
 -}
 data MetaCategory = MetaCategory Name [Category]
   deriving (Show, Read, Eq)
@@ -282,7 +284,7 @@ getCategories :: MetaCategory -> [Category]
 getCategories (MetaCategory _ cs) = cs
 
 {-
-  solver nach YES/CERTIFIED/NO sortiert, evtl mit scoring -> SolverResult
+  solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 -}
 data Category = Category Name [SolverResult] [Int]
   deriving (Show, Read, Eq)
@@ -298,16 +300,32 @@ getJobIds (Category _ _ jis) = jis
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp
-    --where encodeChar ' ' = '+'
-    --      encodeChar '"' = '.'
-    --      encodeChar '[' = '/'
-    --      encodeChar ']' = '~'
-    --      encodeChar c   = c
   fromPathPiece t = case reads (T.unpack t) of
       [(c, "")] -> return c
       _ -> Nothing
-    --where decodeChar '+' = ' '
-    --      decodeChar '.' = '"'
-    --      decodeChar '/' = '['
-    --      decodeChar '~' = ']'
-    --      decodeChar c   = c
+
+type BenchmarkID = Int
+type BenchmarkName = T.Text
+type Benchmark = (BenchmarkID, BenchmarkName)
+type SolverID = Int
+type Solver = (SolverID, SolverName)
+type SolverName = T.Text
+type SolverResults = [Maybe SolverResult]
+type BenchmarkRow = (Benchmark, [Maybe JobResultInfo])
+type TableHead = [SolverName]
+
+data CompetitionResults = CompetitionResults
+  { competitionName :: Name
+  , metaCategoryResults :: [MetaCategoryResult] 
+  } deriving (Show, Eq)
+
+data MetaCategoryResult = MetaCategoryResult
+  { metaCategoryName :: Name
+  , categoryResults :: [CategoryResult]
+  } deriving (Show, Eq)
+
+data CategoryResult = CategoryResult
+  { categoryName :: Name
+  , categorySolver :: [(Maybe Rank, Solver, Score)]
+  , categoryJobs :: [JobInfo]
+  } deriving (Show, Eq)

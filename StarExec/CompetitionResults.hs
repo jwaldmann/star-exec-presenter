@@ -17,7 +17,7 @@ import Data.Maybe
     same results -> special case
 -}
 
-getScores :: [Solver] -> [SolverResult] -> [JobResultInfo] -> [(Solver,Int)]
+getScores :: [Solver] -> [SolverResult] -> [JobResultInfo] -> [(Solver,Score)]
 getScores solver filters results =
   reverse $ L.sortBy sortScore $ map countResults solver
   where
@@ -26,21 +26,57 @@ getScores solver filters results =
     countResults s = (s, length $ filter matches rawResults)
     matches result = any (==result) filters
 
+getRanking :: [(Solver, Score)] -> [(Maybe Rank, Solver, Score)]
+getRanking scores =
+  let indexedScores = zip [1..] scores :: [(Rank, (Solver, Score))]
+      equals score (_,(_,scr)) = score == scr
+      getRanking' :: (Solver, Score) -> (Maybe Rank, Solver, Score)
+      getRanking' (solver, score) =
+          case filter (equals score) indexedScores of
+            [] -> (Nothing, solver, score)
+            ((rank,(slv,scr)):_) ->
+              (if solver /= slv then Nothing else Just rank, solver, score)
+  in map getRanking' scores
+
+
+
+  --map getRanking' $ zipWith [1..] scores
+  --where getRanking' (solv, score)
+
+getCategoriesResult :: Category -> Handler CategoryResult
 getCategoriesResult cat = do
-  let catFilter = getCategoryFilter cat
+  let catName = getCategoryName cat
+      catFilter = getCategoryFilter cat
       catJobIds = getJobIds cat
   pResults <- getManyJobResults catJobIds
   mJobInfos <- mapM getJobInfo catJobIds
   let results = concat $ map fromPersistJobResultInfos pResults
       solver = getInfo extractSolver results
       scores = getScores solver catFilter results
+      rankedSolver = getRanking scores
       jobInfos = catMaybes mJobInfos
-  return (jobInfos, scores)
+  return $ CategoryResult
+            { categoryName = catName
+            , categorySolver = rankedSolver
+            , categoryJobs = jobInfos
+            }
 
+getMetaResults :: MetaCategory -> Handler MetaCategoryResult
 getMetaResults metaCat = do
-  catResults <- mapM getCategoriesResult $ getCategories metaCat
-  return catResults
+  let metaName = getMetaCategoryName metaCat
+      categories = getCategories metaCat
+  catResults <- mapM getCategoriesResult categories
+  return $ MetaCategoryResult
+            { metaCategoryName = metaName
+            , categoryResults = catResults
+            }
 
+getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
-  metaResults <- mapM getMetaResults $ getMetaCategories comp
-  return metaResults
+  let compName = getCompetitionName comp
+      metaCats = getMetaCategories comp
+  metaResults <- mapM getMetaResults metaCats
+  return $ CompetitionResults
+            { competitionName = compName
+            , metaCategoryResults = metaResults
+            }

@@ -1,15 +1,23 @@
-<h1>Competition #{compName}
+<h1>Competition #{competitionName compResults}
 
 <ul>
-  $forall compMetaResults <- compResults
+  $forall compMetaResults <- metaCategoryResults compResults
     <li>
+      <h2>#{metaCategoryName compMetaResults}
       <ul>
-        $forall (jobInfos, compCatResult) <- compMetaResults
+        $forall compCatResult <- categoryResults compMetaResults
           <li>
-            <a href=@{ShowManyJobResultsR $ JobIds $ map jobId jobInfos}>Show JobResults</a>
+            <h3>#{categoryName compCatResult}
+            <a href=@{ShowManyJobResultsR $ JobIds $ map jobId $ categoryJobs compCatResult}>Show JobResults</a>
             <ul>
-              $forall jobInfo <- jobInfos
+              $forall jobInfo <- categoryJobs compCatResult
                 <li>#{jobName jobInfo} (show $ #{jobId jobInfo}): #{show $ jobStatus jobInfo} 
             <ul>
-              $forall result <- compCatResult
-                <li>#{show result}
+              $forall (mRank, solver, score) <- categorySolver compCatResult
+                <li>
+                  $maybe rank <- mRank
+                    <span>#{show rank}.
+                  $nothing
+                    <span>_.
+                  <span>#{show solver}</span>
+                  <span>#{show score}</span>
