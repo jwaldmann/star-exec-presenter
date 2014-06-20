@@ -12,7 +12,8 @@ import qualified Data.Text as T
 
 import Table.Query
 
-countResults result (_jobId,(sid,_)) = do
+countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
+countResults result (_jobId,(sid,_)) = runDB $ do
   count [ PersistJobResultInfoStarExecJobId ==. _jobId
         , PersistJobResultInfoSolverId ==. sid
         , PersistJobResultInfoResult ==. result ]
@@ -37,12 +38,12 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
       (+>) = T.append
       solverNames = map (\(i,name) -> name +> " (" +> (T.pack $ show i) +> ")" ) solvers
       results = [ YES, NO, MAYBE, CERTIFIED, ERROR, OTHER ]
-  yesses <- runDB $ mapM (countResults YES) jobSolvers
-  nos    <- runDB $ mapM (countResults NO) jobSolvers
-  maybes <- runDB $ mapM (countResults MAYBE) jobSolvers
-  certs  <- runDB $ mapM (countResults CERTIFIED) jobSolvers
-  errors <- runDB $ mapM (countResults ERROR) jobSolvers
-  others <- runDB $ mapM (countResults OTHER) jobSolvers
+  yesses <- mapM (countResults YES) jobSolvers
+  nos    <- mapM (countResults NO) jobSolvers
+  maybes <- mapM (countResults MAYBE) jobSolvers
+  certs  <- mapM (countResults CERTIFIED) jobSolvers
+  errors <- mapM (countResults ERROR) jobSolvers
+  others <- mapM (countResults OTHER) jobSolvers
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
     [whamlet| 

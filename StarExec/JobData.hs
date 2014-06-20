@@ -8,11 +8,6 @@ import StarExec.Persist
 import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
-import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString as BS
-import qualified Data.Text.Lazy as TL
-import Data.Text.Lazy.Encoding
-import Codec.Compression.GZip
 
 type JobResultInfos = [JobResultInfo]
 type BenchmarkID = Int
@@ -63,24 +58,24 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getJobResultsWithConnection :: ( MonadHandler m, MonadBaseControl IO m )
-  => StarExecConnection -> Int -> m [JobResultInfo]
+getJobResultsWithConnection :: StarExecConnection -> Int -> Handler [JobResultInfo]
 getJobResultsWithConnection con _jobId = do
   mResults <- SEC.getJobResults con _jobId
   return $ case mResults of
     Just result -> result
     Nothing     -> []
 
-getJobResultsFromStarExec :: ( MonadHandler m, MonadBaseControl IO m )
-  => Int -> m [JobResultInfo]
+getJobResultsFromStarExec :: Int -> Handler [JobResultInfo]
 getJobResultsFromStarExec _jobId = do
   con <- getConnection
   getJobResultsWithConnection con _jobId
 
+selectListByJobId :: Int -> Handler [PersistJobResultInfo]
 selectListByJobId _jobId = runDB $ do
   results <- selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
   return $ map entityVal results
 
+getJobInfo :: Int -> Handler (Maybe JobInfo)
 getJobInfo _jobId = do
   mPersistJobInfo <- runDB $ getBy $ UniquePersistJobInfo _jobId
   case mPersistJobInfo of
@@ -99,6 +94,7 @@ getJobInfo _jobId = do
         , jobDate = persistJobInfoDate persistJobInfo
         }
 
+getJobResults :: Int -> Handler [PersistJobResultInfo]
 getJobResults _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   case mPersistJobInfo of
@@ -112,18 +108,20 @@ getJobResults _jobId = do
             then do
               insertJobInfo ji
               jobResults <- getJobResultsWithConnection con _jobId
-              _ <- runDB $ mapM (dbInsertJobResult _jobId) jobResults
+              mapM_ (dbInsertJobResult _jobId) jobResults
               selectListByJobId _jobId
             else do
               jobResults <- getJobResultsWithConnection con _jobId
               return $ map (toPersistJobResultInfo _jobId) jobResults
     -- job is completed
-    Just persistJobInfo -> selectListByJobId _jobId
+    Just _ -> selectListByJobId _jobId
 
+getManyJobResults :: [Int] -> Handler [[PersistJobResultInfo]] 
 getManyJobResults = mapM getJobResults
 
-getJobPair _pairId = runDB $ do
-  mPair <- getBy $ UniquePersistJobPairInfo _pairId
+getJobPair :: Int -> Handler (Maybe JobPairInfo)
+getJobPair _pairId = do
+  mPair <- runDB $ getBy $ UniquePersistJobPairInfo _pairId
   case mPair of
     Just pair -> return $ Just $ fromPersistJobPairInfo $ entityVal pair
     Nothing -> do
@@ -131,13 +129,13 @@ getJobPair _pairId = runDB $ do
       mPairInfo <- SEC.getJobPairInfo con _pairId
       case mPairInfo of
         Just pairInfo -> do
-          mKey <- insertUnique $ PersistJobPairInfo
+          mKey <- runDB $ insertUnique $ PersistJobPairInfo
                                   _pairId
                                   (compressText $ jpiStdout pairInfo)
                                   (compressText $ jpiLog pairInfo)
           case mKey of
             Just key -> do
-              mVal <- get key
+              mVal <- runDB $ get key
               case mVal of
                 Just val -> return $ Just $ fromPersistJobPairInfo val
                 Nothing -> return Nothing

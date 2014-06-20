@@ -30,7 +30,6 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types.Header
 
 getPostData :: Int -> [(BS.ByteString, BS.ByteString)]
---getPostData :: Int -> [(String, String)]
 getPostData columns =
   [ ("sEcho", "1")
   , ("iColumns", BSC.pack $ show columns)
@@ -41,8 +40,7 @@ getPostData columns =
   , ("sSearch", "")
   , ("sSortDir_0", "asc") ]
 
-listPrim :: ( MonadHandler m ) =>
-  StarExecConnection -> Int -> StarExecListType -> m [Either String PrimInfo]
+listPrim :: StarExecConnection -> Int -> StarExecListType -> Handler [Either String PrimInfo]
 listPrim (sec, man, cookies) primID primType = do
   let columns = getColumns primType
       sType = map toLower $ show primType
@@ -68,8 +66,6 @@ listPrim (sec, man, cookies) primID primType = do
         $ responseBody resp :: (Either String ListPrimResult)
   case jsonObj of
     Right result -> do
-      --liftIO $ putStrLn "found result"
-      --liftIO $ putStrLn $ show $ map (map T.unpack) $ aaData result
       return $ parsePrimInfos primType $ aaData result
     Left msg -> do
       liftIO $ putStrLn msg
@@ -79,7 +75,7 @@ findPrim :: [PrimInfo] -> Int -> Maybe PrimInfo
 findPrim primInfos _primId = List.find isPrim primInfos
     where isPrim prim = primInfoId prim == _primId
 
-findInM :: ( MonadHandler m ) => (a -> m (Maybe b)) -> [a] -> m (Maybe b)
+findInM :: (a -> Handler (Maybe b)) -> [a] -> Handler (Maybe b)
 findInM _ [] = return Nothing
 findInM _pred (x:xs) = do
     result <- _pred x
@@ -87,8 +83,7 @@ findInM _pred (x:xs) = do
         Nothing -> findInM _pred xs
         Just _ -> return result
 
-searchPrimInHierchy :: ( MonadHandler m ) =>
-    StarExecConnection -> Int -> Int -> StarExecListType -> m (Maybe PrimInfo)
+searchPrimInHierchy :: StarExecConnection -> Int -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
 searchPrimInHierchy con _spaceId _primId primType = do
     mPrimList <- listPrim con _spaceId primType
     let primList = fromEither mPrimList
@@ -98,20 +93,15 @@ searchPrimInHierchy con _spaceId _primId primType = do
     liftIO $ putStrLn "### <- searchPrimInHierchy ###"
     case mPrim of
         Just _ -> do
-          --liftIO $ putStrLn $ "Found Primitive in space " ++ (show _spaceId)
           return mPrim
         Nothing -> do
-            --liftIO $ putStrLn $ "Couldn't find Primitive in space " ++ (show _spaceId)
             subSpaces <- listPrim con _spaceId Spaces
             let spaceList = eitherToSpaceInfos subSpaces
-                searchPrimInHierchy' :: ( MonadHandler m ) =>
-                    SpaceInfo -> m ( Maybe PrimInfo )
                 searchPrimInHierchy' space =
                     searchPrimInHierchy con (spaceId space) _primId primType
             findInM searchPrimInHierchy' spaceList
 
-searchPrim :: MonadHandler m =>
-  StarExecConnection -> Int -> StarExecListType -> m (Maybe PrimInfo)
+searchPrim :: StarExecConnection -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
 searchPrim con _primId primType =
     searchPrimInHierchy con 1128 _primId primType
 

@@ -17,7 +17,7 @@ import StarExec.Types
 import StarExec.Urls
 import Data.Time.Clock
 
-getLoginCredentials :: ( MonadIO m ) => m Login
+getLoginCredentials :: Handler Login
 getLoginCredentials = liftIO $ do
   home <- getHomeDirectory
   slogin <- readFile $ home ++ "/.star_exec"
@@ -30,6 +30,7 @@ getSessionData' = do
     Nothing -> return Nothing
     Just en -> return $ Just $ entityVal en
 
+writeSessionData' :: CookieJar -> UTCTime -> Handler ()
 writeSessionData' cookieJar date = do
   let sessionData = StarExecSessionData 0 (T.pack $ show cookieJar) date
   runDB $ do
@@ -37,7 +38,7 @@ writeSessionData' cookieJar date = do
     insert_ sessionData
   return ()
 
-getSessionData :: ( MonadIO m ) => m (Maybe SessionData)
+getSessionData :: Handler (Maybe SessionData)
 getSessionData = liftIO $ do
   home <- getHomeDirectory
   let filePath = home ++ "/.star_exec_session"
@@ -48,7 +49,7 @@ getSessionData = liftIO $ do
       return $ Just $ read sData
     else return Nothing
 
-writeSessionData :: ( MonadIO m ) => CookieJar -> UTCTime -> m ()
+writeSessionData :: CookieJar -> UTCTime -> Handler ()
 writeSessionData cookieJar date = liftIO $ do
   home <- getHomeDirectory
   let file = show $ SessionData { cookieData = T.pack $ show cookieJar
@@ -73,8 +74,7 @@ getLocation resp =
     in
       if null locs then Nothing else Just $ snd $ head locs
 
-checkLogin :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m ) =>
-  StarExecConnection -> m Bool
+checkLogin :: StarExecConnection -> Handler Bool
 checkLogin (sec, man, cookies) = do
   let req = sec { method = "HEAD"
                 , path = "starexec/secure/index.jsp"
@@ -84,8 +84,7 @@ checkLogin (sec, man, cookies) = do
   resp <- sendRequest (req, man, cookies)
   return $ isLoggedIn $ getLocation resp
 
-login :: ( MonadHandler m, MonadIO m, MonadBaseControl IO m ) =>
-  StarExecConnection -> Login -> m StarExecConnection
+login :: StarExecConnection -> Login -> Handler StarExecConnection
 login con@(sec, man, cookies) creds = do
   _ <- checkLogin con
   let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
@@ -97,13 +96,8 @@ login con@(sec, man, cookies) creds = do
                     }
   resp <- sendRequest (req, man, cookies)
   return (sec, man, responseCookieJar resp)
-  --loggedIn <- checkLogin con
-  --if loggedIn
-  --  then return (sec, man, responseCookieJar resp)
-  --  else return $ error "Wrong login-credentials"
 
-index :: ( MonadHandler m, MonadIO m ) =>
-  StarExecConnection -> m StarExecConnection
+index :: StarExecConnection -> Handler StarExecConnection
 index (sec, man, cookies) = do
   let req = sec { method = "GET"
                 , path = indexPath
@@ -111,10 +105,9 @@ index (sec, man, cookies) = do
   resp <- sendRequest (req, man, cookies)
   return (sec, man, responseCookieJar resp)
 
-getConnection :: ( MonadHandler m, MonadBaseControl IO m ) =>
-  m StarExecConnection
+getConnection :: Handler StarExecConnection
 getConnection = do
-  mSession <- getSessionData
+  mSession <- getSessionData'
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
   man <- withManager return
@@ -125,20 +118,20 @@ getConnection = do
       (req, man, cookies) <- login con creds
       return (req, man, cookies)
     Just session -> do
-      let diffTime = fromRational $ toRational $ diffUTCTime currentTime $ date session :: Double
-          cookies = read $ T.unpack $ cookieData session
+      let date' = starExecSessionDataDate session
+          cookieData' = starExecSessionDataCookies session
+          diffTime = fromRational $ toRational $ diffUTCTime currentTime $ date' :: Double
+          cookies = read $ T.unpack $ cookieData'
       if diffTime < 3300.0
         then index (sec, man, cookies)
         else do
           con <- index (sec, man, createCookieJar [])
           creds <- getLoginCredentials
           login con creds
-  writeSessionData cookies currentTime
+  writeSessionData' cookies currentTime
   return con
 
-sendRequest :: ( MonadHandler m ) =>
-  StarExecConnection -> m (Response BSL.ByteString)
+sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do
   let req' =  req { cookieJar = Just cookies }
   httpLbs req' man
-  --return resp

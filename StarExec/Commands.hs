@@ -71,8 +71,7 @@ constructJobInfo _jobId title tds =
 
 -- API
 
-getJobInfo :: ( MonadHandler m ) =>
-  StarExecConnection -> Int -> m (Maybe JobInfo)
+getJobInfo :: StarExecConnection -> Int -> Handler (Maybe JobInfo)
 getJobInfo (sec, man, cookies) _jobId = do
   let (+>) = BS.append
       req = sec { method = "GET"
@@ -88,11 +87,9 @@ getJobInfo (sec, man, cookies) _jobId = do
       let fieldset = getJobInfoFieldset cursor
           tds = descendant fieldset >>= element "td" >>= child
       return $ Just $ constructJobInfo _jobId jobTitle tds
-  --liftIO $ putStrLn $ show $ constructJobInfo _jobId jobTitle tds
-  --return Nothing
 
-getJobResults :: ( MonadHandler m ) =>
- StarExecConnection -> Int -> m (Maybe [JobResultInfo])
+-- TODO either Maybe or List^^
+getJobResults :: StarExecConnection -> Int -> Handler (Maybe [JobResultInfo])
 getJobResults (sec, man, cookies) _jobId = do
   let (+>) = BS.append
       req = sec { method = "GET"
@@ -114,8 +111,7 @@ getJobResults (sec, man, cookies) _jobId = do
             [] -> return Nothing
   return jobs
 
-getJobPairInfo :: ( MonadHandler m ) =>
-  StarExecConnection -> Int -> m (Maybe JobPairInfo)
+getJobPairInfo :: StarExecConnection -> Int -> Handler (Maybe JobPairInfo)
 getJobPairInfo (sec, man, cookies) _pairId = do
   let reqStdout = sec { method = "GET"
                       , queryString = "limit=-1"

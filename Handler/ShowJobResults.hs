@@ -6,14 +6,13 @@ import Import
 import StarExec.Types
 import StarExec.Persist
 import StarExec.JobData
-import StarExec.Connection
-import qualified StarExec.Commands as SEC
 import Data.Double.Conversion.Text
 import qualified Data.List as L
 
-countResults _jobId result solverName = do
+countResults :: Int -> SolverResult -> Text -> Handler Int
+countResults _jobId result _solverName = runDB $ do
   count [ PersistJobResultInfoStarExecJobId ==. _jobId
-        , PersistJobResultInfoSolver ==. solverName
+        , PersistJobResultInfoSolver ==. _solverName
         , PersistJobResultInfoResult ==. result ]
 
 getShowJobResultsR :: Int -> Handler Html
@@ -29,12 +28,12 @@ getShowJobResultsR _jobId = do
       solverNames = map snd solvers
       countResultsByJobId = countResults _jobId
       results = [ YES, NO, MAYBE, CERTIFIED, ERROR, OTHER ]
-  yesses <- runDB $ mapM (countResultsByJobId YES) solverNames
-  nos    <- runDB $ mapM (countResultsByJobId NO) solverNames
-  maybes <- runDB $ mapM (countResultsByJobId MAYBE) solverNames
-  certs  <- runDB $ mapM (countResultsByJobId CERTIFIED) solverNames
-  errors <- runDB $ mapM (countResultsByJobId ERROR) solverNames
-  others <- runDB $ mapM (countResultsByJobId OTHER) solverNames
+  yesses <- mapM (countResultsByJobId YES) solverNames
+  nos    <- mapM (countResultsByJobId NO) solverNames
+  maybes <- mapM (countResultsByJobId MAYBE) solverNames
+  certs  <- mapM (countResultsByJobId CERTIFIED) solverNames
+  errors <- mapM (countResultsByJobId ERROR) solverNames
+  others <- mapM (countResultsByJobId OTHER) solverNames
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
     $(widgetFile "show_job_results")
