@@ -179,7 +179,7 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , Category "Runtime Complexity - Innermost Rewriting"
            [ Participant "TCT" ( Just (1382, 2022))
-           , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
+           , Participant "AProVE" ( Just ( 1185, 1611 ) )
            ]
      , Category "Derivational Complexity - Full Rewriting certified"
            [ Participant "CaT" ( Just (1343, 1953))
@@ -188,7 +188,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "CaT" ( Just (1343, 1953))
            ]
      , Category "Runtime Complexity - Innermost Rewriting certified"
-           [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
+           [ Participant "AProVE" ( Just ( 1185, 1613 ) )
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
