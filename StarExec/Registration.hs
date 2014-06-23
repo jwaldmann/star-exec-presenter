@@ -177,7 +177,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "TCT" Nothing
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , Category "Runtime Complexity - Full Rewriting"
+     , Category "Runtime Complexity - Innermost Rewriting"
            [ Participant "TCT" Nothing
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            ]
