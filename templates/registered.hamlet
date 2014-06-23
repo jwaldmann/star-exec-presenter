@@ -11,7 +11,7 @@
         $forall cat <- categories mecat
           <li>
             #{categoryName cat}:
-            $forall part <- participants cat
+            $forall part <- contents cat
                   $maybe conf <- solver_config part
                       <span class="conf">
                          <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}"> 

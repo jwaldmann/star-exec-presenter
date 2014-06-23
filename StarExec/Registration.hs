@@ -19,12 +19,15 @@ import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
 
-data Competition = Competition { competitionName :: Name, metacategories :: [ MetaCategory ] }
+data Competition a = Competition { competitionName :: Name, metacategories :: [ MetaCategory a ] }
     deriving ( Generic )
-data MetaCategory = MetaCategory { metaCategoryName :: Name, categories :: [ Category ] }
+data MetaCategory a = MetaCategory { metaCategoryName :: Name, categories :: [ Category a ] }
     deriving ( Generic )
-data Category = Category { categoryName :: Name , participants :: [ Participant ] }
+data Category a = Category { categoryName :: Name , contents :: a }
     deriving ( Generic )
+
+type Registration = Competition [Participant]
+
 data Participant = Participant { participantName :: Name, solver_config :: Maybe (Int,Int) }
     deriving ( Generic )
 
@@ -62,13 +65,13 @@ instance Output t => Output (Maybe t) where
         Just a -> "Just" <+> align (output a)
 instance (Output a, Output b) => Output (a,b) where
     output (x,y) = tupled [ output x, output y ]
-instance Output Competition where
+instance Output a => Output (Competition a) where
     output (Competition n mcs) = 
         ("Competition" <+> text (show n)) <#> output mcs
-instance Output MetaCategory where 
+instance Output a => Output (MetaCategory a) where 
     output (MetaCategory n cs) = 
         ("MetaCategory" <+> text (show n)) <#> output cs
-instance Output Category where 
+instance Output a => Output (Category a) where 
     output (Category n ps) = 
         ("Category" <+> text (show n)) <#> output ps
 instance Output Participant where
@@ -81,12 +84,12 @@ instance Output Participant where
 p <#> q = fillBreak 4 p <+> q
 showp = ( \ d -> displayS d "" ) . renderPretty 1.0 80 . output
 
-instance Show Competition where show = showp
-instance Show MetaCategory where show = showp
-instance Show Category where show = showp
+instance Output a => Show ( Competition a) where show = showp
+instance Output a => Show ( MetaCategory a) where show = showp
+instance Output a => Show ( Category a ) where show = showp
 instance Show Participant where show = showp
 
-tc2014 :: Competition
+tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ Category "TRS Standard"
