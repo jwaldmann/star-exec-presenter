@@ -10,13 +10,13 @@
       <ul>
         $forall cat <- categories mecat
           <li>
-            <h4>#{categoryName cat}
+            #{categoryName cat}:
             $forall part <- participants cat
-                  | 
                   $maybe conf <- solver_config part
                       <span class="conf">
                          <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}"> 
                             #{participantName part} #{show conf}
                   $nothing
                       <span class="noconf">#{participantName part}
+                  | 
 

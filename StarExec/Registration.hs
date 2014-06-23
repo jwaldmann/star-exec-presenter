@@ -170,15 +170,15 @@ tc2014 = Competition "Termination Competition 2014"
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
      [ Category "Derivational Complexity - Full Rewriting"
-           [ Participant "TCT" Nothing
+           [ Participant "TCT" ( Just (1382, 2025))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , Category "Runtime Complexity - Full Rewriting"
-           [ Participant "TCT" Nothing
+           [ Participant "TCT" ( Just (1382, 2023))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , Category "Runtime Complexity - Innermost Rewriting"
-           [ Participant "TCT" Nothing
+           [ Participant "TCT" ( Just (1382, 2022))
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            ]
      , Category "Derivational Complexity - Full Rewriting certified"
