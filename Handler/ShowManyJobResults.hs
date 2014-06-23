@@ -9,7 +9,7 @@ import StarExec.JobData
 import Data.Double.Conversion.Text
 import qualified Data.List as L
 import qualified Data.Text as T
-
+import Text.Lucius (luciusFile)
 import Table.Query
 
 countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
@@ -46,8 +46,5 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   others <- mapM (countResults OTHER) jobSolvers
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
-    [whamlet| 
-        <h3> 
-          <a href=@{Flexible_TableR (Query []) jids}>flexible query (experimental) 
-    |]
+    toWidget $(luciusFile "templates/solver_result.lucius")
     $(widgetFile "show_many_job_results")

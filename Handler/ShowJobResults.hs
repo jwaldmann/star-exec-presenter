@@ -8,6 +8,7 @@ import StarExec.Persist
 import StarExec.JobData
 import Data.Double.Conversion.Text
 import qualified Data.List as L
+import Text.Lucius (luciusFile)
 
 countResults :: Int -> SolverResult -> Text -> Handler Int
 countResults _jobId result _solverName = runDB $ do
@@ -36,4 +37,5 @@ getShowJobResultsR _jobId = do
   others <- mapM (countResultsByJobId OTHER) solverNames
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
+    toWidget $(luciusFile "templates/solver_result.lucius")
     $(widgetFile "show_job_results")
