@@ -1,23 +1,46 @@
 <h1>Competition #{competitionName compResults}
 
-<ul>
+<div class="row">
   $forall compMetaResults <- metaCategoryResults compResults
-    <li>
+    <div class="col-lg-12">
       <h2>#{metaCategoryName compMetaResults}
-      <ul>
-        $forall compCatResult <- categoryResults compMetaResults
-          <li>
-            <h3>#{categoryName compCatResult}
-            <a href=@{ShowManyJobResultsR $ JobIds $ map jobId $ categoryJobs compCatResult}>Show JobResults</a>
-            <ul>
-              $forall jobInfo <- categoryJobs compCatResult
-                <li>#{jobName jobInfo} (show $ #{jobId jobInfo}): #{show $ jobStatus jobInfo} 
-            <ul>
-              $forall (mRank, solver, score) <- categorySolver compCatResult
-                <li>
-                  $maybe rank <- mRank
-                    <span>#{show rank}.
-                  $nothing
-                    <span>_.
-                  <span>#{show solver}</span>
-                  <span>#{show score}</span>
+      <div class="container-fluid">
+        <div class="row">
+          $forall compCatResult <- categoryResults compMetaResults
+            <div class="col-lg-4">
+              <div class="container-fluid">
+                <h3>#{categoryName compCatResult}
+                <a href=@{ShowManyJobResultsR $ JobIds $ map jobId $ categoryJobs compCatResult}>Show JobResults</a>
+                <div class="row">
+                  <div class="container-fluid">
+                    <h4>The Jobs
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Job-Name
+                          <th>Job-Id
+                          <th>Job-Status
+                      <tbody>
+                        $forall jobInfo <- categoryJobs compCatResult
+                          <tr>
+                            <td>#{jobName jobInfo}
+                            <td>#{show $ jobId jobInfo}
+                            <td>#{show $ jobStatus jobInfo}
+                <div class="row">
+                  <div class="container-fluid">
+                    <h4>The Rankings
+                    <table class="table">
+                      <thead>
+                        <tr>
+                          <th>Rank
+                          <th>Solver-Name
+                          <th>Score
+                      <tbody>
+                        $forall (mRank, solver, score) <- categorySolver compCatResult
+                          <tr>
+                            $maybe rank <- mRank
+                              <td>#{show rank}.
+                            $nothing
+                              <td>
+                            <td>#{show solver}
+                            <td>#{show score}

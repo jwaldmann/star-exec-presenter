@@ -19,7 +19,7 @@ getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
   tab <- Table.Get.getManyJobCells ids
   defaultLayout $ do
     setTitle "Flexible Table"
-    toWidget $(luciusFile "templates/show_job_results.lucius")
+    toWidget $(luciusFile "templates/solver_result.lucius")
     [whamlet|
             <pre>#{show q}
         |]
