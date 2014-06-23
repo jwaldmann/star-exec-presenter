@@ -15,10 +15,10 @@ StarExecSessionData
   cookies Text
   date UTCTime
 
-PersistJobResultInfo
-    starExecJobId Int
+JobResultInfo
+    jobId Int
     pairId Int
-    UniquePersistJobResultInfo pairId
+    UniqueJobResultInfo pairId
     benchmark Text
     benchmarkId Int
     solver Text
@@ -31,46 +31,46 @@ PersistJobResultInfo
     result SolverResult
     deriving Show
 
-PersistJobPairInfo
+JobPairInfo
     pairId Int
-    UniquePersistJobPairInfo pairId
+    UniqueJobPairInfo pairId
     stdout ByteString
     log ByteString
 
-PersistJobInfo
+JobInfo
     starExecId Int
-    UniquePersistJobInfo starExecId
+    UniqueJobInfo starExecId
     name Text
     status JobStatus
     date Text
     deriving Show
 
-PersistSolverInfo
+SolverInfo
     starExecId Int
-    UniquePersistSolverInfo starExecId
+    UniqueSolverInfo starExecId
     name Text
     description Text
     deriving Show
 
-PersistBenchmarkInfo
+BenchmarkInfo
     starExecId Int
-    UniquePersistBenchmarkInfo starExecId
+    UniqueBenchmarkInfo starExecId
     name Text
     type Text
     deriving Show
 
-PersistUserInfo
-    starExecId Int
-    UniquePersistUserInfo starExecId
-    name Text
-    institution Text
-    mail Text
-
-PersistSpaceInfo
-    starExecId Int
-    UniquePersistSpaceInfo starExecId
-    parentId Int Maybe
-    name Text
-    description Text
+-- UserInfo
+--     starExecId Int
+--     UniqueUserInfo starExecId
+--     name Text
+--     institution Text
+--     mail Text
+-- 
+-- SpaceInfo
+--     starExecId Int
+--     UniqueSpaceInfo starExecId
+--     parentId Int Maybe
+--     name Text
+--     description Text
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

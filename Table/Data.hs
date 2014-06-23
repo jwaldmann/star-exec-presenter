@@ -1,6 +1,6 @@
 module Table.Data where
 
-import StarExec.Types
+import Model
 import Prelude (Maybe)
 import Import (Widget)
 

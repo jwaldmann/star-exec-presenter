@@ -36,6 +36,7 @@ library
                      StarExec.Prims
                      StarExec.JobData
                      StarExec.CompetitionResults
+                     StarExec.PersistTypes
                      Table.Data
                      Table.Get
                      Table.Query

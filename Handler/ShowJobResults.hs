@@ -12,14 +12,14 @@ import Text.Lucius (luciusFile)
 
 countResults :: Int -> SolverResult -> Text -> Handler Int
 countResults _jobId result _solverName = runDB $ do
-  count [ PersistJobResultInfoStarExecJobId ==. _jobId
-        , PersistJobResultInfoSolver ==. _solverName
-        , PersistJobResultInfoResult ==. result ]
+  count [ JobResultInfoJobId ==. _jobId
+        , JobResultInfoSolver ==. _solverName
+        , JobResultInfoResult ==. result ]
 
 getShowJobResultsR :: Int -> Handler Html
 getShowJobResultsR _jobId = do
   pJobResults <- getJobResults _jobId
-  let jobResults = fromPersistJobResultInfos pJobResults
+  let jobResults = pJobResults
       benchmarks = getInfo extractBenchmark jobResults
       solvers = getInfo extractSolver jobResults
       benchmarkResults = getBenchmarkResults

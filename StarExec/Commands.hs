@@ -21,11 +21,14 @@ import Network.HTTP.Types.Status
 import StarExec.Types
 import StarExec.Urls
 import StarExec.Connection
+import StarExec.Persist
+import StarExec.PersistTypes
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
 import Text.HTML.DOM
 import Text.XML.Cursor
+import Codec.Compression.GZip
 
 -- internal Methods
 
@@ -44,20 +47,20 @@ getJobInfoFieldset c = head $ descendant c >>= element "fieldset" >>= attributeI
 
 constructJobInfo :: Int -> Text -> [Cursor] -> JobInfo
 constructJobInfo _jobId title tds =
-  let baseJobInfo = JobInfo { jobId = _jobId
-                            , jobName = title
-                            , jobStatus = Incomplete
-                            , jobDate = "" }
+  let baseJobInfo = JobInfo _jobId
+                            title
+                            Incomplete
+                            ""
       getJobStatus t = case t of
                         "complete" -> Complete
                         _ -> Incomplete
       parseTDs info xs =
         case xs of
           ("status":t:tds) -> parseTDs
-                                (info { jobStatus = getJobStatus t })
+                                (info { jobInfoStatus = getJobStatus t })
                                 tds
           ("created":t:tds) -> parseTDs
-                                  (info { jobDate = t })
+                                  (info { jobInfoDate = t })
                                   tds
           (_:tds) -> parseTDs info tds
           _ -> info
@@ -99,6 +102,7 @@ getJobResults (sec, man, cookies) _jobId = do
                 }
   resp <- sendRequest (req, man, cookies)
   let archive = Zip.toArchive $ responseBody resp
+      insertId ji = ji { jobResultInfoJobId = _jobId }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
               let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
@@ -107,7 +111,7 @@ getJobResults (sec, man, cookies) _jobId = do
                   liftIO $ putStrLn msg
                   return Nothing
                 Right (_, jobInfos) ->
-                  return $ Just $ Vector.toList jobInfos
+                  return $ Just $ map insertId $ Vector.toList jobInfos
             [] -> return Nothing
   return jobs
 
@@ -127,7 +131,6 @@ getJobPairInfo (sec, man, cookies) _pairId = do
     then return Nothing
     else do
       respLog <- sendRequest (reqLog, man, responseCookieJar respStdout)
-      return $ Just $ JobPairInfo { jpiPairId = _pairId
-                                  , jpiStdout = decodeUtf8Body respStdout
-                                  , jpiLog = decodeUtf8Body respLog
-                                  }
+      return $ Just $ JobPairInfo _pairId
+                                  (BSL.toStrict $ compress $ responseBody respStdout)
+                                  (BSL.toStrict $ compress $ responseBody respLog)

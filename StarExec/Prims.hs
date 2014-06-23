@@ -5,9 +5,9 @@ module StarExec.Prims
   , eitherToSpaceInfos
   , eitherToSolverInfos
   , eitherToBenchmarkInfos
-  , eitherToUserInfos
-  , searchPrimInHierchy
-  , searchPrim
+  -- , eitherToUserInfos
+  -- , searchPrimInHierchy
+  -- , searchPrim
   ) where
 
 import Import
@@ -24,6 +24,7 @@ import qualified Data.List as List
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import StarExec.Types
+import StarExec.PersistTypes
 import StarExec.Urls
 import StarExec.Connection
 import Network.HTTP.Conduit
@@ -83,27 +84,30 @@ findInM _pred (x:xs) = do
         Nothing -> findInM _pred xs
         Just _ -> return result
 
-searchPrimInHierchy :: StarExecConnection -> Int -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
-searchPrimInHierchy con _spaceId _primId primType = do
-    mPrimList <- listPrim con _spaceId primType
-    let primList = fromEither mPrimList
-        mPrim = findPrim primList _primId
-    liftIO $ putStrLn "### searchPrimInHierchy -> ###"
-    liftIO $ print $ show mPrimList
-    liftIO $ putStrLn "### <- searchPrimInHierchy ###"
-    case mPrim of
-        Just _ -> do
-          return mPrim
-        Nothing -> do
-            subSpaces <- listPrim con _spaceId Spaces
-            let spaceList = eitherToSpaceInfos subSpaces
-                searchPrimInHierchy' space =
-                    searchPrimInHierchy con (spaceId space) _primId primType
-            findInM searchPrimInHierchy' spaceList
+--searchPrimInHierchy :: StarExecConnection -> Int -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
+--searchPrimInHierchy con _spaceId _primId primType = do
+--    mPrimList <- listPrim con _spaceId primType
+--    let primList = fromEither mPrimList
+--        mPrim = findPrim primList _primId
+--    liftIO $ putStrLn "### searchPrimInHierchy -> ###"
+--    liftIO $ print $ show mPrimList
+--    liftIO $ putStrLn "### <- searchPrimInHierchy ###"
+--    case mPrim of
+--        Just _ -> do
+--          return mPrim
+--        Nothing -> do
+--            subSpaces <- listPrim con _spaceId Spaces
+--            let spaceList = eitherToSpaceInfos subSpaces
+--                searchPrimInHierchy' space =
+--                    searchPrimInHierchy con
+--                                        (spaceId space)
+--                                        _primId
+--                                        primType
+--            findInM searchPrimInHierchy' spaceList
 
-searchPrim :: StarExecConnection -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
-searchPrim con _primId primType =
-    searchPrimInHierchy con 1128 _primId primType
+--searchPrim :: StarExecConnection -> Int -> StarExecListType -> Handler (Maybe PrimInfo)
+--searchPrim con _primId primType =
+--    searchPrimInHierchy con 1128 _primId primType
 
 fromEither :: [Either String PrimInfo] -> [PrimInfo]
 fromEither = rights
@@ -120,8 +124,8 @@ eitherToSolverInfos = toSolverInfos . fromEither
 eitherToBenchmarkInfos :: [Either String PrimInfo] -> [BenchmarkInfo]
 eitherToBenchmarkInfos = toBenchmarkInfos . fromEither
 
-eitherToUserInfos :: [Either String PrimInfo] -> [UserInfo]
-eitherToUserInfos = toUserInfos . fromEither
+--eitherToUserInfos :: [Either String PrimInfo] -> [UserInfo]
+--eitherToUserInfos = toUserInfos . fromEither
 
 eitherInfo :: (Either String a) -> (a -> b) -> Either String b
 eitherInfo (Right info) dataConst = Right $ dataConst info
@@ -129,9 +133,9 @@ eitherInfo (Left msg) _ = Left msg
 
 parsePrimInfo :: StarExecListType -> [Text] -> Either String PrimInfo
 parsePrimInfo Jobs       info = eitherInfo (getJobInfoFromTexts info) PrimJobInfo
-parsePrimInfo Spaces     info = eitherInfo (getSpaceInfoFromTexts info) PrimSpaceInfo
+--parsePrimInfo Spaces     info = eitherInfo (getSpaceInfoFromTexts info) PrimSpaceInfo
 parsePrimInfo Benchmarks info = eitherInfo (getBenchmarkInfoFromTexts info) PrimBenchmarkInfo
-parsePrimInfo Users      info = eitherInfo (getUserInfoFromTexts info) PrimUserInfo
+--parsePrimInfo Users      info = eitherInfo (getUserInfoFromTexts info) PrimUserInfo
 parsePrimInfo Solvers    info = eitherInfo (getSolverInfoFromTexts info) PrimSolverInfo
 
 parsePrimInfos :: StarExecListType -> [[Text]] -> [Either String PrimInfo]
@@ -199,61 +203,51 @@ getJobInfoFromTexts
         --pairsCompleted' = parseDouble pairsCompleted
         --pairsNum' = parseInt pairsNum
         --pairsFailed' = parseDouble pairsFailed
-    in Right $ JobInfo
-        { jobId = pid
-        --, jobSpaceId = Nothing
-        , jobName = pname
-        , jobStatus = status'
-        --, jobPairsCompleted = pairsCompleted'
-        --, jobPairsNum = pairsNum'
-        --, jobPairsFailed = pairsFailed'
-        , jobDate = date
-        }
+    in Right $ JobInfo pid
+                       pname
+                       status'
+                       date
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
 
 getBenchmarkInfoFromTexts :: [Text] -> Either String BenchmarkInfo
 getBenchmarkInfoFromTexts
   (idAndName:bType:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
-    in Right $ BenchmarkInfo
-        { benchmarkId = pid
-        , benchmarkName = pname
-        , benchmarkType = parseBenchmarkType bType
-        }
+    in Right $ BenchmarkInfo pid
+                             pname
+                             (parseBenchmarkType bType)
 getBenchmarkInfoFromTexts _ = Left "parse error in getBenchmarkInfoFromTexts"
 
-getUserInfoFromTexts :: [Text] -> Either String UserInfo
-getUserInfoFromTexts
-  (idAndName:institution:mail:_) =
-    let (pid, pname) = parsePrimIdAndName idAndName
-        pMail = parseMail mail
-    in Right $ UserInfo
-        { userId = pid
-        , userName = pname
-        , userInstitution = institution
-        , userMail = pMail
-        }
-getUserInfoFromTexts _ = Left "parse error in getUserInfoFromTexts"
+--getUserInfoFromTexts :: [Text] -> Either String UserInfo
+--getUserInfoFromTexts
+--  (idAndName:institution:mail:_) =
+--    let (pid, pname) = parsePrimIdAndName idAndName
+--        pMail = parseMail mail
+--    in Right $ UserInfo
+--        { userId = pid
+--        , userName = pname
+--        , userInstitution = institution
+--        , userMail = pMail
+--        }
+--getUserInfoFromTexts _ = Left "parse error in getUserInfoFromTexts"
 
-getSpaceInfoFromTexts :: [Text] -> Either String SpaceInfo
-getSpaceInfoFromTexts 
-  (idAndName:desc:_) = 
-    let (pid, pname) = parsePrimIdAndName idAndName
-    in Right $ SpaceInfo
-        { spaceId = pid
-        , spaceParentId = Nothing
-        , spaceName = pname
-        , spaceDescription = desc
-        }
-getSpaceInfoFromTexts _ = Left "parse error in getSpaceInfoFromTexts"
+--getSpaceInfoFromTexts :: [Text] -> Either String SpaceInfo
+--getSpaceInfoFromTexts 
+--  (idAndName:desc:_) = 
+--    let (pid, pname) = parsePrimIdAndName idAndName
+--    in Right $ SpaceInfo
+--        { spaceId = pid
+--        , spaceParentId = Nothing
+--        , spaceName = pname
+--        , spaceDescription = desc
+--        }
+--getSpaceInfoFromTexts _ = Left "parse error in getSpaceInfoFromTexts"
 
 getSolverInfoFromTexts :: [Text] -> Either String SolverInfo
 getSolverInfoFromTexts
   (idAndName:desc:_) =
     let (pid, pname) = parsePrimIdAndName idAndName
-    in Right $ SolverInfo
-        { solverId = pid
-        , solverName = pname
-        , solverDescription = desc
-        }
+    in Right $ SolverInfo pid
+                          pname
+                          desc
 getSolverInfoFromTexts _ = Left "parse error in getSolverInfoFromTexts"

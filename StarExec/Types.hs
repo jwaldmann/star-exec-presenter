@@ -78,74 +78,35 @@ data ListPrimResult = ListPrimResult
 
 instance FromJSON ListPrimResult
 
-{-
--}
-data PrimInfo = PrimJobInfo JobInfo
-                | PrimSolverInfo SolverInfo
-                | PrimBenchmarkInfo BenchmarkInfo
-                | PrimUserInfo UserInfo
-                | PrimSpaceInfo SpaceInfo
-  deriving (Show, Eq)
+--data JobInfo = JobInfo
+--  { jobId :: Int
+--  --, jobSpaceId :: Maybe Int
+--  , jobName :: Name
+--  , jobStatus :: JobStatus
+--  --, jobPairsCompleted :: Double
+--  --, jobPairsNum :: Int
+--  --, jobPairsFailed :: Double
+--  , jobDate :: T.Text
+--  } deriving (Show, Eq)
 
-toJobInfo :: PrimInfo -> JobInfo
-toJobInfo (PrimJobInfo info) = info
+--data SolverInfo = SolverInfo
+--  { solverId :: Int
+--  , solverName :: Name
+--  , solverDescription :: Description
+--  } deriving (Show, Eq)
 
-toJobInfos :: [PrimInfo] -> [JobInfo]
-toJobInfos = map toJobInfo
+--data BenchmarkInfo = BenchmarkInfo
+--  { benchmarkId :: Int
+--  , benchmarkName :: Name
+--  , benchmarkType :: T.Text
+--  } deriving (Show, Eq)
 
-toSolverInfo :: PrimInfo -> SolverInfo
-toSolverInfo (PrimSolverInfo info) = info
-
-toSolverInfos :: [PrimInfo] -> [SolverInfo]
-toSolverInfos = map toSolverInfo
-
-toBenchmarkInfo :: PrimInfo -> BenchmarkInfo
-toBenchmarkInfo (PrimBenchmarkInfo info) = info
-
-toBenchmarkInfos :: [PrimInfo] -> [BenchmarkInfo]
-toBenchmarkInfos = map toBenchmarkInfo
-
-toUserInfo :: PrimInfo -> UserInfo
-toUserInfo (PrimUserInfo info) = info
-
-toUserInfos :: [PrimInfo] -> [UserInfo]
-toUserInfos = map toUserInfo
-
-toSpaceInfo :: PrimInfo -> SpaceInfo
-toSpaceInfo (PrimSpaceInfo info) = info
-
-toSpaceInfos :: [PrimInfo] -> [SpaceInfo]
-toSpaceInfos = map toSpaceInfo
-
-data JobInfo = JobInfo
-  { jobId :: Int
-  --, jobSpaceId :: Maybe Int
-  , jobName :: Name
-  , jobStatus :: JobStatus
-  --, jobPairsCompleted :: Double
-  --, jobPairsNum :: Int
-  --, jobPairsFailed :: Double
-  , jobDate :: T.Text
-  } deriving (Show, Eq)
-
-data SolverInfo = SolverInfo
-  { solverId :: Int
-  , solverName :: Name
-  , solverDescription :: Description
-  } deriving (Show, Eq)
-
-data BenchmarkInfo = BenchmarkInfo
-  { benchmarkId :: Int
-  , benchmarkName :: Name
-  , benchmarkType :: T.Text
-  } deriving (Show, Eq)
-
-data UserInfo = UserInfo
-  { userId :: Int
-  , userName :: Name
-  , userInstitution :: Name
-  , userMail :: Email
-  } deriving (Show, Eq)
+--data UserInfo = UserInfo
+--  { userId :: Int
+--  , userName :: Name
+--  , userInstitution :: Name
+--  , userMail :: Email
+--  } deriving (Show, Eq)
 
 data SpaceInfo = SpaceInfo
   { spaceId :: Int
@@ -154,25 +115,6 @@ data SpaceInfo = SpaceInfo
   , spaceDescription :: Description
   } deriving (Show, Eq)
 
-primInfoId :: PrimInfo -> Int
-primInfoId primInfo =
-  case primInfo of
-    PrimJobInfo info       -> jobId info
-    PrimSpaceInfo info     -> spaceId info
-    PrimBenchmarkInfo info -> benchmarkId info
-    PrimSolverInfo info    -> solverId info
-    PrimSpaceInfo info     -> spaceId info
-    PrimUserInfo info      -> userId info
-
-primInfoName :: PrimInfo -> T.Text
-primInfoName primInfo =
-  case primInfo of
-    PrimJobInfo info       -> jobName info
-    PrimSpaceInfo info     -> spaceName info
-    PrimBenchmarkInfo info -> benchmarkName info
-    PrimSolverInfo info    -> solverName info
-    PrimSpaceInfo info     -> spaceName info
-    PrimUserInfo info      -> userName info
 
 {-
 -}
@@ -180,59 +122,34 @@ data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER
     deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 
-instance CSV.FromField SolverResult where
-    parseField result = parseResult s
-        where
-            s = T.toLower $ decodeUtf8 result
-            parseResult r
-                | r == "yes"        = pure YES
-                | r == "no"         = pure NO
-                | r == "maybe"      = pure MAYBE
-                | r == "certified"  = pure CERTIFIED
-                | r == "error"      = pure ERROR
-                | otherwise         = pure OTHER
-
 instance ToMarkup SolverResult where
     toMarkup = string . show
     preEscapedToMarkup = preEscapedString . show
 
 {-
 -}
-data JobResultInfo = JobResultInfo
-  { jriPairId :: Int
-  , jriBenchmark :: Name
-  , jriBenchmarkId :: Int
-  , jriSolver :: Name
-  , jriSolverId :: Int
-  , jriConfiguration :: Name
-  , jriConfigurationId :: Int
-  , jriStatus :: Name
-  , jriCpuTime :: Double
-  , jriWallclockTime :: Double
-  , jriResult :: SolverResult
-  } deriving (Show, Read)
+--data JobResultInfo = JobResultInfo
+--  { jriPairId :: Int
+--  , jriBenchmark :: Name
+--  , jriBenchmarkId :: Int
+--  , jriSolver :: Name
+--  , jriSolverId :: Int
+--  , jriConfiguration :: Name
+--  , jriConfigurationId :: Int
+--  , jriStatus :: Name
+--  , jriCpuTime :: Double
+--  , jriWallclockTime :: Double
+--  , jriResult :: SolverResult
+--  } deriving (Show, Read)
 
-instance CSV.FromNamedRecord JobResultInfo where
-  parseNamedRecord r =
-    JobResultInfo <$> r CSV..: "pair id"
-                  <*> r CSV..: "benchmark"
-                  <*> r CSV..: "benchmark id"
-                  <*> r CSV..: "solver"
-                  <*> r CSV..: "solver id"
-                  <*> r CSV..: "configuration"
-                  <*> r CSV..: "configuration id"
-                  <*> r CSV..: "status"
-                  <*> r CSV..: "cpu time"
-                  <*> r CSV..: "wallclock time"
-                  <*> r CSV..: "result"
 
 {-
 -}
-data JobPairInfo = JobPairInfo
-  { jpiPairId :: Int
-  , jpiStdout :: T.Text
-  , jpiLog :: T.Text
-  } deriving (Show, Read)
+--data JobPairInfo = JobPairInfo
+--  { jpiPairId :: Int
+--  , jpiStdout :: T.Text
+--  , jpiLog :: T.Text
+--  } deriving (Show, Read)
 
 {-
 -}
@@ -303,29 +220,3 @@ instance PathPiece Competition where
   fromPathPiece t = case reads (T.unpack t) of
       [(c, "")] -> return c
       _ -> Nothing
-
-type BenchmarkID = Int
-type BenchmarkName = T.Text
-type Benchmark = (BenchmarkID, BenchmarkName)
-type SolverID = Int
-type Solver = (SolverID, SolverName)
-type SolverName = T.Text
-type SolverResults = [Maybe SolverResult]
-type BenchmarkRow = (Benchmark, [Maybe JobResultInfo])
-type TableHead = [SolverName]
-
-data CompetitionResults = CompetitionResults
-  { competitionName :: Name
-  , metaCategoryResults :: [MetaCategoryResult] 
-  } deriving (Show, Eq)
-
-data MetaCategoryResult = MetaCategoryResult
-  { metaCategoryName :: Name
-  , categoryResults :: [CategoryResult]
-  } deriving (Show, Eq)
-
-data CategoryResult = CategoryResult
-  { categoryName :: Name
-  , categorySolver :: [(Maybe Rank, Solver, Score)]
-  , categoryJobs :: [JobInfo]
-  } deriving (Show, Eq)

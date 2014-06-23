@@ -9,9 +9,19 @@ import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
 
+type BenchmarkID = Int
+type BenchmarkName = T.Text
+type Benchmark = (BenchmarkID, BenchmarkName)
+type SolverID = Int
+type Solver = (SolverID, SolverName)
+type SolverName = T.Text
+type SolverResults = [Maybe SolverResult]
+type BenchmarkRow = (Benchmark, [Maybe JobResultInfo])
+type TableHead = [SolverName]
+
 getClass :: JobResultInfo -> T.Text
 getClass result =
-  case jriResult result of
+  case jobResultInfoResult result of
     YES       -> "solver-yes"
     NO        -> "solver-no"
     MAYBE     -> "solver-maybe"
@@ -23,10 +33,16 @@ getInfo :: (JobResultInfo -> S.Set a -> S.Set a) -> [JobResultInfo] -> [a]
 getInfo f = S.toList . L.foldr f S.empty
 
 extractBenchmark :: JobResultInfo -> S.Set Benchmark -> S.Set Benchmark
-extractBenchmark jri set = S.insert (jriBenchmarkId jri, jriBenchmark jri) set
+extractBenchmark jri set =
+  S.insert
+    (jobResultInfoBenchmarkId jri, jobResultInfoBenchmark jri)
+     set
 
 extractSolver :: JobResultInfo -> S.Set Solver -> S.Set Solver
-extractSolver jri set = S.insert (jriSolverId jri, jriSolver jri) set
+extractSolver jri set =
+  S.insert
+    (jobResultInfoSolverId jri, jobResultInfoSolver jri)
+    set
 
 getBenchmarkResults :: [Solver] -> [JobResultInfo] -> [Benchmark] -> [BenchmarkRow]
 getBenchmarkResults solvers jobInfos = map getBenchmarkRow 
@@ -39,7 +55,8 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
         Just result -> Just result
         Nothing -> Nothing
     isResult _benchmarkId _solverId jri =
-      (jriBenchmarkId jri == _benchmarkId) && (jriSolverId jri == _solverId)
+      (jobResultInfoBenchmarkId jri == _benchmarkId) &&
+        (jobResultInfoSolverId jri == _solverId)
 
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
@@ -56,14 +73,14 @@ getJobResultsFromStarExec _jobId = do
   con <- getConnection
   getJobResultsWithConnection con _jobId
 
-selectListByJobId :: Int -> Handler [PersistJobResultInfo]
+selectListByJobId :: Int -> Handler [JobResultInfo]
 selectListByJobId _jobId = runDB $ do
-  results <- selectList [ PersistJobResultInfoStarExecJobId ==. _jobId ] []
+  results <- selectList [ JobResultInfoJobId ==. _jobId ] []
   return $ map entityVal results
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)
 getJobInfo _jobId = do
-  mPersistJobInfo <- runDB $ getBy $ UniquePersistJobInfo _jobId
+  mPersistJobInfo <- runDB $ getBy $ UniqueJobInfo _jobId
   case mPersistJobInfo of
     Nothing -> do
       con <- getConnection
@@ -71,16 +88,9 @@ getJobInfo _jobId = do
       case mJobInfo of
         Nothing -> return Nothing
         Just ji -> return $ Just ji
-    Just en -> do
-      let persistJobInfo = entityVal en
-      return $ Just $ JobInfo
-        { jobId = persistJobInfoStarExecId persistJobInfo
-        , jobName = persistJobInfoName persistJobInfo
-        , jobStatus = persistJobInfoStatus persistJobInfo
-        , jobDate = persistJobInfoDate persistJobInfo
-        }
+    Just en -> return $ Just $ entityVal en
 
-getJobResults :: Int -> Handler [PersistJobResultInfo]
+getJobResults :: Int -> Handler [JobResultInfo]
 getJobResults _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   case mPersistJobInfo of
@@ -90,40 +100,35 @@ getJobResults _jobId = do
       case mJobInfo of
         Nothing -> error $ "No such Job: " ++ (show _jobId)
         Just ji -> do
-          if jobStatus ji == Complete
+          if jobInfoStatus ji == Complete
             then do
               insertJobInfo ji
               jobResults <- getJobResultsWithConnection con _jobId
-              mapM_ (dbInsertJobResult _jobId) jobResults
+              mapM_ dbInsertJobResult jobResults
               selectListByJobId _jobId
-            else do
-              jobResults <- getJobResultsWithConnection con _jobId
-              return $ map (toPersistJobResultInfo _jobId) jobResults
+            else getJobResultsWithConnection con _jobId
     -- job is completed
     Just _ -> selectListByJobId _jobId
 
-getManyJobResults :: [Int] -> Handler [[PersistJobResultInfo]] 
+getManyJobResults :: [Int] -> Handler [[JobResultInfo]] 
 getManyJobResults = mapM getJobResults
 
 getJobPair :: Int -> Handler (Maybe JobPairInfo)
 getJobPair _pairId = do
-  mPair <- runDB $ getBy $ UniquePersistJobPairInfo _pairId
+  mPair <- runDB $ getBy $ UniqueJobPairInfo _pairId
   case mPair of
-    Just pair -> return $ Just $ fromPersistJobPairInfo $ entityVal pair
+    Just pair -> return $ Just $ entityVal pair
     Nothing -> do
       con <- getConnection
       mPairInfo <- SEC.getJobPairInfo con _pairId
       case mPairInfo of
         Just pairInfo -> do
-          mKey <- runDB $ insertUnique $ PersistJobPairInfo
-                                  _pairId
-                                  (compressText $ jpiStdout pairInfo)
-                                  (compressText $ jpiLog pairInfo)
+          mKey <- runDB $ insertUnique pairInfo
           case mKey of
             Just key -> do
               mVal <- runDB $ get key
               case mVal of
-                Just val -> return $ Just $ fromPersistJobPairInfo val
+                Just val -> return $ Just val
                 Nothing -> return Nothing
             Nothing -> return Nothing
         Nothing -> return Nothing

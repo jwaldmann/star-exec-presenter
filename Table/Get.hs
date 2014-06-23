@@ -5,7 +5,6 @@ import Import
 import Table.Data
 import StarExec.JobData ( getManyJobResults, getClass )
 import StarExec.Types
-import StarExec.Persist ( fromPersistJobResultInfo )
 
 
 import qualified Data.Text as T
@@ -19,9 +18,8 @@ getManyJobCells ids = do
     let cells :: M.Map (Text,Text) (M.Map Text Cell)
         cells = M.fromListWith M.union $ do
           p <- concat iss
-          let i = fromPersistJobResultInfo p
-          return ( (jriSolver i, jriConfiguration i)
-               , M.singleton (jriBenchmark i) $ cell_for_job_pair i
+          return ( (jobResultInfoSolver p, jobResultInfoConfiguration p)
+               , M.singleton (jobResultInfoBenchmark p) $ cell_for_job_pair p
                )
         headers = M.keys cells
         benchmarks = M.keys $ foldr M.union M.empty $ M.elems cells
@@ -60,9 +58,9 @@ cell_for_solver (s,c) = Cell { contents = [whamlet| #{s}/#{c} |]
 cell_for_job_pair result = 
     Cell { mjri = Just result
          , contents = [whamlet|
-            <a class="pair-link" href=@{ShowJobPairR (jriPairId result)}>
-                #{toFixed 1 $ jriCpuTime result} /
-                #{toFixed 1 $ jriWallclockTime result}
+            <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
+                #{toFixed 1 $ jobResultInfoCpuTime result} /
+                #{toFixed 1 $ jobResultInfoWallclockTime result}
              |]
          , tdclass = getClass result
          , url = T.pack $ "nothing"

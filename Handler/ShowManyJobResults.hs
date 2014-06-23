@@ -14,9 +14,9 @@ import Table.Query
 
 countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
 countResults result (_jobId,(sid,_)) = runDB $ do
-  count [ PersistJobResultInfoStarExecJobId ==. _jobId
-        , PersistJobResultInfoSolverId ==. sid
-        , PersistJobResultInfoResult ==. result ]
+  count [ JobResultInfoJobId ==. _jobId
+        , JobResultInfoSolverId ==. sid
+        , JobResultInfoResult ==. result ]
 
 toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
@@ -24,7 +24,7 @@ toTuples (i, solvers) = map ((,) i) solvers
 getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
   pJobs <- getManyJobResults ids
-  let jobs = map fromPersistJobResultInfos pJobs
+  let jobs = pJobs
       jobResults = concat jobs
       benchmarks = L.sortBy compareBenchmarks $
                     getInfo extractBenchmark $ jobResults

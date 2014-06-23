@@ -10,7 +10,7 @@
             <div class="col-lg-4">
               <div class="container-fluid">
                 <h3>#{categoryName compCatResult}
-                <a href=@{ShowManyJobResultsR $ JobIds $ map jobId $ categoryJobs compCatResult}>Show JobResults</a>
+                <a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>Show JobResults</a>
                 <div class="row">
                   <div class="container-fluid">
                     <h4>The Jobs
@@ -23,9 +23,9 @@
                       <tbody>
                         $forall jobInfo <- categoryJobs compCatResult
                           <tr>
-                            <td>#{jobName jobInfo}
-                            <td>#{show $ jobId jobInfo}
-                            <td>#{show $ jobStatus jobInfo}
+                            <td>#{jobInfoName jobInfo}
+                            <td>#{show $ jobInfoStarExecId jobInfo}
+                            <td>#{show $ jobInfoStatus jobInfo}
                 <div class="row">
                   <div class="container-fluid">
                     <h4>The Rankings

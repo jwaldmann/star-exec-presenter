@@ -21,3 +21,4 @@ cabal sandbox init && cabal install --enable-tests . yesod-platform yesod-bin --
 * create user: sudo -u postgres createuser -P yesod
 * clear db: sudo -u postgres dropdb yesod
 * create db: sudo -u postgres createdb -O yesod yesod
+* access db: sudo -u postgres psql -d yesod

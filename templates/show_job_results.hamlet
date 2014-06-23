@@ -50,8 +50,8 @@
         $forall mResult <- results
           $maybe result <- mResult
             <td class="#{getClass result}">
-              <a class="pair-link" href=@{ShowJobPairR (jriPairId result)}>
-                #{toFixed 1 $ jriCpuTime result} /
-                #{toFixed 1 $ jriWallclockTime result}
+              <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
+                #{toFixed 1 $ jobResultInfoCpuTime result} /
+                #{toFixed 1 $ jobResultInfoWallclockTime result}
           $nothing
             <td>

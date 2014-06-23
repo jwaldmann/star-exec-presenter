@@ -2,8 +2,8 @@
 
 $maybe pair <- mPair
   <h3>Stdout:
-  <pre>#{jpiStdout pair}
+  <pre>#{decompressText $ jobPairInfoStdout pair}
   <h3>Log:
-  <pre>#{jpiLog pair}
+  <pre>#{decompressText $ jobPairInfoLog pair}
 $nothing
   <p>It appears that there are no infos found. Maybe your Pair-ID is wrong

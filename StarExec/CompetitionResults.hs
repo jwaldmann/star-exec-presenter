@@ -1,5 +1,8 @@
 module StarExec.CompetitionResults 
   ( getCompetitionResults
+  , CompetitionResults(..)
+  , MetaCategoryResult(..)
+  , CategoryResult(..)
   ) where
 
 import Import
@@ -9,6 +12,22 @@ import StarExec.JobData
 import StarExec.Persist
 import qualified Data.List as L
 import Data.Maybe
+
+data CompetitionResults = CompetitionResults
+  { competitionName :: Name
+  , metaCategoryResults :: [MetaCategoryResult] 
+  } deriving (Show)
+
+data MetaCategoryResult = MetaCategoryResult
+  { metaCategoryName :: Name
+  , categoryResults :: [CategoryResult]
+  } deriving (Show)
+
+data CategoryResult = CategoryResult
+  { categoryName :: Name
+  , categorySolver :: [(Maybe Rank, Solver, Score)]
+  , categoryJobs :: [JobInfo]
+  } deriving (Show)
 
 {-
   TODOs:
@@ -22,7 +41,7 @@ getScores solver filters results =
   reverse $ L.sortBy sortScore $ map countResults solver
   where
     sortScore (_,i1) (_,i2) = compare i1 i2
-    rawResults = map jriResult results
+    rawResults = map jobResultInfoResult results
     countResults s = (s, length $ filter matches rawResults)
     matches result = any (==result) filters
 
@@ -50,7 +69,7 @@ getCategoriesResult cat = do
       catJobIds = getJobIds cat
   pResults <- getManyJobResults catJobIds
   mJobInfos <- mapM getJobInfo catJobIds
-  let results = concat $ map fromPersistJobResultInfos pResults
+  let results = concat $ pResults
       solver = getInfo extractSolver results
       scores = getScores solver catFilter results
       rankedSolver = getRanking scores
