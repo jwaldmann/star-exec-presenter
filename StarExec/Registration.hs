@@ -19,13 +19,13 @@ import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
 
-data Competition = Competition Name [ MetaCategory ]
+data Competition = Competition { competitionName :: Name, metacategories :: [ MetaCategory ] }
     deriving ( Generic )
-data MetaCategory = MetaCategory Name [ Category ]
+data MetaCategory = MetaCategory { metaCategoryName :: Name, categories :: [ Category ] }
     deriving ( Generic )
-data Category = Category Name [ Participant ]
+data Category = Category { categoryName :: Name , participants :: [ Participant ] }
     deriving ( Generic )
-data Participant = Participant { name :: Name, solver_config :: Maybe (Int,Int) }
+data Participant = Participant { participantName :: Name, solver_config :: Maybe (Int,Int) }
     deriving ( Generic )
 
 class Input t where input :: Parser t
@@ -74,7 +74,7 @@ instance Output Category where
 instance Output Participant where
     output p = 
         "Participant" <+> P.braces ( hsep $ intersperse "," 
-             [ "name" <+> equals <+> output (name p)
+             [ "name" <+> equals <+> output (participantName p)
              , "solver_config" <+> equals <+> output (solver_config p)
              ] )
 
@@ -90,125 +90,123 @@ tc2014 :: Competition
 tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ Category "TRS Standard"
-           [ Participant "TTT2" Nothing
+           [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
-           , Participant "AProVE" Nothing
+           , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "Wanda" Nothing
            , Participant "muterm" Nothing
            ]
        , Category "SRS Standard"
-           [ Participant "TTT2" Nothing
+           [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
-           , Participant "AProVE" Nothing
+           , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
-       , Category "TRS Relative"
-           [ Participant "TTT2" Nothing
-           , Participant "AProVE" Nothing
+       , Category "TRS Relative" 
+           [ Participant "TTT2" ( Just ( 1342, 1950 ))
+           , Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
        , Category "SRS Relative"
-           [ Participant "TTT2" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "TTT2" ( Just ( 1342, 1950 ))
+           , Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
       , Category "TRS Standard certified"
-           [ Participant "TTT2" Nothing
-           , Participant "matchbox" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           , Participant "matchbox" ( Just ( 952, 1192 ))
+           , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "SRS Standard certified"
-           [ Participant "TTT2" Nothing
-           , Participant "matchbox" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           , Participant "matchbox"  ( Just ( 952, 1192 ))
+           , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "TRS Relative certified"
-           [ Participant "TTT2" Nothing
-           , Participant "matchbox" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "SRS Relative certified"
-           [ Participant "TTT2" Nothing
-           , Participant "matchbox" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "TRS Equational"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
       , Category "TRS Conditional"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
       , Category "TRS Context Sensitive"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
       , Category "TRS Innermost"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
       , Category "TRS Outermost"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" Nothing
            ]
       , Category "TRS Innermost certified"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "TRS Outermost certified"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "Higher-Order rewriting (union beta)"
            [ Participant "Wanda" Nothing
            , Participant "THOR" Nothing
            ]
      , Category "Integer Transition Systems"
-           [ Participant "T2" Nothing
-           , Participant "AProVE" Nothing
+           [ Participant "T2" ( Just ( 1373, 2000 ))
+           , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" Nothing
            ]
      , Category "Integer TRS"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" Nothing
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
      [ Category "Derivational Complexity - Full Rewriting"
            [ Participant "TCT" Nothing
-           , Participant "CaT" Nothing
+           , Participant "CaT" ( Just (1343, 1952))
            ]
      , Category "Runtime Complexity - Full Rewriting"
            [ Participant "TCT" Nothing
-           , Participant "CaT" Nothing
+           , Participant "CaT" ( Just (1343, 1952))
            ]
      , Category "Runtime Complexity - Full Rewriting"
            [ Participant "TCT" Nothing
-           , Participant "AProVE" Nothing
+           , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            ]
      , Category "Derivational Complexity - Full Rewriting certified"
-           [ Participant "CaT" Nothing
+           [ Participant "CaT" ( Just (1343, 1953))
            ]
      , Category "Runtime Complexity - Full Rewriting certified"
-           [ Participant "CaT" Nothing
+           [ Participant "CaT" ( Just (1343, 1953))
            ]
      , Category "Runtime Complexity - Innermost Rewriting certified"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
      [ Category "C"
-           [ Participant "AProVE" Nothing
-           , Participant "T2" Nothing
+           [ Participant "AProVE" ( Just ( 1185,  1608 ) )
+           , Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "Ultimate Buchi Automizer" Nothing
            , Participant "lsi.upc tool" Nothing
            ]
      , Category "Java"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1612  ) )
            , Participant "Julia" Nothing
            ]
      , Category "Logic Programming"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1667  ) )
            ]
      , Category "Functional Programming"
-           [ Participant "AProVE" Nothing
+           [ Participant "AProVE" ( Just ( 1185, 1606  ) )
            ]
      ]
    ]

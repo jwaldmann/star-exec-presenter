@@ -1,0 +1,20 @@
+<h2>Registration for #{competitionName comp}
+
+<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014_Registration">
+   explanation
+
+<ul>
+  $forall mecat <- metacategories comp
+    <li>
+      <h3>#{metaCategoryName mecat}
+      <ul>
+        $forall cat <- categories mecat
+          <li>
+            <h4>#{categoryName cat}
+            $forall part <- participants cat
+                  | 
+                  $maybe conf <- solver_config part
+                      <span class="conf">#{participantName part} #{show conf}
+                  $nothing
+                      <span class="noconf">#{participantName part}
+

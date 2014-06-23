@@ -28,6 +28,7 @@ library
                      Handler.Flexible_Table
                      Handler.Competition
                      Handler.CompetitionWithConfig
+                     Handler.Registered
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -36,6 +37,7 @@ library
                      StarExec.Prims
                      StarExec.JobData
                      StarExec.CompetitionResults
+                     StarExec.Registration
                      Table.Data
                      Table.Get
                      Table.Query
