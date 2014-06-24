@@ -149,7 +149,6 @@ tc2014 = Competition "Termination Competition 2014"
            ]
       , Category "TRS Outermost"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
            ]
       , Category "TRS Innermost certified"
            [ Participant "AProVE" ( Just ( 1185, 1613  ) )
