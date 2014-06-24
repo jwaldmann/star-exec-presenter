@@ -94,13 +94,13 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "Wanda" Nothing
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
        , Category "SRS Standard"
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
        , Category "TRS Relative" 
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
@@ -130,19 +130,19 @@ tc2014 = Competition "Termination Competition 2014"
            ]
       , Category "TRS Equational"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
       , Category "TRS Conditional"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
       , Category "TRS Context Sensitive"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
       , Category "TRS Innermost"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "muterm" Nothing
+           , Participant "muterm" ( Just (1388, 2059))
            ]
       , Category "TRS Outermost"
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
