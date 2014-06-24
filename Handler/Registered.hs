@@ -10,6 +10,4 @@ getRegisteredR = do
     let comp = StarExec.Registration.tc2014
     defaultLayout $ do
         $(widgetFile "registered")
-        -- toWidget $(luciusFile "templates/registered.lucius")
-        -- toWidget $(hamletFile "templates/registered.hamlet")
 
