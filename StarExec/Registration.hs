@@ -67,7 +67,7 @@ data Participant =
     deriving ( Generic )
 
 standard bs ps = Catinfo { postproc = 44 , benchmarks = bs , participants = ps }
-certified bs ps = Catinfo { postproc = 130 , benchmarks = bs , participants = ps }
+certified bs ps = Catinfo { postproc = 135 , benchmarks = bs , participants = ps }
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"

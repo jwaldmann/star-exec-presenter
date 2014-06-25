@@ -6,24 +6,35 @@
 
 import StarExec.Registration
 
+import qualified Data.Text as T
 import Text.Hamlet (shamlet)
 import Text.Blaze.Html.Renderer.String (renderHtml)
 
 import Data.Time.Clock
-import Prelude ( IO, show, unwords, putStrLn, ($), snd, Maybe (..), map )
+import Prelude ( IO, show, unwords, putStrLn, ($), snd, Maybe (..), map, elem, take, reverse )
 import qualified Data.Map.Strict as M
 
 main :: Prelude.IO ()
 main = do    
     now <- Data.Time.Clock.getCurrentTime 
-    let repair c = case c of ':' -> '.' ; _ -> c
-        jobname = map repair $ unwords [ "termcomp", "auto", show now ]
+    let ekat n xs = reverse $ take n $ reverse xs
+    let -- forbidden chars must be replaces
+        repair c = if c `elem` ":()-" then '.' else c
+        -- jobname cannot be too long (64 chars)
+        jobname me cat = map repair 
+           $ unwords [ "termcomp", "auto"
+                     , ekat 5 $ T.unpack $ metaCategoryName me
+                     , ekat 5 $ T.unpack $ categoryName cat
+                     , show now 
+                     ]
     putStrLn "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>"
     putStrLn $ renderHtml [shamlet|
     <tns:Jobs xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd" xmlns:tns="https://www.starexec.org/starexec/public/batchJobSchema.xsd">
-        <Job cpu-timeout="240" description="no description" mem-limit="128.0" name="#{jobname}" postproc-id="44" queue-id="478" start-paused="false" wallclock-timeout="60">
-          $forall mecat <- metacategories tc2014
-            $forall cat <- categories mecat
+
+      $forall mecat <- metacategories tc2014
+        $forall cat <- categories mecat
+
+          <Job cpu-timeout="240" description="no description" mem-limit="128.0" name="#{jobname mecat cat}" postproc-id="#{postproc (contents cat)}" queue-id="478" start-paused="false" wallclock-timeout="60">
               $forall p <- participants (contents cat)
                 $forall b <- benchmarks (contents cat)
                   $maybe sc <- solver_config p
