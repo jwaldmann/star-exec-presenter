@@ -39,6 +39,7 @@ library
                      StarExec.CompetitionResults
                      StarExec.Registration
                      StarExec.PersistTypes
+                     StarExec.Concurrent
                      Table.Data
                      Table.Get
                      Table.Query
