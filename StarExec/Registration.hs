@@ -67,7 +67,7 @@ data Participant =
     deriving ( Generic )
 
 standard bs ps = Catinfo { postproc = 44 , benchmarks = bs , participants = ps }
-certified bs ps = Catinfo { postproc = 130 , benchmarks = bs , participants = ps }
+certified bs ps = Catinfo { postproc = 135 , benchmarks = bs , participants = ps }
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
@@ -94,21 +94,21 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
       , Category "TRS Standard certified" $ certified [ Bench 935202 ]
-           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "SRS Standard certified" $ certified [ Bench 936511 ]
-           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "TRS Relative certified" $ certified [ Bench 936234 ]
-           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "SRS Relative certified" $ certified [ Bench 943491 ]
-           [ Participant "TTT2"  ( Just ( 1342, 1950 ))
+           [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , Category "TRS Equational" $ standard [ Bench 937617 ]
