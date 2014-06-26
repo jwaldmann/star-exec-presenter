@@ -133,6 +133,7 @@ executable         star-exec-controller
                      , yesod
                      , parsec, text, blaze-markup, http-conduit, cassava, wl-pprint
                      , time, blaze-html, containers, shakespeare
+                     , xml-conduit, xml-hamlet, hashable
 
     ghc-options:       -threaded -O2
 
