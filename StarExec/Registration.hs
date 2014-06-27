@@ -170,14 +170,14 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "CaT" ( Just (1343, 1953))
            ]
      , Category "Runtime Complexity - Innermost Rewriting certified" $ certified [ Bench 931609 ]
-           [ Participant "AProVE" ( Just ( 1185, 1613 ) )
+           [ 
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
      [ Category "C" $ standard [ Bench 964659 ]
            [ Participant "AProVE" ( Just ( 1185,  1608 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
-           , Participant "Ultimate Buchi Automizer" Nothing
+           , Participant "Ultimate Buchi Automizer" (Just (1433, 2221))
            , Participant "lsi.upc tool" Nothing
            ]
      , Category "Java" $ standard [ Bench 933941 ]
