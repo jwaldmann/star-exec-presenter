@@ -29,6 +29,11 @@ import qualified Data.Vector as Vector
 import Text.HTML.DOM
 import Text.XML.Cursor
 import Codec.Compression.GZip
+import qualified Data.Map as M
+
+import Text.Hamlet.XML
+import Text.XML
+import qualified Data.Char
 
 -- internal Methods
 
@@ -36,7 +41,7 @@ decodeUtf8Body :: Response BSL.ByteString -> Text
 decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
 
 cursorFromDOM :: BSL.ByteString -> Cursor
-cursorFromDOM = fromDocument . parseLBS
+cursorFromDOM = fromDocument . Text.HTML.DOM.parseLBS
 
 getJobTitle :: Cursor -> Text
 getJobTitle c = head $ content h1
@@ -71,6 +76,34 @@ constructJobInfo _jobId title tds =
       tds' = map (safeHead . content) tds
       jobInfo = parseTDs baseJobInfo tds'
   in jobInfo
+
+data Job =
+     Job { postproc_id :: Int
+         , description :: T.Text
+         , job_name :: T.Text
+         , queue_id :: Int
+         , mem_limit :: Double
+         , wallclock_timeout :: Double
+         , cpu_timeout :: Double
+         , start_paused :: Bool
+         , jobpairs :: [ (Int,Int) ] -- ^ benchmark, config
+         }
+    deriving Show
+
+-- | create jobxml DOM according to spec
+-- jobs_to_XML :: [ Job ] -> XML
+jobs_to_XML js = Document (Prologue [] Nothing []) root [] where 
+    t x = T.pack $ show x
+    b x = T.pack $ map Data.Char.toLower $ show x
+    root = Element "tns:Jobs" 
+             (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+                         ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
+                         ,("xmlns:tns","https://www.starexec.org/starexec/public/batchJobSchema.xsd") ]) [xml|
+       $forall j <- js
+           <Job cpu-timeout="#{t $ cpu_timeout j}" description="#{description j}" mem-limit="#{t $ mem_limit j}" name="#{job_name j}" postproc-id="#{t $ postproc_id j}" queue-id="#{t $ queue_id j}" start-paused="#{b $ start_paused j}" wallclock-timeout="#{t $ wallclock_timeout j}">
+             $forall bc <- jobpairs j
+                 <JobPair bench-id="#{t $ fst bc}" config-id="#{t $ snd bc}">
+      |]
 
 -- API
 
@@ -134,3 +167,13 @@ getJobPairInfo (sec, man, cookies) _pairId = do
       return $ Just $ JobPairInfo _pairId
                                   (BSL.toStrict $ compress $ responseBody respStdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
+
+pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler (Maybe [Int])
+pushJobXml (sec, man, cookies) spaceId jobs = do
+  let (+>) = BS.append
+      req = sec { method = "POST"
+                , path = pushjobxmlPath
+                , queryString = "id=" +> (BSC.pack $ show spaceId)
+                                +> "&type=job&returnids=true" -- FIXME
+                }
+  undefined
