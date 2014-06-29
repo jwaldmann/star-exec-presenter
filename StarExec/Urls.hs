@@ -52,4 +52,4 @@ downloadPath :: ByteString
 downloadPath = "starexec/secure/download"
 
 pushjobxmlPath :: ByteString
-pushjobxmlPath = "starexec/secure/pushjobxml" --FIXME
+pushjobxmlPath = "starexec/secure/upload/jobXML"               

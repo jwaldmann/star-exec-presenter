@@ -1,4 +1,4 @@
-{-
+{- |
   StarExecCommands: Module that contains and handles all request to the
   starexec-cluster
 -}
@@ -7,6 +7,7 @@ module StarExec.Commands
   ( getJobResults
   , getJobPairInfo
   , getJobInfo
+  , pushJobXml, Job (..) -- FIXME: move to some other module
   ) where
 
 import Import
@@ -34,8 +35,12 @@ import qualified Data.Map as M
 import Text.Hamlet.XML
 import Text.XML
 import qualified Data.Char
+import Data.CaseInsensitive ()
+import Control.Monad ( guard )
+import qualified Network.HTTP.Client.MultipartFormData as M
+import qualified Network.HTTP.Client as C
 
--- internal Methods
+-- * internal Methods
 
 decodeUtf8Body :: Response BSL.ByteString -> Text
 decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
@@ -83,15 +88,15 @@ data Job =
          , job_name :: T.Text
          , queue_id :: Int
          , mem_limit :: Double
-         , wallclock_timeout :: Double
-         , cpu_timeout :: Double
+         , wallclock_timeout :: Int
+         , cpu_timeout :: Int
          , start_paused :: Bool
          , jobpairs :: [ (Int,Int) ] -- ^ benchmark, config
          }
     deriving Show
 
 -- | create jobxml DOM according to spec
--- jobs_to_XML :: [ Job ] -> XML
+jobs_to_XML :: [ Job ] -> Document
 jobs_to_XML js = Document (Prologue [] Nothing []) root [] where 
     t x = T.pack $ show x
     b x = T.pack $ map Data.Char.toLower $ show x
@@ -105,7 +110,14 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                  <JobPair bench-id="#{t $ fst bc}" config-id="#{t $ snd bc}">
       |]
 
--- API
+jobs_to_archive :: [ Job ] -> BSL.ByteString
+jobs_to_archive js = 
+    let d = jobs_to_XML js
+        e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d ) 
+        a = Zip.addEntryToArchive e Zip.emptyArchive
+    in  Zip.fromArchive a
+
+-- * API
 
 getJobInfo :: StarExecConnection -> Int -> Handler (Maybe JobInfo)
 getJobInfo (sec, man, cookies) _jobId = do
@@ -168,12 +180,33 @@ getJobPairInfo (sec, man, cookies) _pairId = do
                                   (BSL.toStrict $ compress $ responseBody respStdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
 
+-- | description of the request object: see
+-- org.starexec.command.Connection:uploadXML
+
 pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler (Maybe [Int])
 pushJobXml (sec, man, cookies) spaceId jobs = do
-  let (+>) = BS.append
-      req = sec { method = "POST"
-                , path = pushjobxmlPath
-                , queryString = "id=" +> (BSC.pack $ show spaceId)
-                                +> "&type=job&returnids=true" -- FIXME
-                }
-  undefined
+
+  liftIO $ BSL.writeFile "command.zip" $ jobs_to_archive jobs
+
+  req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
+       -- , M.partBS "f" ( BSL.toStrict $ jobs_to_archive jobs)
+       , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS $ jobs_to_archive jobs
+                           ]
+          $ sec { path = pushjobxmlPath }
+  liftIO $ print req 
+
+  resp <- sendRequest (req, man, cookies)
+  -- the job ids are in the returned cookie.
+  -- if there are more, then it's a comma-separated list
+  -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
+  
+  let cs = destroyCookieJar $ responseCookieJar resp
+  liftIO $ print cs
+  let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+      cut c s = if null s then []
+                else let (pre,post) = span (/= c) s
+                     in  pre : cut c ( drop 1 post)
+  return $ case vs of
+       [] -> Nothing
+       [s] -> Just $ map read $ cut ',' $ BSC.unpack s
+
