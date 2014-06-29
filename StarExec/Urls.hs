@@ -50,3 +50,6 @@ getURL url patterns = List.foldl' (\path (pattern, sub) ->
 
 downloadPath :: ByteString
 downloadPath = "starexec/secure/download"
+
+pushjobxmlPath :: ByteString
+pushjobxmlPath = "starexec/secure/pushjobxml" --FIXME

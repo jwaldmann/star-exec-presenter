@@ -110,6 +110,7 @@ library
                  , wl-pprint
                  , parsec
                  , blaze-html
+                 , xml-hamlet
 
 executable         star-exec-presenter
     if flag(library-only)
