@@ -23,23 +23,23 @@ getLoginCredentials = liftIO $ do
   slogin <- readFile $ home ++ "/.star_exec"
   return $ read slogin
 
-getSessionData' :: Handler (Maybe StarExecSessionData)
-getSessionData' = do
+getSessionData :: Handler (Maybe StarExecSessionData)
+getSessionData = do
   mSessionData <- runDB $ getBy $ UniqueStarExecSessionData 0
   case mSessionData of
     Nothing -> return Nothing
     Just en -> return $ Just $ entityVal en
 
-writeSessionData' :: CookieJar -> UTCTime -> Handler ()
-writeSessionData' cookieJar date = do
+writeSessionData :: CookieJar -> UTCTime -> Handler ()
+writeSessionData cookieJar date = do
   let sessionData = StarExecSessionData 0 (T.pack $ show cookieJar) date
   runDB $ do
     deleteBy $ UniqueStarExecSessionData 0
     insert_ sessionData
   return ()
 
-getSessionData :: Handler (Maybe SessionData)
-getSessionData = liftIO $ do
+getSessionData' :: Handler (Maybe SessionData)
+getSessionData' = liftIO $ do
   home <- getHomeDirectory
   let filePath = home ++ "/.star_exec_session"
   dataExists <- doesFileExist filePath
@@ -49,8 +49,8 @@ getSessionData = liftIO $ do
       return $ Just $ read sData
     else return Nothing
 
-writeSessionData :: CookieJar -> UTCTime -> Handler ()
-writeSessionData cookieJar date = liftIO $ do
+writeSessionData' :: CookieJar -> UTCTime -> Handler ()
+writeSessionData' cookieJar date = liftIO $ do
   home <- getHomeDirectory
   let file = show $ SessionData { cookieData = T.pack $ show cookieJar
                                 , date = date }
@@ -107,7 +107,7 @@ index (sec, man, cookies) = do
 
 getConnection :: Handler StarExecConnection
 getConnection = do
-  mSession <- getSessionData'
+  mSession <- getSessionData
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
   man <- withManager return
@@ -128,7 +128,7 @@ getConnection = do
           con <- index (sec, man, createCookieJar [])
           creds <- getLoginCredentials
           login con creds
-  writeSessionData' cookies currentTime
+  writeSessionData cookies currentTime
   return con
 
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)

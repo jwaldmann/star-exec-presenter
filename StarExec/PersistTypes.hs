@@ -92,3 +92,11 @@ primInfoName primInfo =
     PrimSolverInfo info    -> solverInfoName info
     PrimSpaceInfo info     -> spaceName info
     --PrimUserInfo info      -> userName info
+
+data QueryIntermediateResult =
+  QIRJobInfo (Maybe JobInfo)
+  | QIRSolverInfo (Maybe SolverInfo)
+  | QIRBenchmarkInfo (Maybe BenchmarkInfo)
+  | QIRJobPairInfo (Maybe JobPairInfo)
+  | QIRJobResults [JobResultInfo]
+  deriving (Show)

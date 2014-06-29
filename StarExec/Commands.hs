@@ -23,6 +23,7 @@ import StarExec.Urls
 import StarExec.Connection
 import StarExec.Persist
 import StarExec.PersistTypes
+import StarExec.Prims (defaultDate)
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
@@ -56,6 +57,7 @@ constructJobInfo _jobId title tds =
                             title
                             Incomplete
                             ""
+                            defaultDate
       getJobStatus t = case t of
                         "complete" -> Complete
                         _ -> Incomplete
