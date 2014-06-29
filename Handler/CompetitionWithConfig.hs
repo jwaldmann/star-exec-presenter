@@ -8,4 +8,4 @@ getCompetitionWithConfigR :: Competition -> Handler Html
 getCompetitionWithConfigR comp = do
   compResults <- getCompetitionResults comp
   defaultLayout $ do
-    $(widgetFile "competition")
+    $(widgetFile "competition_slim")
