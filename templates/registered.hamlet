@@ -11,6 +11,7 @@
         $forall cat <- categories mecat
           <li>
             #{categoryName cat}:
+            <a href=@{TestCatR (categoryName cat)}>test
             $forall Bench b <- benchmarks (contents cat)
                 <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{b}">#{b}
             $forall part <- participants (contents cat)

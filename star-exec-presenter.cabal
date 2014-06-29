@@ -29,6 +29,7 @@ library
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Handler.Registered
+                     Handler.TestCat
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -111,6 +112,8 @@ library
                  , parsec
                  , blaze-html
                  , xml-hamlet
+                 , case-insensitive
+                 , http-client
 
 executable         star-exec-presenter
     if flag(library-only)

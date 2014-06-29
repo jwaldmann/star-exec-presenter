@@ -66,128 +66,130 @@ data Participant =
                  }
     deriving ( Generic )
 
-standard bs ps = Catinfo { postproc = 44 , benchmarks = bs , participants = ps }
-certified bs ps = Catinfo { postproc = 135 , benchmarks = bs , participants = ps }
+standard n bs ps = Category {  categoryName = n , contents = 
+    Catinfo { postproc = 141 , benchmarks = bs , participants = ps } }
+certified n bs ps = Category { categoryName = n, contents = 
+    Catinfo { postproc = 135 , benchmarks = bs , participants = ps } }
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-       [ Category "TRS Standard" $ standard [ Bench 935202 ]
+       [ standard "TRS Standard"  [ Bench 935202 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "Wanda" Nothing
            , Participant "muterm" ( Just (1388, 2059))
            ]
-       , Category "SRS Standard" $ standard [ Bench 936511 ]
+       , standard "SRS Standard"  [ Bench 936511 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-       , Category "TRS Relative" $ standard [ Bench 936234 ]
+       , standard "TRS Relative"  [ Bench 936234 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
-       , Category "SRS Relative" $ standard [ Bench 943491 ]
+       , standard "SRS Relative"  [ Bench 943491 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
-      , Category "TRS Standard certified" $ certified [ Bench 935202 ]
+      , certified "TRS Standard certified"  [ Bench 935202 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "SRS Standard certified" $ certified [ Bench 936511 ]
+      , certified "SRS Standard certified"  [ Bench 936511 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "TRS Relative certified" $ certified [ Bench 936234 ]
+      , certified "TRS Relative certified"  [ Bench 936234 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "SRS Relative certified" $ certified [ Bench 943491 ]
+      , certified "SRS Relative certified"  [ Bench 943491 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "TRS Equational" $ standard [ Bench 937617 ]
+      , standard "TRS Equational"  [ Bench 937617 ]
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , Category "TRS Conditional" $ standard [ Bench 934159 ]
+      , standard "TRS Conditional"  [ Bench 934159 ]
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , Category "TRS Context Sensitive" $ standard [ Bench 934738 ]
+      , standard "TRS Context Sensitive"  [ Bench 934738 ]
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , Category "TRS Innermost" $ standard [ Bench 934641 ]
+      , standard "TRS Innermost"  [ Bench 934641 ]
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , Category "TRS Outermost" $ standard [ Bench 933838 ]
+      , standard "TRS Outermost"  [ Bench 933838 ]
            [ Participant "AProVE" ( Just ( 1185, 1611  ) )
            ]
-      , Category "TRS Innermost certified" $ certified [ Bench 934641 ]
+      , certified "TRS Innermost certified"  [ Bench 934641 ]
            [ Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "TRS Outermost certified" $ certified [ Bench 933838 ]
+      , certified "TRS Outermost certified"  [ Bench 933838 ]
            [ Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
-      , Category "Higher-Order rewriting (union beta)" $ standard [ Bench 933481 ]
+      , standard "Higher-Order rewriting (union beta)"  [ Bench 933481 ]
            [ Participant "Wanda" Nothing
            , Participant "THOR" Nothing
            ]
-     , Category "Integer Transition Systems" $ standard [ Bench 964032 ]
+     , standard "Integer Transition Systems"  [ Bench 964032 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" Nothing
            ]
-     , Category "Integer TRS" $ standard []
+     , standard "Integer TRS"  []
            [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" Nothing
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
-     [ Category "Derivational Complexity - Full Rewriting" $ standard [ Bench 941674 ]
+     [ standard "Derivational Complexity - Full Rewriting"  [ Bench 941674 ]
            [ Participant "TCT" ( Just (1382, 2025))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , Category "Runtime Complexity - Full Rewriting" $ standard [ Bench 937691 ]
+     , standard "Runtime Complexity - Full Rewriting"  [ Bench 937691 ]
            [ Participant "TCT" ( Just (1382, 2023))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , Category "Runtime Complexity - Innermost Rewriting" $ standard [ Bench 931609 ]
+     , standard "Runtime Complexity - Innermost Rewriting"  [ Bench 931609 ]
            [ Participant "TCT" ( Just (1382, 2022))
            , Participant "AProVE" ( Just ( 1185, 1611 ) )
            ]
-     , Category "Derivational Complexity - Full Rewriting certified" $ certified [ Bench 941674 ]
+     , certified "Derivational Complexity - Full Rewriting certified"  [ Bench 941674 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , Category "Runtime Complexity - Full Rewriting certified" $ certified [ Bench 937691 ]
+     , certified "Runtime Complexity - Full Rewriting certified"  [ Bench 937691 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , Category "Runtime Complexity - Innermost Rewriting certified" $ certified [ Bench 931609 ]
+     , certified "Runtime Complexity - Innermost Rewriting certified"  [ Bench 931609 ]
            [ 
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
-     [ Category "C" $ standard [ Bench 964659 ]
+     [ standard "C"  [ Bench 964659 ]
            [ Participant "AProVE" ( Just ( 1185,  1608 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "Ultimate Buchi Automizer" (Just (1433, 2221))
            , Participant "lsi.upc tool" Nothing
            ]
-     , Category "Java" $ standard [ Bench 933941 ]
+     , standard "Java"  [ Bench 933941 ]
            [ Participant "AProVE" ( Just ( 1185, 1612  ) )
            , Participant "Julia" Nothing
            ]
-     , Category "Logic Programming" $ standard [ Bench 933167 ]
+     , standard "Logic Programming"  [ Bench 933167 ]
            [ Participant "AProVE" ( Just ( 1185, 1667  ) )
            ]
-     , Category "Functional Programming" $ standard [ Bench 930016 ]
+     , standard "Functional Programming"  [ Bench 930016 ]
            [ Participant "AProVE" ( Just ( 1185, 1606  ) )
            ]
      ]
