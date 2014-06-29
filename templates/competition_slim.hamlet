@@ -1,0 +1,28 @@
+<h1>Competition #{competitionName compResults}
+
+<table class="table table-condensed">
+  <tbody>
+    $forall compMetaResults <- metaCategoryResults compResults
+      <tr>
+        <td rowspan="2">#{metaCategoryName compMetaResults}
+        <td>
+          <table class="table table-condensed">
+            <tbody>
+              $forall (mRank, solver, score) <- take 3 $ metaCategoryRanking compMetaResults
+                <tr>
+                  $maybe rank <- mRank
+                    <td>#{show rank}.
+                  $nothing
+                    <td>
+                  <td>#{show solver}
+                  <td>#{show score}
+      <tr>
+        <td>
+          <table class="table table-condensed">
+            <tbody>
+              $forall compCatResult <- categoryResults compMetaResults
+                <tr>
+                  <td><a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
+                  <td>
+                    $forall (_, solver, score) <- categoryRanking compCatResult
+                      #{show $ snd solver} (#{show score}), 
