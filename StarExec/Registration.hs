@@ -18,6 +18,7 @@ import Text.Parsec.String
 import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
+import Data.Maybe ( isJust )
 
 data Competition a = 
      Competition { competitionName :: Name
@@ -33,6 +34,15 @@ data MetaCategory a =
                   , categories :: [ Category a ] 
                   }
     deriving ( Generic )
+
+full_categories mc = 
+    filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
+
+underfull_categories mc =
+    filter ( \ c -> length (real_participants c) < 2 ) $  categories mc
+
+real_participants c = 
+    filter ( isJust . solver_config ) $ participants $ contents c
 
 instance Functor MetaCategory where 
     fmap f c = c { categories = map (fmap f) $ categories c }
