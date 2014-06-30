@@ -158,7 +158,7 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
-     , standard "Integer TRS"  []
+     , standard "Integer TRS"  [ Bench 956021 ]
            [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
