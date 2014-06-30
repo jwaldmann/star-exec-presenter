@@ -36,6 +36,7 @@ JobPairInfo
     UniqueJobPairInfo pairId
     stdout ByteString
     log ByteString
+    deriving Show
 
 JobInfo
     starExecId Int
@@ -43,6 +44,7 @@ JobInfo
     name Text
     status JobStatus
     date Text
+    lastUpdate UTCTime
     deriving Show
 
 SolverInfo
@@ -50,6 +52,7 @@ SolverInfo
     UniqueSolverInfo starExecId
     name Text
     description Text
+    lastUpdate UTCTime
     deriving Show
 
 BenchmarkInfo
@@ -57,6 +60,12 @@ BenchmarkInfo
     UniqueBenchmarkInfo starExecId
     name Text
     type Text
+    lastUpdate UTCTime
+    deriving Show
+
+QueryInfo
+    query SEQuery
+    UniqueQueryInfo query
     deriving Show
 
 -- UserInfo

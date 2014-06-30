@@ -5,6 +5,7 @@ module StarExec.Prims
   , eitherToSpaceInfos
   , eitherToSolverInfos
   , eitherToBenchmarkInfos
+  , defaultDate
   -- , eitherToUserInfos
   -- , searchPrimInHierchy
   -- , searchPrim
@@ -16,6 +17,8 @@ import Data.Char
 import Data.Aeson
 import Data.Either
 import Data.Maybe
+import Data.Time.Clock
+import Data.Time.Calendar
 import Text.XML
 import Text.XML.Cursor
 import qualified Data.ByteString as BS
@@ -207,6 +210,7 @@ getJobInfoFromTexts
                        pname
                        status'
                        date
+                       defaultDate
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
 
 getBenchmarkInfoFromTexts :: [Text] -> Either String BenchmarkInfo
@@ -216,6 +220,7 @@ getBenchmarkInfoFromTexts
     in Right $ BenchmarkInfo pid
                              pname
                              (parseBenchmarkType bType)
+                             defaultDate
 getBenchmarkInfoFromTexts _ = Left "parse error in getBenchmarkInfoFromTexts"
 
 --getUserInfoFromTexts :: [Text] -> Either String UserInfo
@@ -250,4 +255,10 @@ getSolverInfoFromTexts
     in Right $ SolverInfo pid
                           pname
                           desc
+                          defaultDate
 getSolverInfoFromTexts _ = Left "parse error in getSolverInfoFromTexts"
+
+defaultDate :: UTCTime
+defaultDate = UTCTime
+  (fromGregorian 1970 1 1)
+  (secondsToDiffTime 0)

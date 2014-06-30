@@ -13,6 +13,7 @@ import Control.Applicative
 import Network.HTTP.Conduit
 import GHC.Generics
 import qualified Data.Csv as CSV
+import Yesod.Core
 
 type Email = T.Text
 type Password = T.Text
@@ -20,6 +21,7 @@ type Name = T.Text
 type Description = T.Text
 type Rank = Int
 type Score = Int
+type Seconds = Double
 
 data Login = Login Email Password deriving (Show, Read)
 
@@ -114,7 +116,6 @@ data SpaceInfo = SpaceInfo
   , spaceName :: Name
   , spaceDescription :: Description
   } deriving (Show, Eq)
-
 
 {-
 -}
@@ -220,3 +221,27 @@ instance PathPiece Competition where
   fromPathPiece t = case reads (T.unpack t) of
       [(c, "")] -> return c
       _ -> Nothing
+
+{-
+  data-type for concurrent work
+-}
+data QueryStatus k = Pending (Key k) | Latest
+data QueryResult k a = QueryResult
+  { queryStatus :: QueryStatus k
+  , queryResult :: a
+  }
+
+data SEQuery =
+  GetJobInfo Int
+  | GetSolverInfo Int
+  | GetBenchmarkInfo Int
+  | GetJobPair Int
+  | GetJobResults Int
+  deriving (Eq, Read, Show)
+derivePersistField "SEQuery"
+
+fromDiffTime :: NominalDiffTime -> Seconds
+fromDiffTime = fromRational . toRational
+
+diffTime :: UTCTime -> UTCTime -> Seconds
+diffTime t1 t2 = fromDiffTime $ diffUTCTime t1 t2

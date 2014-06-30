@@ -2,12 +2,15 @@ module StarExec.JobData where
 
 import Import
 import StarExec.Types
+import StarExec.PersistTypes
 import StarExec.Connection
+import StarExec.Concurrent
 import qualified StarExec.Commands as SEC
 import StarExec.Persist
 import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
+import Data.Time.Clock
 
 type BenchmarkID = Int
 type BenchmarkName = T.Text
@@ -18,6 +21,12 @@ type SolverName = T.Text
 type SolverResults = [Maybe SolverResult]
 type BenchmarkRow = (Benchmark, [Maybe JobResultInfo])
 type TableHead = [SolverName]
+
+updateThreshold :: Seconds
+updateThreshold = 300
+
+getTime :: Handler UTCTime
+getTime = liftIO getCurrentTime
 
 getClass :: JobResultInfo -> T.Text
 getClass result =
@@ -73,10 +82,24 @@ getJobResultsFromStarExec _jobId = do
   con <- getConnection
   getJobResultsWithConnection con _jobId
 
-selectListByJobId :: Int -> Handler [JobResultInfo]
-selectListByJobId _jobId = runDB $ do
-  results <- selectList [ JobResultInfoJobId ==. _jobId ] []
-  return $ map entityVal results
+queryJobResults' :: Int -> Handler (QueryResult QueryInfo QueryIntermediateResult)
+queryJobResults' _jobId = do
+  _ <- runQuery $ GetJobInfo _jobId
+  runQuery $ GetJobResults _jobId
+
+queryJobResults :: Int -> Handler (QueryResult QueryInfo QueryIntermediateResult)
+queryJobResults _jobId = do
+  mPersistJobInfo <- getPersistJobInfo _jobId
+  currentTime <- getTime
+  case mPersistJobInfo of
+    Just persistJobInfo -> do
+      let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
+      if since > updateThreshold
+        then queryJobResults' _jobId
+        else do
+          persistJobResults <- getPersistJobResults _jobId
+          return $ QueryResult Latest $ QIRJobResults persistJobResults
+    Nothing -> queryJobResults' _jobId
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)
 getJobInfo _jobId = do
@@ -105,10 +128,10 @@ getJobResults _jobId = do
               insertJobInfo ji
               jobResults <- getJobResultsWithConnection con _jobId
               mapM_ dbInsertJobResult jobResults
-              selectListByJobId _jobId
+              getPersistJobResults _jobId
             else getJobResultsWithConnection con _jobId
     -- job is completed
-    Just _ -> selectListByJobId _jobId
+    Just _ -> getPersistJobResults _jobId
 
 getManyJobResults :: [Int] -> Handler [[JobResultInfo]] 
 getManyJobResults = mapM getJobResults

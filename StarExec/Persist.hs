@@ -12,11 +12,35 @@ insertJobInfo :: JobInfo -> Handler ()
 insertJobInfo jobInfo = runDB $ insert_ jobInfo
 
 getPersistJobInfo :: Int -> Handler (Maybe JobInfo)
-getPersistJobInfo _jobId = runDB $ do
-  pEntity <- getBy $ UniqueJobInfo _jobId
-  case pEntity of
+getPersistJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
+
+getPersistJobResults :: Int -> Handler [JobResultInfo]
+getPersistJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
+
+--getEntityList :: (YesodPersist site,
+--                  PersistQuery (YesodPersistBackend site Handler),
+--                  PersistEntity b,
+--                  PersistMonadBackend (YesodPersistBackend site Handler)
+--                  ~ PersistEntityBackend b) =>
+--                       [Filter b] -> [SelectOpt b] -> Handler [b]
+getEntityList _filter _opts = runDB $ do
+  results <- selectList _filter _opts
+  return $ map entityVal results
+
+getEntity uniqueVal = runDB $ do
+  mVal <- getBy uniqueVal
+  case mVal of
     Nothing -> return Nothing
-    Just en -> return $ Just $ entityVal en
+    Just val -> return $ Just $ entityVal val
+
+getPersistJobPair :: Int -> Handler (Maybe JobPairInfo)
+getPersistJobPair _pairId = getEntity $ UniqueJobPairInfo _pairId
+
+getPersistSolverInfo :: Int -> Handler (Maybe SolverInfo)
+getPersistSolverInfo _solverId = getEntity $ UniqueSolverInfo _solverId
+
+getPersistBenchmarInfo :: Int -> Handler (Maybe BenchmarkInfo)
+getPersistBenchmarInfo _benchId = getEntity $ UniqueBenchmarkInfo _benchId
 
 --fromPersistJobResultInfos :: [PersistJobResultInfo] -> [JobResultInfo]
 --fromPersistJobResultInfos = map fromPersistJobResultInfo
