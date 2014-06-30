@@ -18,6 +18,7 @@ import Text.Parsec.String
 import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
+import Data.Maybe ( isJust )
 
 data Competition a = 
      Competition { competitionName :: Name
@@ -33,6 +34,15 @@ data MetaCategory a =
                   , categories :: [ Category a ] 
                   }
     deriving ( Generic )
+
+full_categories mc = 
+    filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
+
+underfull_categories mc =
+    filter ( \ c -> length (real_participants c) < 2 ) $  categories mc
+
+real_participants c = 
+    filter ( isJust . solver_config ) $ participants $ contents c
 
 instance Functor MetaCategory where 
     fmap f c = c { categories = map (fmap f) $ categories c }
@@ -78,7 +88,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "Wanda" Nothing
+           , Participant "Wanda" ( Just (1542, 2398))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ Bench 936511 ]
@@ -139,17 +149,17 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "AProVE" ( Just ( 1185, 1613  ) )
            ]
       , standard "Higher-Order rewriting (union beta)"  [ Bench 933481 ]
-           [ Participant "Wanda" Nothing
+           [ Participant "Wanda" ( Just (1542, 2390))
            , Participant "THOR" Nothing
            ]
      , standard "Integer Transition Systems"  [ Bench 964032 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
-           , Participant "Ctrl" Nothing
+           , Participant "Ctrl" ( Just (1541, 2387))
            ]
      , standard "Integer TRS"  []
            [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
-           , Participant "Ctrl" Nothing
+           , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
