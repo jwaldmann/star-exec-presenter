@@ -142,6 +142,7 @@ data Job =
          , cpu_timeout :: Int
          , start_paused :: Bool
          , jobpairs :: [ (Int,Int) ] -- ^ benchmark, config
+         , jobid :: Maybe Int
          }
     deriving Show
 
@@ -269,14 +270,16 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
-pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler (Maybe [Int])
+pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler [Job]
 pushJobXml (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
-  Nothing -> return (Just [])
+  Nothing -> return jobs
   Just bs -> do
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { path = pushjobxmlPath }
     liftIO $ print req 
+
+    -- liftIO $ BSL.writeFile "command.zip" bs
     
     resp <- sendRequest (req, man, cookies)
     -- the job ids are in the returned cookie.
@@ -290,8 +293,17 @@ pushJobXml (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
                   else let (pre,post) = span (/= c) s
                        in  pre : cut c ( drop 1 post)
     return $ case vs of
-         [] -> Nothing
-         [s] -> Just 
-              $ filter (> 0) -- sometimes we get "-1" for "no job"
-              $ map read $ cut ',' $ BSC.unpack s
+         [] ->  jobs
+         [s] -> do
+             let ids = map read $ cut ',' 
 
+-- FIXME, actually EXPLAINME:
+-- single job: 
+-- Cookie {cookie_name = "New_ID", cookie_value = "3048"
+-- multiple jobs: 
+-- Cookie {cookie_name = "New_ID", cookie_value = "\"3049,3050,3051,3052,3053\""
+                     $ filter ( /= '"' ) 
+
+                     $ BSC.unpack s
+             (j,i) <- zip jobs ids
+             return $ j { jobid = do guard $ i > 0 ; return i }

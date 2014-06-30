@@ -153,12 +153,12 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "Wanda" ( Just (1542, 2390))
            , Participant "THOR" Nothing
            ]
-     , standard "Integer Transition Systems"  [ Bench 964032 ]
+     , standard "Integer Transition Systems"  [ Bench 963614 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
-     , standard "Integer TRS"  []
+     , standard "Integer TRS"  [ Bench 956021 ]
            [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
