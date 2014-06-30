@@ -1,0 +1,3 @@
+<h1>Solver-Infos of #{show _solverId}
+
+#{show mSolverInfo}

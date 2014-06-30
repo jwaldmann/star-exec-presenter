@@ -82,11 +82,6 @@ getJobResultsFromStarExec _jobId = do
   con <- getConnection
   getJobResultsWithConnection con _jobId
 
-queryJobResults' :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
-queryJobResults' _jobId = do
-  _ <- runQueryJobInfo _jobId
-  runQueryJobResults _jobId
-
 queryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 queryJobResults _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
@@ -100,6 +95,55 @@ queryJobResults _jobId = do
           persistJobResults <- getPersistJobResults _jobId
           return $ QueryResult Latest persistJobResults
     Nothing -> queryJobResults' _jobId
+  where
+    queryJobResults' :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
+    queryJobResults' _jobId = do
+      _ <- runQueryJobInfo _jobId
+      runQueryJobResults _jobId
+
+queryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
+queryJobInfo _jobId = do
+  mPersistJobInfo <- getPersistJobInfo _jobId
+  currentTime <- getTime
+  case mPersistJobInfo of
+    Just persistJobInfo -> do
+      let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
+      if since > updateThreshold
+        then runQueryJobInfo _jobId
+        else return $ QueryResult Latest $ Just persistJobInfo
+    Nothing -> runQueryJobInfo _jobId
+
+querySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
+querySolverInfo _solverId = do
+  mPersistSolverInfo <- getPersistSolverInfo _solverId
+  currentTime <- getTime
+  case mPersistSolverInfo of
+    Just persistSolverInfo -> do
+      let since = diffTime currentTime $ solverInfoLastUpdate persistSolverInfo
+      if since > updateThreshold
+        then runQuerySolverInfo _solverId
+        else return $ QueryResult Latest $ Just persistSolverInfo
+    Nothing -> runQuerySolverInfo _solverId
+
+queryBenchmarkInfo :: Int -> Handler (QueryResult QueryInfo (Maybe BenchmarkInfo))
+queryBenchmarkInfo _benchmarkId = do
+  mPersistBenchmarkInfo <- getPersistBenchmarkInfo _benchmarkId
+  currentTime <- getTime
+  case mPersistBenchmarkInfo of
+    Just persistBenchmarkInfo -> do
+      let since = diffTime currentTime $ benchmarkInfoLastUpdate persistBenchmarkInfo
+      if since > updateThreshold
+        then runQueryBenchmarkInfo _benchmarkId
+        else return $ QueryResult Latest $ Just persistBenchmarkInfo
+    Nothing -> runQueryBenchmarkInfo _benchmarkId
+
+queryJobPair :: Int -> Handler (QueryResult QueryInfo (Maybe JobPairInfo))
+queryJobPair _pairId = do
+  mPersistPairInfo <- getPersistJobPair _pairId
+  case mPersistPairInfo of
+    Just persistPairInfo -> do
+      return $ QueryResult Latest $ Just persistPairInfo
+    Nothing -> runQueryJobPair _pairId
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)
 getJobInfo _jobId = do

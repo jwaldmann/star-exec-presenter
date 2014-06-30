@@ -39,48 +39,8 @@ getPersistJobPair _pairId = getEntity $ UniqueJobPairInfo _pairId
 getPersistSolverInfo :: Int -> Handler (Maybe SolverInfo)
 getPersistSolverInfo _solverId = getEntity $ UniqueSolverInfo _solverId
 
-getPersistBenchmarInfo :: Int -> Handler (Maybe BenchmarkInfo)
-getPersistBenchmarInfo _benchId = getEntity $ UniqueBenchmarkInfo _benchId
-
---fromPersistJobResultInfos :: [PersistJobResultInfo] -> [JobResultInfo]
---fromPersistJobResultInfos = map fromPersistJobResultInfo
-
---fromPersistJobResultInfo :: PersistJobResultInfo -> JobResultInfo
---fromPersistJobResultInfo p = JobResultInfo
---  { jriPairId = persistJobResultInfoPairId p
---  , jriBenchmark = persistJobResultInfoBenchmark p
---  , jriBenchmarkId = persistJobResultInfoBenchmarkId p
---  , jriSolver = persistJobResultInfoSolver p
---  , jriSolverId = persistJobResultInfoSolverId p
---  , jriConfiguration = persistJobResultInfoConfiguration p
---  , jriConfigurationId = persistJobResultInfoConfigurationId p
---  , jriStatus = persistJobResultInfoStatus p
---  , jriCpuTime = persistJobResultInfoCpuTime p
---  , jriWallclockTime = persistJobResultInfoWallclockTime p
---  , jriResult = persistJobResultInfoResult p
---  }
-
---toPersistJobResultInfo :: Int -> JobResultInfo -> PersistJobResultInfo
---toPersistJobResultInfo _jobId j = PersistJobResultInfo
---  _jobId
---  (jriPairId j)
---  (jriBenchmark j)
---  (jriBenchmarkId j)
---  (jriSolver j)
---  (jriSolverId j)
---  (jriConfiguration j)
---  (jriConfigurationId j)
---  (jriStatus j)
---  (jriCpuTime j)
---  (jriWallclockTime j)
---  (jriResult j)
-
---fromPersistJobPairInfo :: PersistJobPairInfo -> JobPairInfo
---fromPersistJobPairInfo p = JobPairInfo
---  { jpiPairId = persistJobPairInfoPairId p
---  , jpiStdout = decompressText $ persistJobPairInfoStdout p
---  , jpiLog = decompressText $ persistJobPairInfoLog p
---  }
+getPersistBenchmarkInfo :: Int -> Handler (Maybe BenchmarkInfo)
+getPersistBenchmarkInfo _benchId = getEntity $ UniqueBenchmarkInfo _benchId
 
 dbInsertJobResult :: JobResultInfo -> Handler ()
 dbInsertJobResult jobResult = runDB $ do

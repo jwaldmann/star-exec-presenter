@@ -40,6 +40,12 @@ pairLogPath = "starexec/services/jobs/pairs/{pairId}/log"
 jobInfoPath :: ByteString
 jobInfoPath = "starexec/secure/details/job.jsp"
 
+solverInfoPath :: ByteString
+solverInfoPath = "starexec/secure/details/solver.jsp"
+
+benchmarkInfoPath :: ByteString
+benchmarkInfoPath = "starexec/secure/details/benchmark.jsp"
+
 getURL :: ByteString -> [(String, String)] -> ByteString
 getURL url patterns = List.foldl' (\path (pattern, sub) ->
     BSL.toStrict $ BSS.replace

@@ -33,6 +33,9 @@ library
                      Handler.TestMetaCat
                      Handler.Control
                      Handler.TestComp
+                     Handler.ShowJobInfo
+                     Handler.ShowBenchmarkInfo
+                     Handler.ShowSolverInfo
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types

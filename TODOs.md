@@ -67,4 +67,4 @@ c = Competition "2014"
 * route to show all competitions
   * example competition
 * SolverResult -> YES Maybe Text
-* link auf solver-info, benchmark-info, job-info
+* link to solver-info, benchmark-info, job-info

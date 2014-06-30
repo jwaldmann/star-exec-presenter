@@ -7,6 +7,8 @@ module StarExec.Commands
   ( getJobResults
   , getJobPairInfo
   , getJobInfo
+  , getBenchmarkInfo
+  , getSolverInfo
   , pushJobXml, Job (..) -- FIXME: move to some other module
   ) where
 
@@ -41,6 +43,12 @@ import Control.Monad ( guard )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 
+(+>) = BS.append
+
+safeHead :: a -> [a] -> a
+safeHead defaultVal (x:_) = x
+safeHead defaultVal [] = defaultVal
+
 -- * internal Methods
 
 decodeUtf8Body :: Response BSL.ByteString -> Text
@@ -49,12 +57,25 @@ decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
 cursorFromDOM :: BSL.ByteString -> Cursor
 cursorFromDOM = fromDocument . Text.HTML.DOM.parseLBS
 
-getJobTitle :: Cursor -> Text
-getJobTitle c = head $ content h1
+getFirstTitle :: Cursor -> Text
+getFirstTitle c = head $ content h1
   where h1 = head $ descendant c >>= element "h1" >>= child
 
 getJobInfoFieldset :: Cursor -> Cursor
-getJobInfoFieldset c = head $ descendant c >>= element "fieldset" >>= attributeIs "id" "detailField"
+getJobInfoFieldset c = getFieldsetByID c "detailField"
+--getJobInfoFieldset c = head $ descendant c >>= element "fieldset" >>= attributeIs "id" "detailField"
+
+getFirstFieldset :: Cursor -> Cursor
+getFirstFieldset c = head $ getFieldsets c
+
+getFieldsets :: Cursor -> [Cursor]
+getFieldsets c = descendant c >>= element "fieldset"
+
+getFieldsetByID :: Cursor -> Text -> Cursor
+getFieldsetByID c _id = head $ getFieldsets c >>= attributeIs "id" _id
+
+getTds :: Cursor -> [Cursor]
+getTds c = descendant c >>= element "td" >>= child
 
 constructJobInfo :: Int -> Text -> [Cursor] -> JobInfo
 constructJobInfo _jobId title tds =
@@ -76,13 +97,40 @@ constructJobInfo _jobId title tds =
                                   tds
           (_:tds) -> parseTDs info tds
           _ -> info
-      safeHead list =
-        case list of
-          (_:_) -> head list
-          _ -> ""
-      tds' = map (safeHead . content) tds
-      jobInfo = parseTDs baseJobInfo tds'
-  in jobInfo
+      tds' = map (safeHead "" . content) tds
+  in parseTDs baseJobInfo tds'
+
+constructBenchmarkInfo :: Int -> Text -> [Cursor] -> BenchmarkInfo
+constructBenchmarkInfo _benchmarkId title tds =
+  let baseBenchmarkInfo = BenchmarkInfo _benchmarkId
+                                        title
+                                        ""
+                                        defaultDate
+      parseTDs info xs =
+        case xs of
+          ("name":t:tds) -> parseTDs
+                              (info { benchmarkInfoType = t })
+                              tds
+          (_:tds) -> parseTDs info tds
+          _ -> info
+      tds' = map (safeHead "" . content) tds
+  in parseTDs baseBenchmarkInfo tds'
+
+constructSolverInfo :: Int -> Text -> [Cursor] -> SolverInfo
+constructSolverInfo _solverId title tds =
+  let baseSolverInfo = SolverInfo _solverId
+                                  title
+                                  ""
+                                  defaultDate
+      parseTDs info xs =
+        case xs of
+          ("description":t:tds) -> parseTDs
+                                     (info { solverInfoDescription = t })
+                                     tds
+          (_:tds) -> parseTDs info tds
+          _ -> info
+      tds' = map (safeHead "" . content) tds
+  in parseTDs baseSolverInfo tds'
 
 data Job =
      Job { postproc_id :: Int
@@ -125,26 +173,60 @@ jobs_to_archive js =
 
 getJobInfo :: StarExecConnection -> Int -> Handler (Maybe JobInfo)
 getJobInfo (sec, man, cookies) _jobId = do
-  let (+>) = BS.append
-      req = sec { method = "GET"
+  let req = sec { method = "GET"
                 , path = jobInfoPath
                 , queryString = "id=" +> (BSC.pack $ show _jobId)
                 }
   resp <- sendRequest (req, man, cookies)
   let cursor = cursorFromDOM $ responseBody resp
-      jobTitle = getJobTitle cursor
+      jobTitle = getFirstTitle cursor
   if "http" == T.take 4 jobTitle
     then return Nothing
     else do
       let fieldset = getJobInfoFieldset cursor
-          tds = descendant fieldset >>= element "td" >>= child
+          tds = getTds fieldset
       return $ Just $ constructJobInfo _jobId jobTitle tds
+
+getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
+getBenchmarkInfo (sec, man, cookies) _benchmarkId = do
+  let req = sec { method = "GET"
+                , path = benchmarkInfoPath
+                , queryString = "id=" +> (BSC.pack $ show _benchmarkId)
+                }
+  resp <- sendRequest (req, man, cookies)
+  let cursor = cursorFromDOM $ responseBody resp
+      benchmarkTitle = getFirstTitle cursor
+  if "http" == T.take 4 benchmarkTitle
+    then return Nothing
+    else do
+      let detailFieldset = getFirstFieldset cursor
+          typeFieldset = getFieldsetByID cursor "fieldType"
+          detailTds = getTds detailFieldset
+          typeTds = getTds typeFieldset
+      return $ Just $ constructBenchmarkInfo
+        _benchmarkId benchmarkTitle $ detailTds ++ typeTds
+
+getSolverInfo :: StarExecConnection -> Int -> Handler (Maybe SolverInfo)
+getSolverInfo (sec, man, cookies) _solverId = do
+  let req = sec { method = "GET"
+                , path = solverInfoPath
+                , queryString = "id=" +> (BSC.pack $ show _solverId)
+                }
+  resp <- sendRequest (req, man, cookies)
+  let cursor = cursorFromDOM $ responseBody resp
+      solverTitle = getFirstTitle cursor
+  if "http" == T.take 4 solverTitle
+    then return Nothing
+    else do
+      let detailFieldset = getFirstFieldset cursor
+          tds = getTds detailFieldset
+      return $ Just $ constructSolverInfo
+        _solverId solverTitle $ tds
 
 -- TODO either Maybe or List^^
 getJobResults :: StarExecConnection -> Int -> Handler (Maybe [JobResultInfo])
 getJobResults (sec, man, cookies) _jobId = do
-  let (+>) = BS.append
-      req = sec { method = "GET"
+  let req = sec { method = "GET"
                 , path = downloadPath
                 , queryString = "id=" +> (BSC.pack $ show _jobId)
                                 +> "&type=job&returnids=true"
