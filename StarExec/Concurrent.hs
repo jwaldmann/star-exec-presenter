@@ -1,5 +1,9 @@
 module StarExec.Concurrent 
-  ( runQuery
+  ( runQueryJobInfo
+  , runQueryJobResults
+  , runQuerySolverInfo
+  , runQueryBenchmarkInfo
+  , runQueryJobPair
   ) where
 
 import Import
@@ -36,6 +40,81 @@ deleteQuery q = runDB $ deleteBy $ UniqueQueryInfo q
 
 pendingQuery :: QueryInfoId -> QueryIntermediateResult -> QueryResult QueryInfo QueryIntermediateResult
 pendingQuery key result = QueryResult (Pending key) result
+
+pendingQuery' :: QueryInfoId -> a -> QueryResult QueryInfo a
+pendingQuery' key result = QueryResult (Pending key) result
+
+type QueryInfoHandler a = Maybe (Entity QueryInfo) -> Handler (QueryResult QueryInfo a)
+
+queryExceptionHandler :: SEQuery -> ExceptionHandler
+queryExceptionHandler q = \e -> do
+  baseExceptionHandler e
+  deleteQuery q
+
+runQueryBase :: SEQuery -> QueryInfoHandler a -> Handler (QueryResult QueryInfo a)
+runQueryBase q handler = do
+  mQuery <- getQuery q
+  handler mQuery
+
+runQueryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
+runQueryJobInfo _jobId = do
+  let q = GetJobInfo _jobId
+  runQueryBase q $ \mQuery ->
+    case mQuery of
+      Just eq -> do
+        mPersistJobInfo <- getPersistJobInfo _jobId
+        return $ pendingQuery' (entityKey eq) mPersistJobInfo
+      Nothing -> do
+        mKey <- insertQuery q
+        runConcurrent (queryExceptionHandler q) $ do
+          con <- getConnection
+          mJobInfo <- getJobInfo con _jobId
+          case mJobInfo of
+            Nothing -> deleteQuery q
+            Just ji -> do
+              currentTime <- liftIO getCurrentTime
+              _ <- runDB $ do
+                deleteBy $ UniqueJobInfo _jobId
+                insertUnique $ JobInfo _jobId
+                                       (jobInfoName ji)
+                                       (jobInfoStatus ji)
+                                       (jobInfoDate ji)
+                                       currentTime
+              deleteQuery q
+              liftIO $ putStrLn $ "Job done: " ++ (show q)
+        return $ pendingQuery' (fromJust mKey) Nothing
+
+runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
+runQueryJobResults _jobId = do
+  let q = GetJobResults _jobId
+  runQueryBase q $ \mQuery ->
+    case mQuery of
+      Just eq -> do
+        mPersistJobResults <- getPersistJobResults _jobId
+        return $ pendingQuery' (entityKey eq) mPersistJobResults
+      Nothing -> do
+        mKey <- insertQuery q
+        runBaseConcurrent $ do
+          con <- getConnection
+          mResults <- getJobResults con _jobId
+          case mResults of
+            Nothing -> deleteQuery q
+            Just rs -> do
+              runDB $ do
+                mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) rs
+                mapM_ insertUnique rs
+              deleteQuery q
+              liftIO $ putStrLn $ "Job done: " ++ (show q)
+        return $ pendingQuery' (fromJust mKey) []
+
+runQueryJobPair :: Int -> Handler (QueryResult QueryInfo (Maybe JobPairInfo))
+runQueryJobPair _pairId = undefined
+
+runQueryBenchmarkInfo :: Int -> Handler (QueryResult QueryInfo (Maybe BenchmarkInfo))
+runQueryBenchmarkInfo _benchId = undefined
+
+runQuerySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
+runQuerySolverInfo _solverId = undefined
 
 runQuery :: SEQuery -> Handler (QueryResult QueryInfo QueryIntermediateResult)
 runQuery q@(GetJobInfo _jobId) = do

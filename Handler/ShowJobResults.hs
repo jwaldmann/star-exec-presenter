@@ -23,7 +23,7 @@ checkStatus (Pending key) = liftIO $ putStrLn $ "Job pending: " ++ (show key)
 
 getShowJobResultsR :: Int -> Handler Html
 getShowJobResultsR _jobId = do
-  (QueryResult qStatus (QIRJobResults jrs)) <- queryJobResults _jobId
+  (QueryResult qStatus jrs) <- queryJobResults _jobId
   checkStatus qStatus
   --pJobResults <- getJobResults _jobId
   let jobResults = jrs

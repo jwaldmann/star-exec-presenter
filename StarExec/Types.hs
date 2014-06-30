@@ -181,29 +181,6 @@ instance PathMultiPiece JobIds where
   fromPathMultiPiece _ = Nothing
 
 {-
--}
-data Competition = Competition Name [MetaCategory]
-  deriving (Show, Read, Eq)
-
-getCompetitionName :: Competition -> Name
-getCompetitionName (Competition name _) = name
-
-getMetaCategories :: Competition -> [MetaCategory]
-getMetaCategories (Competition _ ms) = ms
-
-{-
-  solver by rank in the categories
--}
-data MetaCategory = MetaCategory Name [Category]
-  deriving (Show, Read, Eq)
-
-getMetaCategoryName :: MetaCategory -> Name
-getMetaCategoryName (MetaCategory name _) = name
-
-getCategories :: MetaCategory -> [Category]
-getCategories (MetaCategory _ cs) = cs
-
-{-
   solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 -}
 data Category = Category Name [SolverResult] [Int]
@@ -217,6 +194,31 @@ getCategoryFilter (Category _ srs _) = srs
 
 getJobIds :: Category -> [Int]
 getJobIds (Category _ _ jis) = jis
+
+{-
+  solver by rank in the categories
+-}
+data MetaCategory = MetaCategory Name [Category]
+  deriving (Show, Read, Eq)
+derivePersistField "MetaCategory"
+
+getMetaCategoryName :: MetaCategory -> Name
+getMetaCategoryName (MetaCategory name _) = name
+
+getCategories :: MetaCategory -> [Category]
+getCategories (MetaCategory _ cs) = cs
+
+{-
+-}
+data Competition = Competition Name [MetaCategory]
+  deriving (Show, Read, Eq)
+derivePersistField "Competition"
+
+getCompetitionName :: Competition -> Name
+getCompetitionName (Competition name _) = name
+
+getMetaCategories :: Competition -> [MetaCategory]
+getMetaCategories (Competition _ ms) = ms
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp

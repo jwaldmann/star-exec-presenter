@@ -42,6 +42,7 @@ import Handler.Competition
 import Handler.CompetitionWithConfig
 import Handler.Registered
 import Handler.TestCat
+import Handler.TestMetaCat
 import Handler.Control
 
 -- This line actually creates our YesodDispatch instance. It is the second half

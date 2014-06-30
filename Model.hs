@@ -6,7 +6,7 @@ import Data.Text (Text)
 import Data.ByteString (ByteString)
 import Database.Persist.Quasi
 import Data.Typeable (Typeable)
-import StarExec.Types (JobStatus, SolverResult, SEQuery)
+import StarExec.Types (JobStatus, SolverResult, SEQuery, Competition)
 import Table.Query
 import Data.Time.Clock
 

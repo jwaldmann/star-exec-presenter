@@ -30,6 +30,7 @@ library
                      Handler.CompetitionWithConfig
                      Handler.Registered
                      Handler.TestCat
+                     Handler.TestMetaCat
                      Handler.Control
                      StarExec.Commands
                      StarExec.Connection
