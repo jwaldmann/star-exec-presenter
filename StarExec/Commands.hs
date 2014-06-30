@@ -209,5 +209,7 @@ pushJobXml (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
                        in  pre : cut c ( drop 1 post)
     return $ case vs of
          [] -> Nothing
-         [s] -> Just $ map read $ cut ',' $ BSC.unpack s
+         [s] -> Just 
+              $ filter (> 0) -- sometimes we get "-1" for "no job"
+              $ map read $ cut ',' $ BSC.unpack s
 
