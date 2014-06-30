@@ -1,5 +1,6 @@
 {-# language DeriveGeneric #-}
 {-# language OverloadedStrings #-}
+{-# language DisambiguateRecordFields #-}
 
 module StarExec.Registration where
 
@@ -246,6 +247,17 @@ instance Output Participant where
              [ "name" <+> equals <+> output (participantName p)
              , "solver_config" <+> equals <+> output (solver_config p)
              ] )
+instance Output Catinfo where
+    output i = "Catinfo" <+> P.braces ( hsep $ intersperse ","
+             [ "postproc" <+> equals <+> output (postproc i)
+             , "benchmarks" <+>  equals <+> output (benchmarks i)
+             , "participants" <+> equals <+> output ( participants i)
+             ] )
+instance Output Benchmark_Source where
+    output s = case s of
+        Bench { bench = i } -> "Bench" <+> output i
+        All { space = s } -> "All" <+> output s
+        Hierarchy { space = s } -> "Hierarchy" <+> output s
 
 p <#> q = fillBreak 4 p <+> q
 showp = ( \ d -> displayS d "" ) . renderPretty 1.0 80 . output

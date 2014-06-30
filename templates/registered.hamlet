@@ -6,7 +6,7 @@
 <ul>
   $forall mecat <- metacategories comp
     <li>
-      <h3>#{metaCategoryName mecat}
+      <h3>#{metaCategoryName mecat} <a href=@{TestMetaCatR (metaCategoryName mecat)}> test
       <ul>
         $forall cat <- categories mecat
           <li>
