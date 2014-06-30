@@ -68,6 +68,11 @@ QueryInfo
     UniqueQueryInfo query
     deriving Show
 
+CompetitionInfo
+    competition Competition
+    date UTCTime
+    deriving Show
+
 -- UserInfo
 --     starExecId Int
 --     UniqueUserInfo starExecId
