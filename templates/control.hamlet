@@ -16,8 +16,8 @@
                 $forall part <- participants (contents cat)
                   $maybe conf <- solver_config part
                       <span class="conf">
-                         <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}"> 
-                            #{participantName part} #{show conf}
+                         <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}">#{participantName part}</a>
+                         (<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{snd conf}">#{snd conf}</a>)
                   $nothing
                       <span class="noconf">#{participantName part}
                   | 
