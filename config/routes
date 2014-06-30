@@ -15,4 +15,8 @@
 /competition_with_config/#Competition CompetitionWithConfigR GET
 /registered RegisteredR GET
 /testCat/#Text TestCatR GET
+<<<<<<< HEAD
 /testMetaCat/#Text TestMetaCatR GET
+=======
+/control ControlR GET
+>>>>>>> 378f27b073fb4040c6b45aa1363057186a7293ca

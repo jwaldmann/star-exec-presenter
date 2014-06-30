@@ -82,12 +82,12 @@ getJobResultsFromStarExec _jobId = do
   con <- getConnection
   getJobResultsWithConnection con _jobId
 
-queryJobResults' :: Int -> Handler (QueryResult QueryInfo QueryIntermediateResult)
+queryJobResults' :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 queryJobResults' _jobId = do
-  _ <- runQuery $ GetJobInfo _jobId
-  runQuery $ GetJobResults _jobId
+  _ <- runQueryJobInfo _jobId
+  runQueryJobResults _jobId
 
-queryJobResults :: Int -> Handler (QueryResult QueryInfo QueryIntermediateResult)
+queryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 queryJobResults _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   currentTime <- getTime
@@ -98,7 +98,7 @@ queryJobResults _jobId = do
         then queryJobResults' _jobId
         else do
           persistJobResults <- getPersistJobResults _jobId
-          return $ QueryResult Latest $ QIRJobResults persistJobResults
+          return $ QueryResult Latest persistJobResults
     Nothing -> queryJobResults' _jobId
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)
