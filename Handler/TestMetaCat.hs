@@ -8,8 +8,9 @@ import StarExec.Registration
 import StarExec.Commands (pushJobXml, Job (..))
 import StarExec.Connection (getConnection)
 import StarExec.Types (JobIds(..))
+import qualified StarExec.Types as S
 
-import Handler.TestCat ( pushmetacat )
+import Handler.TestCat ( pushmetacat, convertMC )
 
 import Data.Time.Clock
 import Control.Monad ( guard, forM )
@@ -26,11 +27,9 @@ getTestMetaCatR t = do
             return mc
     mc_with_jobs <- pushmetacat mc
 
+    let c = S.Competition "Test" [ convertMC mc_with_jobs]
+
     defaultLayout $ do
         setTitle "testMetaCat"
-        [whamlet|
-<pre>
-   #{show mc_with_jobs}
+        [whamlet|<a href=@{CompetitionWithConfigR c}>test output</a>|]
 
-    
-|]

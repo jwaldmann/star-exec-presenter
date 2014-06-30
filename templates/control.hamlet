@@ -1,7 +1,4 @@
-<h2>Registration for #{competitionName comp}
-
-<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014_Registration">
-   explanation
+<h2>#{competitionName comp} (<a href=@{TestCompR (competitionName comp)}>test</a>)
 
 <ul>
   $forall mecat <- metacategories comp

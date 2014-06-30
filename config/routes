@@ -17,3 +17,4 @@
 /testCat/#Text TestCatR GET
 /testMetaCat/#Text TestMetaCatR GET
 /control ControlR GET
+/testComp/#Text TestCompR GET

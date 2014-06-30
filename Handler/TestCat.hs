@@ -8,6 +8,7 @@ import StarExec.Registration
 import StarExec.Commands (pushJobXml, Job (..))
 import StarExec.Connection (getConnection)
 import StarExec.Types (JobIds(..))
+import qualified StarExec.Types as S
 
 import Data.Time.Clock
 import Control.Monad ( guard, forM )
@@ -49,6 +50,17 @@ pushcatjobs cat = do
     con <- getConnection
     pushJobXml con autotest_spaceId [ job ]
 
+convertComp :: Competition (Catinfo, Maybe [Int]) 
+        -> S.Competition
+convertComp c = S.Competition (competitionName c) 
+          $ map convertMC (metacategories c)
+
+convertMC mc = S.MetaCategory (metaCategoryName mc)
+         $ map convertC (categories mc)
+
+convertC c = S.Category (categoryName c) [ S.YES, S.NO ] 
+         $ let (_, mjobs) = contents c in maybe [] id mjobs
+
 
 getTestCatR :: Text -> Handler Html
 getTestCatR t = do
@@ -57,14 +69,10 @@ getTestCatR t = do
             c <- categories mc
             guard $ categoryName c == t
             return c
-    mi <- pushcatjobs cat
+    cat_with_jobs <- pushcat cat
+
+    let c = S.Competition "Test" [ S.MetaCategory "Test" [ convertC cat_with_jobs]]
 
     defaultLayout $ do
         setTitle "testCat"
-        [whamlet|
-<pre>
-        getTestCatR: #{t}  
-        pushjobXML, answer is #{show mi}
-<a href=@{ShowManyJobResultsR (JobIds (maybe [] id mi))}> job results
-    
-|]
+        [whamlet|<a href=@{CompetitionWithConfigR c}>test output</a>|]

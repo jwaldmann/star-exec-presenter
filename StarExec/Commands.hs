@@ -11,7 +11,7 @@ module StarExec.Commands
   ) where
 
 import Import
-import Prelude (head)
+import Prelude (head, Maybe(..))
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import qualified Data.ByteString as BS
@@ -112,13 +112,14 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                  <JobPair bench-id="#{t $ fst bc}" config-id="#{t $ snd bc}">
       |]
 
-jobs_to_archive :: [ Job ] -> BSL.ByteString
+jobs_to_archive :: [ Job ] -> Maybe BSL.ByteString
 jobs_to_archive js = 
     let empty = null . jobpairs
-        d = jobs_to_XML $ filter ( not . empty ) js
+        ne_js = filter ( not . empty ) js
+        d = jobs_to_XML ne_js
         e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d ) 
         a = Zip.addEntryToArchive e Zip.emptyArchive
-    in  Zip.fromArchive a
+    in  if null ne_js then Nothing else Just $ Zip.fromArchive a
 
 -- * API
 
@@ -187,29 +188,26 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- org.starexec.command.Connection:uploadXML
 
 pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler (Maybe [Int])
-pushJobXml (sec, man, cookies) spaceId jobs = do
-
-  liftIO $ BSL.writeFile "command.zip" $ jobs_to_archive jobs
-
-  req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
-       -- , M.partBS "f" ( BSL.toStrict $ jobs_to_archive jobs)
-       , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS $ jobs_to_archive jobs
-                           ]
-          $ sec { path = pushjobxmlPath }
-  liftIO $ print req 
-
-  resp <- sendRequest (req, man, cookies)
-  -- the job ids are in the returned cookie.
-  -- if there are more, then it's a comma-separated list
-  -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
-  
-  let cs = destroyCookieJar $ responseCookieJar resp
-  liftIO $ print cs
-  let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
-      cut c s = if null s then []
-                else let (pre,post) = span (/= c) s
-                     in  pre : cut c ( drop 1 post)
-  return $ case vs of
-       [] -> Nothing
-       [s] -> Just $ map read $ cut ',' $ BSC.unpack s
+pushJobXml (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
+  Nothing -> return (Just [])
+  Just bs -> do
+    req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
+         , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
+         ] $ sec { path = pushjobxmlPath }
+    liftIO $ print req 
+    
+    resp <- sendRequest (req, man, cookies)
+    -- the job ids are in the returned cookie.
+    -- if there are more, then it's a comma-separated list
+    -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
+    
+    let cs = destroyCookieJar $ responseCookieJar resp
+    liftIO $ print cs
+    let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+        cut c s = if null s then []
+                  else let (pre,post) = span (/= c) s
+                       in  pre : cut c ( drop 1 post)
+    return $ case vs of
+         [] -> Nothing
+         [s] -> Just $ map read $ cut ',' $ BSC.unpack s
 
