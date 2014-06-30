@@ -1,7 +1,10 @@
 <h3> 
   <a href=@{Flexible_TableR (Query []) jids}>flexible query (experimental) 
 
-<h1>Overview of the job-results
+<h1>Overview of job-results
+view original jobs on star-exec:
+$forall jid <- getids jids
+   <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{jid}">#{jid}</a>|
 
 <div class="container">
   <label for="legend">Legend

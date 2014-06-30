@@ -168,6 +168,8 @@ instance PathPiece ErrorID where
 newtype JobIds = JobIds [Int]
   deriving (Show, Eq, Read)
 
+getids (JobIds ids) = ids
+
 instance PathMultiPiece JobIds where
   toPathMultiPiece (JobIds ints) = toPathMultiPiece $ map show $ ints
   fromPathMultiPiece (i:is) = do

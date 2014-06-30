@@ -88,7 +88,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" Nothing
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
-           , Participant "Wanda" ( Just (1542, 2398))
+           , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ Bench 936511 ]

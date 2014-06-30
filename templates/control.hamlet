@@ -6,15 +6,17 @@
 <ul>
   $forall mecat <- metacategories comp
     <li>
-      <h3>#{metaCategoryName mecat}
+      <h3>#{metaCategoryName mecat} (<a href=@{TestMetaCatR (metaCategoryName mecat)}>test</a>)
       <ul>
         $forall cat <- categories mecat
           <li>
-            #{categoryName cat}:
-            <a href=@{TestCatR (categoryName cat)}>test
-            $forall Bench b <- benchmarks (contents cat)
-                <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{b}">#{b}
-            $forall part <- participants (contents cat)
+            #{categoryName cat} (<a href=@{TestCatR (categoryName cat)}>test</a>)
+            <ul>
+              <li>Benchmarks:
+                $forall Bench b <- benchmarks (contents cat)
+                  <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{b}">#{b}
+              <li>Solvers:
+                $forall part <- participants (contents cat)
                   $maybe conf <- solver_config part
                       <span class="conf">
                          <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}"> 

@@ -114,7 +114,8 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
 
 jobs_to_archive :: [ Job ] -> BSL.ByteString
 jobs_to_archive js = 
-    let d = jobs_to_XML js
+    let empty = null . jobpairs
+        d = jobs_to_XML $ filter ( not . empty ) js
         e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d ) 
         a = Zip.addEntryToArchive e Zip.emptyArchive
     in  Zip.fromArchive a

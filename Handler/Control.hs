@@ -9,6 +9,6 @@ import Text.Hamlet (hamletFile)
 getControlR :: Handler Html
 getControlR = do
     let comp = StarExec.Registration.tc2014
-    defaultLayout [whamlet|control|]
-        --  $(widgetFile "control")
+    defaultLayout 
+        $(widgetFile "control")
 
