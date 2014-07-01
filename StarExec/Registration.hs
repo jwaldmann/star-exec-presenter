@@ -87,14 +87,14 @@ tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ standard "TRS Standard"  [ Bench 935202 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" Nothing
+           , Participant "NaTT" ( Just ( 1225, 1717))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ Bench 936511 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" Nothing
+           , Participant "NaTT" ( Just ( 1225, 1717))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
