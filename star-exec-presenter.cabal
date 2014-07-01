@@ -36,6 +36,7 @@ library
                      Handler.ShowJobInfo
                      Handler.ShowBenchmarkInfo
                      Handler.ShowSolverInfo
+                     Handler.ListCompetitions
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
