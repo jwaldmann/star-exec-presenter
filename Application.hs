@@ -41,10 +41,7 @@ import Handler.Flexible_Table
 import Handler.Competition
 import Handler.CompetitionWithConfig
 import Handler.Registered
-import Handler.TestCat
-import Handler.TestMetaCat
 import Handler.Control
-import Handler.TestComp
 import Handler.ShowJobInfo
 import Handler.ShowBenchmarkInfo
 import Handler.ShowSolverInfo

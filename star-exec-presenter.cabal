@@ -29,10 +29,7 @@ library
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Handler.Registered
-                     Handler.TestCat
-                     Handler.TestMetaCat
                      Handler.Control
-                     Handler.TestComp
                      Handler.ShowJobInfo
                      Handler.ShowBenchmarkInfo
                      Handler.ShowSolverInfo
@@ -50,6 +47,7 @@ library
                      Table.Data
                      Table.Get
                      Table.Query
+                     Control.Job
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

@@ -23,7 +23,7 @@ type Rank = Int
 type Score = Int
 type Seconds = Double
 
-data Login = Login Email Password deriving (Show, Read)
+data Login = Login Email Password deriving (Show, Read, Eq)
 
 data SessionData = SessionData
   { cookieData :: T.Text

@@ -1,51 +1,95 @@
--- | make job xmls from registration info.
--- for syntax of xml file, see https://github.com/stefanvonderkrone/star-exec-presenter/issues/18#issuecomment-46840686
--- for usage of hamlet, see http://www.yesodweb.com/book/shakespearean-templates
+module Control.Job where
 
-{-# LANGUAGE QuasiQuotes #-}
-
-import StarExec.Registration
+import Import
 
 import qualified Data.Text as T
-import qualified Data.Text.Lazy.IO as T
-import Text.Hamlet.XML
-import Text.XML
-import Data.Hashable
 
-
--- import Text.Blaze.Html.Renderer.String (renderHtml)
+import StarExec.Registration 
+import StarExec.Commands (pushJobXml, Job (..))
+import StarExec.Connection (getConnection)
+import StarExec.Types (JobIds(..))
+import qualified StarExec.Types as S
 
 import Data.Time.Clock
-import Prelude ( IO, show, unwords, putStrLn, print, ($), snd, Maybe (..), map, elem, take, reverse, sum, fromEnum, foldr, (+), (*), Bool (..), any, (.), maybe, const, otherwise )
+import Control.Monad ( guard, forM )
+import Data.Char (isAlphaNum)
+import Data.Maybe (catMaybes)
 import qualified Data.Map.Strict as M
 
-main :: Prelude.IO ()
-main = do    
-    now <- Data.Time.Clock.getCurrentTime 
-    let ekat n xs = reverse $ take n $ reverse xs
-    let -- forbidden chars must be replaced
-        repair c = if c `elem` ":()-" then '.' else c
-        -- jobname cannot be too long (64 chars)
-        jobname me cat = T.pack $ show $ hash
-           $ unwords [ "termcomp", "auto"
-                     , T.unpack $ metaCategoryName me
-                     , T.unpack $ categoryName cat
-                     , show now 
-                     ]
-    let nonemptyC = any isJust . map solver_config . participants . contents
-        isJust = maybe False (const True)
-    let doc = Document (Prologue [] Nothing []) root []
-        root = Element "tns:Jobs" 
-             (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
-                         ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
-                         ,("xmlns:tns","https://www.starexec.org/starexec/public/batchJobSchema.xsd") ]) [xml|
-      $forall mecat <- metacategories tc2014
-        $forall cat <- categories mecat
-          $if nonemptyC cat
-            <Job cpu-timeout="240" description="no description" mem-limit="128.0" name="#{jobname mecat cat}" postproc-id="#{T.pack $ show $ postproc $ contents cat}" queue-id="478" start-paused="false" wallclock-timeout="60">
-              $forall p <- participants (contents cat)
-                $forall b <- benchmarks (contents cat)
-                  $maybe sc <- solver_config p
-                    <JobPair bench-id="#{T.pack $ show $ bench b}" config-id="#{T.pack $ show $ snd sc}">
-    |]
-    T.putStrLn $ renderText def { rsPretty=True} doc 
+autotest_spaceId = 52915 :: Int
+termination_queueId = 478 :: Int
+
+pushcat :: Category Catinfo -> Handler (Category ( Catinfo, [Int] ))
+pushcat cat = do
+    mis <- pushcatjobs cat
+    return $ cat { contents = (contents cat, catMaybes $ map jobid mis) }
+
+pushmetacat mc = do
+    now <- liftIO getCurrentTime
+    let jobs = do 
+            cat <- categories mc 
+            return $ mkJob cat now
+    con <- getConnection
+    js <- pushJobXml con autotest_spaceId jobs
+    let m = M.fromList $ do
+            j @ Job { description = d, jobid = Just i } <- js
+            return ( d, [i] ) 
+        for = flip map
+    return $ mc { categories = for (categories mc) $ \ cat -> 
+                 cat { contents = (contents cat, M.findWithDefault [] (repair $ categoryName cat) m ) } } 
+
+pushcomp c = do
+    now <- liftIO getCurrentTime
+    let jobs = do 
+            mc <- metacategories c ; cat <- categories mc 
+            return $ mkJob cat now
+    con <- getConnection
+    js <- pushJobXml con autotest_spaceId jobs
+    let m = M.fromList $ do
+            j @ Job { description = d, jobid = Just i } <- js
+            return ( d, [i] ) 
+        for = flip map
+    return $ c { metacategories = for (metacategories c) $ \ mc -> 
+             mc { categories = for (categories mc) $ \ cat -> 
+                 cat { contents = (contents cat, M.findWithDefault [] (repair $ categoryName cat) m ) } } }
+
+repair = T.map ( \ c -> if isAlphaNum c then c else ' ' )
+
+compact = T.unwords . map (T.take 5) . T.words
+
+mkJob cat now = 
+    let ci = contents cat 
+        (+>) = T.append
+    in Job 
+         { postproc_id = postproc ci
+         , description = repair $ categoryName cat
+         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show now)
+         , queue_id = termination_queueId
+         , mem_limit = 128.0
+         , wallclock_timeout = 60
+         , cpu_timeout = 240
+         , start_paused = False
+         , jobpairs = do 
+               Bench { bench = b } <- benchmarks ci
+               Participant { solver_config = Just (s,c) } <- participants ci
+               return ( b, c )
+         , jobid = Nothing
+         }
+
+pushcatjobs cat = do
+    let ci = contents cat
+    now <- liftIO getCurrentTime
+    con <- getConnection
+    pushJobXml con autotest_spaceId [ mkJob cat now ]
+
+convertComp :: Competition (Catinfo,  [Int]) 
+        -> S.Competition
+convertComp c = S.Competition (competitionName c) 
+          $ map convertMC (metacategories c)
+
+convertMC mc = S.MetaCategory (metaCategoryName mc)
+         $ map convertC (categories mc)
+
+convertC c = S.Category (categoryName c) [ S.YES, S.NO ] 
+         $ let (_, jobs) = contents c in jobs
+

@@ -13,11 +13,8 @@
 /flexible-table/#Query/*JobIds Flexible_TableR GET
 /competition/#Text CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
+/control ControlR GET POST
 /registered RegisteredR GET
-/testCat/#Text TestCatR GET
-/testMetaCat/#Text TestMetaCatR GET
-/control ControlR GET
-/testComp/#Text TestCompR GET
 /show_job_info/#Int ShowJobInfoR GET
 /show_benchmark_info/#Int ShowBenchmarkInfoR GET
 /show_solver_info/#Int ShowSolverInfoR GET
