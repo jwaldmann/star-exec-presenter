@@ -87,14 +87,14 @@ tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ standard "TRS Standard"  [ Bench 935202 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" ( Just ( 1225, 1717))
+           , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ Bench 936511 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" ( Just ( 1225, 1717))
+           , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1185, 1611  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
@@ -165,15 +165,15 @@ tc2014 = Competition "Termination Competition 2014"
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
      [ standard "Derivational Complexity - Full Rewriting"  [ Bench 941674 ]
-           [ Participant "TCT" ( Just (1382, 2025))
+           [ Participant "TCT" ( Just (1620, 2518))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , standard "Runtime Complexity - Full Rewriting"  [ Bench 937691 ]
-           [ Participant "TCT" ( Just (1382, 2023))
+           [ Participant "TCT" ( Just (1620, 2516))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , standard "Runtime Complexity - Innermost Rewriting"  [ Bench 931609 ]
-           [ Participant "TCT" ( Just (1382, 2022))
+           [ Participant "TCT" ( Just (1620, 2515))
            , Participant "AProVE" ( Just ( 1185, 1611 ) )
            ]
      , certified "Derivational Complexity - Full Rewriting certified"  [ Bench 941674 ]

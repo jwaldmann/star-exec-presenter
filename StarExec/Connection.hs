@@ -2,6 +2,7 @@ module StarExec.Connection
     ( getConnection
     , sendRequest
     , index
+    , getLoginCredentials
     ) where
 
 import Import
