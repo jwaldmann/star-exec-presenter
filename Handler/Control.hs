@@ -7,9 +7,12 @@ import Import
 import StarExec.Registration 
 import StarExec.Connection (getLoginCredentials)
 import StarExec.Types (Login(..))
+import StarExec.Persist
+
 import Control.Monad ( guard )
 import qualified StarExec.Types as S
 import qualified Data.Text as T
+import Data.Time.Clock
 
 import Control.Job
 
@@ -43,6 +46,12 @@ postControlR = do
                 then startjobs con
                 else return Nothing
             _ -> return Nothing
+    case mc of 
+        Nothing -> return ()
+        Just c -> do
+            now <- liftIO getCurrentTime
+            runDB $ insert $ CompetitionInfo c now
+            return ()
     defaultLayout $ do
         [whamlet|<h2>Result of previous command
 $maybe c <- mc
