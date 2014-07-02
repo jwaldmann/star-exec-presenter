@@ -188,6 +188,35 @@ getJobInfo (sec, man, cookies) _jobId = do
           tds = getTds fieldset
       return $ Just $ constructJobInfo _jobId jobTitle tds
 
+getSpaceXML :: StarExecConnection -> Int -> Handler (Maybe Space)
+getSpaceXML (sec, man, cookies) spaceId = do
+  let req = sec { method = "GET"
+                , path = downloadPath
+                , queryString = "id=" +> (BSC.pack $ show spaceId)
+                            +> "&type=spaceXML"
+                            +> "&includeattrs=false"
+                }
+  resp <- sendRequest (req, man, cookies)
+
+  let archive = Zip.toArchive $ responseBody resp
+  space <- case Zip.zEntries archive of
+      es -> do
+          liftIO $ print es
+          liftIO $ print $ length es
+{-
+            [entry] -> do
+              let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
+              case eitherVector of
+                Left msg -> do
+                  liftIO $ putStrLn msg
+                  return Nothing
+                Right (_, jobInfos) ->
+                  return $ Just $ map insertId $ Vector.toList jobInfos
+            [] -> return Nothing
+-}
+  return Nothing
+    
+
 getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
 getBenchmarkInfo (sec, man, cookies) _benchmarkId = do
   let req = sec { method = "GET"

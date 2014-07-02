@@ -26,9 +26,8 @@ pushcat cat = do
 
 pushmetacat mc = do
     now <- liftIO getCurrentTime
-    let jobs = do 
-            cat <- categories mc 
-            return $ mkJob cat now
+    jobs <- forM (categories mc) $ \ cat ->  do 
+            mkJob cat now
     con <- getConnection
     js <- pushJobXml con autotest_spaceId jobs
     let m = M.fromList $ do
@@ -40,9 +39,8 @@ pushmetacat mc = do
 
 pushcomp c = do
     now <- liftIO getCurrentTime
-    let jobs = do 
-            mc <- metacategories c ; cat <- categories mc 
-            return $ mkJob cat now
+    jobs <- forM ( metacategories c >>= categories ) $ \ cat -> do 
+            mkJob cat now
     con <- getConnection
     js <- pushJobXml con autotest_spaceId jobs
     let m = M.fromList $ do
@@ -57,10 +55,10 @@ repair = T.map ( \ c -> if isAlphaNum c then c else ' ' )
 
 compact = T.unwords . map (T.take 5) . T.words
 
-mkJob cat now = 
+mkJob cat now = do
     let ci = contents cat 
         (+>) = T.append
-    in Job 
+    return $ Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
          , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show now)
@@ -80,7 +78,8 @@ pushcatjobs cat = do
     let ci = contents cat
     now <- liftIO getCurrentTime
     con <- getConnection
-    pushJobXml con autotest_spaceId [ mkJob cat now ]
+    job <- mkJob cat now
+    pushJobXml con autotest_spaceId [ job ]
 
 timed now (S.Competition name mcs) = 
     let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]
