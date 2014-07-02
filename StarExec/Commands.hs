@@ -9,7 +9,8 @@ module StarExec.Commands
   , getJobInfo
   , getBenchmarkInfo
   , getSolverInfo
-  , pushJobXml, Job (..) -- FIXME: move to some other module
+  , pushJobXML, Job (..) -- FIXME: move to some other module
+  , getSpaceXML
   ) where
 
 import Import
@@ -42,6 +43,7 @@ import Data.CaseInsensitive ()
 import Control.Monad ( guard )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
+import Data.List ( isSuffixOf )
 
 (+>) = BS.append
 
@@ -199,22 +201,26 @@ getSpaceXML (sec, man, cookies) spaceId = do
   resp <- sendRequest (req, man, cookies)
 
   let archive = Zip.toArchive $ responseBody resp
-  space <- case Zip.zEntries archive of
-      es -> do
-          liftIO $ print es
-          liftIO $ print $ length es
-{-
-            [entry] -> do
-              let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
-              case eitherVector of
-                Left msg -> do
-                  liftIO $ putStrLn msg
-                  return Nothing
-                Right (_, jobInfos) ->
-                  return $ Just $ map insertId $ Vector.toList jobInfos
-            [] -> return Nothing
--}
-  return Nothing
+      xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 
+                 $ Zip.zEntries archive 
+  let spaces =  case xml_entries of
+        [ e ] -> do
+          let c = cursorFromDOM $ Zip.fromEntry e
+              root = laxElement "tns:Spaces" c >>= child
+              walk :: [ Cursor ] -> [ Space ]
+              walk root = root >>= laxElement "Space" >>= \ s -> return
+                     Space { benchmarks = map ( read . T.unpack )
+                             $ child s >>= laxElement "benchmark" >>= attribute "id" 
+                           , children = [] -- FIXME: child s >>= walk 
+                           }
+          walk root
+        _ -> []
+
+  case spaces of
+      [s] -> return $ Just s
+      _ -> do
+          liftIO $ putStrLn "====== no space ======"
+          return Nothing
     
 
 getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
@@ -299,8 +305,8 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
-pushJobXml :: StarExecConnection -> Int -> [Job] -> Handler [Job]
-pushJobXml (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
+pushJobXML :: StarExecConnection -> Int -> [Job] -> Handler [Job]
+pushJobXML (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just bs -> do
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 

@@ -119,6 +119,7 @@ library
                  , xml-hamlet
                  , case-insensitive
                  , http-client
+                 , random
 
 executable         star-exec-presenter
     if flag(library-only)

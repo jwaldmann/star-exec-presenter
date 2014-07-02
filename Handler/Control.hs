@@ -23,12 +23,15 @@ controlForm = renderDivs $ Login
         <$> areq textField "user" Nothing
         <*> areq passwordField "pass" Nothing 
 
+benches bs = do Bench b <- bs ; return b
+alls bs = do All b <- bs ; return b
+hierarchies bs = do Hierarchy b <- bs ; return b
+
 getControlR :: Handler Html
 getControlR = do
     (widget,enctype) <- generateFormPost $ controlForm
     let comp = tc2014
-    defaultLayout 
-        $(widgetFile "control")
+    defaultLayout $(widgetFile "control")
 
 postControlR :: Handler Html
 postControlR = do
