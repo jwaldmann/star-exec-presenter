@@ -88,66 +88,66 @@ tc2014 = Competition "Termination Competition 2014"
        [ standard "TRS Standard"  [ Bench 935202 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
-           , Participant "AProVE" ( Just ( 1185, 1611  ) )
+           , Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ Bench 936511 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
-           , Participant "AProVE" ( Just ( 1185, 1611  ) )
+           , Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "TRS Relative"  [ Bench 936234 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 1185, 1611  ) )
+           , Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
        , standard "SRS Relative"  [ Bench 943491 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 1185, 1611  ) )
+           , Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
       , certified "TRS Standard certified"  [ Bench 935202 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
-           , Participant "AProVE" ( Just ( 1185, 1613  ) )
+           , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , certified "SRS Standard certified"  [ Bench 936511 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
-           , Participant "AProVE" ( Just ( 1185, 1613  ) )
+           , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , certified "TRS Relative certified"  [ Bench 936234 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "AProVE" ( Just ( 1185, 1613  ) )
+           , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , certified "SRS Relative certified"  [ Bench 943491 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "AProVE" ( Just ( 1185, 1613  ) )
+           , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , standard "TRS Equational"  [ Bench 937617 ]
-           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Conditional"  [ Bench 934159 ]
-           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Context Sensitive"  [ Bench 934738 ]
-           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Innermost"  [ Bench 934641 ]
-           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Outermost"  [ Bench 933838 ]
-           [ Participant "AProVE" ( Just ( 1185, 1611  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
       , certified "TRS Innermost certified"  [ Bench 934641 ]
-           [ Participant "AProVE" ( Just ( 1185, 1613  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , certified "TRS Outermost certified"  [ Bench 933838 ]
-           [ Participant "AProVE" ( Just ( 1185, 1613  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
       , standard "Higher-Order rewriting (union beta)"  [ Bench 933481 ]
            [ Participant "Wanda" ( Just (1542, 2390))
@@ -155,11 +155,11 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , standard "Integer Transition Systems"  [ Bench 963614 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
-           , Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
+           , Participant "AProVE" ( Just ( 1664, 2614 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
      , standard "Integer TRS"  [ Bench 956021 ]
-           [ Participant "AProVE" Nothing -- ( Just ( 1185,   ) )
+           [ Participant "AProVE" ( Just ( 1664, 2617  ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
@@ -174,7 +174,7 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , standard "Runtime Complexity - Innermost Rewriting"  [ Bench 931609 ]
            [ Participant "TCT" ( Just (1620, 2515))
-           , Participant "AProVE" ( Just ( 1185, 1611 ) )
+           , Participant "AProVE" ( Just ( 1664, 2619 ) )
            ]
      , certified "Derivational Complexity - Full Rewriting certified"  [ Bench 941674 ]
            [ Participant "CaT" ( Just (1343, 1953))
@@ -188,20 +188,20 @@ tc2014 = Competition "Termination Competition 2014"
      ]
    , MetaCategory "Termination of Programming Languages"
      [ standard "C"  [ Bench 964659 ]
-           [ Participant "AProVE" ( Just ( 1185,  1608 ) )
+           [ Participant "AProVE" ( Just ( 1664,  2618 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
-           , Participant "Ultimate Buchi Automizer" (Just (1433, 2221))
+           , Participant "Ultimate Buchi Automizer" (Just (1660, 2607))
            , Participant "lsi.upc tool" Nothing
            ]
      , standard "Java"  [ Bench 933941 ]
-           [ Participant "AProVE" ( Just ( 1185, 1612  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2620  ) )
            , Participant "Julia" Nothing
            ]
      , standard "Logic Programming"  [ Bench 933167 ]
-           [ Participant "AProVE" ( Just ( 1185, 1667  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2616  ) )
            ]
      , standard "Functional Programming"  [ Bench 930016 ]
-           [ Participant "AProVE" ( Just ( 1185, 1606  ) )
+           [ Participant "AProVE" ( Just ( 1664, 2613  ) )
            ]
      ]
    ]
