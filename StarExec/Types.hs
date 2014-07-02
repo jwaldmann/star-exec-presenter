@@ -117,6 +117,14 @@ data SpaceInfo = SpaceInfo
   , spaceDescription :: Description
   } deriving (Show, Eq)
 
+-- | this is (some of) the data in the xml file returned by download-space-XML
+-- (for the moment, only benchmarks, ignoring permissions and solvers)
+data Space = Space 
+   { children :: [Space]
+   , benchmarks :: [ Int ]
+   } deriving ( Show, Eq )
+
+
 {-
 -}
 data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER
