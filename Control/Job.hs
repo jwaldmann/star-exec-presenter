@@ -5,7 +5,7 @@ import Import
 import qualified Data.Text as T
 
 import StarExec.Registration 
-import StarExec.Commands (pushJobXml, Job (..))
+import StarExec.Commands (pushJobXML, Job (..), getSpaceXML)
 import StarExec.Connection (getConnection)
 import StarExec.Types (JobIds(..))
 import qualified StarExec.Types as S
@@ -15,6 +15,7 @@ import Control.Monad ( guard, forM )
 import Data.Char (isAlphaNum)
 import Data.Maybe (catMaybes)
 import qualified Data.Map.Strict as M
+import System.Random
 
 autotest_spaceId = 52915 :: Int
 termination_queueId = 478 :: Int
@@ -29,7 +30,7 @@ pushmetacat mc = do
     jobs <- forM (categories mc) $ \ cat ->  do 
             mkJob cat now
     con <- getConnection
-    js <- pushJobXml con autotest_spaceId jobs
+    js <- pushJobXML con autotest_spaceId jobs
     let m = M.fromList $ do
             j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -42,7 +43,7 @@ pushcomp c = do
     jobs <- forM ( metacategories c >>= categories ) $ \ cat -> do 
             mkJob cat now
     con <- getConnection
-    js <- pushJobXml con autotest_spaceId jobs
+    js <- pushJobXML con autotest_spaceId jobs
     let m = M.fromList $ do
             j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -55,9 +56,38 @@ repair = T.map ( \ c -> if isAlphaNum c then c else ' ' )
 
 compact = T.unwords . map (T.take 5) . T.words
 
+
+-- FIXME: getspaceXML should be DB-cached
+select_benchmarks num bs = do
+    con <- getConnection
+    bmss <- forM bs $ \ b -> case b of
+        Bench { bench = id } -> do
+            return [id]
+        All { space = id } -> do
+            s <- getSpaceXML con id
+            return $ case s of
+                Nothing -> []
+                Just s -> S.benchmarks s                
+        Hierarchy { space = id } -> do
+            error "select benchmarks from hierarchy not implemented"
+    let bms = concat bmss
+    bms' <- liftIO $ permute bms
+    return $ take num bms'
+
+permute [] = return []
+permute (x:xs) = do
+    ys <- permute xs
+    k <- randomRIO (0,length ys)
+    let (pre,post) = splitAt k ys
+    return $ pre ++ x : post
+
+
+mkJob :: Category Catinfo -> UTCTime -> Handler Job
 mkJob cat now = do
     let ci = contents cat 
         (+>) = T.append
+    -- FIXME: number (10) must be configurable
+    bs <- select_benchmarks 10 $ benchmarks ci
     return $ Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
@@ -68,7 +98,7 @@ mkJob cat now = do
          , cpu_timeout = 240
          , start_paused = False
          , jobpairs = do 
-               Bench { bench = b } <- benchmarks ci
+               b <- bs
                Participant { solver_config = Just (s,c) } <- participants ci
                return ( b, c )
          , jobid = Nothing
@@ -79,7 +109,7 @@ pushcatjobs cat = do
     now <- liftIO getCurrentTime
     con <- getConnection
     job <- mkJob cat now
-    pushJobXml con autotest_spaceId [ job ]
+    pushJobXML con autotest_spaceId [ job ]
 
 timed now (S.Competition name mcs) = 
     let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]

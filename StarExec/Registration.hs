@@ -82,125 +82,130 @@ standard n bs ps = Category {  categoryName = n , contents =
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 135 , benchmarks = bs , participants = ps } }
 
+der95 = All 12360
+zan04 = All 12391
+mixed_rel_srs = All 12512
+mixed_rel_trs = All 12381
+
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-       [ standard "TRS Standard"  [ Bench 935202 ]
+       [ standard "TRS Standard"  [ der95 ] 
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
-       , standard "SRS Standard"  [ Bench 936511 ]
+       , standard "SRS Standard"  [ zan04 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-       , standard "TRS Relative"  [ Bench 936234 ]
+       , standard "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
-       , standard "SRS Relative"  [ Bench 943491 ]
+       , standard "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
-      , certified "TRS Standard certified"  [ Bench 935202 ]
+      , certified "TRS Standard certified"  [ der95 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , certified "SRS Standard certified"  [ Bench 936511 ]
+      , certified "SRS Standard certified"  [ zan04 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , certified "TRS Relative certified"  [ Bench 936234 ]
+      , certified "TRS Relative certified"  [ mixed_rel_trs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , certified "SRS Relative certified"  [ Bench 943491 ]
+      , certified "SRS Relative certified"  [ mixed_rel_srs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , standard "TRS Equational"  [ Bench 937617 ]
+      , standard "TRS Equational"  [ All 12399  ]
            [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Conditional"  [ Bench 934159 ]
+      , standard "TRS Conditional"  [ All 12330 ]
            [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Context Sensitive"  [ Bench 934738 ]
+      , standard "TRS Context Sensitive"  [ All 12345 ]
            [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Innermost"  [ Bench 934641 ]
+      , standard "TRS Innermost"  [ All 12341 ]
            [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Outermost"  [ Bench 933838 ]
+      , standard "TRS Outermost"  [ All 12316 ]
            [ Participant "AProVE" ( Just ( 1664, 2619  ) )
            ]
-      , certified "TRS Innermost certified"  [ Bench 934641 ]
+      , certified "TRS Innermost certified"  [ All 12341 ]
            [ Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , certified "TRS Outermost certified"  [ Bench 933838 ]
+      , certified "TRS Outermost certified"  [ All 12316 ]
            [ Participant "AProVE" ( Just ( 1664, 2615  ) )
            ]
-      , standard "Higher-Order rewriting (union beta)"  [ Bench 933481 ]
+      , standard "Higher-Order rewriting (union beta)"  [ All 12306 ]
            [ Participant "Wanda" ( Just (1542, 2390))
            , Participant "THOR" Nothing
            ]
-     , standard "Integer Transition Systems"  [ Bench 963614 ]
+     , standard "Integer Transition Systems"  [ All 51335 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "AProVE" ( Just ( 1664, 2614 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
-     , standard "Integer TRS"  [ Bench 956021 ]
+     , standard "Integer TRS"  [ All 37558  ]
            [ Participant "AProVE" ( Just ( 1664, 2617  ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
-     [ standard "Derivational Complexity - Full Rewriting"  [ Bench 941674 ]
+     [ standard "Derivational Complexity - Full Rewriting"  [ All 12473 ]
            [ Participant "TCT" ( Just (1620, 2518))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , standard "Runtime Complexity - Full Rewriting"  [ Bench 937691 ]
+     , standard "Runtime Complexity - Full Rewriting"  [ All 12402 ]
            [ Participant "TCT" ( Just (1620, 2516))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , standard "Runtime Complexity - Innermost Rewriting"  [ Bench 931609 ]
+     , standard "Runtime Complexity - Innermost Rewriting"  [ All 12258 ]
            [ Participant "TCT" ( Just (1620, 2515))
            , Participant "AProVE" ( Just ( 1664, 2619 ) )
            ]
-     , certified "Derivational Complexity - Full Rewriting certified"  [ Bench 941674 ]
+     , certified "Derivational Complexity - Full Rewriting certified" [ All 12473 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , certified "Runtime Complexity - Full Rewriting certified"  [ Bench 937691 ]
+     , certified "Runtime Complexity - Full Rewriting certified"   [ All 12402 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , certified "Runtime Complexity - Innermost Rewriting certified"  [ Bench 931609 ]
+     , certified "Runtime Complexity - Innermost Rewriting certified"  [ All 12258 ]
            [ 
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
-     [ standard "C"  [ Bench 964659 ]
+     [ standard "C"  [ All 32448 ]
            [ Participant "AProVE" ( Just ( 1664,  2618 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "Ultimate Buchi Automizer" (Just (1660, 2607))
            , Participant "lsi.upc tool" Nothing
            ]
-     , standard "Java"  [ Bench 933941 ]
+     , standard "Java"  [ All 12322 ]
            [ Participant "AProVE" ( Just ( 1664, 2620  ) )
            , Participant "Julia" Nothing
            ]
-     , standard "Logic Programming"  [ Bench 933167 ]
+     , standard "Logic Programming"  [ All 12293 ]
            [ Participant "AProVE" ( Just ( 1664, 2616  ) )
            ]
-     , standard "Functional Programming"  [ Bench 930016 ]
+     , standard "Functional Programming"  [ All 12254 ]
            [ Participant "AProVE" ( Just ( 1664, 2613  ) )
            ]
      ]
