@@ -1,6 +1,8 @@
-$if null competitions
-    <h1>Sorry, currently no competitions to be listet
+<h2>Test runs for preparing the Termination Competition 2014
+
+$if null competitionInfos
+    <h1>Sorry, currently no test runs to be listed
 $else
     <ul>
-        $forall comp <- competitions
-            <li><a href=@{CompetitionWithConfigR comp}>#{getCompetitionName comp}</a>
+        $forall ci <- competitionInfos
+            <li><a href=@{CompetitionWithConfigR $ competitionInfoCompetition ci}>#{getCompetitionName $ competitionInfoCompetition ci}</a>

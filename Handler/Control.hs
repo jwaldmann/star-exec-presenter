@@ -32,7 +32,6 @@ getControlR = do
 
 postControlR :: Handler Html
 postControlR = do
-    liftIO $ putStrLn "========= yay"
     ((result,widget),enctype) <- runFormPost $ \ mu -> do
         (res,widg) <- controlForm mu        
         Just e <- askParams -- FIXME
@@ -50,7 +49,7 @@ postControlR = do
         Nothing -> return ()
         Just c -> do
             now <- liftIO getCurrentTime
-            runDB $ insert $ CompetitionInfo c now
+            runDB $ insert $ CompetitionInfo ( timed now c ) now
             return ()
     defaultLayout $ do
         [whamlet|<h2>Result of previous command

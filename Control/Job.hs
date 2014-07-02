@@ -82,6 +82,10 @@ pushcatjobs cat = do
     con <- getConnection
     pushJobXml con autotest_spaceId [ mkJob cat now ]
 
+timed now (S.Competition name mcs) = 
+    let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]
+    in  S.Competition name' mcs
+
 convertComp :: Competition (Catinfo,  [Int]) 
         -> S.Competition
 convertComp c = S.Competition (competitionName c) 
