@@ -93,66 +93,66 @@ tc2014 = Competition "Termination Competition 2014"
        [ standard "TRS Standard"  [ der95 ] 
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
-           , Participant "AProVE" ( Just ( 1664, 2619  ) )
+           , Participant "AProVE" ( Just ( 1681, 2656 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "SRS Standard"  [ zan04 ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
-           , Participant "AProVE" ( Just ( 1664, 2619  ) )
+           , Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
        , standard "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 1664, 2619  ) )
+           , Participant "AProVE" ( Just ( 1681, 2656  ) )
            ]
        , standard "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 1664, 2619  ) )
+           , Participant "AProVE" ( Just ( 1681, 2656  ) )
            ]
       , certified "TRS Standard certified"  [ der95 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
-           , Participant "AProVE" ( Just ( 1664, 2615  ) )
+           , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "SRS Standard certified"  [ zan04 ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
-           , Participant "AProVE" ( Just ( 1664, 2615  ) )
+           , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "TRS Relative certified"  [ mixed_rel_trs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "AProVE" ( Just ( 1664, 2615  ) )
+           , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "SRS Relative certified"  [ mixed_rel_srs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "AProVE" ( Just ( 1664, 2615  ) )
+           , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , standard "TRS Equational"  [ All 12399  ]
-           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Conditional"  [ All 12330 ]
-           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Context Sensitive"  [ All 12345 ]
-           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Innermost"  [ All 12341 ]
-           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2619  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Outermost"  [ All 12316 ]
-           [ Participant "AProVE" ( Just ( 1664, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            ]
       , certified "TRS Innermost certified"  [ All 12341 ]
-           [ Participant "AProVE" ( Just ( 1664, 2615  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "TRS Outermost certified"  [ All 12316 ]
-           [ Participant "AProVE" ( Just ( 1664, 2615  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , standard "Higher-Order rewriting (union beta)"  [ All 12306 ]
            [ Participant "Wanda" ( Just (1542, 2390))
@@ -160,11 +160,11 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , standard "Integer Transition Systems"  [ All 51335 ]
            [ Participant "T2" ( Just ( 1373, 2000 ))
-           , Participant "AProVE" ( Just ( 1664, 2614 ))
+           , Participant "AProVE" ( Just ( 1681, 2658 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
      , standard "Integer TRS"  [ All 37558  ]
-           [ Participant "AProVE" ( Just ( 1664, 2617  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2654  ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
@@ -179,7 +179,7 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , standard "Runtime Complexity - Innermost Rewriting"  [ All 12258 ]
            [ Participant "TCT" ( Just (1620, 2515))
-           , Participant "AProVE" ( Just ( 1664, 2619 ) )
+           , Participant "AProVE" ( Just ( 1681, 2656 ) )
            ]
      , certified "Derivational Complexity - Full Rewriting certified" [ All 12473 ]
            [ Participant "CaT" ( Just (1343, 1953))
@@ -193,20 +193,20 @@ tc2014 = Competition "Termination Competition 2014"
      ]
    , MetaCategory "Termination of Programming Languages"
      [ standard "C"  [ All 32448 ]
-           [ Participant "AProVE" ( Just ( 1664,  2618 ) )
+           [ Participant "AProVE" ( Just ( 1681,  2655 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
            , Participant "Ultimate Buchi Automizer" (Just (1660, 2607))
            , Participant "lsi.upc tool" Nothing
            ]
      , standard "Java"  [ All 12322 ]
-           [ Participant "AProVE" ( Just ( 1664, 2620  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2657  ) )
            , Participant "Julia" Nothing
            ]
      , standard "Logic Programming"  [ All 12293 ]
-           [ Participant "AProVE" ( Just ( 1664, 2616  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2653  ) )
            ]
      , standard "Functional Programming"  [ All 12254 ]
-           [ Participant "AProVE" ( Just ( 1664, 2613  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2650  ) )
            ]
      ]
    ]
