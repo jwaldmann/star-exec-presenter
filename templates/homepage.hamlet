@@ -1,10 +1,28 @@
-<h1>_{MsgHello}
+<h1>Termination Competition 2014 
 
-<div>
-  <a href=@{ViewSpaceR 1}>browse Spaces</a>
-<div>
-  <a href=@{CompetitionR "2014"}>view Competition "2014"</a>
-<div>
-  <a href=@{ShowManyJobResultsR $ JobIds [1095, 1217]}>Show Many Job Results of Jobs 1095 and 1217</a>
-<div>
-  <a href=@{ListCompetitionsR}>List Competitions</a>
+<p>The 
+  <a href="http://termination-portal.org/wiki/Termination_Competition_2014">
+     International Termination Competition 2014 
+  will be run on 
+  <a href="http://www.starexec.org">
+     Star-Exec.
+
+<p>We provide here these extra features:
+  <ul>
+    <li>
+      computation and display of results per category, and medalists per meta-category
+    <li>
+      flexible 2-dimensional results tables (x-axis: solver, y-axis: benchmark) (with filters for rows and columns, sorters, etc.)
+    <li>
+      caching (and permanent storage) of results (we intend to include also results of earlier competitions)
+
+
+This site:
+<ul>
+  <li><a href=@{RegisteredR}>registered participants</a>
+  <li><a href=@{ListCompetitionsR}>result data from test runs</a>
+
+Meta-information for this site:
+<ul>
+  <li>built with <a href="http://www.yesodweb.com/">Yesod</a> (Haskell web framework)
+  <li><a href="https://github.com/stefanvonderkrone/star-exec-presenter">source code, issue tracker</a>
