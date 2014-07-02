@@ -18,7 +18,12 @@ import qualified Data.Map.Strict as M
 import System.Random
 
 autotest_spaceId = 52915 :: Int
+
 termination_queueId = 478 :: Int
+all_queueId = 1 :: Int
+
+queueId = all_queueId
+benchmarks_per_space = 25 :: Int
 
 pushcat :: Category Catinfo -> Handler (Category ( Catinfo, [Int] ))
 pushcat cat = do
@@ -86,13 +91,12 @@ mkJob :: Category Catinfo -> UTCTime -> Handler Job
 mkJob cat now = do
     let ci = contents cat 
         (+>) = T.append
-    -- FIXME: number (10) must be configurable
-    bs <- select_benchmarks 10 $ benchmarks ci
+    bs <- select_benchmarks benchmarks_per_space $ benchmarks ci
     return $ Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
          , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show now)
-         , queue_id = termination_queueId
+         , queue_id = queueId
          , mem_limit = 128.0
          , wallclock_timeout = 60
          , cpu_timeout = 240
