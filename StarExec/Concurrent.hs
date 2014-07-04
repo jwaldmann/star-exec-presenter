@@ -131,6 +131,9 @@ runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
 --                mPersistJobInfo' <- getPersistJobInfo _jobId
 --                return $ QueryResult Latest mPersistJobInfo'
 
+resultIsCompleted :: JobResultInfo -> Bool
+resultIsCompleted r = JobResultComplete == jobResultInfoStatus r
+
 runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 runQueryJobResults _jobId = do
   let q = GetJobResults _jobId
@@ -156,6 +159,9 @@ runQueryJobResults _jobId = do
                   runDB $ do
                     mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
                     mapM_ insertUnique results
+                  -- tried automatic polling of job-pair-infos from star-exec, but
+                  -- the app and/or star-exec cannot handle so many requests in short time...
+                  --mapM_ (runQueryJobPair . jobResultInfoPairId) $ filter resultIsCompleted results
                   deleteQuery q
                   liftIO $ putStrLn $ "Job done: " ++ (show q)
             return $ pendingQuery queryKey mPersistJobResults
