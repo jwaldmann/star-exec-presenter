@@ -70,17 +70,10 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getJobResultsWithConnection :: StarExecConnection -> Int -> Handler [JobResultInfo]
-getJobResultsWithConnection con _jobId = do
-  mResults <- SEC.getJobResults con _jobId
-  return $ case mResults of
-    Just result -> result
-    Nothing     -> []
-
 getJobResultsFromStarExec :: Int -> Handler [JobResultInfo]
 getJobResultsFromStarExec _jobId = do
   con <- getConnection
-  getJobResultsWithConnection con _jobId
+  SEC.getJobResults con _jobId
 
 queryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 queryJobResults _jobId = do
@@ -171,10 +164,10 @@ getJobResults _jobId = do
           if jobInfoStatus ji == Complete
             then do
               insertJobInfo ji
-              jobResults <- getJobResultsWithConnection con _jobId
+              jobResults <- SEC.getJobResults con _jobId
               mapM_ dbInsertJobResult jobResults
               getPersistJobResults _jobId
-            else getJobResultsWithConnection con _jobId
+            else SEC.getJobResults con _jobId
     -- job is completed
     Just _ -> getPersistJobResults _jobId
 

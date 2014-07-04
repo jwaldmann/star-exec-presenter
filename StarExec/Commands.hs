@@ -258,8 +258,7 @@ getSolverInfo (sec, man, cookies) _solverId = do
       return $ Just $ constructSolverInfo
         _solverId solverTitle $ tds
 
--- TODO either Maybe or List^^
-getJobResults :: StarExecConnection -> Int -> Handler (Maybe [JobResultInfo])
+getJobResults :: StarExecConnection -> Int -> Handler [JobResultInfo]
 getJobResults (sec, man, cookies) _jobId = do
   let req = sec { method = "GET"
                 , path = downloadPath
@@ -275,10 +274,10 @@ getJobResults (sec, man, cookies) _jobId = do
               case eitherVector of
                 Left msg -> do
                   liftIO $ putStrLn msg
-                  return Nothing
+                  return []
                 Right (_, jobInfos) ->
-                  return $ Just $ map insertId $ Vector.toList jobInfos
-            [] -> return Nothing
+                  return $ map insertId $ Vector.toList jobInfos
+            [] -> return []
   return jobs
 
 getJobPairInfo :: StarExecConnection -> Int -> Handler (Maybe JobPairInfo)

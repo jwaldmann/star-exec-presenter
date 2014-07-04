@@ -142,13 +142,13 @@ runQueryJobResults _jobId = do
           Just queryKey -> do
             runConcurrent (queryExceptionHandler q) $ do
               con <- getConnection
-              mResults <- getJobResults con _jobId
-              case mResults of
-                Nothing -> deleteQuery q
-                Just rs -> do
+              results <- getJobResults con _jobId
+              if null results
+                then deleteQuery q
+                else do
                   runDB $ do
-                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) rs
-                    mapM_ insertUnique rs
+                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
+                    mapM_ insertUnique results
                   deleteQuery q
                   liftIO $ putStrLn $ "Job done: " ++ (show q)
             return $ pendingQuery queryKey mPersistJobResults
