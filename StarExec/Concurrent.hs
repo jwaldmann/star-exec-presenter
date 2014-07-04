@@ -66,6 +66,7 @@ runQueryJobInfo _jobId = do
         return $ pendingQuery (entityKey eq) mPersistJobInfo
       Nothing -> do
         mKey <- insertQuery q
+        -- possible bug, test for Just and Nothing!
         runConcurrent (queryExceptionHandler q) $ do
           con <- getConnection
           mJobInfo <- getJobInfo con _jobId
@@ -90,6 +91,7 @@ runQueryJobResults _jobId = do
         return $ pendingQuery (entityKey eq) mPersistJobResults
       Nothing -> do
         mKey <- insertQuery q
+        -- possible bug, test for Just and Nothing!
         runConcurrent (queryExceptionHandler q) $ do
           con <- getConnection
           mResults <- getJobResults con _jobId
@@ -113,6 +115,7 @@ runQueryJobPair _pairId = do
         return $ pendingQuery (entityKey eq) mPersistJobPair
       Nothing -> do
         mKey <- insertQuery q
+        -- possible bug, test for Just and Nothing!
         runConcurrent (queryExceptionHandler q) $ do
           con <- getConnection
           mJobPair <- getJobPairInfo con _pairId
@@ -137,6 +140,7 @@ runQueryBenchmarkInfo _benchId = do
         return $ pendingQuery (entityKey eq) mPersistBenchmarkInfo
       Nothing -> do
         mKey <- insertQuery q
+        -- possible bug, test for Just and Nothing!
         runConcurrent (queryExceptionHandler q) $ do
           con <- getConnection
           mBenchmarkInfo <- getBenchmarkInfo con _benchId
@@ -161,6 +165,7 @@ runQuerySolverInfo _solverId = do
         return $ pendingQuery (entityKey eq) mPersistSolverInfo
       Nothing -> do
         mKey <- insertQuery q
+        -- possible bug, test for Just and Nothing!
         runConcurrent (queryExceptionHandler q) $ do
           con <- getConnection
           mSolverInfo <- getSolverInfo con _solverId
