@@ -8,7 +8,7 @@
         <td>
           <table class="table table-condensed">
             <tbody>
-              $forall (mRank, solver, score) <- take 3 $ metaCategoryRanking compMetaResults
+              $forall (mRank, solver, score) <- metaCategoryRanking compMetaResults
                 <tr>
                   $maybe rank <- mRank
                     <td>#{show rank}.
