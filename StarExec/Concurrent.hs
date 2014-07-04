@@ -59,27 +59,32 @@ runQueryBase q handler = do
 runQueryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
 runQueryJobInfo _jobId = do
   let q = GetJobInfo _jobId
+  mPersistJobInfo <- getPersistJobInfo _jobId
   runQueryBase q $ \mQuery ->
     case mQuery of
-      Just eq -> do
-        mPersistJobInfo <- getPersistJobInfo _jobId
-        return $ pendingQuery (entityKey eq) mPersistJobInfo
+      Just eq -> return $ pendingQuery (entityKey eq) mPersistJobInfo
       Nothing -> do
         mKey <- insertQuery q
-        -- possible bug, test for Just and Nothing!
-        runConcurrent (queryExceptionHandler q) $ do
-          con <- getConnection
-          mJobInfo <- getJobInfo con _jobId
-          case mJobInfo of
-            Nothing -> deleteQuery q
-            Just ji -> do
-              currentTime <- getTime
-              _ <- runDB $ do
-                deleteBy $ UniqueJobInfo _jobId
-                insertUnique $ ji { jobInfoLastUpdate = currentTime }
-              deleteQuery q
-              liftIO $ putStrLn $ "Job done: " ++ (show q)
-        return $ pendingQuery (fromJust mKey) Nothing
+        case mKey of
+          Just queryKey -> do
+            runConcurrent (queryExceptionHandler q) $ do
+              con <- getConnection
+              mJobInfo <- getJobInfo con _jobId
+              case mJobInfo of
+                Nothing -> deleteQuery q
+                Just ji -> do
+                  currentTime <- getTime
+                  _ <- runDB $ do
+                    deleteBy $ UniqueJobInfo _jobId
+                    insertUnique $ ji { jobInfoLastUpdate = currentTime }
+                  deleteQuery q
+                  liftIO $ putStrLn $ "Job done: " ++ (show q)
+            return $ pendingQuery queryKey mPersistJobInfo
+          Nothing -> do
+            mQuery' <- getQuery q
+            case mQuery' of
+              Just eq -> return $ pendingQuery (entityKey eq) mPersistJobInfo
+              Nothing -> runQueryJobInfo _jobId
 
 runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 runQueryJobResults _jobId = do

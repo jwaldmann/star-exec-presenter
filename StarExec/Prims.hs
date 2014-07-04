@@ -136,7 +136,7 @@ eitherInfo (Left msg) _ = Left msg
 
 parsePrimInfo :: StarExecListType -> [Text] -> Either String PrimInfo
 parsePrimInfo Jobs       info = eitherInfo (getJobInfoFromTexts info) PrimJobInfo
---parsePrimInfo Spaces     info = eitherInfo (getSpaceInfoFromTexts info) PrimSpaceInfo
+parsePrimInfo Spaces     info = eitherInfo (getSpaceInfoFromTexts info) PrimSpaceInfo
 parsePrimInfo Benchmarks info = eitherInfo (getBenchmarkInfoFromTexts info) PrimBenchmarkInfo
 --parsePrimInfo Users      info = eitherInfo (getUserInfoFromTexts info) PrimUserInfo
 parsePrimInfo Solvers    info = eitherInfo (getSolverInfoFromTexts info) PrimSolverInfo
@@ -236,17 +236,17 @@ getBenchmarkInfoFromTexts _ = Left "parse error in getBenchmarkInfoFromTexts"
 --        }
 --getUserInfoFromTexts _ = Left "parse error in getUserInfoFromTexts"
 
---getSpaceInfoFromTexts :: [Text] -> Either String SpaceInfo
---getSpaceInfoFromTexts 
---  (idAndName:desc:_) = 
---    let (pid, pname) = parsePrimIdAndName idAndName
---    in Right $ SpaceInfo
---        { spaceId = pid
---        , spaceParentId = Nothing
---        , spaceName = pname
---        , spaceDescription = desc
---        }
---getSpaceInfoFromTexts _ = Left "parse error in getSpaceInfoFromTexts"
+getSpaceInfoFromTexts :: [Text] -> Either String SpaceInfo
+getSpaceInfoFromTexts 
+  (idAndName:desc:_) = 
+    let (pid, pname) = parsePrimIdAndName idAndName
+    in Right $ SpaceInfo
+        { spaceId = pid
+        , spaceParentId = Nothing
+        , spaceName = pname
+        , spaceDescription = desc
+        }
+getSpaceInfoFromTexts _ = Left "parse error in getSpaceInfoFromTexts"
 
 getSolverInfoFromTexts :: [Text] -> Either String SolverInfo
 getSolverInfoFromTexts

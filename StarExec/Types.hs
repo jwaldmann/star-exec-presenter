@@ -5,15 +5,11 @@ module StarExec.Types where
 import Prelude
 import Yesod
 import qualified Data.Text as T
-import Data.Text.Encoding
 import Data.Time.Clock
 import Text.Blaze
 import Text.Blaze.Internal
-import Control.Applicative
 import Network.HTTP.Conduit
 import GHC.Generics
-import qualified Data.Csv as CSV
-import Yesod.Core
 
 type Email = T.Text
 type Password = T.Text
@@ -176,6 +172,7 @@ instance PathPiece ErrorID where
 newtype JobIds = JobIds [Int]
   deriving (Show, Eq, Read)
 
+getids :: JobIds -> [Int]
 getids (JobIds ids) = ids
 
 instance PathMultiPiece JobIds where
@@ -238,6 +235,7 @@ instance PathPiece Competition where
   data-type for concurrent work
 -}
 data QueryStatus k = Pending (Key k) | Latest
+  deriving (Show)
 data QueryResult k a = QueryResult
   { queryStatus :: QueryStatus k
   , queryResult :: a

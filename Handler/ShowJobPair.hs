@@ -7,6 +7,6 @@ import StarExec.Persist
 
 getShowJobPairR :: Int -> Handler Html
 getShowJobPairR _pairId = do
-  mPair <- getJobPair _pairId
+  (QueryResult qStatus mPair) <- queryJobPair _pairId
   defaultLayout $ do
     $(widgetFile "show_job_pair")

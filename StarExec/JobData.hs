@@ -108,7 +108,8 @@ queryJobInfo _jobId = do
   case mPersistJobInfo of
     Just persistJobInfo -> do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
-      if since > updateThreshold
+          jobComplete = Complete == jobInfoStatus persistJobInfo
+      if not jobComplete || since > updateThreshold
         then runQueryJobInfo _jobId
         else return $ QueryResult Latest $ Just persistJobInfo
     Nothing -> runQueryJobInfo _jobId

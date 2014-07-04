@@ -7,9 +7,9 @@
 / HomeR GET
 /error/#ErrorID ErrorR GET
 /view_space/#Int ViewSpaceR GET
-/show_job_results/#Int ShowJobResultsR GET
+-- /show_job_results/#Int ShowJobResultsR GET
 /show_job_pair/#Int ShowJobPairR GET
-/show_many_job_results/*JobIds ShowManyJobResultsR GET
+/show_job_results/*JobIds ShowManyJobResultsR GET
 /flexible-table/#Query/*JobIds Flexible_TableR GET
 /competition/#Text CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
