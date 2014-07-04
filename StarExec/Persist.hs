@@ -17,6 +17,9 @@ getPersistJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
 getPersistJobResults :: Int -> Handler [JobResultInfo]
 getPersistJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
 
+getPersistJobResult :: Int -> Handler (Maybe JobResultInfo)
+getPersistJobResult _pairId = getEntity $ UniqueJobResultInfo _pairId
+
 getPersistCompetitions :: Handler [CompetitionInfo]
 getPersistCompetitions = getEntityList [] [ Desc CompetitionInfoDate ]
 

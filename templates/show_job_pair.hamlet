@@ -1,8 +1,16 @@
 $maybe pair <- mPair
   <h1>Overview of the job-pairs #{_pairId}
-    <h3>Stdout:
-    <pre>#{decompressText $ jobPairInfoStdout pair}
-    <h3>Log:
-    <pre>#{decompressText $ jobPairInfoLog pair}
+  $maybe jobInfo <- mJobInfo
+    <p>This job-pair is a result of the job "<a href=@{ShowJobInfoR $ jobInfoStarExecId jobInfo}>#{jobInfoName jobInfo}</a>"<br/>
+      <a href=@{ShowManyJobResultsR $ JobIds [jobInfoStarExecId jobInfo]}>View Job-Results</a>
+    $maybe solverInfo <- mSolverInfo
+      <p>The Solver was "<a href=@{ShowSolverInfoR $ solverInfoStarExecId solverInfo}>#{solverInfoName solverInfo}</a>"
+    $maybe benchInfo <- mBenchmarkInfo
+      <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ benchmarkInfoStarExecId benchInfo}>#{benchmarkInfoName benchInfo}</a>"
+  <h2>The data of the job-pair
+  <h3>Stdout:
+  <pre>#{decompressText $ jobPairInfoStdout pair}
+  <h3>Log:
+  <pre>#{decompressText $ jobPairInfoLog pair}
 $nothing
   <h1>Sorry, no pair with the id #{show _pairId} found!
