@@ -10,14 +10,14 @@ getShowJobPairR _pairId = do
   (QueryResult qStatus mPair) <- queryJobPair _pairId
   mJobResult <- getPersistJobResult _pairId
   (mj, mb, ms) <- case mJobResult of
-                    Nothing -> return (Nothing, Nothing, Nothing)
+                    Nothing -> return (QueryResult Latest Nothing, QueryResult Latest Nothing, QueryResult Latest Nothing)
                     Just jr -> do
                       qmj <- queryJobInfo $ jobResultInfoJobId jr
                       qmb <- queryBenchmarkInfo $ jobResultInfoBenchmarkId jr
                       qms <- querySolverInfo $ jobResultInfoSolverId jr
-                      return (queryResult qmj, queryResult qmb, queryResult qms)
-  let mJobInfo = mj
-      mBenchmarkInfo = mb
-      mSolverInfo = ms
+                      return (qmj, qmb, qms)
+  let mJobInfo = queryResult mj
+      mBenchmarkInfo = queryResult mb
+      mSolverInfo = queryResult ms
   defaultLayout $ do
     $(widgetFile "show_job_pair")

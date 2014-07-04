@@ -270,6 +270,7 @@ getJobResults (sec, man, cookies) _jobId = do
       insertId ji = ji { jobResultInfoJobId = _jobId }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
+              --liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
               let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
               case eitherVector of
                 Left msg -> do

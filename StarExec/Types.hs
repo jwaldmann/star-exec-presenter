@@ -124,12 +124,18 @@ data Space = Space
 {-
 -}
 data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER
-    deriving (Show, Read, Eq)
+   deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 
 instance ToMarkup SolverResult where
-    toMarkup = string . show
-    preEscapedToMarkup = preEscapedString . show
+   toMarkup = string . show
+   preEscapedToMarkup = preEscapedString . show
+
+{-
+-}
+data JobResultStatus = JobResultComplete | JobResultRunning | JobResultOther T.Text
+  deriving (Show, Read, Eq)
+derivePersistField "JobResultStatus"
 
 {-
 -}

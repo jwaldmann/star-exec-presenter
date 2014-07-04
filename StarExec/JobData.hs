@@ -174,6 +174,9 @@ getJobResults _jobId = do
 getManyJobResults :: [Int] -> Handler [[JobResultInfo]] 
 getManyJobResults = mapM getJobResults
 
+queryManyJobResults :: [Int] -> Handler [QueryResult QueryInfo [JobResultInfo]]
+queryManyJobResults = mapM queryJobResults
+
 getJobPair :: Int -> Handler (Maybe JobPairInfo)
 getJobPair _pairId = do
   mPair <- runDB $ getBy $ UniqueJobPairInfo _pairId

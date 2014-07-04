@@ -23,8 +23,9 @@ toTuples (i, solvers) = map ((,) i) solvers
 
 getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
-  pJobs <- getManyJobResults ids
-  let jobs = pJobs
+  qJobs <- queryManyJobResults ids
+  let pJobs = map queryResult qJobs
+      jobs = pJobs
       jobResults = concat jobs
       benchmarks = L.sortBy compareBenchmarks $
                     getInfo extractBenchmark $ jobResults
