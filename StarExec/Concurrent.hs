@@ -137,22 +137,17 @@ resultIsCompleted r = JobResultComplete == jobResultInfoStatus r
 runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 runQueryJobResults _jobId = do
   let q = GetJobResults _jobId
-  --debugTrace $ "### starting " ++ (show q)
   mPersistJobResults <- getPersistJobResults _jobId
   runQueryBase q $ \mQuery ->
     case mQuery of
-      Just eq -> do
-        --debugTrace $ "### query is pending: " ++ (show q)
-        return $ pendingQuery (entityKey eq) mPersistJobResults
+      Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults
       Nothing -> do
         mKey <- insertQuery q
         case mKey of
           Just queryKey -> do
-            --debugTrace $ "### starting concurrent action: " ++ (show q)
             runConcurrent (queryExceptionHandler q) $ do
               con <- getConnection
               results <- getJobResults con _jobId
-              --debugTrace $ "### got some results from star-exec: " ++ (show q) ++ " " ++ (show $ length results)
               if null results
                 then deleteQuery q
                 else do
@@ -166,7 +161,6 @@ runQueryJobResults _jobId = do
                   liftIO $ putStrLn $ "Job done: " ++ (show q)
             return $ pendingQuery queryKey mPersistJobResults
           Nothing -> do
-            --debugTrace $ "### currently there is a pending query: " ++ (show q)
             mQuery' <- getQuery q
             case mQuery' of
               Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults

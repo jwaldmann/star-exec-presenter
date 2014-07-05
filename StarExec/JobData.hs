@@ -141,7 +141,9 @@ queryJobPair _pairId = do
   mPersistPairInfo <- getPersistJobPair _pairId
   case mPersistPairInfo of
     Just persistPairInfo -> do
-      return $ QueryResult Latest $ Just persistPairInfo
+      if jobPairInfoResultStatus persistPairInfo == JobResultComplete
+        then return $ QueryResult Latest $ Just persistPairInfo
+        else runQueryJobPair _pairId
     Nothing -> runQueryJobPair _pairId
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)

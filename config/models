@@ -36,6 +36,7 @@ JobPairInfo
     UniqueJobPairInfo pairId
     stdout ByteString
     log ByteString
+    resultStatus JobResultStatus
     deriving Show
 
 JobInfo

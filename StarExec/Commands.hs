@@ -24,6 +24,7 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
 import StarExec.Types
 import StarExec.Urls
+import StarExec.Persist
 import StarExec.Connection
 import StarExec.Prims (defaultDate)
 import qualified Codec.Archive.Zip as Zip
@@ -297,9 +298,14 @@ getJobPairInfo (sec, man, cookies) _pairId = do
     then return Nothing
     else do
       respLog <- sendRequest (reqLog, man, responseCookieJar respStdout)
+      mPersistJobResult <- getPersistJobResult _pairId
+      let resultStatus = case mPersistJobResult of
+                            Nothing -> JobResultUndetermined
+                            Just jr -> jobResultInfoStatus jr
       return $ Just $ JobPairInfo _pairId
                                   (BSL.toStrict $ compress $ responseBody respStdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
+                                  resultStatus
 
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
