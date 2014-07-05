@@ -8,6 +8,7 @@ import StarExec.Registration
 import StarExec.Connection (getLoginCredentials)
 import StarExec.Types (Login(..))
 import StarExec.Persist
+import StarExec.Commands (Job(..))
 
 import Control.Monad ( guard )
 import qualified StarExec.Types as S
@@ -23,6 +24,23 @@ controlForm = renderDivs $ Login
         <$> areq textField "user" Nothing
         <*> areq passwordField "pass" Nothing 
 
+{-
+
+jobstartForm :: Form Job
+jobstartForm = renderDivs $ Job 
+        <$> pure 0
+        <*> pure "description (set by starter)"
+        <*> pure "job_name (set by starter)"
+        <*> areq (radioFieldList [("Termination.q",478),("all.q",1),("all2.q",4)]) "queue" (Just 478)
+        <*> areq (radioFieldList [("128", 128), ("256", 256)]) "mem_limit" (Just 128)
+        <*> areq (radioFieldList [("60", 60)]) "wallclock_timeout" (Just 60)
+        <*> areq (radioFieldList [("240", 240)]) "cpu_timeout" (Just 240)
+        <*> areq (radioFieldList [("true", True), ("false", False)]) "start_paused" (Just False)
+        <*> pure []
+        <*> pure Nothing
+
+-}
+
 benches bs = do Bench b <- bs ; return b
 alls bs = do All b <- bs ; return b
 hierarchies bs = do Hierarchy b <- bs ; return b
@@ -37,15 +55,17 @@ postControlR :: Handler Html
 postControlR = do
     ((result,widget),enctype) <- runFormPost $ \ mu -> do
         (res,widg) <- controlForm mu        
-        Just e <- askParams -- FIXME
-        Just [con] <- return $ M.lookup "control" e
-        return (fmap ((,) con) res , widg )
+        Just env <- askParams -- FIXME
+        return (fmap ((,) env) res , widg )
     let comp = tc2014
     cred <- getLoginCredentials
+
     mc <- case result of
-            FormSuccess (con, s) -> 
+            FormSuccess (env, s) -> 
                 if s == cred
-                then startjobs con
+                then do
+                    Just [con] <- return $ M.lookup "control" env
+                    startjobs con
                 else return Nothing
             _ -> return Nothing
     case mc of 
@@ -66,7 +86,7 @@ $nothing
 startjobs con = 
       checkPrefix "cat:"  con startCat
     $ checkPrefix "mc:" con startMC
---  $ checkPrefix "comp:" con startComp
+    $ checkPrefix "comp:" con startComp
     $ return Nothing
 
 checkPrefix :: T.Text -> T.Text -> ( T.Text -> a ) -> a ->  a

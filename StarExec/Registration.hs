@@ -82,22 +82,29 @@ standard n bs ps = Category {  categoryName = n , contents =
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 135 , benchmarks = bs , participants = ps } }
 
-der95 = All 12360
-zan04 = All 12391
+trss = [ All 12360 -- Der95
+       , All 12347 -- AG01
+       ]
+
+srss = [ All 12391 -- zan04
+       , All 12383 -- Waldm07a
+       , All 12392 -- Waldm07b
+       ]
+
 mixed_rel_srs = All 12512
 mixed_rel_trs = All 12381
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-       [ standard "TRS Standard"  [ der95 ] 
+       [ standard "TRS Standard"  trss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1681, 2656 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            ]
-       , standard "SRS Standard"  [ zan04 ]
+       , standard "SRS Standard"  srss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1681, 2656  ) )
@@ -111,12 +118,12 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 1681, 2656  ) )
            ]
-      , certified "TRS Standard certified"  [ der95 ]
+      , certified "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox" ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
-      , certified "SRS Standard certified"  [ zan04 ]
+      , certified "SRS Standard certified"  srss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "matchbox"  ( Just ( 952, 1192 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )

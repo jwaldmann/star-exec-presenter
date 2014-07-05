@@ -22,7 +22,7 @@ autotest_spaceId = 52915 :: Int
 termination_queueId = 478 :: Int
 all_queueId = 1 :: Int
 
-queueId = all_queueId
+queueId = termination_queueId
 benchmarks_per_space = 25 :: Int
 
 pushcat :: Category Catinfo -> Handler (Category ( Catinfo, [Int] ))
