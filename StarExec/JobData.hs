@@ -103,9 +103,14 @@ queryJobInfo _jobId = do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
           jobComplete = Complete == jobInfoStatus persistJobInfo
       if not jobComplete || since > updateThreshold
-        then runQueryJobInfo _jobId
+        then queryJobInfo' _jobId
         else return $ QueryResult Latest $ Just persistJobInfo
-    Nothing -> runQueryJobInfo _jobId
+    Nothing -> queryJobInfo' _jobId
+  where
+    queryJobInfo' :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
+    queryJobInfo' _jobId = do
+      _ <- runQueryJobResults _jobId
+      runQueryJobInfo _jobId
 
 querySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
 querySolverInfo _solverId = do
