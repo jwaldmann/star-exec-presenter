@@ -43,6 +43,7 @@ instance CSV.FromField JobResultStatus where
             parseResult r
                 | r == "complete" = pure JobResultComplete
                 | r == "running"  = pure JobResultRunning
+                | r == "enqueued" = pure JobResultEnqueued
                 | otherwise       = pure $ JobResultOther s
 
 {-

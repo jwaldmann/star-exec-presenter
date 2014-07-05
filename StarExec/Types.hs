@@ -133,7 +133,7 @@ instance ToMarkup SolverResult where
 
 {-
 -}
-data JobResultStatus = JobResultComplete | JobResultRunning | JobResultOther T.Text | JobResultUndetermined
+data JobResultStatus = JobResultComplete | JobResultRunning | JobResultEnqueued | JobResultOther T.Text | JobResultUndetermined
   deriving (Show, Read, Eq)
 derivePersistField "JobResultStatus"
 
