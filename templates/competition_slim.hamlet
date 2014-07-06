@@ -24,8 +24,8 @@
       <tr>
         <td>
          <div class="container">
-          <label for="categories">show/hide categories
-          <input type="checkbox" id="categories">
+          <label for="label-#{metaCategoryName compMetaResults}">show/hide categories
+          <input type="checkbox" id="label-#{metaCategoryName compMetaResults}">
           <div class="checked-container">
            <table class="table table-condensed">
             <tbody>
