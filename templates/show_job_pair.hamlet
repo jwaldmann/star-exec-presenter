@@ -14,3 +14,4 @@ $maybe pair <- mPair
   <pre>#{decompressText $ jobPairInfoLog pair}
 $nothing
   <h1>Sorry, no pair with the id #{show _pairId} found!
+  (try re-loading this page after a while)

@@ -16,3 +16,4 @@ $maybe solverInfo <- mSolverInfo
 
 $nothing
   <h1>Sorry, no solver with the id #{show _solverId} found!
+  (try re-loading this page after a while)
