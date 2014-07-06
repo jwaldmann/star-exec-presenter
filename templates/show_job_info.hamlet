@@ -20,3 +20,4 @@ $maybe jobInfo <- mJobInfo
 
 $nothing
   <h1>Sorry, no job with the id #{show _jobId} found!
+  (try re-loading this page after a while)

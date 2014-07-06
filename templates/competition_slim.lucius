@@ -1,0 +1,23 @@
+.container {
+
+  input {
+    display: none;
+  }
+
+  label {
+    cursor: pointer;
+    margin-top: 1em;
+  }
+
+  .checked-container {
+    display: none;
+
+    .table {
+      width: auto; 
+    }
+  }
+
+  input:checked + .checked-container {
+    display: block;
+  }
+}

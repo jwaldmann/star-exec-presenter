@@ -16,3 +16,4 @@ $maybe benchInfo <- mBenchmarkInfo
 
 $nothing
   <h1>Sorry, no benchmark with the id #{show _benchmarkId} found!
+  (try re-loading this page after a while)
