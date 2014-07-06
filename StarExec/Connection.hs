@@ -33,11 +33,15 @@ getSessionData = do
 
 writeSessionData :: CookieJar -> UTCTime -> Handler ()
 writeSessionData cj d = do
-  let sessionData = StarExecSessionData 0 (T.pack $ show cj) d
-  _ <- runDB $ do
-    deleteBy $ UniqueStarExecSessionData 0
-    insertUnique sessionData
-  return ()
+  let ct = T.pack $ show cj
+  runDB $ do
+    mPersistSessionData <- getBy $ UniqueStarExecSessionData 0
+    case mPersistSessionData of
+      Just en ->
+        update (entityKey en) [StarExecSessionDataCookies =. ct]
+      Nothing -> do
+        _ <- insertUnique $ StarExecSessionData 0 ct d
+        return ()
 
 user :: Login -> Text
 user (Login u _) = u
