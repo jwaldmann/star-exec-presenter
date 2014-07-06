@@ -168,7 +168,7 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "THOR" Nothing
            ]
      , standard "Integer Transition Systems"  [ All 51335 ]
-           [ Participant "T2" ( Just ( 1373, 2000 ))
+           [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 1681, 2658 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            ]
@@ -203,7 +203,7 @@ tc2014 = Competition "Termination Competition 2014"
    , MetaCategory "Termination of Programming Languages"
      [ standard "C"  [ All 32448 ]
            [ Participant "AProVE" ( Just ( 1681,  2655 ) )
-           , Participant "T2" ( Just ( 1373, 2000 ))
+           , Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "Ultimate Buchi Automizer" (Just (1730, 2738))
            , Participant "lsi.upc tool" Nothing
            ]
