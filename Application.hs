@@ -32,7 +32,7 @@ import Handler.Home
 --import Handler.StarExecLogin
 import Handler.Error
 import Handler.ViewSpace
-import Handler.ShowJobResults
+--import Handler.ShowJobResults
 --import Handler.SearchPrim
 --import Handler.CompareJobs
 import Handler.ShowJobPair

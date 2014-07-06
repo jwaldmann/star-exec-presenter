@@ -36,6 +36,16 @@ instance CSV.FromField SolverResult where
                 | r == "error"      = pure ERROR
                 | otherwise         = pure OTHER
 
+instance CSV.FromField JobResultStatus where
+    parseField result = parseResult s
+        where
+            s = T.toLower $ decodeUtf8 result
+            parseResult r
+                | r == "complete" = pure JobResultComplete
+                | r == "running"  = pure JobResultRunning
+                | r == "enqueued" = pure JobResultEnqueued
+                | otherwise       = pure $ JobResultOther s
+
 {-
 -}
 data PrimInfo = PrimJobInfo JobInfo

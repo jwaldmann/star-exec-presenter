@@ -25,7 +25,7 @@ JobResultInfo
     solverId Int
     configuration Text
     configurationId Int
-    status Text
+    status JobResultStatus
     cpuTime Double
     wallclockTime Double
     result SolverResult
@@ -36,6 +36,7 @@ JobPairInfo
     UniqueJobPairInfo pairId
     stdout ByteString
     log ByteString
+    resultStatus JobResultStatus
     deriving Show
 
 JobInfo

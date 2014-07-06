@@ -70,17 +70,10 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getJobResultsWithConnection :: StarExecConnection -> Int -> Handler [JobResultInfo]
-getJobResultsWithConnection con _jobId = do
-  mResults <- SEC.getJobResults con _jobId
-  return $ case mResults of
-    Just result -> result
-    Nothing     -> []
-
 getJobResultsFromStarExec :: Int -> Handler [JobResultInfo]
 getJobResultsFromStarExec _jobId = do
   con <- getConnection
-  getJobResultsWithConnection con _jobId
+  SEC.getJobResults con _jobId
 
 queryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
 queryJobResults _jobId = do
@@ -108,10 +101,16 @@ queryJobInfo _jobId = do
   case mPersistJobInfo of
     Just persistJobInfo -> do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
-      if since > updateThreshold
-        then runQueryJobInfo _jobId
+          jobComplete = Complete == jobInfoStatus persistJobInfo
+      if not jobComplete || since > updateThreshold
+        then queryJobInfo' _jobId
         else return $ QueryResult Latest $ Just persistJobInfo
-    Nothing -> runQueryJobInfo _jobId
+    Nothing -> queryJobInfo' _jobId
+  where
+    queryJobInfo' :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
+    queryJobInfo' _jobId = do
+      _ <- runQueryJobResults _jobId
+      runQueryJobInfo _jobId
 
 querySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
 querySolverInfo _solverId = do
@@ -142,7 +141,9 @@ queryJobPair _pairId = do
   mPersistPairInfo <- getPersistJobPair _pairId
   case mPersistPairInfo of
     Just persistPairInfo -> do
-      return $ QueryResult Latest $ Just persistPairInfo
+      if jobPairInfoResultStatus persistPairInfo == JobResultComplete
+        then return $ QueryResult Latest $ Just persistPairInfo
+        else runQueryJobPair _pairId
     Nothing -> runQueryJobPair _pairId
 
 getJobInfo :: Int -> Handler (Maybe JobInfo)
@@ -170,15 +171,18 @@ getJobResults _jobId = do
           if jobInfoStatus ji == Complete
             then do
               insertJobInfo ji
-              jobResults <- getJobResultsWithConnection con _jobId
+              jobResults <- SEC.getJobResults con _jobId
               mapM_ dbInsertJobResult jobResults
               getPersistJobResults _jobId
-            else getJobResultsWithConnection con _jobId
+            else SEC.getJobResults con _jobId
     -- job is completed
     Just _ -> getPersistJobResults _jobId
 
 getManyJobResults :: [Int] -> Handler [[JobResultInfo]] 
 getManyJobResults = mapM getJobResults
+
+queryManyJobResults :: [Int] -> Handler [QueryResult QueryInfo [JobResultInfo]]
+queryManyJobResults = mapM queryJobResults
 
 getJobPair :: Int -> Handler (Maybe JobPairInfo)
 getJobPair _pairId = do

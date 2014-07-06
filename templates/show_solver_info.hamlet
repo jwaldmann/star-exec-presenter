@@ -1,3 +1,18 @@
-<h1>Solver-Infos of #{show _solverId}
+$maybe solverInfo <- mSolverInfo
+  <h1>Solver-Info of "#{solverInfoName solverInfo}"
 
-#{show mSolverInfo}
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{solverInfoName solverInfo}
+        <tr>
+          <td>Description:
+          <td>#{solverInfoDescription solverInfo}
+        <tr>
+          <td>Last Update from Star-Exec:
+          <td>#{show $ solverInfoLastUpdate solverInfo}
+
+$nothing
+  <h1>Sorry, no solver with the id #{show _solverId} found!

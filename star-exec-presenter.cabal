@@ -22,7 +22,6 @@ library
                      Handler.Home
                      Handler.Error
                      Handler.ViewSpace
-                     Handler.ShowJobResults
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
                      Handler.Flexible_Table

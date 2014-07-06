@@ -24,9 +24,8 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
 import StarExec.Types
 import StarExec.Urls
-import StarExec.Connection
 import StarExec.Persist
-import StarExec.PersistTypes
+import StarExec.Connection
 import StarExec.Prims (defaultDate)
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
@@ -45,10 +44,11 @@ import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf )
 
+(+>) :: BSC.ByteString -> BSC.ByteString -> BSC.ByteString
 (+>) = BS.append
 
 safeHead :: a -> [a] -> a
-safeHead defaultVal (x:_) = x
+safeHead _ (x:_) = x
 safeHead defaultVal [] = defaultVal
 
 -- * internal Methods
@@ -91,13 +91,13 @@ constructJobInfo _jobId title tds =
                         _ -> Incomplete
       parseTDs info xs =
         case xs of
-          ("status":t:tds) -> parseTDs
+          ("status":t:ts) -> parseTDs
                                 (info { jobInfoStatus = getJobStatus t })
-                                tds
-          ("created":t:tds) -> parseTDs
+                                ts
+          ("created":t:ts) -> parseTDs
                                   (info { jobInfoDate = t })
-                                  tds
-          (_:tds) -> parseTDs info tds
+                                  ts
+          (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds
   in parseTDs baseJobInfo tds'
@@ -110,10 +110,10 @@ constructBenchmarkInfo _benchmarkId title tds =
                                         defaultDate
       parseTDs info xs =
         case xs of
-          ("name":t:tds) -> parseTDs
+          ("name":t:ts) -> parseTDs
                               (info { benchmarkInfoType = t })
-                              tds
-          (_:tds) -> parseTDs info tds
+                              ts
+          (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds
   in parseTDs baseBenchmarkInfo tds'
@@ -126,10 +126,10 @@ constructSolverInfo _solverId title tds =
                                   defaultDate
       parseTDs info xs =
         case xs of
-          ("description":t:tds) -> parseTDs
+          ("description":t:ts) -> parseTDs
                                      (info { solverInfoDescription = t })
-                                     tds
-          (_:tds) -> parseTDs info tds
+                                     ts
+          (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds
   in parseTDs baseSolverInfo tds'
@@ -191,10 +191,10 @@ getJobInfo (sec, man, cookies) _jobId = do
       return $ Just $ constructJobInfo _jobId jobTitle tds
 
 getSpaceXML :: StarExecConnection -> Int -> Handler (Maybe Space)
-getSpaceXML (sec, man, cookies) spaceId = do
+getSpaceXML (sec, man, cookies) _spaceId = do
   let req = sec { method = "GET"
                 , path = downloadPath
-                , queryString = "id=" +> (BSC.pack $ show spaceId)
+                , queryString = "id=" +> (BSC.pack $ show _spaceId)
                             +> "&type=spaceXML"
                             +> "&includeattrs=false"
                 }
@@ -259,8 +259,7 @@ getSolverInfo (sec, man, cookies) _solverId = do
       return $ Just $ constructSolverInfo
         _solverId solverTitle $ tds
 
--- TODO either Maybe or List^^
-getJobResults :: StarExecConnection -> Int -> Handler (Maybe [JobResultInfo])
+getJobResults :: StarExecConnection -> Int -> Handler [JobResultInfo]
 getJobResults (sec, man, cookies) _jobId = do
   let req = sec { method = "GET"
                 , path = downloadPath
@@ -272,14 +271,15 @@ getJobResults (sec, man, cookies) _jobId = do
       insertId ji = ji { jobResultInfoJobId = _jobId }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
+              --liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
               let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
               case eitherVector of
                 Left msg -> do
                   liftIO $ putStrLn msg
-                  return Nothing
+                  return []
                 Right (_, jobInfos) ->
-                  return $ Just $ map insertId $ Vector.toList jobInfos
-            [] -> return Nothing
+                  return $ map insertId $ Vector.toList jobInfos
+            [] -> return []
   return jobs
 
 getJobPairInfo :: StarExecConnection -> Int -> Handler (Maybe JobPairInfo)
@@ -298,9 +298,14 @@ getJobPairInfo (sec, man, cookies) _pairId = do
     then return Nothing
     else do
       respLog <- sendRequest (reqLog, man, responseCookieJar respStdout)
+      mPersistJobResult <- getPersistJobResult _pairId
+      let resultStatus = case mPersistJobResult of
+                            Nothing -> JobResultUndetermined
+                            Just jr -> jobResultInfoStatus jr
       return $ Just $ JobPairInfo _pairId
                                   (BSL.toStrict $ compress $ responseBody respStdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
+                                  resultStatus
 
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML

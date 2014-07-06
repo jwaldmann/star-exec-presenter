@@ -12,7 +12,7 @@ import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.Text.Encoding as TE
-import qualified Data.Text.IO as TIO
+--import qualified Data.Text.IO as TIO
 import qualified Data.Text as T
 import StarExec.Types
 import StarExec.Urls
@@ -32,30 +32,12 @@ getSessionData = do
     Just en -> return $ Just $ entityVal en
 
 writeSessionData :: CookieJar -> UTCTime -> Handler ()
-writeSessionData cookieJar date = do
-  let sessionData = StarExecSessionData 0 (T.pack $ show cookieJar) date
+writeSessionData cj d = do
+  let sessionData = StarExecSessionData 0 (T.pack $ show cj) d
   runDB $ do
     deleteBy $ UniqueStarExecSessionData 0
     insert_ sessionData
   return ()
-
-getSessionData' :: Handler (Maybe SessionData)
-getSessionData' = liftIO $ do
-  home <- getHomeDirectory
-  let filePath = home ++ "/.star_exec_session"
-  dataExists <- doesFileExist filePath
-  if dataExists
-    then do
-      sData <- readFile filePath
-      return $ Just $ read sData
-    else return Nothing
-
-writeSessionData' :: CookieJar -> UTCTime -> Handler ()
-writeSessionData' cookieJar date = liftIO $ do
-  home <- getHomeDirectory
-  let file = show $ SessionData { cookieData = T.pack $ show cookieJar
-                                , date = date }
-  writeFile (home ++ "/.star_exec_session") file
 
 user :: Login -> Text
 user (Login u _) = u
@@ -112,18 +94,18 @@ getConnection = do
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
   man <- withManager return
-  con@(req, man, cookies) <- case mSession of
+  con@(_, _, cookies) <- case mSession of
     Nothing -> do
-      con <- index (sec, man, createCookieJar [])
+      con' <- index (sec, man, createCookieJar [])
       creds <- getLoginCredentials
-      (req, man, cookies) <- login con creds
-      return (req, man, cookies)
+      con'' <- login con' creds
+      return con''
     Just session -> do
       let date' = starExecSessionDataDate session
           cookieData' = starExecSessionDataCookies session
-          diffTime = fromRational $ toRational $ diffUTCTime currentTime $ date' :: Double
+          since = diffTime currentTime date'
           cookies = read $ T.unpack $ cookieData'
-      if diffTime < 3300.0
+      if since < 3300.0
         then index (sec, man, cookies)
         else do
           con <- index (sec, man, createCookieJar [])

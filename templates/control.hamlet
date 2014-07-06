@@ -1,12 +1,12 @@
 <form method=post action=@{ControlR} enctype=#{enctype}>
 
-  <h2>Authentication 
+  <h2>Authentication, Parameters
   confirm that you are the person who started this instance of star-exec-presenter
-  ^{widget} 
+  <table>
+    ^{widget} 
 
-  <h2>Control Center
-  click on any button starts job(s) on star-exec.
-
+  <h2>Select Benchmarks
+  
   <h3><input type=submit name=control value="comp:#{competitionName comp}">
 
   <ul>

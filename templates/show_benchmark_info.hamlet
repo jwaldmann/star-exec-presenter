@@ -1,3 +1,18 @@
-<h1>Benchmark-Infos of #{show _benchmarkId}
+$maybe benchInfo <- mBenchmarkInfo
+  <h1>Benchmark-Infos of "#{benchmarkInfoName benchInfo}"
 
-#{show mBenchmarkInfo}
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{benchmarkInfoName benchInfo}
+        <tr>
+          <td>Type:
+          <td>#{benchmarkInfoType benchInfo}
+        <tr>
+          <td>Last Update from Star-Exec:
+          <td>#{show $ benchmarkInfoLastUpdate benchInfo}
+
+$nothing
+  <h1>Sorry, no benchmark with the id #{show _benchmarkId} found!
