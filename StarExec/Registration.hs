@@ -84,11 +84,13 @@ certified n bs ps = Category { categoryName = n, contents =
 
 trss = [ All 12360 -- Der95
        , All 12347 -- AG01
+       , All 12350 -- SK90
        ]
 
 srss = [ All 12391 -- zan04
        , All 12383 -- Waldm07a
        , All 12392 -- Waldm07b
+       , All 12393 -- ICFP 2010
        ]
 
 mixed_rel_srs = All 12512
