@@ -1,37 +1,12 @@
 <form method=post action=@{ControlR} enctype=#{enctype}>
 
-  <h2>Authentication 
+  <h2>Authentication, Parameters
   confirm that you are the person who started this instance of star-exec-presenter
-  ^{widget} 
+  <table>
+    ^{widget} 
 
-  <h2>Control Center
-
-  <p>
-    job creation parameters
-    <ul>
-      <li>
-        queue:
-        <input type=radio name=queueid value=478 checked=checked>
-          Termination.q (478)
-        <input type=radio name=queueid value=1>
-          all.q (1)
-        <input type=radio name=queueid value=4>
-          all2.q (4)
-      <li>
-        space:
-        <input type=radio name=spaceid value=52915 checked=checked>
-          autotest (52915)
-      <li>
-        wallclock timeout:
-        <input type=radio name=wallclocktimeout value=60 checked=checked>
-           60
-        <input type=radio name=wallclocktimeout value=300>
-           300
-        <input type=radio name=wallclocktimeout value=900>
-           900
-
-  click on the button to starts job(s) on star-exec.
-
+  <h2>Select Benchmarks
+  
   <h3><input type=submit name=control value="comp:#{competitionName comp}">
 
   <ul>
