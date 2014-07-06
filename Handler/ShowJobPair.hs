@@ -4,6 +4,7 @@ import Import
 import StarExec.Types
 import StarExec.JobData
 import StarExec.Persist
+import Data.ByteString
 
 getShowJobPairR :: Int -> Handler Html
 getShowJobPairR _pairId = do
@@ -19,5 +20,8 @@ getShowJobPairR _pairId = do
   let mJobInfo = queryResult mj
       mBenchmarkInfo = queryResult mb
       mSolverInfo = queryResult ms
+      hasHtmlProof = case mPair of
+        Nothing -> False
+        Just pair -> Nothing /= (jobPairInfoHtmlProof pair)
   defaultLayout $ do
     $(widgetFile "show_job_pair")

@@ -31,6 +31,7 @@ import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
 import Text.HTML.DOM
+import Text.HTML.TagSoup
 import Text.XML.Cursor
 import Codec.Compression.GZip
 import qualified Data.Map as M
@@ -302,10 +303,25 @@ getJobPairInfo (sec, man, cookies) _pairId = do
       let resultStatus = case mPersistJobResult of
                             Nothing -> JobResultUndetermined
                             Just jr -> jobResultInfoStatus jr
+          stdout = responseBody respStdout
+          htmlProof = getHtmlProof stdout
       return $ Just $ JobPairInfo _pairId
-                                  (BSL.toStrict $ compress $ responseBody respStdout)
+                                  (BSL.toStrict $ compress stdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
+                                  htmlProof
                                   resultStatus
+  where
+    getHtmlProof :: BSL.ByteString -> Maybe BS.ByteString
+    getHtmlProof bsl =
+      let t = TE.decodeUtf8 $ BSL.toStrict bsl
+          mHtmlStart = T.findIndex (=='<') t
+      in case mHtmlStart of
+          Nothing -> Nothing
+          Just hs -> 
+            let htmlText = T.drop hs t
+            in case parseTags htmlText of
+                [] -> Nothing
+                _ -> Just $ BSL.toStrict $ compress $ BSL.fromStrict $ TE.encodeUtf8 htmlText
 
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML

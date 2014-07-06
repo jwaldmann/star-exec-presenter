@@ -19,3 +19,4 @@
 /show_benchmark_info/#Int ShowBenchmarkInfoR GET
 /show_solver_info/#Int ShowSolverInfoR GET
 /test-runs ListCompetitionsR GET
+/display_html_proof/#Int DisplayHtmlProofR GET

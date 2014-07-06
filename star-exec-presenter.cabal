@@ -33,6 +33,7 @@ library
                      Handler.ShowBenchmarkInfo
                      Handler.ShowSolverInfo
                      Handler.ListCompetitions
+                     Handler.DisplayHtmlProof
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types
@@ -119,6 +120,7 @@ library
                  , case-insensitive
                  , http-client
                  , random
+                 , tagsoup
 
 executable         star-exec-presenter
     if flag(library-only)

@@ -7,6 +7,8 @@ $maybe pair <- mPair
       <p>The Solver was "<a href=@{ShowSolverInfoR $ solverInfoStarExecId solverInfo}>#{solverInfoName solverInfo}</a>"
     $maybe benchInfo <- mBenchmarkInfo
       <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ benchmarkInfoStarExecId benchInfo}>#{benchmarkInfoName benchInfo}</a>"
+  $if hasHtmlProof
+    <a href=@{DisplayHtmlProofR _pairId}>Show Html-Proof</a>
   <h2>The data of the job-pair
   <h3>Stdout:
   <pre>#{decompressText $ jobPairInfoStdout pair}
