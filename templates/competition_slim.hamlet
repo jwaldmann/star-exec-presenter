@@ -7,6 +7,11 @@
         <td rowspan="2">#{metaCategoryName compMetaResults}
         <td>
           <table class="table table-condensed">
+            <thead>
+                <tr>
+                  <th>rank
+                  <th>solver
+                  <th>score
             <tbody>
               $forall (mRank, solver, score) <- metaCategoryRanking compMetaResults
                 <tr>
@@ -14,7 +19,7 @@
                     <td>#{show rank}.
                   $nothing
                     <td>
-                  <td>#{show solver}
+                  <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
                   <td>#{show score}
       <tr>
         <td>
@@ -29,4 +34,5 @@
                   <td><a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
                   <td>
                     $forall (_, solver, score) <- categoryRanking compCatResult
-                      #{show $ snd solver} (#{show score}), 
+                      <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
+                      (#{show score}), 
