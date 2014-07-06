@@ -43,7 +43,7 @@ import Data.CaseInsensitive ()
 import Control.Monad ( guard )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
-import Data.List ( isSuffixOf )
+import Data.List ( isSuffixOf, mapAccumL )
 
 (+>) :: BSC.ByteString -> BSC.ByteString -> BSC.ByteString
 (+>) = BS.append
@@ -164,14 +164,24 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                  <JobPair bench-id="#{t $ fst bc}" config-id="#{t $ snd bc}">
       |]
 
-jobs_to_archive :: [ Job ] -> Maybe BSL.ByteString
+-- | need to take care of Issue #34.
+-- if jobpairs are like this:
+-- [ non-empty, empty, ne, ne, ne, e, ne ]
+-- then we produce an archive with the 5 non-empty jobs,
+-- and the extra result is
+-- [ Just 0, Nothing, Just 1, Just 2, Just 3, Nothing, Just 4 ]
+jobs_to_archive :: [ Job ] -> Maybe (BSL.ByteString, [Maybe Int])
 jobs_to_archive js = 
     let empty = null . jobpairs
         ne_js = filter ( not . empty ) js
+        ( _, remap ) = mapAccumL 
+            ( \ acc j -> if empty j 
+            then (acc, Nothing) else (acc + 1, Just acc) ) 0 js
         d = jobs_to_XML ne_js
         e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d ) 
         a = Zip.addEntryToArchive e Zip.emptyArchive
-    in  if null ne_js then Nothing else Just $ Zip.fromArchive a
+    in  if null ne_js then Nothing 
+        else Just ( Zip.fromArchive a, remap )
 
 -- * API
 
@@ -329,7 +339,7 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 pushJobXML :: StarExecConnection -> Int -> [Job] -> Handler [Job]
 pushJobXML (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
-  Just bs -> do
+  Just (bs, remap) -> do
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { path = pushjobxmlPath }
@@ -361,5 +371,9 @@ pushJobXML (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
                      $ filter ( /= '"' ) 
 
                      $ BSC.unpack s
-             (j,i) <- zip jobs ids
-             return $ j { jobid = do guard $ i > 0 ; return i }
+             (j, mpos) <- zip jobs remap
+             let ji = case mpos of 
+                     Nothing -> Nothing
+                     Just pos -> let i = ids !! pos in
+                                 if i > 0 then Just i else Nothing
+             return $ j { jobid = ji }
