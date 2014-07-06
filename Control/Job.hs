@@ -22,8 +22,11 @@ autotest_spaceId = 52915 :: Int
 termination_queueId = 478 :: Int
 all_queueId = 1 :: Int
 
-queueId = all_queueId
+queueId = termination_queueId
 benchmarks_per_space = 25 :: Int
+
+timeout = 300 :: Int -- seconds
+cores = 4 :: Int
 
 pushcat :: Category Catinfo -> Handler (Category ( Catinfo, [Int] ))
 pushcat cat = do
@@ -98,8 +101,8 @@ mkJob cat now = do
          , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show now)
          , queue_id = queueId
          , mem_limit = 128.0
-         , wallclock_timeout = 60
-         , cpu_timeout = 240
+         , wallclock_timeout = timeout
+         , cpu_timeout = cores * timeout
          , start_paused = False
          , jobpairs = do 
                b <- bs

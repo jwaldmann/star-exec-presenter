@@ -142,7 +142,7 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Innermost"  [ All 12341 ]
-           [ Participant "AProVE" ( Just ( 1681, 2619  ) )
+           [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
       , standard "TRS Outermost"  [ All 12316 ]
