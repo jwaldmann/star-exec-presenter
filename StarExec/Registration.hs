@@ -204,7 +204,7 @@ tc2014 = Competition "Termination Competition 2014"
      [ standard "C"  [ All 32448 ]
            [ Participant "AProVE" ( Just ( 1681,  2655 ) )
            , Participant "T2" ( Just ( 1373, 2000 ))
-           , Participant "Ultimate Buchi Automizer" (Just (1660, 2607))
+           , Participant "Ultimate Buchi Automizer" (Just (1730, 2738))
            , Participant "lsi.upc tool" Nothing
            ]
      , standard "Java"  [ All 12322 ]
