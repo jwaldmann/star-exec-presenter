@@ -18,7 +18,11 @@
                   <td>#{show score}
       <tr>
         <td>
-          <table class="table table-condensed">
+         <div class="container">
+          <label for="categories">show/hide categories
+          <input type="checkbox" id="categories">
+          <div class="checked-container">
+           <table class="table table-condensed">
             <tbody>
               $forall compCatResult <- categoryResults compMetaResults
                 <tr>
