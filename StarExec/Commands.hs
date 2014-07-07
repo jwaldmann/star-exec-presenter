@@ -20,6 +20,7 @@ import qualified Data.Text as T
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
+import Data.Word
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
 import StarExec.Types
@@ -273,13 +274,17 @@ getJobResults (sec, man, cookies) _jobId = do
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
               --liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
-              let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
+              let eitherVector = CSV.decodeByName $ BSL.map filterWord8 $ Zip.fromEntry entry
               case eitherVector of
                 Left msg -> do
                   liftIO $ putStrLn msg
                   return []
                 Right (_, jobInfos) ->
                   return $ map insertId $ Vector.toList jobInfos
+              where
+                filterWord8 :: Word8 -> Word8
+                filterWord8 34 = 39
+                filterWord8 w = w
             [] -> return []
   return jobs
 
