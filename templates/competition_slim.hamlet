@@ -23,31 +23,33 @@
                   <td>#{show score}
          $if not (null $ drop 3 $ metaCategoryRanking compMetaResults)
           <div class="container">
-           <label for="lower-#{metaCategoryName compMetaResults}">show/hide lower ranks
            <input type="checkbox" id="lower-#{metaCategoryName compMetaResults}">
-           <div class="checked-container">
-            <table class="table table-condensed">
-             <tbody>
-              $forall (mRank, solver, score) <- drop 3 $ metaCategoryRanking compMetaResults
-                <tr>
-                  $maybe rank <- mRank
-                    <td>#{show rank}.
-                  $nothing
-                    <td>
-                  <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
-                  <td>#{show score}
+           <div class="container">
+             <label for="lower-#{metaCategoryName compMetaResults}">lower ranks
+             <div class="checked-container">
+              <table class="table table-condensed">
+               <tbody>
+                $forall (mRank, solver, score) <- drop 3 $ metaCategoryRanking compMetaResults
+                  <tr>
+                    $maybe rank <- mRank
+                      <td>#{show rank}.
+                    $nothing
+                      <td>
+                    <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
+                    <td>#{show score}
       <tr>
         <td>
          <div class="container">
-          <label for="detail-#{metaCategoryName compMetaResults}">show/hide categories
           <input type="checkbox" id="detail-#{metaCategoryName compMetaResults}">
-          <div class="checked-container">
-           <table class="table table-condensed">
-            <tbody>
-              $forall compCatResult <- categoryResults compMetaResults
-                <tr>
-                  <td><a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
-                  <td>
-                    $forall (_, solver, score) <- categoryRanking compCatResult
-                      <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
-                      (#{show score}), 
+          <div class="container">
+            <label for="detail-#{metaCategoryName compMetaResults}">categories
+            <div class="checked-container">
+             <table class="table table-condensed">
+              <tbody>
+                $forall compCatResult <- categoryResults compMetaResults
+                  <tr>
+                    <td><a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
+                    <td>
+                      $forall (_, solver, score) <- categoryRanking compCatResult
+                        <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
+                        (#{show score}), 

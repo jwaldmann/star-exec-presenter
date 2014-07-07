@@ -17,7 +17,15 @@
     }
   }
 
-  input:checked + .checked-container {
+  input:checked + .container .checked-container {
     display: block;
+  }
+
+  label:before {
+    content: "show ";
+  }
+
+  input:checked + .container label:before {
+    content: "hide ";
   }
 }
