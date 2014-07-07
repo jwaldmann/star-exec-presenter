@@ -35,7 +35,7 @@ instance CSV.FromField SolverResult where
                 | r == "certified"  = pure CERTIFIED
                 | r == "error"      = pure ERROR
                 | otherwise         =
-                    if "yes" `T.isSuffixOf` r
+                    if "yes" `T.isPrefixOf` r
                       then pure $ YES $ getPolynomial $ T.drop 3 r
                       else pure OTHER
             getPolynomial "" = Nothing
