@@ -324,15 +324,15 @@ getJobPairInfo (sec, man, cookies) _pairId = do
   where
     getHtmlProof :: BSL.ByteString -> Maybe BS.ByteString
     getHtmlProof bsl =
-      let t = TE.decodeUtf8 $ BSL.toStrict bsl
-          mHtmlStart = T.findIndex (=='<') t
-      in case mHtmlStart of
-          Nothing -> Nothing
-          Just hs -> 
-            let htmlText = T.drop hs t
-            in case parseTags htmlText of
-                [] -> Nothing
-                _ -> Just $ BSL.toStrict $ compress $ BSL.fromStrict $ TE.encodeUtf8 htmlText
+      let text = TE.decodeUtf8 $ BSL.toStrict bsl
+          tLines = T.lines text
+          tContent = drop 1 $ takeWhile isNoSuffixOf tLines
+          t = T.dropWhile (/='<') $ T.unlines $ map removeTimeStamp tContent
+      in case parseTags t of
+            [] -> Nothing
+            _ -> Just $ BSL.toStrict $ compress $ BSL.fromStrict $ TE.encodeUtf8 t
+    removeTimeStamp t = T.drop 1 $ T.dropWhile (/='\t') t
+    isNoSuffixOf line = not $ "EOF" `T.isSuffixOf` line
 
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
