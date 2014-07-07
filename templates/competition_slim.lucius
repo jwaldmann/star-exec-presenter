@@ -11,13 +11,9 @@
 
   .checked-container {
     display: none;
-
-    .table {
-      width: auto; 
-    }
   }
 
-  input:checked + .container .checked-container {
+  input:checked + div .checked-container {
     display: block;
   }
 
@@ -25,7 +21,11 @@
     content: "show ";
   }
 
-  input:checked + .container label:before {
+  input:checked + div label:before {
     content: "hide ";
   }
 }
+
+/*.table {
+  width: auto; 
+}*/

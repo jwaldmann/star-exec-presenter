@@ -22,9 +22,9 @@
                   <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
                   <td>#{show score}
          $if not (null $ drop 3 $ metaCategoryRanking compMetaResults)
-          <div class="container">
+          <div>
            <input type="checkbox" id="lower-#{metaCategoryName compMetaResults}">
-           <div class="container">
+           <div>
              <label for="lower-#{metaCategoryName compMetaResults}">lower ranks
              <div class="checked-container">
               <table class="table table-condensed">
@@ -39,9 +39,9 @@
                     <td>#{show score}
       <tr>
         <td>
-         <div class="container">
+         <div>
           <input type="checkbox" id="detail-#{metaCategoryName compMetaResults}">
-          <div class="container">
+          <div>
             <label for="detail-#{metaCategoryName compMetaResults}">categories
             <div class="checked-container">
              <table class="table table-condensed">
