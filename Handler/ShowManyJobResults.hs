@@ -37,7 +37,6 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
                           jobResults
                           benchmarks
       (+>) = T.append
-      solverNames = map (\(i,name) -> name +> " (" +> (T.pack $ show i) +> ")" ) solvers
       results = [ YES, NO, MAYBE, CERTIFIED, ERROR, OTHER ]
   yesses <- mapM (countResults YES) jobSolvers
   nos    <- mapM (countResults NO) jobSolvers
