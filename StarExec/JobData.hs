@@ -31,7 +31,7 @@ getTime = liftIO getCurrentTime
 getClass :: JobResultInfo -> T.Text
 getClass result =
   case jobResultInfoResult result of
-    YES       -> "solver-yes"
+    YES _     -> "solver-yes"
     NO        -> "solver-no"
     MAYBE     -> "solver-maybe"
     CERTIFIED -> "solver-certified"

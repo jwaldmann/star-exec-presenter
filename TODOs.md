@@ -72,6 +72,7 @@ c = Competition "2014"
 # 140707
 
 * YES with Int -> smaller int is better -> add to results
+  -> added polynomial detection to YES-results
 * unique solver -> solverId/configId/JobId
 * benchmark-names shorten with `drop` -> show max last xx chars 
 * cache space-xml

@@ -16,7 +16,19 @@ countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
 countResults result (_jobId,(sid,_)) = runDB $ do
   count [ JobResultInfoJobId ==. _jobId
         , JobResultInfoSolverId ==. sid
-        , JobResultInfoResult ==. result ]
+        , JobResultInfoResult ==. result
+        ]
+
+countResultsYes :: (Int, (Int, Text)) -> Handler Int
+countResultsYes (_jobId,(sid,_)) = runDB $ do
+  count [ JobResultInfoJobId ==. _jobId
+        , JobResultInfoSolverId ==. sid
+        , JobResultInfoResult !=. NO
+        , JobResultInfoResult !=. MAYBE
+        , JobResultInfoResult !=. CERTIFIED
+        , JobResultInfoResult !=. ERROR
+        , JobResultInfoResult !=. OTHER
+        ]
 
 toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
@@ -37,8 +49,8 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
                           jobResults
                           benchmarks
       (+>) = T.append
-      results = [ YES, NO, MAYBE, CERTIFIED, ERROR, OTHER ]
-  yesses <- mapM (countResults YES) jobSolvers
+      results = [ "YES", "NO", "MAYBE", "CERTIFIED", "ERROR", "OTHER" ] :: [T.Text]
+  yesses <- mapM countResultsYes jobSolvers
   nos    <- mapM (countResults NO) jobSolvers
   maybes <- mapM (countResults MAYBE) jobSolvers
   certs  <- mapM (countResults CERTIFIED) jobSolvers

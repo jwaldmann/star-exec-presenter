@@ -76,36 +76,6 @@ data ListPrimResult = ListPrimResult
 
 instance FromJSON ListPrimResult
 
---data JobInfo = JobInfo
---  { jobId :: Int
---  --, jobSpaceId :: Maybe Int
---  , jobName :: Name
---  , jobStatus :: JobStatus
---  --, jobPairsCompleted :: Double
---  --, jobPairsNum :: Int
---  --, jobPairsFailed :: Double
---  , jobDate :: T.Text
---  } deriving (Show, Eq)
-
---data SolverInfo = SolverInfo
---  { solverId :: Int
---  , solverName :: Name
---  , solverDescription :: Description
---  } deriving (Show, Eq)
-
---data BenchmarkInfo = BenchmarkInfo
---  { benchmarkId :: Int
---  , benchmarkName :: Name
---  , benchmarkType :: T.Text
---  } deriving (Show, Eq)
-
---data UserInfo = UserInfo
---  { userId :: Int
---  , userName :: Name
---  , userInstitution :: Name
---  , userMail :: Email
---  } deriving (Show, Eq)
-
 data SpaceInfo = SpaceInfo
   { spaceId :: Int
   , spaceParentId :: Maybe Int
@@ -123,7 +93,7 @@ data Space = Space
 
 {-
 -}
-data SolverResult = YES | NO | CERTIFIED | MAYBE | ERROR | OTHER
+data SolverResult = YES (Maybe Int) | NO | CERTIFIED | MAYBE | ERROR | OTHER
    deriving (Show, Read, Eq)
 derivePersistField "SolverResult"
 

@@ -4,6 +4,7 @@ import Import
 import Model
 import qualified Data.Csv as CSV
 import qualified Data.Text as T
+import qualified Data.Text.Read as TRead
 import Data.Text.Encoding
 import GHC.Generics
 import Control.Applicative
@@ -29,12 +30,25 @@ instance CSV.FromField SolverResult where
         where
             s = T.toLower $ decodeUtf8 result
             parseResult r
-                | r == "yes"        = pure YES
                 | r == "no"         = pure NO
                 | r == "maybe"      = pure MAYBE
                 | r == "certified"  = pure CERTIFIED
                 | r == "error"      = pure ERROR
-                | otherwise         = pure OTHER
+                | otherwise         =
+                    if "yes" `T.isSuffixOf` r
+                      then pure $ YES $ getPolynomial $ T.drop 3 r
+                      else pure OTHER
+            getPolynomial "" = Nothing
+            getPolynomial r = -- "(?,n^x)"
+              let iText = T.dropWhile (/='^') r -- "^x)"
+                  tLength = T.length iText
+              in if tLength >= 3
+                    then let x = T.drop 1 iText
+                         in case TRead.decimal x of
+                              Right (i,_) -> Just i
+                              Left _ -> Nothing
+                    else Nothing
+
 
 instance CSV.FromField JobResultStatus where
     parseField result = parseResult s

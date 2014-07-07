@@ -7,7 +7,7 @@ currentCompetition :: Text -> Competition
 currentCompetition compName = Competition compName
   [ MetaCategory "Termination"
       [ Category "TRS_Standard"
-          [ YES ]
+          [ YES Nothing ]
           [ 2166, 2168 ]
       , Category "SRS_Standard"
           [ CERTIFIED ]

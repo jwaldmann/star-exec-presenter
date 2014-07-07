@@ -283,18 +283,14 @@ getJobResults (sec, man, cookies) _jobId = do
       insertId ji = ji { jobResultInfoJobId = _jobId }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
-              --liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
-              let eitherVector = CSV.decodeByName $ BSL.map filterWord8 $ Zip.fromEntry entry
+              -- liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
+              let eitherVector = CSV.decodeByName $ Zip.fromEntry entry
               case eitherVector of
                 Left msg -> do
                   liftIO $ putStrLn msg
                   return []
                 Right (_, jobInfos) ->
                   return $ map insertId $ Vector.toList jobInfos
-              where
-                filterWord8 :: Word8 -> Word8
-                filterWord8 34 = 39
-                filterWord8 w = w
             [] -> return []
   return jobs
 
