@@ -78,9 +78,9 @@ data Participant =
     deriving ( Generic )
 
 standard n bs ps = Category {  categoryName = n , contents = 
-    Catinfo { postproc = 164 , benchmarks = bs , participants = ps } }
-certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 163 , benchmarks = bs , participants = ps } }
+certified n bs ps = Category { categoryName = n, contents = 
+    Catinfo { postproc = 164 , benchmarks = bs , participants = ps } }
 
 trss = [ All 12360 -- Der95
        , All 12347 -- AG01
