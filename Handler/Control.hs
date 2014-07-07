@@ -26,7 +26,7 @@ inputForm = renderTable $ JobControl
         <*> areq (radioFieldList [("Termination.q"::T.Text,478),("all.q",1),("all2.q",4)]) "queue" (Just 478)
         <*> areq (radioFieldList [("autotest":: T.Text, 52915)]) "space" (Just 52915)
         <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
-        <*> areq (radioFieldList [("10"::T.Text,10), ("25", 25), ("100", 100)]) "benchmarks_per_category" (Just 25)
+        <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)]) "benchmarks_per_category" (Just 25)
         <*> formToAForm ( do 
             e <- askParams 
             return ( FormSuccess $ maybe M.empty id e, [] ) )
