@@ -68,3 +68,15 @@ c = Competition "2014"
   * example competition
 * SolverResult -> YES Maybe Text
 * link to solver-info, benchmark-info, job-info
+
+# 140707
+
+* YES with Int -> smaller int is better -> add to results
+* unique solver -> solverId/configId/JobId
+* benchmark-names shorten with `drop` -> show max last xx chars 
+* cache space-xml
+* htmlProof over multiple lines
+* why does a request on CompetitionWithConfigs pend so long?
+* one route for show_job_results and flexible_tables
+* disable sql-logging in
+* show that jobs and pairs are incomplete
