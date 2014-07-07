@@ -50,3 +50,4 @@ c = Competition "2014"
 * disable sql-logging in
 * show that jobs and pairs are incomplete
 * link job-, solver- and benchmark-infos to starexec
+* write down the process of polling all data from star-exec
