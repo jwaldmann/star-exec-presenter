@@ -52,7 +52,7 @@
   <tbody>
     $forall ((bId,bName), results) <- benchmarkResults
       <tr>
-        <td><a href=@{ShowBenchmarkInfoR bId}>#{bName}</a>
+        <td><a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
         $forall mResult <- results
           $maybe result <- mResult
             <td class="#{getClass result}">

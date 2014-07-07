@@ -33,6 +33,11 @@ countResultsYes (_jobId,(sid,_)) = runDB $ do
 toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
 
+shorten :: Text -> Text
+shorten t = if T.length t > 50
+              then shorten $ T.tail t
+              else t
+
 getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
   qJobs <- queryManyJobResults ids

@@ -75,6 +75,7 @@ c = Competition "2014"
   -> added polynomial detection to YES-results
 * unique solver -> solverId/configId/JobId
 * benchmark-names shorten with `drop` -> show max last xx chars 
+  -> shorten to 50 chars max
 * cache space-xml
 * htmlProof over multiple lines
 * why does a request on CompetitionWithConfigs pend so long?
