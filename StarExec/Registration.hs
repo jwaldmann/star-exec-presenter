@@ -173,6 +173,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 1681, 2658 ))
            , Participant "Ctrl" ( Just (1541, 2387))
+           , Participant "CppInv" ( Just (1697, 2778))
            ]
      , standard "Integer TRS"  [ All 37558  ]
            [ Participant "AProVE" ( Just ( 1681, 2654  ) )
@@ -207,7 +208,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "AProVE" ( Just ( 1681,  2655 ) )
            , Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "Ultimate Buchi Automizer" (Just (1730, 2738))
-           , Participant "lsi.upc tool" Nothing
+           -- , Participant "lsi.upc tool" Nothing
            ]
      , standard "Java"  [ All 12322 ]
            [ Participant "AProVE" ( Just ( 1681, 2657  ) )
