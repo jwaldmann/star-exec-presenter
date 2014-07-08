@@ -105,12 +105,14 @@ tc2014 = Competition "Termination Competition 2014"
            , Participant "AProVE" ( Just ( 1681, 2656 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
+           -- , Participant "matchbox" ( Just ( 1790, 2847 ))
            ]
        , standard "SRS Standard"  srss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 1225, 2514))
            , Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
+           -- , Participant "matchbox" ( Just ( 1790, 2847 ))
            ]
        , standard "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
@@ -122,12 +124,12 @@ tc2014 = Competition "Termination Competition 2014"
            ]
       , certified "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "matchbox" ( Just ( 952, 1192 ))
+           , Participant "matchbox" ( Just ( 1790, 2846 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "SRS Standard certified"  srss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "matchbox"  ( Just ( 952, 1192 ))
+           , Participant "matchbox"  ( Just ( 1790, 2846 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "TRS Relative certified"  [ mixed_rel_trs ]
