@@ -1,5 +1,6 @@
 $maybe benchInfo <- mBenchmarkInfo
   <h1>Benchmark-Infos of "#{benchmarkInfoName benchInfo}"
+  view original benchmark-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{show _benchmarkId}">#{show _benchmarkId}</a>
 
   <div class="container">
     <table class="table" style="width: auto;">
