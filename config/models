@@ -37,7 +37,7 @@ JobPairInfo
     stdout ByteString
     log ByteString
     htmlProof ByteString Maybe
-    resultStatus JobResultStatus
+    resultStatus JobResultStatus default='JobResultUndetermined'
     deriving Show
 
 JobInfo
@@ -46,7 +46,7 @@ JobInfo
     name Text
     status JobStatus
     date Text
-    lastUpdate UTCTime
+    lastUpdate UTCTime default=now()
     deriving Show
 
 SolverInfo
@@ -54,7 +54,7 @@ SolverInfo
     UniqueSolverInfo starExecId
     name Text
     description Text
-    lastUpdate UTCTime
+    lastUpdate UTCTime default=now()
     deriving Show
 
 BenchmarkInfo
@@ -62,7 +62,7 @@ BenchmarkInfo
     UniqueBenchmarkInfo starExecId
     name Text
     type Text
-    lastUpdate UTCTime
+    lastUpdate UTCTime default=now()
     deriving Show
 
 QueryInfo
@@ -72,7 +72,7 @@ QueryInfo
 
 CompetitionInfo
     competition Competition
-    date UTCTime
+    date UTCTime default=now()
     deriving Show
 
 -- UserInfo
