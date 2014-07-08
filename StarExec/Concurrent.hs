@@ -99,37 +99,6 @@ runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
                 deleteBy $ UniqueJobInfo _jobId
                 insertUnique $ ji { jobInfoLastUpdate = currentTime }
               return ()
---runQueryJobInfo _jobId = do
---  let q = GetJobInfo _jobId
---  mPersistJobInfo <- getPersistJobInfo _jobId
---  runQueryBase q $ \mQuery ->
---    case mQuery of
---      Just eq -> return $ pendingQuery (entityKey eq) mPersistJobInfo
---      Nothing -> do
---        mKey <- insertQuery q
---        case mKey of
---          Just queryKey -> do
---            runConcurrent (queryExceptionHandler q) $ do
---              con <- getConnection
---              mJobInfo <- getJobInfo con _jobId
---              case mJobInfo of
---                Nothing -> deleteQuery q
---                Just ji -> do
---                  currentTime <- getTime
---                  _ <- runDB $ do
---                    deleteBy $ UniqueJobInfo _jobId
---                    insertUnique $ ji { jobInfoLastUpdate = currentTime }
---                  deleteQuery q
---                  liftIO $ putStrLn $ "Job done: " ++ (show q)
---            return $ pendingQuery queryKey mPersistJobInfo
---          Nothing -> do
---            mQuery' <- getQuery q
---            case mQuery' of
---              Just eq -> return $ pendingQuery (entityKey eq) mPersistJobInfo
---              -- assuming that the concurrent query is completed
---              Nothing -> do
---                mPersistJobInfo' <- getPersistJobInfo _jobId
---                return $ QueryResult Latest mPersistJobInfo'
 
 resultIsCompleted :: JobResultInfo -> Bool
 resultIsCompleted r = JobResultComplete == jobResultInfoStatus r
@@ -182,38 +151,6 @@ runQueryJobPair = runQueryInfo GetJobPair UniqueJobPairInfo queryStarExec
                 deleteBy $ UniqueJobPairInfo _pairId
                 insertUnique jp
               return ()
---runQueryJobPair _pairId = do
---  let q = GetJobPair _pairId
---  mPersistJobPair <- getPersistJobPair _pairId
---  runQueryBase q $ \mQuery ->
---    case mQuery of
---      Just eq -> do
---        return $ pendingQuery (entityKey eq) mPersistJobPair
---      Nothing -> do
---        mKey <- insertQuery q
---        case mKey of
---          Just queryKey -> do
---            runConcurrent (queryExceptionHandler q) $ do
---              con <- getConnection
---              mJobPair <- getJobPairInfo con _pairId
---              case mJobPair of
---                Nothing -> deleteQuery q
---                Just jp -> do
---                  currentTime <- getTime
---                  _ <- runDB $ do
---                    deleteBy $ UniqueJobPairInfo _pairId
---                    insertUnique jp
---                  deleteQuery q
---                  liftIO $ putStrLn $ "Job done: " ++ (show q)
---            return $ pendingQuery queryKey Nothing
---          Nothing -> do
---            mQuery' <- getQuery q
---            case mQuery' of
---              Just eq -> return $ pendingQuery (entityKey eq) mPersistJobPair
---              -- assuming that the concurrent query is completed
---              Nothing -> do
---                mPersistJobPair' <- getPersistJobPair _pairId
---                return $ QueryResult Latest mPersistJobPair'
 
 runQueryBenchmarkInfo :: Int -> Handler (QueryResult QueryInfo (Maybe BenchmarkInfo))
 runQueryBenchmarkInfo = runQueryInfo GetBenchmarkInfo UniqueBenchmarkInfo queryStarExec
@@ -228,38 +165,6 @@ runQueryBenchmarkInfo = runQueryInfo GetBenchmarkInfo UniqueBenchmarkInfo queryS
                 deleteBy $ UniqueBenchmarkInfo _benchId
                 insertUnique $ bi { benchmarkInfoLastUpdate = currentTime }
               return ()
---runQueryBenchmarkInfo _benchId = do
---  let q = GetBenchmarkInfo _benchId
---  mPersistBenchmarkInfo <- getPersistBenchmarkInfo _benchId
---  runQueryBase q $ \mQuery ->
---    case mQuery of
---      Just eq -> do
---        return $ pendingQuery (entityKey eq) mPersistBenchmarkInfo
---      Nothing -> do
---        mKey <- insertQuery q
---        case mKey of
---          Just queryKey -> do
---            runConcurrent (queryExceptionHandler q) $ do
---              con <- getConnection
---              mBenchmarkInfo <- getBenchmarkInfo con _benchId
---              case mBenchmarkInfo of
---                Nothing -> deleteQuery q
---                Just bi -> do
---                  currentTime <- getTime
---                  _ <- runDB $ do
---                    deleteBy $ UniqueBenchmarkInfo _benchId
---                    insertUnique $ bi { benchmarkInfoLastUpdate = currentTime }
---                  deleteQuery q
---                  liftIO $ putStrLn $ "Job done: " ++ (show q)
---            return $ pendingQuery queryKey Nothing
---          Nothing -> do
---            mQuery' <- getQuery q
---            case mQuery' of
---              Just eq -> return $ pendingQuery (entityKey eq) mPersistBenchmarkInfo
---              -- assuming that the concurrent query is completed
---              Nothing -> do
---                mPersistBenchmarkInfo' <- getPersistBenchmarkInfo _benchId
---                return $ QueryResult Latest mPersistBenchmarkInfo'
 
 runQuerySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
 runQuerySolverInfo = runQueryInfo GetSolverInfo UniqueSolverInfo queryStarExec
@@ -274,35 +179,3 @@ runQuerySolverInfo = runQueryInfo GetSolverInfo UniqueSolverInfo queryStarExec
                 deleteBy $ UniqueSolverInfo _solverId
                 insertUnique $ si { solverInfoLastUpdate = currentTime }
               return ()
---runQuerySolverInfo _solverId = do
---  let q = GetSolverInfo _solverId
---  mPersistSolverInfo <- getPersistSolverInfo _solverId
---  runQueryBase q $ \mQuery ->
---    case mQuery of
---      Just eq -> do
---        return $ pendingQuery (entityKey eq) mPersistSolverInfo
---      Nothing -> do
---        mKey <- insertQuery q
---        case mKey of
---          Just queryKey -> do
---            runConcurrent (queryExceptionHandler q) $ do
---              con <- getConnection
---              mSolverInfo <- getSolverInfo con _solverId
---              case mSolverInfo of
---                Nothing -> deleteQuery q
---                Just si -> do
---                  currentTime <- getTime
---                  _ <- runDB $ do
---                    deleteBy $ UniqueSolverInfo _solverId
---                    insertUnique $ si { solverInfoLastUpdate = currentTime }
---                  deleteQuery q
---                  liftIO $ putStrLn $ "Job done: " ++ (show q)
---            return $ pendingQuery queryKey Nothing
---          Nothing -> do
---            mQuery' <- getQuery q
---            case mQuery' of
---              Just eq -> return $ pendingQuery (entityKey eq) mPersistSolverInfo
---              -- assuming that the concurrent query is completed
---              Nothing -> do
---                mPersistSolverInfo' <- getPersistSolverInfo _solverId
---                return $ QueryResult Latest mPersistSolverInfo'

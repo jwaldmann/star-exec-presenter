@@ -51,3 +51,4 @@ c = Competition "2014"
 * show that jobs and pairs are incomplete
 * link job-, solver- and benchmark-infos to starexec
 * write down the process of polling all data from star-exec
+* check for unsafe reads
