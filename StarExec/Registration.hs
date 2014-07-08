@@ -122,12 +122,12 @@ tc2014 = Competition "Termination Competition 2014"
            ]
       , certified "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "matchbox" ( Just ( 952, 1192 ))
+           , Participant "matchbox" ( Just ( 1659, 2669 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "SRS Standard certified"  srss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
-           , Participant "matchbox"  ( Just ( 952, 1192 ))
+           , Participant "matchbox"  ( Just ( 1659, 2669 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , certified "TRS Relative certified"  [ mixed_rel_trs ]
