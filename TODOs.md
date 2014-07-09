@@ -52,3 +52,6 @@ c = Competition "2014"
 * ~~link job-, solver- and benchmark-infos to starexec~~
 * write down the process of polling all data from star-exec
 * check for unsafe reads
+* xml-proofs -> see job-results of 4067
+* hidden competitions
+* space-xml
