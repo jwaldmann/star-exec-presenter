@@ -1,5 +1,6 @@
 $maybe jobInfo <- mJobInfo
   <h1>Job-Infos of "#{jobInfoName jobInfo}"
+  view original job-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{show _jobId}">#{show _jobId}</a>
 
   <div class="container">
     <table class="table" style="width: auto;">

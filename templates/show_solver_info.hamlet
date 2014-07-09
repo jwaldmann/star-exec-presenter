@@ -1,5 +1,6 @@
 $maybe solverInfo <- mSolverInfo
   <h1>Solver-Info of "#{solverInfoName solverInfo}"
+  view original solver-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{show _solverId}">#{show _solverId}</a>
 
   <div class="container">
     <table class="table" style="width: auto;">

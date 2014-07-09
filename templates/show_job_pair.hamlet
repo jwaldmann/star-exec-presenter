@@ -1,5 +1,6 @@
 $maybe pair <- mPair
   <h1>Overview of the job-pairs #{_pairId}
+  view original pair-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{show _pairId}">#{show _pairId}</a>
   $maybe jobInfo <- mJobInfo
     <p>This job-pair is a result of the job "<a href=@{ShowJobInfoR $ jobInfoStarExecId jobInfo}>#{jobInfoName jobInfo}</a>"<br/>
       <a href=@{ShowManyJobResultsR $ JobIds [jobInfoStarExecId jobInfo]}>View Job-Results</a>
