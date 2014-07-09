@@ -33,7 +33,7 @@ library
                      Handler.ShowBenchmarkInfo
                      Handler.ShowSolverInfo
                      Handler.ListCompetitions
-                     Handler.DisplayHtmlProof
+                     Handler.DisplayProof
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types

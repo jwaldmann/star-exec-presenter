@@ -5,6 +5,10 @@ import StarExec.Types
 import StarExec.JobData
 import StarExec.Persist
 import Data.ByteString
+import qualified Data.Text as T
+
+int2Text :: Int -> Text
+int2Text = T.pack . show
 
 getShowJobPairR :: Int -> Handler Html
 getShowJobPairR _pairId = do

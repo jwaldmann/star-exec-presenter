@@ -10,7 +10,7 @@ $maybe pair <- mPair
       <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ benchmarkInfoStarExecId benchInfo}>#{benchmarkInfoName benchInfo}</a>"
     <p>view original job pair data on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{_pairId}">#{_pairId}</a>
   $if hasHtmlProof
-    <a href=@{DisplayHtmlProofR _pairId}>Show Html-Proof</a>
+    <a href=@{DisplayProofR $ int2Text _pairId}>Show Html-Proof</a>
   <h2>The data of the job-pair
   <h3>Stdout:
   <pre>#{decompressText $ jobPairInfoStdout pair}
