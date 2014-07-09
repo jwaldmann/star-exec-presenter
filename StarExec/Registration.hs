@@ -165,15 +165,16 @@ tc2014 = Competition "Termination Competition 2014"
       , certified "TRS Outermost certified"  [ All 12316 ]
            [ Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
-      , standard "Higher-Order rewriting (union beta)"  [ All 12306 ]
+      , standard "Higher-Order rewriting (union beta)"  
+           [ All 12306, All 12307, All 12304, All 12308, All 12305 ]
            [ Participant "Wanda" ( Just (1542, 2390))
-           , Participant "THOR" Nothing
+           , Participant "THOR" ( Just (1800, 2862))
            ]
      , standard "Integer Transition Systems"  [ All 51335 ]
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 1681, 2658 ))
            , Participant "Ctrl" ( Just (1541, 2387))
-           , Participant "CppInv" ( Just (1697, 2778))
+           , Participant "CppInv" ( Just (1794, 2854))
            ]
      , standard "Integer TRS"  [ All 37558  ]
            [ Participant "AProVE" ( Just ( 1681, 2654  ) )
@@ -212,7 +213,7 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      , standard "Java"  [ All 12322 ]
            [ Participant "AProVE" ( Just ( 1681, 2657  ) )
-           , Participant "Julia" Nothing
+           -- , Participant "Julia" Nothing
            ]
      , standard "Logic Programming"  [ All 12293 ]
            [ Participant "AProVE" ( Just ( 1681, 2653  ) )
