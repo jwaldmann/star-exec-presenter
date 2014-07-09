@@ -44,7 +44,7 @@ c = Competition "2014"
   -> shorten to 50 chars max
 * cache space-xml
 * ~~htmlProof over multiple lines~~
-* what about xml-proofs?
+* ~~what about xml-proofs?~~
 * why does a request on CompetitionWithConfigs pend so long?
 * one route for show_job_results and flexible_tables
 * disable sql-logging in
@@ -52,6 +52,5 @@ c = Competition "2014"
 * ~~link job-, solver- and benchmark-infos to starexec~~
 * write down the process of polling all data from star-exec
 * check for unsafe reads
-* xml-proofs -> see job-results of 4067
+* ~~xml-proofs -> see job-results of 4067~~
 * hidden competitions
-* space-xml
