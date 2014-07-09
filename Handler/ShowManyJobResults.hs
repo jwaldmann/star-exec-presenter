@@ -1,5 +1,6 @@
 module Handler.ShowManyJobResults
   ( getShowManyJobResultsR
+  , getShowManyJobResultsLegacyR
   ) where
 
 import Import
@@ -37,6 +38,11 @@ shorten :: Text -> Text
 shorten t = if T.length t > 50
               then shorten $ T.tail t
               else t
+
+--  | to keep old URLs working, as in
+--  http://lists.lri.fr/pipermail/termtools/2014-July/000965.html
+getShowManyJobResultsLegacyR :: JobIds -> Handler Html
+getShowManyJobResultsLegacyR = getShowManyJobResultsR
 
 getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
