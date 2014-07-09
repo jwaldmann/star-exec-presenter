@@ -174,7 +174,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 1681, 2658 ))
            , Participant "Ctrl" ( Just (1541, 2387))
-           , Participant "CppInv" ( Just (1794, 2854))
+           , Participant "CppInv" ( Just (1803, 2870))
            ]
      , standard "Integer TRS"  [ All 37558  ]
            [ Participant "AProVE" ( Just ( 1681, 2654  ) )
