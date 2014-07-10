@@ -41,12 +41,8 @@ getProof _pairId = do
         let proof = decompress $ BSL.fromStrict hp
             dom = fromDocument $ parseLBS proof
         if isHTML dom
-          then do
-            liftIO $ putStrLn "document is html"
-            return $ toTypedContent $ (typeHtml, toContent proof)
-          else do
-            liftIO $ putStrLn "document is xml"
-            return $ toTypedContent $ repXml proof
+          then return $ toTypedContent $ (typeHtml, toContent proof)
+          else return $ toTypedContent $ repXml proof
             --addHeader "Content-Type" "text/xml; charset=utf-8"
         --return $ preEscapedToMarkup $ decodeUtf8 $ proof
   where renderFail = do
