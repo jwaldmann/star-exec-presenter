@@ -67,7 +67,8 @@
                 <h2>Proof</h2>                
                     <xsl:apply-templates select="proof/*">
                         <xsl:with-param name="indent" select="1"/>
-                    </xsl:apply-templates>                
+                    </xsl:apply-templates>
+                <xsl:apply-templates select="origin/proofOrigin" mode="toolConfiguration"/>
             </body>
         </html>
     </xsl:template>
@@ -77,30 +78,44 @@
             <xsl:text>by </xsl:text>
             <xsl:for-each select="tool">
                 <xsl:if test="position() != 1">, </xsl:if>
-                <xsl:choose>
-                    <xsl:when test="url">
-                        <xsl:element name="a">
-                            <xsl:attribute name="href">
-                                <xsl:value-of select="normalize-space(url/text())"/>
-                            </xsl:attribute>
-                            <xsl:value-of select="name/text()"/>
-                        </xsl:element>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:value-of select="name/text()"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-                <xsl:text> (version </xsl:text>
-                <xsl:apply-templates select="version"/>
-                <xsl:text>)</xsl:text>
-                <xsl:if test="strategy">
-                    <xsl:text> (strategy </xsl:text>
-                    <xsl:apply-templates select="strategy/text()"/>
-                    <xsl:text>)</xsl:text>
-                </xsl:if>                
+                <xsl:call-template name="toolName"/>
             </xsl:for-each>            
         </p>
     </xsl:template>
+    
+    <xsl:template name="toolName">
+        <xsl:choose>
+            <xsl:when test="url">
+                <xsl:element name="a">
+                    <xsl:attribute name="href">
+                        <xsl:value-of select="normalize-space(url/text())"/>
+                    </xsl:attribute>
+                    <xsl:value-of select="name/text()"/>
+                </xsl:element>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="name/text()"/>
+            </xsl:otherwise>
+        </xsl:choose>        
+    </xsl:template>
+    
+    <xsl:template match="proofOrigin" mode="toolConfiguration">
+        <h2>Tool configuration</h2>
+        <xsl:for-each select="tool">
+            <p>
+                <xsl:call-template name="toolName"/>
+                <ul>
+                    <li>version: <xsl:apply-templates select="version"/></li>
+                    <xsl:if test="strategy">
+                        <li>strategy:                         
+                        <xsl:apply-templates select="strategy/text()"/>
+                        </li>
+                    </xsl:if>                                    
+                </ul>
+            </p>
+        </xsl:for-each>                    
+    </xsl:template>
+    
     
     <xsl:template name="inputOrigin">
         <h2>
