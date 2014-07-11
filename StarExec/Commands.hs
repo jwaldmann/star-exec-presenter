@@ -87,18 +87,22 @@ constructJobInfo _jobId title tds =
                             title
                             Incomplete
                             ""
+                            "unkown"
+                            "unkown"
                             defaultDate
       getJobStatus t = case t of
                         "complete" -> Complete
                         _ -> Incomplete
       parseTDs info xs =
         case xs of
-          ("status":t:ts) -> parseTDs
-                                (info { jobInfoStatus = getJobStatus t })
-                                ts
-          ("created":t:ts) -> parseTDs
-                                  (info { jobInfoDate = t })
-                                  ts
+          ("status":t:ts) ->
+            parseTDs (info { jobInfoStatus = getJobStatus t }) ts
+          ("created":t:ts) ->
+            parseTDs (info { jobInfoDate = t }) ts
+          ("postprocessor":t:ts) ->
+            parseTDs (info { jobInfoPostProc = t }) ts
+          ("preprocessor":t:ts) ->
+            parseTDs (info { jobInfoPreProc = t }) ts
           (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds

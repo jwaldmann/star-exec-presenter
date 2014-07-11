@@ -209,6 +209,8 @@ getJobInfoFromTexts
     in Right $ JobInfo pid
                        pname
                        status'
+                       "unkown"
+                       "unkown"
                        date
                        defaultDate
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
