@@ -49,17 +49,30 @@ data CategoryResult = CategoryResult
 sortScore :: (Solver, Score) -> (Solver, Score) -> Ordering
 sortScore (_,i1) (_,i2) = compare i1 i2
 
+isYes :: SolverResult -> Bool
+isYes (YES _) = True
+isYes _       = False
+
 -- | output is decreasing by Score
-getScores :: [Solver] -> [SolverResult] -> [JobResultInfo] -> [(Solver,Score)]
-getScores solver filters results =
+getScores :: [Solver] -> Scoring -> [JobResultInfo] -> [(Solver,Score)]
+getScores solver scoring results =
   reverse $ L.sortBy sortScore $ map countResults solver
   where
     countResults s = (s, length $ filter (matches s) results)
-    matches (sid,sn) jri = any (\f ->
-        jobResultInfoSolverId jri == sid &&
-        jobResultInfoSolver jri == sn &&
-        jobResultInfoResult jri == f
-      ) filters
+    matches (sid,sn) jri =
+      let solverId = jobResultInfoSolverId jri
+          solver = jobResultInfoSolver jri
+          result = jobResultInfoResult jri
+      in case scoring of
+          Standard ->
+            solverId == sid && solver == sn &&
+            (result == NO || isYes result )
+          Complexity -> undefined
+          Custom rs ->
+            solverId == sid && solver == sn &&
+            any (\f ->
+              result == f
+            ) rs
 
 
 testGetRanking1 = 
@@ -83,7 +96,7 @@ getRanking scores =
 getCategoriesResult :: Category -> Handler CategoryResult
 getCategoriesResult cat = do
   let catName = getCategoryName cat
-      catFilter = getCategoryFilter cat
+      catScoring = getCategoryScoring cat
       catJobIds = getJobIds cat
   qResults <- mapM queryJobResults catJobIds
   qJobInfos <- mapM queryJobInfo catJobIds
@@ -91,7 +104,7 @@ getCategoriesResult cat = do
   --mJobInfos <- mapM getJobInfo catJobIds
   let results = concat $ map queryResult qResults
       solver = getInfo extractSolver results
-      scores = getScores solver catFilter results
+      scores = getScores solver catScoring results
       rankedSolver = getRanking scores
       jobInfos = catMaybes $ map queryResult qJobInfos
   return $ CategoryResult catName

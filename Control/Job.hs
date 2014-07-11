@@ -129,6 +129,7 @@ convertComp c = S.Competition (competitionName c)
 convertMC mc = S.MetaCategory (metaCategoryName mc)
          $ map convertC (categories mc)
 
-convertC c = S.Category (categoryName c) [ S.YES Nothing, S.NO ] 
+--convertC c = S.Category (categoryName c) [ S.YES Nothing, S.NO ] 
+convertC c = S.Category (categoryName c) S.Standard
          $ let (_, jobs) = contents c in jobs
 

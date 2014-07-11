@@ -161,17 +161,20 @@ instance PathMultiPiece JobIds where
     return $ JobIds (int:ints)
   fromPathMultiPiece _ = Nothing
 
+data Scoring = Standard | Complexity | Custom [SolverResult]
+  deriving (Show, Read, Eq)
+
 {-
   solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 -}
-data Category = Category Name [SolverResult] [Int]
+data Category = Category Name Scoring [Int]
   deriving (Show, Read, Eq)
 
 getCategoryName :: Category -> Name
 getCategoryName (Category name _ _) = name
 
-getCategoryFilter :: Category -> [SolverResult]
-getCategoryFilter (Category _ srs _) = srs
+getCategoryScoring :: Category -> Scoring
+getCategoryScoring (Category _ scoring _) = scoring
 
 getJobIds :: Category -> [Int]
 getJobIds (Category _ _ jis) = jis

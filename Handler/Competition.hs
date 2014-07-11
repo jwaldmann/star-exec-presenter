@@ -7,18 +7,18 @@ currentCompetition :: Text -> Competition
 currentCompetition compName = Competition compName
   [ MetaCategory "Termination"
       [ Category "TRS_Standard"
-          [ YES Nothing ]
+          (Custom [ YES Nothing ])
           [ 2166, 2168 ]
       , Category "SRS_Standard"
-          [ CERTIFIED ]
+          (Custom [ CERTIFIED ])
           [ 2166, 2168 ]
       ]
   , MetaCategory "Termination 2"
       [ Category "TRS_Standard 2"
-          [ NO ]
+          (Custom [ NO ])
           [ 2166, 2168 ]
       , Category "SRS_Standard 2"
-          [ MAYBE ]
+          (Custom [ MAYBE ])
           [ 2166, 2168 ]
       ]
   ]
