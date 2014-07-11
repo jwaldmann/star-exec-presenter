@@ -46,7 +46,9 @@ c = Competition "2014"
 * ~~htmlProof over multiple lines~~
 * ~~what about xml-proofs?~~
 * why does a request on CompetitionWithConfigs pend so long?
+  -> there is no request to star-exec during the execution of the handler...
 * one route for show_job_results and flexible_tables
+  -> overlapping routes
 * disable sql-logging in
 * show that jobs and pairs are incomplete
 * ~~link job-, solver- and benchmark-infos to starexec~~

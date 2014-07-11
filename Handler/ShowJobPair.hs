@@ -4,8 +4,8 @@ import Import
 import StarExec.Types
 import StarExec.JobData
 import StarExec.Persist
-import Data.ByteString
 import qualified Data.Text as T
+import Utils.WidgetMetaRefresh
 
 int2Text :: Int -> Text
 int2Text = T.pack . show
@@ -28,4 +28,7 @@ getShowJobPairR _pairId = do
         Nothing -> False
         Just pair -> Nothing /= (jobPairInfoHtmlProof pair)
   defaultLayout $ do
+    case qStatus of
+      Latest -> return ()
+      Pending _ -> insertWidgetMetaRefresh
     $(widgetFile "show_job_pair")

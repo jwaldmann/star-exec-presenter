@@ -3,7 +3,7 @@ module Table.Get where
 import Import
 
 import Table.Data
-import StarExec.JobData ( getManyJobResults, getClass )
+import StarExec.JobData ( queryManyJobResults, getClass )
 import StarExec.Types
 
 
@@ -13,8 +13,8 @@ import qualified Data.Set as S
 
 import Data.Double.Conversion.Text
 
-getManyJobCells ids = do
-    iss <- getManyJobResults ids
+getManyJobCells iss = do
+    --iss <- getManyJobResults ids
     let cells :: M.Map (Text,Text) (M.Map Text Cell)
         cells = M.fromListWith M.union $ do
           p <- concat iss

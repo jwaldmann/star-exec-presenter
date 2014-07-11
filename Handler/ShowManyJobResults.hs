@@ -12,6 +12,7 @@ import qualified Data.List as L
 import qualified Data.Text as T
 import Text.Lucius (luciusFile)
 import Table.Query
+import Utils.WidgetMetaRefresh
 
 countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
 countResults result (_jobId,(sid,_)) = runDB $ do
@@ -70,4 +71,7 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
+    if any (\q -> queryStatus q /= Latest) qJobs
+      then insertWidgetMetaRefresh
+      else return ()
     $(widgetFile "show_many_job_results")

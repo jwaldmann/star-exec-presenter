@@ -94,6 +94,7 @@ index (sec, man, cookies) = do
 
 getConnection :: Handler StarExecConnection
 getConnection = do
+  --liftIO $ putStrLn "getConnection >>>"
   mSession <- getSessionData
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
@@ -116,6 +117,7 @@ getConnection = do
           creds <- getLoginCredentials
           login con creds
   writeSessionData cookies currentTime
+  --liftIO $ putStrLn "<<< getConnection"
   return con
 
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)

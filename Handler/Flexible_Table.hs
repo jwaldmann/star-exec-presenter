@@ -3,9 +3,11 @@ module Handler.Flexible_Table where
 import Import
 
 import StarExec.Types 
+import StarExec.JobData ( queryManyJobResults )
 import Table.Data
 import Table.Query
 import Table.Get
+import Utils.WidgetMetaRefresh
 
 import Text.Lucius (luciusFile)
 
@@ -16,10 +18,14 @@ import Data.List (sortBy)
 
 getFlexible_TableR :: Query -> JobIds -> Handler Html
 getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
-  tab <- Table.Get.getManyJobCells ids
+  qJobs <- queryManyJobResults ids
+  tab <- Table.Get.getManyJobCells $ map queryResult qJobs
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget $(luciusFile "templates/solver_result.lucius")
+    if any (\q -> queryStatus q /= Latest) qJobs
+      then insertWidgetMetaRefresh
+      else return ()
     [whamlet|
             <pre>#{show q}
         |]

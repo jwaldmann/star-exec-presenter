@@ -66,7 +66,7 @@ instance Yesod App where
 
     defaultLayout widget = do
         master <- getYesod
-        mmsg <- getMessage
+        --mmsg <- getMessage
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and

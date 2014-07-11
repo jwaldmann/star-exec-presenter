@@ -49,6 +49,7 @@ library
                      Table.Get
                      Table.Query
                      Control.Job
+                     Utils.WidgetMetaRefresh
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
