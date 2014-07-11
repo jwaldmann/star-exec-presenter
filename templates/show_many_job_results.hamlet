@@ -7,7 +7,7 @@
 <div class="container">
   <input type="checkbox" id="legend">
   <div class="container">
-    <label for="legend">Legend
+    <label for="legend" class="a">Legend
     <div class="checked-container">
       <h3>Legend
       <div>
@@ -26,7 +26,7 @@
 <div class="container">
   <input type="checkbox" id="scores">
   <div class="container">
-    <label for="scores">Scores
+    <label for="scores" class="a">Scores
     <div class="checked-container">
       <h2>The Scores:
       <table class="table">
