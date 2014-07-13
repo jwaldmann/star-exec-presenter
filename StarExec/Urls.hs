@@ -46,6 +46,10 @@ solverInfoPath = "starexec/secure/details/solver.jsp"
 benchmarkInfoPath :: ByteString
 benchmarkInfoPath = "starexec/secure/details/benchmark.jsp"
 
+postProcPath :: ByteString
+--postProcPath = "starexec/secure/edit/processor.jsp?type=post&id=164"
+postProcPath = "starexec/secure/edit/processor.jsp"
+
 getURL :: ByteString -> [(String, String)] -> ByteString
 getURL url patterns = List.foldl' (\path (pattern, sub) ->
     BSL.toStrict $ BSS.replace

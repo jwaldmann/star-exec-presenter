@@ -17,6 +17,7 @@ StarExecSessionData
 
 JobResultInfo
     jobId Int
+    score Int Maybe
     pairId Int
     UniqueJobResultInfo pairId
     benchmark Text
@@ -48,6 +49,7 @@ JobInfo
     date Text
     preProc Text default='unknown'
     postProc Text default='unknown'
+    isComplexity Bool default=False
     lastUpdate UTCTime default=now()
     deriving Show
 

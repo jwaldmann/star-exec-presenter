@@ -12,7 +12,7 @@ import StarExec.Types
 
 instance CSV.FromNamedRecord JobResultInfo where
   parseNamedRecord r =
-    JobResultInfo (-1)
+    JobResultInfo (-1) Nothing
                   <$> r CSV..: "pair id"
                   <*> r CSV..: "benchmark"
                   <*> r CSV..: "benchmark id"

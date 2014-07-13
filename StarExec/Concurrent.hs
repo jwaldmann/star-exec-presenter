@@ -117,6 +117,7 @@ runQueryJobResults _jobId = do
             runConcurrent (queryExceptionHandler q) $ do
               con <- getConnection
               results <- getJobResults con _jobId
+              -- getRankings...
               if null results
                 then deleteQuery q
                 else do

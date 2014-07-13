@@ -89,10 +89,12 @@ constructJobInfo _jobId title tds =
                             ""
                             "unkown"
                             "unkown"
+                            False
                             defaultDate
       getJobStatus t = case t of
                         "complete" -> Complete
                         _ -> Incomplete
+      isComplexity s = 0 < (T.count "complex" $ T.toLower s)
       parseTDs info xs =
         case xs of
           ("status":t:ts) ->
@@ -103,6 +105,8 @@ constructJobInfo _jobId title tds =
             parseTDs (info { jobInfoPostProc = t }) ts
           ("preprocessor":t:ts) ->
             parseTDs (info { jobInfoPreProc = t }) ts
+          ("description":t:ts) ->
+            parseTDs (info { jobInfoIsComplexity = isComplexity t }) ts
           (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds
