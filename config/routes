@@ -21,3 +21,4 @@
 /show_solver_info/#Int ShowSolverInfoR GET
 /test-runs ListCompetitionsR GET
 /display_proof/#Text DisplayProofR GET
+/hidden-test-runs ListHiddenCompetitionsR GET

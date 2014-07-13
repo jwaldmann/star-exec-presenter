@@ -1,12 +1,12 @@
-module Handler.ListCompetitions where
+module Handler.ListHiddenCompetitions where
 
 import Import
 import StarExec.Persist
 import StarExec.Types
 
-getListCompetitionsR :: Handler Html
-getListCompetitionsR = do
-  competitionInfos <- getPersistCompetitions True
+getListHiddenCompetitionsR :: Handler Html
+getListHiddenCompetitionsR = do
+  competitionInfos <- getPersistCompetitions False
   let competitions = map competitionInfoCompetition competitionInfos
   defaultLayout $ do
     $(widgetFile "list_competitions")

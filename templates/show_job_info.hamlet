@@ -15,6 +15,12 @@ $maybe jobInfo <- mJobInfo
           <td>Date:
           <td>#{jobInfoDate jobInfo}
         <tr>
+          <td>Pre-Processor
+          <td>#{jobInfoPreProc jobInfo}
+        <tr>
+          <td>Post-Processor
+          <td>#{jobInfoPostProc jobInfo}
+        <tr>
           <td>Last Update from Star-Exec:
           <td>#{show $ jobInfoLastUpdate jobInfo}
     <a href=@{ShowManyJobResultsR $ JobIds [_jobId]}>Show Job-Results</a>

@@ -20,6 +20,7 @@ import System.Random
 data JobControl = JobControl
    { user :: Text
    , pass :: Text
+   , isPublic :: Bool
    , queue :: Int
    , space :: Int
    , wallclock :: Int

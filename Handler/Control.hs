@@ -22,7 +22,8 @@ import qualified Data.Map as M
 
 inputForm = renderTable $ JobControl
         <$> areq textField "user" Nothing
-        <*> areq passwordField "pass" Nothing 
+        <*> areq passwordField "pass" Nothing
+        <*> areq checkBoxField "is public" (Just False)
         <*> areq (radioFieldList [("Termination.q"::T.Text,478),("all.q",1),("all2.q",4)]) "queue" (Just 478)
         <*> areq (radioFieldList [("autotest":: T.Text, 52915)]) "space" (Just 52915)
         <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
@@ -47,6 +48,9 @@ postControlR = do
     ((result,widget), enctype) <- runFormPost inputForm
 
     let comp = tc2014
+        public = case result of
+                  FormSuccess input -> isPublic input
+                  _ -> False
     cred <- getLoginCredentials
 
     mc <- case result of
@@ -61,7 +65,7 @@ postControlR = do
         Nothing -> return ()
         Just c -> do
             now <- liftIO getCurrentTime
-            runDB $ insert $ CompetitionInfo ( timed now c ) now
+            runDB $ insert $ CompetitionInfo ( timed now c ) now public
             return ()
     defaultLayout $ do
         [whamlet|<h2>Result of previous command
@@ -72,7 +76,7 @@ $nothing
 |] 
         $(widgetFile "control")
 
-
+startjobs :: JobControl -> Text -> Handler (Maybe S.Competition)
 startjobs input con = 
       checkPrefix "cat:"  con (startCat input)
     $ checkPrefix "mc:" con (startMC input)
