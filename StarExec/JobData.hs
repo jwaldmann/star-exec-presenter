@@ -30,7 +30,10 @@ queryJob _jobId = do
   case mPersistJobInfo of
     Just persistJobInfo -> do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
-      if since > updateThreshold
+          jobComplete = Complete == jobInfoStatus persistJobInfo
+      liftIO $ putStrLn $ "### queryJob: " ++ (show _jobId) ++ " status: " ++ (show $ jobInfoStatus persistJobInfo)
+      liftIO $ putStrLn $ "### queryJob: " ++ (show _jobId) ++ " too old?: " ++ (show $ since > updateThreshold)
+      if (not jobComplete) || (since > updateThreshold)
         then runQueryJob _jobId
         else do
           persistJobResults <- getPersistJobResults _jobId

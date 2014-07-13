@@ -59,5 +59,6 @@
               <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
                 #{toFixed 1 $ jobResultInfoCpuTime result} /
                 #{toFixed 1 $ jobResultInfoWallclockTime result}
+                (#{getScore result})
           $nothing
             <td>

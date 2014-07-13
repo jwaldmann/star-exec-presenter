@@ -1,7 +1,5 @@
 module StarExec.Concurrent 
-  ( runQueryJobInfo
-  , runQueryJobResults
-  , runQuerySolverInfo
+  ( runQuerySolverInfo
   , runQueryBenchmarkInfo
   , runQueryJobPair
   , runQueryJob
@@ -12,11 +10,13 @@ import Control.Exception.Base
 import StarExec.Types
 import StarExec.PersistTypes
 import StarExec.Persist
+import StarExec.Processing
 import StarExec.Connection
 import StarExec.Commands
 import Data.Maybe
 import Data.Time.Clock
 import Database.Persist.Class
+import Debug.Trace
 
 type ExceptionHandler = SomeException -> Handler ()
 
@@ -101,9 +101,6 @@ runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
                 insertUnique $ ji { jobInfoLastUpdate = currentTime }
               return ()
 
-getScoredResults :: [JobResultInfo] -> [JobResultInfo]
-getScoredResults results = results
-
 runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
 runQueryJob _jobId = do
   let q = GetJob _jobId
@@ -122,16 +119,21 @@ runQueryJob _jobId = do
               mJobInfo <- getJobInfo con _jobId
               case mJobInfo of
                 Just ji -> do
+                  liftIO $ putStrLn $ "Got Job: " ++ (show ji)
                   results <- getJobResults con _jobId
+                  currentTime <- getTime
+                  let isComplexJob = jobInfoIsComplexity ji
+                  liftIO $ putStrLn $ "Job is complex? " ++ (show isComplexJob)
+                  liftIO $ putStrLn $ show $ map jobResultInfoStatus results
                   let processedResults =
-                        if jobInfoIsComplexity ji
+                        if isComplexJob
                           then getScoredResults results
                           else results
                   runDB $ do
                     deleteBy $ UniqueJobInfo _jobId
                     mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
-                    insertUnique ji
-                    mapM_ insertUnique results
+                    insertUnique ji { jobInfoLastUpdate = currentTime }
+                    mapM_ insertUnique processedResults
                   return ()
                 Nothing -> return ()
               liftIO $ putStrLn $ "Job done: " ++ (show q)
