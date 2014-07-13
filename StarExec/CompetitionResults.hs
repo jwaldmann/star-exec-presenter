@@ -16,6 +16,7 @@ module StarExec.CompetitionResults
 import Import
 import StarExec.Types
 import StarExec.JobData
+import StarExec.Processing
 import qualified Data.List as L
 import Data.Maybe
 

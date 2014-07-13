@@ -3,7 +3,7 @@ module Table.Get where
 import Import
 
 import Table.Data
-import StarExec.JobData ( getClass )
+import StarExec.Processing ( getClass )
 import StarExec.Types
 
 

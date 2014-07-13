@@ -7,6 +7,7 @@ import Import
 import StarExec.Types
 import StarExec.Persist
 import StarExec.JobData
+import StarExec.Processing
 import Data.Double.Conversion.Text
 import Data.Maybe
 import qualified Data.List as L

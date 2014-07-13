@@ -45,6 +45,7 @@ library
                      StarExec.Registration
                      StarExec.PersistTypes
                      StarExec.Concurrent
+                     StarExec.Processing
                      Table.Data
                      Table.Get
                      Table.Query
