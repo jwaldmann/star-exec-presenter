@@ -15,13 +15,13 @@ getShowJobPairR _pairId = do
   (QueryResult qStatus mPair) <- queryJobPair _pairId
   mJobResult <- getPersistJobResult _pairId
   (mj, mb, ms) <- case mJobResult of
-                    Nothing -> return (QueryResult Latest Nothing, QueryResult Latest Nothing, QueryResult Latest Nothing)
+                    Nothing -> return (QueryResult Latest (Nothing, []), QueryResult Latest Nothing, QueryResult Latest Nothing)
                     Just jr -> do
-                      qmj <- queryJobInfo $ jobResultInfoJobId jr
+                      qmj <- queryJob $ jobResultInfoJobId jr
                       qmb <- queryBenchmarkInfo $ jobResultInfoBenchmarkId jr
                       qms <- querySolverInfo $ jobResultInfoSolverId jr
                       return (qmj, qmb, qms)
-  let mJobInfo = queryResult mj
+  let mJobInfo = fst $ queryResult mj
       mBenchmarkInfo = queryResult mb
       mSolverInfo = queryResult ms
       hasHtmlProof = case mPair of

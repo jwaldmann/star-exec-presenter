@@ -1,8 +1,28 @@
-module StarExec.JobData where
+module StarExec.JobData
+  ( queryJob
+  , querySolverInfo
+  , queryBenchmarkInfo
+  , queryJobPair
+  , queryManyJobs
+  , getClass
+  , getBenchmarkResults
+  , getInfo
+  , extractBenchmark
+  , extractSolver
+  , compareBenchmarks
+  , Solver
+  , SolverName
+  , SolverID
+  , SolverResults
+  , Benchmark
+  , BenchmarkID
+  , BenchmarkName
+  , BenchmarkRow
+  , TableHead
+  ) where
 
 import Import
 import StarExec.Types
-import StarExec.PersistTypes
 import StarExec.Connection
 import StarExec.Concurrent
 import qualified StarExec.Commands as SEC
@@ -70,47 +90,19 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getJobResultsFromStarExec :: Int -> Handler [JobResultInfo]
-getJobResultsFromStarExec _jobId = do
-  con <- getConnection
-  SEC.getJobResults con _jobId
-
-queryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
-queryJobResults _jobId = do
+queryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
+queryJob _jobId = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   currentTime <- getTime
   case mPersistJobInfo of
     Just persistJobInfo -> do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
       if since > updateThreshold
-        then queryJobResults' _jobId
+        then runQueryJob _jobId
         else do
           persistJobResults <- getPersistJobResults _jobId
-          return $ QueryResult Latest persistJobResults
-    Nothing -> queryJobResults' _jobId
-  where
-    queryJobResults' :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
-    queryJobResults' _jobId = do
-      _ <- runQueryJobInfo _jobId
-      runQueryJobResults _jobId
-
-queryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
-queryJobInfo _jobId = do
-  mPersistJobInfo <- getPersistJobInfo _jobId
-  currentTime <- getTime
-  case mPersistJobInfo of
-    Just persistJobInfo -> do
-      let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
-          jobComplete = Complete == jobInfoStatus persistJobInfo
-      if not jobComplete || since > updateThreshold
-        then queryJobInfo' _jobId
-        else return $ QueryResult Latest $ Just persistJobInfo
-    Nothing -> queryJobInfo' _jobId
-  where
-    queryJobInfo' :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
-    queryJobInfo' _jobId = do
-      _ <- runQueryJobResults _jobId
-      runQueryJobInfo _jobId
+          return $ QueryResult Latest (Just persistJobInfo, persistJobResults)
+    Nothing -> runQueryJob _jobId
 
 querySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
 querySolverInfo _solverId = do
@@ -146,60 +138,5 @@ queryJobPair _pairId = do
         else runQueryJobPair _pairId
     Nothing -> runQueryJobPair _pairId
 
-getJobInfo :: Int -> Handler (Maybe JobInfo)
-getJobInfo _jobId = do
-  mPersistJobInfo <- runDB $ getBy $ UniqueJobInfo _jobId
-  case mPersistJobInfo of
-    Nothing -> do
-      con <- getConnection
-      mJobInfo <- SEC.getJobInfo con _jobId
-      case mJobInfo of
-        Nothing -> return Nothing
-        Just ji -> return $ Just ji
-    Just en -> return $ Just $ entityVal en
-
-getJobResults :: Int -> Handler [JobResultInfo]
-getJobResults _jobId = do
-  mPersistJobInfo <- getPersistJobInfo _jobId
-  case mPersistJobInfo of
-    Nothing -> do
-      con <- getConnection
-      mJobInfo <- SEC.getJobInfo con _jobId
-      case mJobInfo of
-        Nothing -> error $ "No such Job: " ++ (show _jobId)
-        Just ji -> do
-          if jobInfoStatus ji == Complete
-            then do
-              insertJobInfo ji
-              jobResults <- SEC.getJobResults con _jobId
-              mapM_ dbInsertJobResult jobResults
-              getPersistJobResults _jobId
-            else SEC.getJobResults con _jobId
-    -- job is completed
-    Just _ -> getPersistJobResults _jobId
-
-getManyJobResults :: [Int] -> Handler [[JobResultInfo]] 
-getManyJobResults = mapM getJobResults
-
-queryManyJobResults :: [Int] -> Handler [QueryResult QueryInfo [JobResultInfo]]
-queryManyJobResults = mapM queryJobResults
-
-getJobPair :: Int -> Handler (Maybe JobPairInfo)
-getJobPair _pairId = do
-  mPair <- runDB $ getBy $ UniqueJobPairInfo _pairId
-  case mPair of
-    Just pair -> return $ Just $ entityVal pair
-    Nothing -> do
-      con <- getConnection
-      mPairInfo <- SEC.getJobPairInfo con _pairId
-      case mPairInfo of
-        Just pairInfo -> do
-          mKey <- runDB $ insertUnique pairInfo
-          case mKey of
-            Just key -> do
-              mVal <- runDB $ get key
-              case mVal of
-                Just val -> return $ Just val
-                Nothing -> return Nothing
-            Nothing -> return Nothing
-        Nothing -> return Nothing
+queryManyJobs :: [Int] -> Handler [QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo])]
+queryManyJobs = mapM queryJob

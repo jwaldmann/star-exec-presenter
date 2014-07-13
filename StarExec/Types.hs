@@ -226,6 +226,7 @@ data SEQuery =
   | GetBenchmarkInfo Int
   | GetJobPair Int
   | GetJobResults Int
+  | GetJob Int
   deriving (Eq, Read, Show)
 derivePersistField "SEQuery"
 

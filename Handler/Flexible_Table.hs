@@ -3,7 +3,7 @@ module Handler.Flexible_Table where
 import Import
 
 import StarExec.Types 
-import StarExec.JobData ( queryManyJobResults )
+import StarExec.JobData ( queryManyJobs )
 import Table.Data
 import Table.Query
 import Table.Get
@@ -18,8 +18,8 @@ import Data.List (sortBy)
 
 getFlexible_TableR :: Query -> JobIds -> Handler Html
 getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
-  qJobs <- queryManyJobResults ids
-  tab <- Table.Get.getManyJobCells $ map queryResult qJobs
+  qJobs <- queryManyJobs ids
+  tab <- Table.Get.getManyJobCells $ map (snd . queryResult) qJobs
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget $(luciusFile "templates/solver_result.lucius")

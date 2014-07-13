@@ -8,6 +8,7 @@ import StarExec.Types
 import StarExec.Persist
 import StarExec.JobData
 import Data.Double.Conversion.Text
+import Data.Maybe
 import qualified Data.List as L
 import qualified Data.Text as T
 import Text.Lucius (luciusFile)
@@ -47,10 +48,10 @@ getShowManyJobResultsLegacyR = getShowManyJobResultsR
 
 getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
-  qJobs <- queryManyJobResults ids
-  let pJobs = map queryResult qJobs
-      jobs = pJobs
-      jobResults = concat jobs
+  qJobs <- queryManyJobs ids
+  let jobInfos = catMaybes $ map (fst . queryResult) qJobs
+      jobs = map (snd . queryResult) qJobs
+      jobResults = concat $ jobs
       benchmarks = L.sortBy compareBenchmarks $
                     getInfo extractBenchmark $ jobResults
       groupedSolvers = map (getInfo extractSolver) jobs

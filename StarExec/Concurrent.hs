@@ -4,6 +4,7 @@ module StarExec.Concurrent
   , runQuerySolverInfo
   , runQueryBenchmarkInfo
   , runQueryJobPair
+  , runQueryJob
   ) where
 
 import Import
@@ -99,6 +100,51 @@ runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
                 deleteBy $ UniqueJobInfo _jobId
                 insertUnique $ ji { jobInfoLastUpdate = currentTime }
               return ()
+
+getScoredResults :: [JobResultInfo] -> [JobResultInfo]
+getScoredResults results = results
+
+runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
+runQueryJob _jobId = do
+  let q = GetJob _jobId
+  mPersistJobInfo <- getPersistJobInfo _jobId
+  persistJobResults <- getPersistJobResults _jobId
+  runQueryBase q $ \mQuery ->
+    case mQuery of
+      Just eq -> 
+        return $ pendingQuery (entityKey eq) (mPersistJobInfo, persistJobResults)
+      Nothing -> do
+        mKey <- insertQuery q
+        case mKey of
+          Just queryKey -> do
+            runConcurrent (queryExceptionHandler q) $ do
+              con <- getConnection
+              mJobInfo <- getJobInfo con _jobId
+              case mJobInfo of
+                Just ji -> do
+                  results <- getJobResults con _jobId
+                  let processedResults =
+                        if jobInfoIsComplexity ji
+                          then getScoredResults results
+                          else results
+                  runDB $ do
+                    deleteBy $ UniqueJobInfo _jobId
+                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
+                    insertUnique ji
+                    mapM_ insertUnique results
+                  return ()
+                Nothing -> return ()
+              liftIO $ putStrLn $ "Job done: " ++ (show q)
+              deleteQuery q
+            return $ pendingQuery queryKey (mPersistJobInfo, persistJobResults)
+          Nothing -> do
+            mQuery' <- getQuery q
+            case mQuery' of
+              Just eq -> do
+                persistJobResults' <- getPersistJobResults _jobId
+                return $ pendingQuery (entityKey eq) (mPersistJobInfo, persistJobResults')
+              Nothing -> do
+                return $ QueryResult Latest (mPersistJobInfo, persistJobResults)
 
 resultIsCompleted :: JobResultInfo -> Bool
 resultIsCompleted r = JobResultComplete == jobResultInfoStatus r

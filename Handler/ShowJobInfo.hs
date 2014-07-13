@@ -7,7 +7,7 @@ import Utils.WidgetMetaRefresh
 
 getShowJobInfoR :: Int -> Handler Html
 getShowJobInfoR _jobId = do
-  (QueryResult qStatus mJobInfo) <- queryJobInfo _jobId
+  (QueryResult qStatus (mJobInfo,_)) <- queryJob _jobId
   defaultLayout $ do
     case qStatus of
       Latest -> return ()

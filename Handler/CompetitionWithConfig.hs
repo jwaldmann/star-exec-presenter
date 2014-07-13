@@ -11,7 +11,7 @@ getCompetitionWithConfigR comp = do
   let metaCats = getMetaCategories comp
       cats = concat $ map getCategories metaCats
       jobIds = concat $ map getJobIds cats
-  qJobs <- queryManyJobResults jobIds
+  qJobs <- queryManyJobs jobIds
   compResults <- getCompetitionResults comp
   defaultLayout $ do
     if any (\q -> queryStatus q /= Latest) qJobs

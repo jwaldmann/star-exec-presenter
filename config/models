@@ -49,7 +49,7 @@ JobInfo
     date Text
     preProc Text default='unknown'
     postProc Text default='unknown'
-    isComplexity Bool default=False
+    isComplexity Bool default=FALSE
     lastUpdate UTCTime default=now()
     deriving Show
 

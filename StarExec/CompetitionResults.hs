@@ -98,15 +98,14 @@ getCategoriesResult cat = do
   let catName = getCategoryName cat
       catScoring = getCategoryScoring cat
       catJobIds = getJobIds cat
-  qResults <- mapM queryJobResults catJobIds
-  qJobInfos <- mapM queryJobInfo catJobIds
+  qResults <- queryManyJobs catJobIds
   --pResults <- getManyJobResults catJobIds
   --mJobInfos <- mapM getJobInfo catJobIds
-  let results = concat $ map queryResult qResults
+  let results = concat $ map (snd . queryResult) qResults
       solver = getInfo extractSolver results
       scores = getScores solver catScoring results
       rankedSolver = getRanking scores
-      jobInfos = catMaybes $ map queryResult qJobInfos
+      jobInfos = catMaybes $ map (fst . queryResult) qResults
   return $ CategoryResult catName
                           rankedSolver
                           jobInfos
