@@ -27,17 +27,22 @@
 <table class="table">
   <thead>
     <tr>
+      <th>Jobs
+      $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
+        <th colspan="#{i}"><a href=@{ShowJobInfoR $ jobInfoStarExecId jobInfo}>#{jobInfoName jobInfo}</a>
+    <tr>
       <th>Benchmarks
       $forall (sId, sName) <- solvers
         <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
     <tr>
       <th>Scores
-      $forall (sId, _) <- solvers
-        <th>
-          $maybe score <- IM.lookup sId scores
-            #{score}
-          $nothing
-            0
+      $forall (solvers, scores) <- zip groupedSolvers scores
+        $forall (sId,_) <- solvers
+          <th>
+            $maybe score <- IM.lookup sId scores
+              #{score}
+            $nothing
+              0
   <tbody>
     $forall ((bId,bName), results) <- benchmarkResults
       <tr>
@@ -49,11 +54,12 @@
                 <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
                   #{toFixed 1 $ jobResultInfoCpuTime result} /
                   #{toFixed 1 $ jobResultInfoWallclockTime result}
-                  $maybe score <- jobResultInfoScore result
-                    (#{getScore result})
-                  $nothing
-                    (-)
+                  $if isComplexity
+                    $maybe score <- jobResultInfoScore result
+                      &nbsp;(#{getScore result})
+                    $nothing
+                      &nbsp;(-)
               $else
-                --
+                not finished
           $nothing
             <td>

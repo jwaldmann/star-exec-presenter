@@ -88,19 +88,19 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
                 mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
                 return $ QueryResult Latest mPersistInfo'
 
-runQueryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
-runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
-  where queryStarExec _jobId = do
-          con <- getConnection
-          mJobInfo <- getJobInfo con _jobId
-          case mJobInfo of
-            Nothing -> return ()
-            Just ji -> do
-              currentTime <- getTime
-              _ <- runDB $ do
-                deleteBy $ UniqueJobInfo _jobId
-                insertUnique $ ji { jobInfoLastUpdate = currentTime }
-              return ()
+--runQueryJobInfo :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo))
+--runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
+--  where queryStarExec _jobId = do
+--          con <- getConnection
+--          mJobInfo <- getJobInfo con _jobId
+--          case mJobInfo of
+--            Nothing -> return ()
+--            Just ji -> do
+--              currentTime <- getTime
+--              _ <- runDB $ do
+--                deleteBy $ UniqueJobInfo _jobId
+--                insertUnique $ ji { jobInfoLastUpdate = currentTime }
+--              return ()
 
 updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
 updateJobInfo mJobInfo jobInfo = do
@@ -149,10 +149,10 @@ runQueryJob _jobId = do
                           then getScoredResults results
                           else results
                   runDB $ do
-                    deleteBy $ UniqueJobInfo _jobId
-                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
-                    updateJobInfo mPersistJobInfo ji
+                    --deleteBy $ UniqueJobInfo _jobId
                     --insertUnique ji { jobInfoLastUpdate = currentTime }
+                    updateJobInfo mPersistJobInfo ji
+                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
                     mapM_ insertUnique processedResults
                   return ()
                 Nothing -> return ()
@@ -171,41 +171,41 @@ runQueryJob _jobId = do
 resultIsCompleted :: JobResultInfo -> Bool
 resultIsCompleted r = JobResultComplete == jobResultInfoStatus r
 
-runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
-runQueryJobResults _jobId = do
-  let q = GetJobResults _jobId
-  mPersistJobResults <- getPersistJobResults _jobId
-  runQueryBase q $ \mQuery ->
-    case mQuery of
-      Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults
-      Nothing -> do
-        mKey <- insertQuery q
-        case mKey of
-          Just queryKey -> do
-            runConcurrent (queryExceptionHandler q) $ do
-              con <- getConnection
-              results <- getJobResults con _jobId
-              -- getRankings...
-              if null results
-                then deleteQuery q
-                else do
-                  runDB $ do
-                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
-                    mapM_ insertUnique results
-                  -- tried automatic polling of job-pair-infos from star-exec, but
-                  -- the app and/or star-exec cannot handle so many requests in short time...
-                  --mapM_ (runQueryJobPair . jobResultInfoPairId) $ filter resultIsCompleted results
-                  deleteQuery q
-                  liftIO $ putStrLn $ "Job done: " ++ (show q)
-            return $ pendingQuery queryKey mPersistJobResults
-          Nothing -> do
-            mQuery' <- getQuery q
-            case mQuery' of
-              Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults
-              -- assuming that the concurrent query is completed
-              Nothing -> do
-                mPersistJobResults' <- getPersistJobResults _jobId
-                return $ QueryResult Latest mPersistJobResults'
+--runQueryJobResults :: Int -> Handler (QueryResult QueryInfo [JobResultInfo])
+--runQueryJobResults _jobId = do
+--  let q = GetJobResults _jobId
+--  mPersistJobResults <- getPersistJobResults _jobId
+--  runQueryBase q $ \mQuery ->
+--    case mQuery of
+--      Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults
+--      Nothing -> do
+--        mKey <- insertQuery q
+--        case mKey of
+--          Just queryKey -> do
+--            runConcurrent (queryExceptionHandler q) $ do
+--              con <- getConnection
+--              results <- getJobResults con _jobId
+--              -- getRankings...
+--              if null results
+--                then deleteQuery q
+--                else do
+--                  runDB $ do
+--                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
+--                    mapM_ insertUnique results
+--                  -- tried automatic polling of job-pair-infos from star-exec, but
+--                  -- the app and/or star-exec cannot handle so many requests in short time...
+--                  --mapM_ (runQueryJobPair . jobResultInfoPairId) $ filter resultIsCompleted results
+--                  deleteQuery q
+--                  liftIO $ putStrLn $ "Job done: " ++ (show q)
+--            return $ pendingQuery queryKey mPersistJobResults
+--          Nothing -> do
+--            mQuery' <- getQuery q
+--            case mQuery' of
+--              Just eq -> return $ pendingQuery (entityKey eq) mPersistJobResults
+--              -- assuming that the concurrent query is completed
+--              Nothing -> do
+--                mPersistJobResults' <- getPersistJobResults _jobId
+--                return $ QueryResult Latest mPersistJobResults'
 
 runQueryJobPair :: Int -> Handler (QueryResult QueryInfo (Maybe JobPairInfo))
 runQueryJobPair = runQueryInfo GetJobPair UniqueJobPairInfo queryStarExec

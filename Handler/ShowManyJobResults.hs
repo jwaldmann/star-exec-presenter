@@ -95,9 +95,11 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   certs  <- mapM (countResults CERTIFIED) jobSolvers
   errors <- mapM (countResults ERROR) jobSolvers
   others <- mapM (countResults OTHER) jobSolvers
-  let scores = if isComplexity
-                 then calcComplexityScores jobResults
-                 else calcStandardScores jobResults
+  let scores = flip map jobs $
+        \results ->
+          if isComplexity
+            then calcComplexityScores results
+            else calcStandardScores results
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q -> queryStatus q /= Latest) qJobs
