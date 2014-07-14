@@ -12,14 +12,27 @@ $maybe jobInfo <- mJobInfo
           <td>Status:
           <td>#{show $ jobInfoStatus jobInfo}
         <tr>
-          <td>Date:
+          <td>Date (Star-Exec):
           <td>#{jobInfoDate jobInfo}
         <tr>
-          <td>Pre-Processor
+          <td>Pre-Processor:
           <td>#{jobInfoPreProc jobInfo}
         <tr>
-          <td>Post-Processor
+          <td>Post-Processor:
           <td>#{jobInfoPostProc jobInfo}
+        <tr>
+          <td>IsComplexity:
+          <td>#{jobInfoIsComplexity jobInfo}
+        <tr>
+          <td>Start-Date:
+          <td>#{show $ jobInfoStartDate jobInfo}
+        <tr>
+          <td>Finish-Date:
+          <td>
+            $maybe date <- jobInfoFinishDate jobInfo
+              #{show date}
+            $nothing
+              The Job is not yet finished
         <tr>
           <td>Last Update from Star-Exec:
           <td>#{show $ jobInfoLastUpdate jobInfo}

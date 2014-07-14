@@ -214,6 +214,7 @@ getJobInfoFromTexts
                        "unkown"
                        False
                        defaultDate
+                       Nothing
                        defaultDate
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
 

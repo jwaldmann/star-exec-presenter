@@ -92,6 +92,7 @@ constructJobInfo _jobId title tds =
                             "unkown"
                             False
                             defaultDate
+                            Nothing
                             defaultDate
       getJobStatus t = case t of
                         "complete" -> Complete
@@ -220,7 +221,10 @@ getSpaceXML (sec, man, cookies) _spaceId = do
                             +> "&type=spaceXML"
                             +> "&includeattrs=false"
                 }
+  liftIO $ putStrLn "### getSpaceXML -> ###"
+  liftIO $ print req
   resp <- sendRequest (req, man, cookies)
+  liftIO $ putStrLn "### <- getSpaceXML ###"
 
   let archive = Zip.toArchive $ responseBody resp
       xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 
@@ -363,7 +367,7 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
          ] $ sec { path = pushjobxmlPath }
     liftIO $ print req 
 
-    -- liftIO $ BSL.writeFile "command.zip" bs
+    liftIO $ BSL.writeFile "command.zip" bs
     
     resp <- sendRequest (req, man, cookies)
     -- the job ids are in the returned cookie.

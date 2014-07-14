@@ -51,6 +51,7 @@ JobInfo
     postProc Text default='unknown'
     isComplexity Bool default=FALSE
     startDate UTCTime default=now()
+    finishDate UTCTime Maybe
     lastUpdate UTCTime default=now()
     deriving Show
 

@@ -69,5 +69,5 @@ registerJobs ids = do
   mapM_ (insertJob now) ids
   where
     insertJob now _id = do
-      let j = JobInfo _id "" Started "" "" "" False now now
+      let j = JobInfo _id "" Started "" "" "" False now Nothing now
       runDB $ insertUnique j

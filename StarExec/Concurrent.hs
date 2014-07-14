@@ -108,12 +108,17 @@ updateJobInfo mJobInfo jobInfo = do
   case mJobInfo of
     Just ji -> updateWhere
       [ JobInfoStarExecId ==. jobInfoStarExecId ji ]
-      [ JobInfoName =. jobInfoName ji
-      , JobInfoStatus =. jobInfoStatus ji
-      , JobInfoDate =. jobInfoDate ji
-      , JobInfoPreProc =. jobInfoPreProc ji
-      , JobInfoPostProc =. jobInfoPostProc ji
-      , JobInfoIsComplexity =. jobInfoIsComplexity ji
+      [ JobInfoName =. jobInfoName jobInfo
+      , JobInfoStatus =. jobInfoStatus jobInfo
+      , JobInfoDate =. jobInfoDate jobInfo
+      , JobInfoPreProc =. jobInfoPreProc jobInfo
+      , JobInfoPostProc =. jobInfoPostProc jobInfo
+      , JobInfoIsComplexity =. jobInfoIsComplexity jobInfo
+      , JobInfoFinishDate =. case jobInfoFinishDate ji of
+                              Nothing -> if jobInfoStatus jobInfo == Complete
+                                          then Just currentTime
+                                          else Nothing
+                              Just fd -> Just fd
       , JobInfoLastUpdate =. currentTime
       ]
     Nothing -> do
