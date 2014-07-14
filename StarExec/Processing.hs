@@ -7,6 +7,7 @@ import qualified Data.List as L
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
 import Debug.Trace
+import qualified Data.IntMap.Strict as IM
 
 type BenchmarkID = Int
 type BenchmarkName = T.Text
@@ -100,3 +101,24 @@ getScoredResults results =
                                       else 0
                                 }
           in map updateScore jris
+
+calcScoresBase :: (JobResultInfo -> Int) -> [JobResultInfo] -> IM.IntMap Int
+calcScoresBase getScore = L.foldl' addScore IM.empty
+  where addScore m jri = IM.insertWith (+) (jobResultInfoSolverId jri) (getScore jri) m
+
+calcComplexityScores :: [JobResultInfo] -> IM.IntMap Int
+calcComplexityScores = calcScoresBase getScore
+  where
+    getScore jri =
+      case jobResultInfoScore jri of
+        Nothing -> 0
+        Just i  -> i
+
+calcStandardScores :: [JobResultInfo] -> IM.IntMap Int
+calcStandardScores = calcScoresBase getScore
+  where
+    getScore jri =
+      case jobResultInfoResult jri of
+        YES _ -> 1
+        NO    -> 1
+        _     -> 0

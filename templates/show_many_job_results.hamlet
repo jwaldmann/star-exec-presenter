@@ -23,31 +23,6 @@
         The results are displayed in the following pattern:
         <code> cpu-time / wallclock-time (complexity-score)
 
-<div class="container">
-  <input type="checkbox" id="scores">
-  <div class="container">
-    <label for="scores" class="a">Scores
-    <div class="checked-container">
-      <h2>The Scores:
-      <table class="table">
-        <thead>
-          <tr>
-            <th>Result
-            $forall (sId, sName) <- solvers
-              <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
-        <tbody>
-          $if isComplexity
-            <tr>
-              <th>Score
-              $forall score <- complexityScores
-                <th>#{show score}
-          $else
-            $forall (result, solverScores) <- scores
-              <tr>
-                <th>#{result}
-                $forall solverScore <- solverScores
-                  <th>#{solverScore}
-
 <h2>The Results:
 <table class="table">
   <thead>
@@ -55,6 +30,14 @@
       <th>Benchmarks
       $forall (sId, sName) <- solvers
         <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
+    <tr>
+      <th>Scores
+      $forall (sId, _) <- solvers
+        <th>
+          $maybe score <- IM.lookup sId scores
+            #{score}
+          $nothing
+            0
   <tbody>
     $forall ((bId,bName), results) <- benchmarkResults
       <tr>

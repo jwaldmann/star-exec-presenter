@@ -12,6 +12,7 @@ import Data.Double.Conversion.Text
 import Data.Maybe
 import qualified Data.List as L
 import qualified Data.Text as T
+import qualified Data.IntMap.Strict as IM
 import Text.Lucius (luciusFile)
 import Table.Query
 import Utils.WidgetMetaRefresh
@@ -94,10 +95,9 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   certs  <- mapM (countResults CERTIFIED) jobSolvers
   errors <- mapM (countResults ERROR) jobSolvers
   others <- mapM (countResults OTHER) jobSolvers
-  complexityScores <- if isComplexity
-                        then mapM ((calcScore ids) . fst) solvers
-                        else return []
-  let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
+  let scores = if isComplexity
+                 then calcComplexityScores jobResults
+                 else calcStandardScores jobResults
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q -> queryStatus q /= Latest) qJobs
