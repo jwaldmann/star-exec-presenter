@@ -231,7 +231,7 @@ getSpaceXML (sec, man, cookies) _spaceId = do
               walk root = root >>= laxElement "Space" >>= \ s -> return
                      Space { benchmarks = map ( read . T.unpack )
                              $ child s >>= laxElement "benchmark" >>= attribute "id" 
-                           , children = [] -- FIXME: child s >>= walk 
+                           , children = child s >>= \ c ->  walk [c]
                            }
           walk root
         _ -> []
