@@ -55,9 +55,9 @@ c = Competition "2014"
 * write down the process of polling all data from star-exec
 * check for unsafe reads
 * ~~xml-proofs -> see job-results of 4067~~
-* ~~hidden competitions~~
+* ~~hidden competitions~
 * refresh of compititions if job-pair or job incomplete
 * ~~isComplexity for JobInfo~~
-* Complexity-Scores: only Score: XXX, not YES: XXX, NO: XXX
+* ~~Complexity-Scores: only Score: XXX, not YES: XXX, NO: XXX~~
 * display, that jobs/competition incomplete
 * extend Category with post-proc-info
