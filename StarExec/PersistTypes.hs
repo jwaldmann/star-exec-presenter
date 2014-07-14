@@ -10,6 +10,8 @@ import GHC.Generics
 import Control.Applicative
 import StarExec.Types
 
+import qualified StarExec.Complexity as C
+
 instance CSV.FromNamedRecord JobResultInfo where
   parseNamedRecord r =
     JobResultInfo (-1) Nothing
@@ -34,6 +36,12 @@ instance CSV.FromField SolverResult where
                 | r == "maybe"      = pure MAYBE
                 | r == "certified"  = pure CERTIFIED
                 | r == "error"      = pure ERROR
+                | r == "yes"        = pure $ YES Nothing
+                | otherwise = case readsPrec 0 $ T.unpack $ decodeUtf8 result of
+                    [ ( C.Bounds { C.upper = C.Poly (Just deg) } , "" ) ]
+                        -> pure $ YES $ Just deg
+                    _ -> pure OTHER
+{-
                 | otherwise         =
                     if "yes" `T.isPrefixOf` r
                       then pure $ YES $ getPolynomial $ T.drop 3 r
@@ -48,7 +56,7 @@ instance CSV.FromField SolverResult where
                               Right (i,_) -> Just i
                               Left _ -> Nothing
                     else Nothing
-
+-}
 
 instance CSV.FromField JobResultStatus where
     parseField result = parseResult s

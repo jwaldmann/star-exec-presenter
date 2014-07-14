@@ -45,6 +45,7 @@ library
                      StarExec.CompetitionResults
                      StarExec.Registration
                      StarExec.PersistTypes
+                     StarExec.Complexity
                      StarExec.Concurrent
                      StarExec.Processing
                      Table.Data
