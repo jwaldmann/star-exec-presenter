@@ -85,10 +85,23 @@ select_benchmarks num bs = do
                 Nothing -> []
                 Just s -> S.benchmarks s                
         Hierarchy { StarExec.Registration.space = id } -> do
-            error "select benchmarks from hierarchy not implemented"
+            s <- getSpaceXML con id
+            return $ case s of
+                Nothing -> []
+                Just s -> S.all_in_hierarchy s
+            
     let bms = concat bmss
     bms' <- liftIO $ permute bms
-    return $ take num bms'
+    let result = take num bms'
+
+    liftIO $ putStrLn $ unlines
+       [ "benchmark sources: " ++ show bs
+       , "total number of benchmarks: " ++ show (length bms)
+       , "take random subset of size: " ++ show (length result)
+       , "consisting of benchmarks: " ++ show result
+       ]
+
+    return $ result
 
 permute [] = return []
 permute (x:xs) = do
