@@ -55,10 +55,10 @@ instance CSV.FromField JobResultStatus where
         where
             s = T.toLower $ decodeUtf8 result
             parseResult r
-                | r == "complete" = pure JobResultComplete
                 | r == "running"  = pure JobResultRunning
                 | r == "enqueued" = pure JobResultEnqueued
-                | otherwise       = pure $ JobResultOther s
+                | otherwise       = pure JobResultComplete
+                -- | otherwise       = pure $ JobResultOther s
 
 {-
 -}
