@@ -67,7 +67,7 @@ data Catinfo =
 
 data Benchmark_Source =
        Bench { bench :: Int } | All { space :: Int } | Hierarchy { space :: Int }
-    deriving ( Generic )
+    deriving ( Generic, Show )
 
 type Registration = Competition Catinfo
 
@@ -82,19 +82,11 @@ standard n bs ps = Category {  categoryName = n , contents =
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 164 , benchmarks = bs , participants = ps } }
 
-trss = [ All 12360 -- Der95
-       , All 12347 -- AG01
-       , All 12350 -- SK90
-       ]
+trss = [ Hierarchy 56849 ]
+srss = [ Hierarchy 56810 ]
 
-srss = [ All 12391 -- zan04
-       , All 12383 -- Waldm07a
-       , All 12392 -- Waldm07b
-       , All 12393 -- ICFP 2010
-       ]
-
-mixed_rel_srs = All 12512
-mixed_rel_trs = All 12381
+mixed_rel_srs = Hierarchy 56805
+mixed_rel_trs = Hierarchy 56846
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
@@ -140,85 +132,85 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
-      , standard "TRS Equational"  [ All 12399  ]
+      , standard "TRS Equational"  [ Hierarchy 56831  ]
            [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Conditional"  [ All 12330 ]
+      , standard "TRS Conditional"  [ Hierarchy 56824 ]
            [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Context Sensitive"  [ All 12345 ]
+      , standard "TRS Context Sensitive"  [ Hierarchy 56827 ]
            [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Innermost"  [ All 12341 ]
+      , standard "TRS Innermost"  [ Hierarchy 56836 ]
            [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Outermost"  [ All 12316 ]
+      , standard "TRS Outermost"  [ Hierarchy 56842 ]
            [ Participant "AProVE" ( Just ( 1681, 2656  ) )
            ]
-      , certified "TRS Innermost certified"  [ All 12341 ]
+      , certified "TRS Innermost certified"  [ Hierarchy 56836 ]
            [ Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
-      , certified "TRS Outermost certified"  [ All 12316 ]
+      , certified "TRS Outermost certified"  [ Hierarchy 56842  ]
            [ Participant "AProVE" ( Just ( 1681, 2652  ) )
            ]
       , standard "Higher-Order rewriting (union beta)"  
-           [ All 12306, All 12307, All 12304, All 12308, All 12305 ]
+           [ Hierarchy 56698 ]
            [ Participant "Wanda" ( Just (1542, 2390))
            , Participant "THOR" ( Just (1800, 2862))
            ]
-     , standard "Integer Transition Systems"  [ All 51335 ]
+     , standard "Integer Transition Systems"  [ Hierarchy 56706 ]
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 1681, 2894 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            , Participant "CppInv" ( Just (1803, 2870))
            ]
-     , standard "Integer TRS"  [ All 37558  ]
+     , standard "Integer TRS"  [ Hierarchy 56704  ]
            [ Participant "AProVE" ( Just ( 1681, 2654  ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
-     [ standard "Derivational Complexity - Full Rewriting"  [ All 12473 ]
+     [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ Participant "TCT" ( Just (1620, 2518))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , standard "Runtime Complexity - Full Rewriting"  [ All 12402 ]
+     , standard "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
            [ Participant "TCT" ( Just (1620, 2516))
            , Participant "CaT" ( Just (1343, 1952))
            ]
-     , standard "Runtime Complexity - Innermost Rewriting"  [ All 12258 ]
+     , standard "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
            [ Participant "TCT" ( Just (1620, 2515))
            , Participant "AProVE" ( Just ( 1681, 2656 ) )
            ]
-     , certified "Derivational Complexity - Full Rewriting certified" [ All 12473 ]
+     , certified "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , certified "Runtime Complexity - Full Rewriting certified"   [ All 12402 ]
+     , certified "Runtime Complexity - Full Rewriting certified"   [ Hierarchy 56748 ]
            [ Participant "CaT" ( Just (1343, 1953))
            ]
-     , certified "Runtime Complexity - Innermost Rewriting certified"  [ All 12258 ]
+     , certified "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
            [ 
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
-     [ standard "C"  [ All 32448 ]
+     [ standard "C"  [ Hierarchy 56607 ]
            [ Participant "AProVE" ( Just ( 1681,  2655 ) )
            , Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "Ultimate Buchi Automizer" (Just (1730, 2738))
            -- , Participant "lsi.upc tool" Nothing
            ]
-     , standard "Java"  [ All 12322 ]
+     , standard "Java"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 1681, 2657  ) )
            -- , Participant "Julia" Nothing
            ]
-     , standard "Logic Programming"  [ All 12293 ]
+     , standard "Logic Programming"  [ Hierarchy 56728, Hierarchy 56739, Hierarchy 56744 ]
            [ Participant "AProVE" ( Just ( 1681, 2653  ) )
            ]
-     , standard "Functional Programming"  [ All 12254 ]
+     , standard "Functional Programming"  [ Hierarchy 56695 ]
            [ Participant "AProVE" ( Just ( 1681, 2650  ) )
            ]
      ]
