@@ -79,7 +79,7 @@ QueryInfo
 CompetitionInfo
     competition Competition
     date UTCTime default=now()
-    public Bool
+    public Bool default=True
     deriving Show
 
 -- UserInfo
