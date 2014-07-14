@@ -21,7 +21,7 @@
               <td class="solver-error">ERROR
               <td class="solver-nothing">OTHER / Nothing
         The results are displayed in the following pattern:
-        <code> cpu-time / wallclock-time
+        <code> cpu-time / wallclock-time (complexity-score)
 
 <div class="container">
   <input type="checkbox" id="scores">
@@ -36,11 +36,17 @@
             $forall (sId, sName) <- solvers
               <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
         <tbody>
-          $forall (result, solverScores) <- scores
+          $if isComplexity
             <tr>
-              <th>#{result}
-              $forall solverScore <- solverScores
-                <th>#{solverScore}
+              <th>Score
+              $forall score <- complexityScores
+                <th>#{show score}
+          $else
+            $forall (result, solverScores) <- scores
+              <tr>
+                <th>#{result}
+                $forall solverScore <- solverScores
+                  <th>#{solverScore}
 
 <h2>The Results:
 <table class="table">

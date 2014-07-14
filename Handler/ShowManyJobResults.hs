@@ -15,6 +15,10 @@ import qualified Data.Text as T
 import Text.Lucius (luciusFile)
 import Table.Query
 import Utils.WidgetMetaRefresh
+--import Database.Persist.Sql
+--import Control.Exception.Lifted (catch)
+--import Data.Ratio
+--import Control.Monad (void)
 
 countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
 countResults result (_jobId,(sid,_)) = runDB $ do
@@ -42,6 +46,25 @@ shorten t = if T.length t > 50
               then shorten $ T.tail t
               else t
 
+calcScore :: [Int] -> Int -> Handler Int
+calcScore [] _solverId = return 0
+calcScore _jobIds _solverId = do
+  let solverFilter = JobResultInfoSolverId ==. _solverId
+      eqFilters = map (\i -> [JobResultInfoJobId ==. i, solverFilter]) _jobIds
+      jobFilter = L.foldr1 (||.) $ eqFilters
+  solverResults <- runDB $ selectList jobFilter []
+  return $ sum $ catMaybes $ map (jobResultInfoScore . entityVal) solverResults
+
+--calcScore :: Int -> Handler [Int]
+--calcScore _solverId = do
+--  let sql = "SELECT sum(score) FROM job_result_info WHERE solver_id = ?;"
+--  scores <- catch
+--    ( runDB $ rawSql sql [ toPersistValue _solverId ] )
+--    ( return [ Single $ 0 % 1 ] )
+--  case scores of
+--    [] -> return [0]
+--    xs -> return $ map (truncate . fromRational . unSingle) xs
+
 --  | to keep old URLs working, as in
 --  http://lists.lri.fr/pipermail/termtools/2014-July/000965.html
 getShowManyJobResultsLegacyR :: JobIds -> Handler Html
@@ -51,6 +74,7 @@ getShowManyJobResultsR :: JobIds -> Handler Html
 getShowManyJobResultsR jids @ (JobIds ids) = do
   qJobs <- queryManyJobs ids
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
+      isComplexity = all jobInfoIsComplexity jobInfos
       jobs = map (snd . queryResult) qJobs
       jobResults = concat $ jobs
       benchmarks = L.sortBy compareBenchmarks $
@@ -70,6 +94,9 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   certs  <- mapM (countResults CERTIFIED) jobSolvers
   errors <- mapM (countResults ERROR) jobSolvers
   others <- mapM (countResults OTHER) jobSolvers
+  complexityScores <- if isComplexity
+                        then mapM ((calcScore ids) . fst) solvers
+                        else return []
   let scores = zip results [ yesses, nos, maybes, certs, errors, others ]
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
