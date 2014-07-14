@@ -214,6 +214,7 @@ getJobInfoFromTexts
                        "unkown"
                        False
                        defaultDate
+                       defaultDate
 getJobInfoFromTexts _ = Left "parse error in getJobInfoFromTexts"
 
 getBenchmarkInfoFromTexts :: [Text] -> Either String BenchmarkInfo

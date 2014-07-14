@@ -45,6 +45,7 @@ import Control.Monad ( guard )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
+import Data.Maybe
 
 (+>) :: BSC.ByteString -> BSC.ByteString -> BSC.ByteString
 (+>) = BS.append
@@ -90,6 +91,7 @@ constructJobInfo _jobId title tds =
                             "unkown"
                             "unkown"
                             False
+                            defaultDate
                             defaultDate
       getJobStatus t = case t of
                         "complete" -> Complete
@@ -346,7 +348,14 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- org.starexec.command.Connection:uploadXML
 
 pushJobXML :: StarExecConnection -> Int -> [Job] -> Handler [Job]
-pushJobXML (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
+pushJobXML con spaceId jobs = do
+  js <- pushJobXMLStarExec con spaceId jobs
+  registerJobs $ catMaybes $ map jobid js
+  return js
+
+
+pushJobXMLStarExec :: StarExecConnection -> Int -> [Job] -> Handler [Job]
+pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just (bs, remap) -> do
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 

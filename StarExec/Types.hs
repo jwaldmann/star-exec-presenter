@@ -36,7 +36,7 @@ type StarExecConnection = (Request, Manager, CookieJar)
 
 {-
 -}
-data JobStatus = Complete | Incomplete
+data JobStatus = Complete | Incomplete | Started
     deriving (Show, Read, Eq)
 derivePersistField "JobStatus"
 

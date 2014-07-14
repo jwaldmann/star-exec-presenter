@@ -7,6 +7,7 @@ import Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as TL
 import StarExec.Types
 import Codec.Compression.GZip
+import Data.Time.Clock
 
 insertJobInfo :: JobInfo -> Handler ()
 insertJobInfo jobInfo = runDB $ insert_ jobInfo
@@ -58,3 +59,12 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 
 compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
+
+registerJobs :: [Int] -> Handler ()
+registerJobs ids = do
+  now <- liftIO getCurrentTime
+  mapM_ (insertJob now) ids
+  where
+    insertJob now _id = do
+      let j = JobInfo _id "" Started "" "" "" False now now
+      runDB $ insertUnique j

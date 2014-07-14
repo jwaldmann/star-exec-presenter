@@ -17,6 +17,7 @@ import Data.Maybe
 import Data.Time.Clock
 import Database.Persist.Class
 import Debug.Trace
+import Data.List ((\\))
 
 type ExceptionHandler = SomeException -> Handler ()
 
@@ -101,6 +102,24 @@ runQueryJobInfo = runQueryInfo GetJobInfo UniqueJobInfo queryStarExec
                 insertUnique $ ji { jobInfoLastUpdate = currentTime }
               return ()
 
+updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
+updateJobInfo mJobInfo jobInfo = do
+  currentTime <- lift getTime
+  case mJobInfo of
+    Just ji -> updateWhere
+      [ JobInfoStarExecId ==. jobInfoStarExecId ji ]
+      [ JobInfoName =. jobInfoName ji
+      , JobInfoStatus =. jobInfoStatus ji
+      , JobInfoDate =. jobInfoDate ji
+      , JobInfoPreProc =. jobInfoPreProc ji
+      , JobInfoPostProc =. jobInfoPostProc ji
+      , JobInfoIsComplexity =. jobInfoIsComplexity ji
+      , JobInfoLastUpdate =. currentTime
+      ]
+    Nothing -> do
+      insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
+      return ()
+
 runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
 runQueryJob _jobId = do
   let q = GetJob _jobId
@@ -121,7 +140,7 @@ runQueryJob _jobId = do
                 Just ji -> do
                   liftIO $ putStrLn $ "Got Job: " ++ (show ji)
                   results <- getJobResults con _jobId
-                  currentTime <- getTime
+                  --currentTime <- getTime
                   let isComplexJob = jobInfoIsComplexity ji
                   liftIO $ putStrLn $ "Job is complex? " ++ (show isComplexJob)
                   liftIO $ putStrLn $ show $ map jobResultInfoStatus results
@@ -132,7 +151,8 @@ runQueryJob _jobId = do
                   runDB $ do
                     deleteBy $ UniqueJobInfo _jobId
                     mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
-                    insertUnique ji { jobInfoLastUpdate = currentTime }
+                    updateJobInfo mPersistJobInfo ji
+                    --insertUnique ji { jobInfoLastUpdate = currentTime }
                     mapM_ insertUnique processedResults
                   return ()
                 Nothing -> return ()
