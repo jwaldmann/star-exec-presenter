@@ -62,9 +62,15 @@
         $forall mResult <- results
           $maybe result <- mResult
             <td class="#{getClass result}">
-              <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
-                #{toFixed 1 $ jobResultInfoCpuTime result} /
-                #{toFixed 1 $ jobResultInfoWallclockTime result}
-                (#{getScore result})
+              $if jobResultInfoStatus result == JobResultComplete
+                <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
+                  #{toFixed 1 $ jobResultInfoCpuTime result} /
+                  #{toFixed 1 $ jobResultInfoWallclockTime result}
+                  $maybe score <- jobResultInfoScore result
+                    (#{getScore result})
+                  $nothing
+                    (-)
+              $else
+                --
           $nothing
             <td>
