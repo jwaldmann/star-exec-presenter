@@ -6,7 +6,7 @@ import StarExec.Types
 
 getListHiddenCompetitionsR :: Handler Html
 getListHiddenCompetitionsR = do
-  competitionInfos <- getPersistCompetitions False
+  competitionInfos <- getPersistCompetitions
   let competitions = map competitionInfoCompetition competitionInfos
   defaultLayout $ do
     $(widgetFile "list_competitions")

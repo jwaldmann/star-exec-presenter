@@ -64,7 +64,7 @@ c = Competition "2014"
 * scores for non-complexities like complexity: 1 point for each YES or NO
 * list post-proc in categories-list of competition and wether complete/incomplete
 * show, that meta-cat is incomplete, because a sub-cat is incomplete
-* hidden-test-runs: show all competitions
-* handle new record-field star-date
+* ~~hidden-test-runs: show all competitions~~
+* ~~handle new record-field star-date~~
 * show duration in show-job-results and competitions
   * completion-time and start-time
