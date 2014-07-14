@@ -90,6 +90,10 @@ data Space = Space
    , benchmarks :: [ Int ]
    } deriving ( Show, Eq )
 
+all_in_hierarchy :: Space -> [Int]
+all_in_hierarchy s =
+    benchmarks s ++ (children s >>= all_in_hierarchy)
+
 
 {-
 -}
