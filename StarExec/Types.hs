@@ -18,6 +18,7 @@ type Description = T.Text
 type Rank = Int
 type Score = Int
 type Seconds = Double
+type PostProcId = Int
 
 data Login = Login Email Password deriving (Show, Read, Eq)
 
@@ -171,17 +172,20 @@ data Scoring = Standard | Complexity | Custom [SolverResult]
 {-
   solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 -}
-data Category = Category Name Scoring [Int]
+data Category = Category Name Scoring PostProcId [Int]
   deriving (Show, Read, Eq)
 
 getCategoryName :: Category -> Name
-getCategoryName (Category name _ _) = name
+getCategoryName (Category name _ _ _) = name
 
 getCategoryScoring :: Category -> Scoring
-getCategoryScoring (Category _ scoring _) = scoring
+getCategoryScoring (Category _ scoring _ _) = scoring
+
+getPostProcId :: Category -> PostProcId
+getPostProcId (Category _ _ pid _) = pid
 
 getJobIds :: Category -> [Int]
-getJobIds (Category _ _ jis) = jis
+getJobIds (Category _ _ _ jis) = jis
 
 {-
   solver by rank in the categories
@@ -231,6 +235,7 @@ data SEQuery =
   | GetJobPair Int
   | GetJobResults Int
   | GetJob Int
+  | GetPostProc Int
   deriving (Eq, Read, Show)
 derivePersistField "SEQuery"
 

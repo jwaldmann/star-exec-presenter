@@ -36,6 +36,8 @@ data MetaCategoryResult = MetaCategoryResult
 
 data CategoryResult = CategoryResult
   { categoryName :: Name
+  , categoryScoring :: Scoring
+  , categoryPostProc :: Maybe PostProcInfo
   , categoryRanking :: [(Maybe Rank, Solver, Score)]
   , categoryJobs :: [JobInfo]
   } deriving (Show)
@@ -98,8 +100,10 @@ getCategoriesResult :: Category -> Handler CategoryResult
 getCategoriesResult cat = do
   let catName = getCategoryName cat
       catScoring = getCategoryScoring cat
+      catPostProcId = getPostProcId cat
       catJobIds = getJobIds cat
   qResults <- queryManyJobs catJobIds
+  qPostProc <- queryPostProc catPostProcId
   --pResults <- getManyJobResults catJobIds
   --mJobInfos <- mapM getJobInfo catJobIds
   let results = concat $ map (snd . queryResult) qResults
@@ -108,6 +112,8 @@ getCategoriesResult cat = do
       rankedSolver = getRanking scores
       jobInfos = catMaybes $ map (fst . queryResult) qResults
   return $ CategoryResult catName
+                          catScoring
+                          (queryResult qPostProc)
                           rankedSolver
                           jobInfos
 

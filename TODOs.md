@@ -45,12 +45,13 @@ c = Competition "2014"
 * cache space-xml
 * ~~htmlProof over multiple lines~~
 * ~~what about xml-proofs?~~
-* why does a request on CompetitionWithConfigs pend so long?
+* ~~why does a request on CompetitionWithConfigs pend so long?~~
   -> there is no request to star-exec during the execution of the handler...
 * one route for show_job_results and flexible_tables
   -> overlapping routes
 * disable sql-logging in
 * show that jobs and pairs are incomplete
+  -> done for `/show_job_results`
 * ~~link job-, solver- and benchmark-infos to starexec~~
 * write down the process of polling all data from star-exec
 * check for unsafe reads
@@ -60,7 +61,7 @@ c = Competition "2014"
 * ~~isComplexity for JobInfo~~
 * ~~Complexity-Scores: only Score: XXX, not YES: XXX, NO: XXX~~
 * display, that jobs/competition incomplete
-* extend Category with post-proc-info
+* ~~extend Category with post-proc-info~~
 * scores for non-complexities like complexity: 1 point for each YES or NO
 * list post-proc in categories-list of competition and wether complete/incomplete
 * show, that meta-cat is incomplete, because a sub-cat is incomplete

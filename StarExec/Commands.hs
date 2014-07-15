@@ -9,6 +9,7 @@ module StarExec.Commands
   , getJobInfo
   , getBenchmarkInfo
   , getSolverInfo
+  , getPostProcInfo
   , pushJobXML, Job (..) -- FIXME: move to some other module
   , getSpaceXML
   ) where
@@ -147,6 +148,26 @@ constructSolverInfo _solverId title tds =
       tds' = map (safeHead "" . content) tds
   in parseTDs baseSolverInfo tds'
 
+constructPostProcInfo :: Int -> Text -> [Cursor] -> PostProcInfo
+constructPostProcInfo _procId title tds =
+  let basePostProcInfo = PostProcInfo _procId
+                                      title
+                                      ""
+                                      defaultDate
+      part (ys,zs) (x:y:xs) = part (x:ys,y:zs) xs
+      part rest _           = rest
+      (keys,vals) = part ([],[]) tds
+      keys' = map (safeHead "" . content) keys
+      vals' = map (safeHead "" . content . head . child) vals
+      parse info xs = 
+        case xs of
+          ("description",v):zs -> parse
+                                    (info { postProcInfoDescription = v })
+                                    zs
+          _:zs -> parse info zs
+          _ -> info
+  in parse basePostProcInfo $ zip keys' vals'
+
 data Job =
      Job { postproc_id :: Int
          , description :: T.Text
@@ -283,7 +304,24 @@ getSolverInfo (sec, man, cookies) _solverId = do
       let detailFieldset = getFirstFieldset cursor
           tds = getTds detailFieldset
       return $ Just $ constructSolverInfo
-        _solverId solverTitle $ tds
+        _solverId solverTitle tds
+
+getPostProcInfo :: StarExecConnection -> Int -> Handler (Maybe PostProcInfo)
+getPostProcInfo (sec, man, cookies) _procId = do
+  let req = sec { method = "GET"
+                , path = postProcPath
+                , queryString = "type=post&id=" +> (BSC.pack $ show _procId)
+                }
+  resp <- sendRequest (req, man, cookies)
+  let cursor = cursorFromDOM $ responseBody resp
+      procTitle = getFirstTitle cursor
+  if "http" == T.take 4 procTitle
+    then return Nothing
+    else do
+      let detailFieldset = getFirstFieldset cursor
+          tds = getTds detailFieldset
+      return $ Just $ constructPostProcInfo
+        _procId procTitle tds
 
 getJobResults :: StarExecConnection -> Int -> Handler [JobResultInfo]
 getJobResults (sec, man, cookies) _jobId = do

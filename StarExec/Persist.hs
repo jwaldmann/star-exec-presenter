@@ -15,6 +15,9 @@ insertJobInfo jobInfo = runDB $ insert_ jobInfo
 getPersistJobInfo :: Int -> Handler (Maybe JobInfo)
 getPersistJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
 
+getPersistPostProcInfo :: Int -> Handler (Maybe PostProcInfo)
+getPersistPostProcInfo _procId = getEntity $ UniquePostProcInfo _procId
+
 getPersistJobResults :: Int -> Handler [JobResultInfo]
 getPersistJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
 

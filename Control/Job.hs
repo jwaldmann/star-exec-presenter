@@ -140,10 +140,17 @@ convertComp :: Competition (Catinfo,  [Int])
 convertComp c = S.Competition (competitionName c) 
           $ map convertMC (metacategories c)
 
+convertMC :: MetaCategory (Catinfo, [Int])
+        -> S.MetaCategory
 convertMC mc = S.MetaCategory (metaCategoryName mc)
          $ map convertC (categories mc)
 
+convertC :: Category (Catinfo, [Int])
+        -> S.Category
 --convertC c = S.Category (categoryName c) [ S.YES Nothing, S.NO ] 
-convertC c = S.Category (categoryName c) S.Standard
-         $ let (_, jobs) = contents c in jobs
+convertC c =
+  let (catInfo, jobs) = contents c
+      name = categoryName c
+      postProcId = postproc catInfo
+  in S.Category name S.Standard postProcId jobs
 

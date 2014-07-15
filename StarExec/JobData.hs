@@ -4,6 +4,7 @@ module StarExec.JobData
   , queryBenchmarkInfo
   , queryJobPair
   , queryManyJobs
+  , queryPostProc
   ) where
 
 import Import
@@ -73,6 +74,18 @@ queryJobPair _pairId = do
         then return $ QueryResult Latest $ Just persistPairInfo
         else runQueryJobPair _pairId
     Nothing -> runQueryJobPair _pairId
+
+queryPostProc :: Int -> Handler (QueryResult QueryInfo (Maybe PostProcInfo))
+queryPostProc _procId = do
+  mPersistPostProcInfo <- getPersistPostProcInfo _procId
+  currentTime <- getTime
+  case mPersistPostProcInfo of
+    Just persistPostProcInfo -> do
+      let since = diffTime currentTime $ postProcInfoLastUpdate persistPostProcInfo
+      if since > updateThreshold
+        then runQueryPostProcInfo _procId
+        else return $ QueryResult Latest $ Just persistPostProcInfo
+    Nothing -> runQueryPostProcInfo _procId
 
 queryManyJobs :: [Int] -> Handler [QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo])]
 queryManyJobs = mapM queryJob

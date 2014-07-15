@@ -35,6 +35,7 @@ library
                      Handler.ListCompetitions
                      Handler.DisplayProof
                      Handler.ListHiddenCompetitions
+                     Handler.ShowPostProcInfo
                      StarExec.Commands
                      StarExec.Connection
                      StarExec.Types

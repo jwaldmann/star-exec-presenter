@@ -82,6 +82,14 @@ CompetitionInfo
     public Bool default=True
     deriving Show
 
+PostProcInfo
+    starExecId Int
+    UniquePostProcInfo starExecId
+    name Text
+    description Text
+    lastUpdate UTCTime default=now()
+    deriving Show
+
 -- UserInfo
 --     starExecId Int
 --     UniqueUserInfo starExecId
