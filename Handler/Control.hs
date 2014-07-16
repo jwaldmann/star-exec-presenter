@@ -10,6 +10,8 @@ import StarExec.Types (Login(..))
 import StarExec.Persist
 import StarExec.Commands (Job(..))
 
+import Yesod.Auth
+
 import Control.Monad ( guard )
 import qualified StarExec.Types as S
 import qualified Data.Text as T
@@ -21,9 +23,7 @@ import qualified Data.Map as M
 
 
 inputForm = renderTable $ JobControl
-        <$> areq textField "user" Nothing
-        <*> areq passwordField "pass" Nothing
-        <*> areq checkBoxField "is public" (Just False)
+        <$> areq checkBoxField "is public" (Just False)
         <*> areq (radioFieldList [("Termination.q"::T.Text,478),("all.q",1),("all2.q",4)]) "queue" (Just 478)
         <*> areq (radioFieldList [("autotest":: T.Text, 52915)]) "space" (Just 52915)
         <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
@@ -44,27 +44,24 @@ hierarchies bs = do Hierarchy b <- bs ; return b
 
 getControlR :: Handler Html
 getControlR = do
+    maid <- maybeAuthId
     (widget, enctype) <- generateFormPost inputForm
     let comp = tc2014
     defaultLayout $(widgetFile "control")
 
 postControlR :: Handler Html
 postControlR = do
+    maid <- maybeAuthId
     ((result,widget), enctype) <- runFormPost inputForm
 
     let comp = tc2014
         public = case result of
                   FormSuccess input -> isPublic input
                   _ -> False
-    cred <- getLoginCredentials
-
     mc <- case result of
-            FormSuccess input -> 
-                if Login (user input) (pass input) == cred
-                then do
+            FormSuccess input -> do
                     Just [con] <- return $ M.lookup "control" $ env input
-                    startjobs ( input { user = "none", pass = "denkste" } ) con 
-                else return Nothing
+                    startjobs input con 
             _ -> return Nothing
     mKey <- case mc of 
               Nothing -> return Nothing

@@ -1,7 +1,12 @@
+<h1>Create Jobs on Star-Exec
+
+beware: depending on parameter settings below, you can burn a lot of cpu cycles on star-exec.
+
 <form method=post action=@{ControlR} enctype=#{enctype}>
 
-  <h2>Authentication, Parameters
-  confirm that you are the person who started this instance of star-exec-presenter
+  <p><a href=@{AuthR LogoutR}>Logout</a>
+
+  <h2>Job Parameters
   <table>
     ^{widget} 
 

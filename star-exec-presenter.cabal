@@ -49,6 +49,7 @@ library
                      StarExec.Complexity
                      StarExec.Concurrent
                      StarExec.Processing
+                     StarExec.Auth
                      Table.Data
                      Table.Get
                      Table.Query

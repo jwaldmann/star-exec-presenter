@@ -20,9 +20,7 @@ import Data.Hashable
 import Control.Applicative ((<$>))
 
 data JobControl = JobControl
-   { user :: Text
-   , pass :: Text
-   , isPublic :: Bool
+   { isPublic :: Bool
    , queue :: Int
    , space :: Int
    , wallclock :: Int

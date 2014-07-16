@@ -21,6 +21,7 @@ This site:
 <ul>
   <li><a href=@{RegisteredR}>registered participants</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
+  <li><a href=@{ControlR}>administration</a> (restricted access)
 
 Meta-information for this site:
 <ul>
