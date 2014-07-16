@@ -402,7 +402,7 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
   Just (bs, remap) -> do
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
-         ] $ sec { path = pushjobxmlPath }
+         ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
     liftIO $ print req 
 
     --liftIO $ BSL.writeFile "command.zip" bs
