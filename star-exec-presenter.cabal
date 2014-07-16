@@ -21,7 +21,6 @@ library
                      Settings.Development
                      Handler.Home
                      Handler.Error
-                     Handler.ViewSpace
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
                      Handler.Flexible_Table
@@ -41,7 +40,6 @@ library
                      StarExec.Types
                      StarExec.Persist
                      StarExec.Urls
-                     StarExec.Prims
                      StarExec.JobData
                      StarExec.CompetitionResults
                      StarExec.Registration

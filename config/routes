@@ -5,21 +5,24 @@
 /robots.txt RobotsR GET
 
 / HomeR GET
+
 /error/#ErrorID ErrorR GET
-/view_space/#Int ViewSpaceR GET
--- /show_job_results/#Int ShowJobResultsR GET
+
 /show_job_pair/#Int ShowJobPairR GET
-/show_job_results/*JobIds ShowManyJobResultsR GET
-/show_many_job_results/*JobIds ShowManyJobResultsLegacyR GET
-/flexible-table/#Query/*JobIds Flexible_TableR GET
-/competition/#CompetitionInfoId CompetitionR GET
-/competition_with_config/#Competition CompetitionWithConfigR GET
-/control ControlR GET POST
-/registered RegisteredR GET
+/display_proof/#Text DisplayProofR GET
 /show_job_info/#Int ShowJobInfoR GET
 /show_benchmark_info/#Int ShowBenchmarkInfoR GET
 /show_solver_info/#Int ShowSolverInfoR GET
-/test-runs ListCompetitionsR GET
-/display_proof/#Text DisplayProofR GET
-/hidden-test-runs ListHiddenCompetitionsR GET
 /show_post_proc_info/#Int ShowPostProcInfoR GET
+/show_job_results/*JobIds ShowManyJobResultsR GET
+/show_many_job_results/*JobIds ShowManyJobResultsLegacyR GET
+/flexible-table/#Query/*JobIds Flexible_TableR GET
+
+/competition/#CompetitionInfoId CompetitionR GET
+/competition_with_config/#Competition CompetitionWithConfigR GET
+
+/control ControlR GET POST
+/registered RegisteredR GET
+
+/test-runs ListCompetitionsR GET
+/hidden-test-runs ListHiddenCompetitionsR GET

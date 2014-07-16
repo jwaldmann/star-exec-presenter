@@ -27,8 +27,8 @@ import Network.HTTP.Types.Status
 import StarExec.Types
 import StarExec.Urls
 import StarExec.Persist
+import StarExec.PersistTypes
 import StarExec.Connection
-import StarExec.Prims (defaultDate)
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
@@ -37,6 +37,8 @@ import Text.HTML.TagSoup
 import Text.XML.Cursor
 import Codec.Compression.GZip
 import qualified Data.Map as M
+import Data.Time.Clock
+import Data.Time.Calendar
 
 import Text.Hamlet.XML
 import Text.XML
@@ -47,6 +49,11 @@ import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
 import Data.Maybe
+
+defaultDate :: UTCTime
+defaultDate = UTCTime
+  (fromGregorian 1970 1 1)
+  (secondsToDiffTime 0)
 
 (+>) :: BSC.ByteString -> BSC.ByteString -> BSC.ByteString
 (+>) = BS.append
