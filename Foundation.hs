@@ -98,6 +98,7 @@ instance Yesod App where
     authRoute _ = Just $ AuthR LoginR
 
     isAuthorized ControlR _ = isAdmin
+    isAuthorized ListHiddenCompetitionsR _ = isAdmin
     isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
