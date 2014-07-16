@@ -63,9 +63,10 @@ instance CSV.FromField JobResultStatus where
         where
             s = T.toLower $ decodeUtf8 result
             parseResult r
-                | r == "running"  = pure JobResultRunning
-                | r == "enqueued" = pure JobResultEnqueued
-                | otherwise       = pure JobResultComplete
+                | r == "running"             = pure JobResultRunning
+                | r == "enqueued"            = pure JobResultEnqueued
+                | "pending" `T.isPrefixOf` r = pure JobResultPending
+                | otherwise                  = pure JobResultComplete
                 -- | otherwise       = pure $ JobResultOther s
 
 {-

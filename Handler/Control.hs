@@ -70,11 +70,12 @@ postControlR = do
                   key <- runDB $ insert $ CompetitionInfo ( timed now c ) now public
                   return $ Just key
     defaultLayout $ do
-        [whamlet|<h2>Result of previous command
+        [whamlet|
+          <h2>Result of previous command
           $maybe key <- mKey
-              jobs started, <a href=@{CompetitionR key}>output</a>
+            jobs started, <a href=@{CompetitionR key}>output</a>
           $nothing
-              could not start jobs
+            could not start jobs
         |] 
         $(widgetFile "control")
 
