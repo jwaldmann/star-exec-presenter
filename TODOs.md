@@ -57,12 +57,12 @@ c = Competition "2014"
 * check for unsafe reads
 * ~~xml-proofs -> see job-results of 4067~~
 * ~~hidden competitions~
-* refresh of compititions if job-pair or job incomplete
+* ~~refresh of compititions if job-pair or job incomplete~~
 * ~~isComplexity for JobInfo~~
 * ~~Complexity-Scores: only Score: XXX, not YES: XXX, NO: XXX~~
 * display, that jobs/competition incomplete
 * ~~extend Category with post-proc-info~~
-* scores for non-complexities like complexity: 1 point for each YES or NO
+* ~~scores for non-complexities like complexity: 1 point for each YES or NO~~
 * list post-proc in categories-list of competition and wether complete/incomplete
 * show, that meta-cat is incomplete, because a sub-cat is incomplete
 * ~~hidden-test-runs: show all competitions~~
@@ -71,6 +71,6 @@ c = Competition "2014"
   * completion-time and start-time
 * add min-start-time and max-completition-time to competition, meta-cat and cat
 * completion time for job-results(?)
-* authentication for hidden-test-runs (and job-results)
+* ~~authentication for hidden-test-runs (and job-results)~~
 * why 0.0 on incomplete job-results?
-* route for competition_info by db-id
+* ~~route for competition_info by db-id~~
