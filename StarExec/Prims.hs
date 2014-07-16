@@ -213,6 +213,7 @@ getJobInfoFromTexts
                        "unkown"
                        "unkown"
                        False
+                       True
                        defaultDate
                        Nothing
                        defaultDate

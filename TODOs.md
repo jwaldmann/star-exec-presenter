@@ -69,3 +69,8 @@ c = Competition "2014"
 * ~~handle new record-field star-date~~
 * show duration in show-job-results and competitions
   * completion-time and start-time
+* add min-start-time and max-completition-time to competition, meta-cat and cat
+* completion time for job-results(?)
+* authentication for hidden-test-runs (and job-results)
+* why 0.0 on incomplete job-results?
+* route for competition_info by db-id

@@ -92,6 +92,7 @@ constructJobInfo _jobId title tds =
                             "unkown"
                             "unkown"
                             False
+                            True
                             defaultDate
                             Nothing
                             defaultDate

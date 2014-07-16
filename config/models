@@ -50,6 +50,7 @@ JobInfo
     preProc Text default='unknown'
     postProc Text default='unknown'
     isComplexity Bool default=FALSE
+    isPublic Bool default=TRUE
     startDate UTCTime default=now()
     finishDate UTCTime Maybe
     lastUpdate UTCTime default=now()
