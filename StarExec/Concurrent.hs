@@ -145,7 +145,8 @@ runQueryJob _jobId = do
                           else results
                   runDB $ do
                     updateJobInfo mPersistJobInfo ji
-                    mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
+                    --mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
+                    deleteWhere [JobResultInfoJobId ==. _jobId]
                     mapM_ insertUnique processedResults
                   return ()
                 Nothing -> return ()
