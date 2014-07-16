@@ -91,6 +91,12 @@ data Space = Space
    , benchmarks :: [ Int ]
    } deriving ( Show, Eq )
 
+families :: Space -> [[Int]]
+families s = 
+    let here = benchmarks s
+        below = children s >>= families
+    in  if Prelude.null here then below else here : below
+
 all_in_hierarchy :: Space -> [Int]
 all_in_hierarchy s =
     benchmarks s ++ (children s >>= all_in_hierarchy)

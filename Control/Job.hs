@@ -16,6 +16,8 @@ import Data.Char (isAlphaNum)
 import Data.Maybe (catMaybes)
 import qualified Data.Map.Strict as M
 import System.Random
+import Data.Hashable
+import Control.Applicative ((<$>))
 
 data JobControl = JobControl
    { user :: Text
@@ -24,7 +26,9 @@ data JobControl = JobControl
    , queue :: Int
    , space :: Int
    , wallclock :: Int
-   , benchmarks_per_category :: Int
+   , family_lower_bound :: Int
+   , family_upper_bound :: Int
+   , family_factor :: Double
    , env :: Env
    } 
         deriving Show
@@ -37,29 +41,28 @@ pushcat config cat = do
     let ci = contents cat
     now <- liftIO getCurrentTime
     con <- getConnection
-    job <- mkJob config cat now
-    js <- pushJobXML con (Control.Job.space config) [ job ]
+    jobs <- mkJobs config cat now
+    js <- pushJobXML con (Control.Job.space config) jobs
     return $ cat { contents = (contents cat, catMaybes $ map jobid js) }
 
 pushmetacat config mc = do
     now <- liftIO getCurrentTime
-    jobs <- forM (categories mc) $ \ cat ->  do 
-            mkJob config cat now
+    jobss <- forM (categories mc) $ \ cat ->  do 
+            mkJobs config cat now
     con <- getConnection
-    js <- pushJobXML con (Control.Job.space config) jobs
+    js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
             j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
-        for = flip map
     return $ mc { categories = for (categories mc) $ \ cat -> 
                  cat { contents = (contents cat, M.findWithDefault [] (repair $ categoryName cat) m ) } } 
 
 pushcomp config c = do
     now <- liftIO getCurrentTime
-    jobs <- forM ( metacategories c >>= categories ) $ \ cat -> do 
-            mkJob config cat now
+    jobss <- forM ( metacategories c >>= categories ) $ \ cat -> do 
+            mkJobs config cat now
     con <- getConnection
-    js <- pushJobXML con (Control.Job.space config) jobs
+    js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
             j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -72,36 +75,52 @@ repair = T.map ( \ c -> if isAlphaNum c then c else ' ' )
 
 compact = T.unwords . map (T.take 5) . T.words
 
+for = flip map
 
--- FIXME: getspaceXML should be DB-cached
-select_benchmarks num bs = do
+-- FIXME: getspaceXML should be DB-cached (issue #29)
+select_benchmarks :: JobControl -> [Benchmark_Source] 
+                  -> Handler [[Int]]
+select_benchmarks config bs = do
     con <- getConnection
     bmss <- forM bs $ \ b -> case b of
         Bench { bench = id } -> do
-            return [id]
+            return [[id]]
         All { StarExec.Registration.space = id } -> do
             s <- getSpaceXML con id
             return $ case s of
                 Nothing -> []
-                Just s -> S.benchmarks s                
+                Just s -> [S.benchmarks s ]
         Hierarchy { StarExec.Registration.space = id } -> do
             s <- getSpaceXML con id
             return $ case s of
                 Nothing -> []
-                Just s -> S.all_in_hierarchy s
+                Just s -> S.families s
             
-    let bms = concat bmss
-    bms' <- liftIO $ permute bms
-    let result = take num bms'
+    let given = concat bmss
+    result <- forM given $ select_from_family config
 
     liftIO $ putStrLn $ unlines
        [ "benchmark sources: " ++ show bs
-       , "total number of benchmarks: " ++ show (length bms)
-       , "take random subset of size: " ++ show (length result)
-       , "consisting of benchmarks: " ++ show result
+       , "familiy sizes (given): " ++ show (map length given)
+       , "familiy sizes (selected): " ++ show (map length result)
        ]
 
     return $ result
+
+-- | random subset of size given by parameters
+select_from_family :: JobControl -> [Int] -> Handler [Int]
+select_from_family config bms = do
+    let given = length bms
+        part = round 
+             $ family_factor config * fromIntegral given
+        selected = 
+            if part < family_lower_bound config 
+            then family_lower_bound config 
+            else if part > family_upper_bound config 
+            then family_upper_bound config 
+            else part
+    bms' <- liftIO $ permute bms
+    return $ take selected  bms'
 
 permute [] = return []
 permute (x:xs) = do
@@ -110,15 +129,20 @@ permute (x:xs) = do
     let (pre,post) = splitAt k ys
     return $ pre ++ x : post
 
-mkJob :: JobControl -> Category Catinfo -> UTCTime -> Handler Job
-mkJob config cat now = do
+mkJobs :: JobControl -> Category Catinfo -> UTCTime 
+       -> Handler [ Job ]
+mkJobs config cat now = do
     let ci = contents cat 
         (+>) = T.append
-    bs <- select_benchmarks (benchmarks_per_category config) $ benchmarks ci
-    return $ Job 
+    bss <- select_benchmarks config $ benchmarks ci
+
+    -- FIXME: too many separate jobs give problems 
+    let all_in_one bss = [ concat bss ]
+
+    return $ for (all_in_one bss) $ \ bs -> Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
-         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show now)
+         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash bs )
          , queue_id = queue config
          , mem_limit = 128.0
          , wallclock_timeout = wallclock config
