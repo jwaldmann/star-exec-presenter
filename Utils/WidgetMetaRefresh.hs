@@ -9,5 +9,5 @@ insertWidgetMetaRefresh = do
     <section>The Data is currently queried from star-exec. This site will constantly refresh until the data is fully loaded
   |]
   toWidgetHead [hamlet|
-    <meta http-equiv="refresh" content="2">
+    <meta http-equiv="refresh" content="10">
   |]

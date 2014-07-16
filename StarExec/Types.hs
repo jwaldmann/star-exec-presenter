@@ -120,31 +120,6 @@ derivePersistField "JobResultStatus"
 
 {-
 -}
---data JobResultInfo = JobResultInfo
---  { jriPairId :: Int
---  , jriBenchmark :: Name
---  , jriBenchmarkId :: Int
---  , jriSolver :: Name
---  , jriSolverId :: Int
---  , jriConfiguration :: Name
---  , jriConfigurationId :: Int
---  , jriStatus :: Name
---  , jriCpuTime :: Double
---  , jriWallclockTime :: Double
---  , jriResult :: SolverResult
---  } deriving (Show, Read)
-
-
-{-
--}
---data JobPairInfo = JobPairInfo
---  { jpiPairId :: Int
---  , jpiStdout :: T.Text
---  , jpiLog :: T.Text
---  } deriving (Show, Read)
-
-{-
--}
 data ErrorID = LoginError | Unkown
     deriving (Eq, Show, Read)
 
@@ -172,7 +147,7 @@ instance PathMultiPiece JobIds where
     return $ JobIds (int:ints)
   fromPathMultiPiece _ = Nothing
 
-data Scoring = Standard | Complexity | Custom [SolverResult]
+data Scoring = Standard | Complexity
   deriving (Show, Read, Eq)
 
 {-

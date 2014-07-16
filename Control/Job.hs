@@ -174,5 +174,8 @@ convertC c =
   let (catInfo, jobs) = contents c
       name = categoryName c
       postProcId = postproc catInfo
-  in S.Category name S.Standard postProcId jobs
+      scoring = if 0 < (T.count "complex" $ T.toLower name)
+                  then S.Complexity
+                  else S.Standard
+  in S.Category name scoring postProcId jobs
 

@@ -20,6 +20,10 @@ import Database.Persist.Class
 import Debug.Trace
 import Data.List ((\\))
 
+{-
+  FIXME: possible bug, that QueryInfo won't be deleted from DB after an exception or after a query is complete
+-}
+
 type ExceptionHandler = SomeException -> Handler ()
 
 debugTrace :: String -> Handler ()
@@ -132,7 +136,6 @@ runQueryJob _jobId = do
                 Just ji -> do
                   liftIO $ putStrLn $ "Got Job: " ++ (show ji)
                   results <- getJobResults con _jobId
-                  --currentTime <- getTime
                   let isComplexJob = jobInfoIsComplexity ji
                   liftIO $ putStrLn $ "Job is complex? " ++ (show isComplexJob)
                   liftIO $ putStrLn $ show $ map jobResultInfoStatus results
@@ -141,8 +144,6 @@ runQueryJob _jobId = do
                           then getScoredResults results
                           else results
                   runDB $ do
-                    --deleteBy $ UniqueJobInfo _jobId
-                    --insertUnique ji { jobInfoLastUpdate = currentTime }
                     updateJobInfo mPersistJobInfo ji
                     mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
                     mapM_ insertUnique processedResults
