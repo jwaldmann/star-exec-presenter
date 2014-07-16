@@ -177,15 +177,15 @@ tc2014 = Competition "Termination Competition 2014"
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
      [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
-           [ Participant "TCT" ( Just (1620, 2518))
+           [ Participant "TCT" ( Just (1620, 2908))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , standard "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
-           [ Participant "TCT" ( Just (1620, 2516))
+           [ Participant "TCT" ( Just (1620, 2909))
            , Participant "CaT" ( Just (1343, 1952))
            ]
      , standard "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
-           [ Participant "TCT" ( Just (1620, 2515))
+           [ Participant "TCT" ( Just (1620, 2910))
            , Participant "AProVE" ( Just ( 1681, 2656 ) )
            ]
      , certified "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
