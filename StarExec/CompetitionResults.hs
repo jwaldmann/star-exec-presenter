@@ -19,6 +19,7 @@ import StarExec.JobData
 import StarExec.Processing
 import qualified Data.List as L
 import Data.Maybe
+import Data.Time.Clock
 import qualified Data.IntMap.Strict as IM
 
 
@@ -28,13 +29,17 @@ data CompetitionResults = CompetitionResults
   { competitionName :: Name
   , metaCategoryResults :: [MetaCategoryResult]
   , competitionComplete :: Bool 
+  , competitionStartTime :: Maybe UTCTime
+  , competitionFinishTime :: Maybe UTCTime
   } deriving (Show)
 
 data MetaCategoryResult = MetaCategoryResult
   { metaCategoryName :: Name
   , categoryResults :: [CategoryResult]
   , metaCategoryRanking :: [(Maybe Rank, Solver, Score)]
-  , metaCategoriesComplete :: Bool
+  , metaCategoryComplete :: Bool
+  , metaCategoryStarTime :: Maybe UTCTime
+  , metaCategoryFinishTime :: Maybe UTCTime
   } deriving (Show)
 
 data CategoryResult = CategoryResult
@@ -44,6 +49,8 @@ data CategoryResult = CategoryResult
   , categoryRanking :: [(Maybe Rank, Solver, Score)]
   , categoryJobs :: [JobInfo]
   , categoryComplete :: Bool
+  , categoryStartTime :: Maybe UTCTime
+  , categoryFinishTime :: Maybe UTCTime
   } deriving (Show)
 
 {-
@@ -74,25 +81,6 @@ getScores solver scoring results =
                 Nothing -> (s,0)
                 Just scr -> (s,scr)
 
-  --reverse $ L.sortBy sortScore $ map countResults solver
-  --where
-  --  countResults s = (s, length $ filter (matches s) results)
-  --  matches (sid,sn) jri =
-  --    let solverId = jobResultInfoSolverId jri
-  --        solver = jobResultInfoSolver jri
-  --        result = jobResultInfoResult jri
-  --    in case scoring of
-  --        Standard ->
-  --          solverId == sid && solver == sn &&
-  --          (result == NO || isYes result )
-  --        Complexity -> undefined
-  --        Custom rs ->
-  --          solverId == sid && solver == sn &&
-  --          any (\f ->
-  --            result == f
-  --          ) rs
-
-
 testGetRanking1 = 
         getRanking [("foo", 30), ("bar", 20), ("what", 20), ("noh", 10)] 
     ==  [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20), (Just 4, "noh", 10)]
@@ -110,29 +98,6 @@ getRanking scores =
             ((rank,(slv,_)):_) ->
               (if solver /= slv then Nothing else Just rank, solver, score)
   in map getRanking' scores
-
-getCategoriesResult :: Category -> Handler CategoryResult
-getCategoriesResult cat = do
-  let catName = getCategoryName cat
-      catScoring = getCategoryScoring cat
-      catPostProcId = getPostProcId cat
-      catJobIds = getJobIds cat
-  qResults <- queryManyJobs catJobIds
-  qPostProc <- queryPostProc catPostProcId
-  --pResults <- getManyJobResults catJobIds
-  --mJobInfos <- mapM getJobInfo catJobIds
-  let results = concat $ map (snd . queryResult) qResults
-      solver = getInfo extractSolver results
-      scores = getScores solver catScoring results
-      rankedSolver = getRanking scores
-      jobInfos = catMaybes $ map (fst . queryResult) qResults
-      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
-  return $ CategoryResult catName
-                          catScoring
-                          (queryResult qPostProc)
-                          rankedSolver
-                          jobInfos
-                          complete
 
 testCalcScores1 = 
        calcScores [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20),(Just 4,"noh",10)]
@@ -157,16 +122,36 @@ calcScores ranking = calcScores' 1 ranking
 
 getMetaScores :: [[(Maybe Rank, Solver, Score)]] -> [(Solver, Score)]
 getMetaScores catScores =
-{-
-  let catScores' = concat $ map calcScores catScores
-      solvers = L.nub $ map fst catScores'
-      countScore s = (s, L.foldl' (\i (slv,scr) ->
-          if slv == s then i + scr else scr
-        ) 0 catScores')
-  in map countScore solvers
--}
     M.toList $ M.fromListWith (+) $ concat $ map calcScores catScores
 
+getCategoriesResult :: Category -> Handler CategoryResult
+getCategoriesResult cat = do
+  let catName = getCategoryName cat
+      catScoring = getCategoryScoring cat
+      catPostProcId = getPostProcId cat
+      catJobIds = getJobIds cat
+  qResults <- queryManyJobs catJobIds
+  qPostProc <- queryPostProc catPostProcId
+  let results = concat $ map (snd . queryResult) qResults
+      solver = getInfo extractSolver results
+      scores = getScores solver catScoring results
+      rankedSolver = getRanking scores
+      jobInfos = catMaybes $ map (fst . queryResult) qResults
+      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
+      startTime = if null jobInfos
+                    then Nothing
+                    else Just $ minimum $ map jobInfoStartDate jobInfos
+      endTime = if complete
+                  then maximum $ map jobInfoFinishDate jobInfos
+                  else Nothing
+  return $ CategoryResult catName
+                          catScoring
+                          (queryResult qPostProc)
+                          rankedSolver
+                          jobInfos
+                          complete
+                          startTime
+                          endTime
 
 getMetaResults :: MetaCategory -> Handler MetaCategoryResult
 getMetaResults metaCat = do
@@ -176,17 +161,33 @@ getMetaResults metaCat = do
   let scores = getMetaScores $ map categoryRanking catResults
       ranking = getRanking $ reverse $ L.sortBy sortScore scores
       complete = all categoryComplete catResults
+      startTime = if null catResults
+                    then Nothing
+                    else minimum $ map categoryStartTime catResults
+      endTime = if complete
+                  then maximum $ map categoryFinishTime catResults
+                  else Nothing
   return $ MetaCategoryResult metaName
                               catResults
                               ranking
                               complete
+                              startTime
+                              endTime
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
   let compName = getCompetitionName comp
       metaCats = getMetaCategories comp
   metaResults <- mapM getMetaResults metaCats
-  let complete = all metaCategoriesComplete metaResults
+  let complete = all metaCategoryComplete metaResults
+      startTime = if null metaResults
+                    then Nothing
+                    else minimum $ map metaCategoryStarTime metaResults
+      endTime = if complete
+                  then maximum $ map metaCategoryFinishTime metaResults
+                  else Nothing
   return $ CompetitionResults compName
                               metaResults
                               complete
+                              startTime
+                              endTime

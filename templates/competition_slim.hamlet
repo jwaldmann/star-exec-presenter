@@ -1,10 +1,19 @@
 <h1>Competition #{competitionName compResults}
-
+$if competitionComplete compResults
+  <p>Competition finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
+$else
+  Competition still running
 <table class="table table-condensed">
   <tbody>
     $forall compMetaResults <- metaCategoryResults compResults
       <tr>
-        <td rowspan="2">#{metaCategoryName compMetaResults}
+        <td rowspan="2">
+          #{metaCategoryName compMetaResults}
+          <br>
+          $if metaCategoryComplete compMetaResults
+            (finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)})
+          $else
+            (still running)
         <td>
           <table class="table table-condensed">
             <thead>
@@ -45,10 +54,28 @@
             <label for="detail-#{metaCategoryName compMetaResults}" class="a">categories
             <div class="checked-container">
              <table class="table table-condensed">
+              <thead>
+                <tr>
+                  <th>name
+                  <th>post-proc
+                  <th>completed
+                  <th>duration
+                  <th>rankings
               <tbody>
                 $forall compCatResult <- categoryResults compMetaResults
                   <tr>
                     <td><a href=@{ShowManyJobResultsR $ JobIds $ map jobInfoStarExecId $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
+                    <td>
+                      $maybe postProc <- categoryPostProc compCatResult
+                        <a href=@{ShowPostProcInfoR $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}
+                      $nothing
+                        /
+                    <td>
+                      $if categoryComplete compCatResult
+                        yes
+                      $else
+                        no
+                    <td>#{getDuration (categoryStartTime compCatResult) (categoryFinishTime compCatResult)}
                     <td>
                       $forall (_, solver, score) <- categoryRanking compCatResult
                         <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
