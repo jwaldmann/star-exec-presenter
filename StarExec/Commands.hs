@@ -18,6 +18,8 @@ import Import
 import Prelude (head, Maybe(..))
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
+import System.IO ( stderr )
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
@@ -322,14 +324,18 @@ getPostProcInfo (sec, man, cookies) _procId = do
                 }
   resp <- sendRequest (req, man, cookies)
   let cursor = cursorFromDOM $ responseBody resp
+      procTitle :: Text
       procTitle = getFirstTitle cursor
+      procName :: Text
+      procName = T.unwords $ filter (  /= "edit" ) $ T.words procTitle
+  liftIO $ T.hPutStrLn stderr $ procTitle
   if "http" == T.take 4 procTitle
     then return Nothing
     else do
       let detailFieldset = getFirstFieldset cursor
           tds = getTds detailFieldset
       return $ Just $ constructPostProcInfo
-        _procId procTitle tds
+        _procId procName tds
 
 getJobResults :: StarExecConnection -> Int -> Handler [JobResultInfo]
 getJobResults (sec, man, cookies) _jobId = do
