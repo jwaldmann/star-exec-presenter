@@ -66,19 +66,19 @@ postControlR = do
                     startjobs ( input { user = "none", pass = "denkste" } ) con 
                 else return Nothing
             _ -> return Nothing
-    case mc of 
-        Nothing -> return ()
-        Just c -> do
-            now <- liftIO getCurrentTime
-            runDB $ insert $ CompetitionInfo ( timed now c ) now public
-            return ()
+    mKey <- case mc of 
+              Nothing -> return Nothing
+              Just c -> do
+                  now <- liftIO getCurrentTime
+                  key <- runDB $ insert $ CompetitionInfo ( timed now c ) now public
+                  return $ Just key
     defaultLayout $ do
         [whamlet|<h2>Result of previous command
-$maybe c <- mc
-    jobs started, <a href=@{CompetitionWithConfigR c}>output</a>
-$nothing
-    could not start jobs
-|] 
+          $maybe key <- mKey
+              jobs started, <a href=@{CompetitionR key}>output</a>
+          $nothing
+              could not start jobs
+        |] 
         $(widgetFile "control")
 
 startjobs :: JobControl -> Text -> Handler (Maybe S.Competition)

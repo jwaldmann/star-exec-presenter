@@ -24,11 +24,11 @@ getPersistJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
 getPersistJobResult :: Int -> Handler (Maybe JobResultInfo)
 getPersistJobResult _pairId = getEntity $ UniqueJobResultInfo _pairId
 
-getPersistCompetitions :: Handler [CompetitionInfo]
-getPersistCompetitions = getEntityList [] [ Desc CompetitionInfoDate ]
+getPersistCompetitions :: Handler [Entity CompetitionInfo]
+getPersistCompetitions = runDB $ selectList [] [ Desc CompetitionInfoDate ]
 
-getPersistPublicCompetitions :: Handler [CompetitionInfo]
-getPersistPublicCompetitions = getEntityList [ CompetitionInfoPublic ==. True ] [ Desc CompetitionInfoDate ]
+getPersistPublicCompetitions :: Handler [Entity CompetitionInfo]
+getPersistPublicCompetitions = runDB $ selectList [ CompetitionInfoPublic ==. True ] [ Desc CompetitionInfoDate ]
 
 --getEntityList :: (YesodPersist site,
 --                  PersistQuery (YesodPersistBackend site Handler),
