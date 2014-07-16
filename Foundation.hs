@@ -6,13 +6,14 @@ import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.BrowserId
 import Yesod.Auth.GoogleEmail
+import Yesod.Auth.Dummy
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
 import qualified Settings
 import Settings.Development (development)
 import qualified Database.Persist
-import Database.Persist.Sql (SqlPersistT)
+import Database.Persist.Sql (SqlBackend, SqlPersistT)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Model
@@ -22,6 +23,7 @@ import Yesod.Core.Types (Logger)
 import StarExec.Types (ErrorID, JobIds, Competition)
 import Table.Query
 import Data.Text (Text)
+import StarExec.Auth (authSE)
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -95,6 +97,9 @@ instance Yesod App where
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
 
+    isAuthorized ControlR _ = isAdmin
+    isAuthorized _ _ = return Authorized
+
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
     -- expiration dates to be set far in the future without worry of
@@ -124,17 +129,17 @@ instance YesodPersist App where
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner connPool
 
+-- simple example copied from 
+-- http://www.yesodweb.com/book/authentication-and-authorization
 instance YesodAuth App where
-    type AuthId App = Text
+    type AuthId App = UserId
 
     -- Where to send a user after successful login
     loginDest _ = HomeR
     -- Where to send a user after logout
     logoutDest _ = HomeR
 
-    getAuthId creds = return . Just . credsIdent
-
-    {- runDB $ do
+    getAuthId creds = runDB $ do
         x <- getBy $ UniqueUser $ credsIdent creds
         case x of
             Just (Entity uid _) -> return $ Just uid
@@ -142,12 +147,18 @@ instance YesodAuth App where
                 fmap Just $ insert User
                     { userIdent = credsIdent creds
                     , userPassword = Nothing
-                    }-}
+                    }
 
-    -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authDummy]
+    authPlugins _ = [ authSE ]
 
     authHttpManager = httpManager
+
+isAdmin = do
+    mu <- maybeAuthId
+    return $ case mu of
+        Nothing -> AuthenticationRequired
+        Just _ -> Authorized
+
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

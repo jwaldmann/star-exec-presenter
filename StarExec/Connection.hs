@@ -16,13 +16,8 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import StarExec.Types
 import StarExec.Urls
+import StarExec.Auth ( getLoginCredentials )
 import Data.Time.Clock
-
-getLoginCredentials :: Handler Login
-getLoginCredentials = liftIO $ do
-  home <- getHomeDirectory
-  slogin <- readFile $ home ++ "/.star_exec"
-  return $ read slogin
 
 getSessionData :: Handler (Maybe StarExecSessionData)
 getSessionData = do
