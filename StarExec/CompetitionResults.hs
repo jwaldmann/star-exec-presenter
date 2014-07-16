@@ -19,19 +19,22 @@ import StarExec.JobData
 import StarExec.Processing
 import qualified Data.List as L
 import Data.Maybe
+import qualified Data.IntMap.Strict as IM
 
 
 import qualified Data.Map as M
 
 data CompetitionResults = CompetitionResults
   { competitionName :: Name
-  , metaCategoryResults :: [MetaCategoryResult] 
+  , metaCategoryResults :: [MetaCategoryResult]
+  , competitionComplete :: Bool 
   } deriving (Show)
 
 data MetaCategoryResult = MetaCategoryResult
   { metaCategoryName :: Name
   , categoryResults :: [CategoryResult]
   , metaCategoryRanking :: [(Maybe Rank, Solver, Score)]
+  , metaCategoriesComplete :: Bool
   } deriving (Show)
 
 data CategoryResult = CategoryResult
@@ -40,6 +43,7 @@ data CategoryResult = CategoryResult
   , categoryPostProc :: Maybe PostProcInfo
   , categoryRanking :: [(Maybe Rank, Solver, Score)]
   , categoryJobs :: [JobInfo]
+  , categoryComplete :: Bool
   } deriving (Show)
 
 {-
@@ -59,23 +63,34 @@ isYes _       = False
 -- | output is decreasing by Score
 getScores :: [Solver] -> Scoring -> [JobResultInfo] -> [(Solver,Score)]
 getScores solver scoring results =
-  reverse $ L.sortBy sortScore $ map countResults solver
+  reverse $ L.sortBy sortScore scores
   where
-    countResults s = (s, length $ filter (matches s) results)
-    matches (sid,sn) jri =
-      let solverId = jobResultInfoSolverId jri
-          solver = jobResultInfoSolver jri
-          result = jobResultInfoResult jri
-      in case scoring of
-          Standard ->
-            solverId == sid && solver == sn &&
-            (result == NO || isYes result )
-          Complexity -> undefined
-          Custom rs ->
-            solverId == sid && solver == sn &&
-            any (\f ->
-              result == f
-            ) rs
+    scoreMap =
+      case scoring of
+        Standard -> calcStandardScores results
+        Complexity -> calcComplexityScores results
+    scores = flip map solver $ \s@(sId,_) ->
+              case IM.lookup sId scoreMap of
+                Nothing -> (s,0)
+                Just scr -> (s,scr)
+
+  --reverse $ L.sortBy sortScore $ map countResults solver
+  --where
+  --  countResults s = (s, length $ filter (matches s) results)
+  --  matches (sid,sn) jri =
+  --    let solverId = jobResultInfoSolverId jri
+  --        solver = jobResultInfoSolver jri
+  --        result = jobResultInfoResult jri
+  --    in case scoring of
+  --        Standard ->
+  --          solverId == sid && solver == sn &&
+  --          (result == NO || isYes result )
+  --        Complexity -> undefined
+  --        Custom rs ->
+  --          solverId == sid && solver == sn &&
+  --          any (\f ->
+  --            result == f
+  --          ) rs
 
 
 testGetRanking1 = 
@@ -111,11 +126,13 @@ getCategoriesResult cat = do
       scores = getScores solver catScoring results
       rankedSolver = getRanking scores
       jobInfos = catMaybes $ map (fst . queryResult) qResults
+      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
   return $ CategoryResult catName
                           catScoring
                           (queryResult qPostProc)
                           rankedSolver
                           jobInfos
+                          complete
 
 testCalcScores1 = 
        calcScores [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20),(Just 4,"noh",10)]
@@ -158,14 +175,18 @@ getMetaResults metaCat = do
   catResults <- mapM getCategoriesResult categories
   let scores = getMetaScores $ map categoryRanking catResults
       ranking = getRanking $ reverse $ L.sortBy sortScore scores
+      complete = all categoryComplete catResults
   return $ MetaCategoryResult metaName
                               catResults
                               ranking
+                              complete
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
   let compName = getCompetitionName comp
       metaCats = getMetaCategories comp
   metaResults <- mapM getMetaResults metaCats
+  let complete = all metaCategoriesComplete metaResults
   return $ CompetitionResults compName
                               metaResults
+                              complete

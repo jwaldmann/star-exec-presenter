@@ -77,8 +77,10 @@ data Participant =
                  }
     deriving ( Generic )
 
+standard :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
 standard n bs ps = Category {  categoryName = n , contents = 
     Catinfo { postproc = 163 , benchmarks = bs , participants = ps } }
+certified :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 164 , benchmarks = bs , participants = ps } }
 
