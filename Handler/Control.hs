@@ -93,7 +93,9 @@ checkPrefix s con action next =
 
 startComp input t = do
     comp_with_jobs <- pushcomp input tc2014
-    let c = convertComp comp_with_jobs
+    let S.Competition name mcs = convertComp comp_with_jobs
+        n = params input t 
+        c = S.Competition n mcs
     return $ Just c
 
 startMC input t = do
@@ -102,7 +104,8 @@ startMC input t = do
             guard $ metaCategoryName mc == t
             return mc
     mc_with_jobs <- pushmetacat input mc
-    let c = S.Competition "Test" [ convertMC mc_with_jobs]
+    let n = params input t
+        c = S.Competition n [ convertMC mc_with_jobs]
     return $ Just c
 
 startCat input t = do
@@ -112,8 +115,16 @@ startCat input t = do
             guard $ categoryName c == t
             return c
     cat_with_jobs <- pushcat input cat    
-    let c = S.Competition "Test" [ S.MetaCategory "Test" [ convertC cat_with_jobs]]
+    let n = params input t
+        c = S.Competition n [ S.MetaCategory n [ convertC cat_with_jobs]]
     return $ Just c
 
+params conf t = T.unwords
+    [ "Test", t
+    , "wc", "=", T.pack $ show $ wallclock conf
+    , "a", "=", T.pack $ show $ family_lower_bound conf
+    , "b", "=", T.pack $ show $ family_upper_bound conf
+    , "c", "=", T.pack $ show $ family_factor conf
+    ]
 
 
