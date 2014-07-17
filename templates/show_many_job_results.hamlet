@@ -4,6 +4,11 @@
   $forall jid <- getids jids
      <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{jid}">#{jid}</a>,
 
+<h2>Statistics
+#{stat}
+
+<h2>Results
+
 <div class="container">
   <input type="checkbox" id="legend">
   <div class="container">
@@ -23,7 +28,7 @@
         The results are displayed in the following pattern:
         <code> cpu-time / wallclock-time (complexity-score)
 
-<h2>The Results:
+
 <table class="table">
   <thead>
     <tr>

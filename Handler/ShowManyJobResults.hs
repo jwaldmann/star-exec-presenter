@@ -20,6 +20,7 @@ import Utils.WidgetMetaRefresh
 --import Control.Exception.Lifted (catch)
 --import Data.Ratio
 --import Control.Monad (void)
+import StarExec.Statistics
 
 countResults :: SolverResult -> (Int, (Int, Text)) -> Handler Int
 countResults result (_jobId,(sid,_)) = runDB $ do
@@ -77,7 +78,19 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       isComplexity = all jobInfoIsComplexity jobInfos
       jobs = map (snd . queryResult) qJobs
+
+      jobResults :: [JobResultInfo]
       jobResults = concat $ jobs
+
+      stat = Statistics 
+           { complete = False -- don't know
+           , startTime = Nothing, finishTime = Nothing
+           , cpu = sum $ map jobResultInfoCpuTime jobResults
+           , wallclock = sum $ map jobResultInfoWallclockTime jobResults
+           , pairs = length jobResults
+           , pairsCompleted = length $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) jobResults
+           }
+
       benchmarks = L.sortBy compareBenchmarks $
                     getInfo extractBenchmark $ jobResults
       groupedSolvers = map (getInfo extractSolver) jobs

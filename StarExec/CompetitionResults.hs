@@ -17,11 +17,11 @@ import Import
 import StarExec.Types
 import StarExec.JobData
 import StarExec.Processing
+import StarExec.Statistics
 import qualified Data.List as L
 import Data.Maybe
 import Data.Time.Clock
 import qualified Data.IntMap.Strict as IM
-
 
 import qualified Data.Map as M
 
@@ -31,6 +31,7 @@ data CompetitionResults = CompetitionResults
   , competitionComplete :: Bool 
   , competitionStartTime :: Maybe UTCTime
   , competitionFinishTime :: Maybe UTCTime
+  , competitionStatistics :: Statistics
   } deriving (Show)
 
 data MetaCategoryResult = MetaCategoryResult
@@ -40,6 +41,7 @@ data MetaCategoryResult = MetaCategoryResult
   , metaCategoryComplete :: Bool
   , metaCategoryStarTime :: Maybe UTCTime
   , metaCategoryFinishTime :: Maybe UTCTime
+  , metaCategoryStatistics :: Statistics
   } deriving (Show)
 
 data CategoryResult = CategoryResult
@@ -51,6 +53,7 @@ data CategoryResult = CategoryResult
   , categoryComplete :: Bool
   , categoryStartTime :: Maybe UTCTime
   , categoryFinishTime :: Maybe UTCTime
+  , categoryStatistics :: Statistics
   } deriving (Show)
 
 {-
@@ -141,9 +144,19 @@ getCategoriesResult cat = do
       startTime = if null jobInfos
                     then Nothing
                     else Just $ minimum $ map jobInfoStartDate jobInfos
-      endTime = if complete
+      endTime = if complete && not (null jobInfos)
                   then maximum $ map jobInfoFinishDate jobInfos
                   else Nothing
+      cpuTotal = sum $ map jobResultInfoCpuTime results
+      wallTotal = sum $ map jobResultInfoWallclockTime results
+      stat = Statistics { complete = complete 
+                        , pairs = length results
+                        , pairsCompleted = length 
+                              $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) results
+                        , startTime = startTime, finishTime = endTime 
+                        , cpu = cpuTotal, wallclock = wallTotal
+                        }
+
   return $ CategoryResult catName
                           catScoring
                           (queryResult qPostProc)
@@ -152,6 +165,7 @@ getCategoriesResult cat = do
                           complete
                           startTime
                           endTime
+                          stat
 
 getMetaResults :: MetaCategory -> Handler MetaCategoryResult
 getMetaResults metaCat = do
@@ -167,12 +181,15 @@ getMetaResults metaCat = do
       endTime = if complete
                   then maximum $ map categoryFinishTime catResults
                   else Nothing
+      stat = mconcat $ map categoryStatistics catResults
+      
   return $ MetaCategoryResult metaName
                               catResults
                               ranking
                               complete
                               startTime
                               endTime
+                              stat
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
@@ -186,8 +203,10 @@ getCompetitionResults comp = do
       endTime = if complete
                   then maximum $ map metaCategoryFinishTime metaResults
                   else Nothing
+      stat = mconcat $ map metaCategoryStatistics metaResults
   return $ CompetitionResults compName
                               metaResults
                               complete
                               startTime
                               endTime
+                              stat

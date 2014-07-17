@@ -48,6 +48,7 @@ library
                      StarExec.Concurrent
                      StarExec.Processing
                      StarExec.Auth
+                     StarExec.Statistics
                      Table.Data
                      Table.Get
                      Table.Query
