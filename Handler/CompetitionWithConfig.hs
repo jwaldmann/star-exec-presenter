@@ -7,6 +7,11 @@ import StarExec.JobData
 import Utils.WidgetMetaRefresh
 import Data.Time.Clock
 
+import qualified Data.Map.Strict as M
+import Control.Concurrent.STM
+import Handler.Control (start_worker)
+import Control.Monad ( when )
+
 minute :: Seconds
 minute = 60
 
@@ -32,15 +37,27 @@ getDuration (Just start) (Just end) =
 getCompetitionWithConfigR :: Competition -> Handler Html
 getCompetitionWithConfigR comp = do
 
-  app <- getYesod
 
-  let metaCats = getMetaCategories comp
-      cats = concat $ map getCategories metaCats
-      jobIds = concat $ map getJobIds cats
-  qJobs <- queryManyJobs jobIds
-  compResults <- getCompetitionResults comp
+  app <- getYesod
+  (mCompResults, start) <- lift $ atomically $ do
+      crc <- readTVar $ compResultsCache app
+      case M.lookup (getCompetitionName comp) crc of
+          Nothing -> do
+              return (Nothing, True)
+          Just entry -> do
+              mCompResults <- readTVar entry
+              return (mCompResults, False)
+  when start $ start_worker comp
+
+  let need_refresh = case mCompResults of
+          Nothing -> True
+          Just cr -> not $ competitionComplete cr
+  
   defaultLayout $ do
-    if any (\q -> queryStatus q /= Latest) qJobs
+    if -- any (\q -> queryStatus q /= Latest) qJobs
+      need_refresh
       then insertWidgetMetaRefresh
       else return ()
-    $(widgetFile "competition_slim")
+    case mCompResults of
+        Nothing -> [whamlet|competition currently not in results cache|]
+        Just compResults -> $(widgetFile "competition_slim")

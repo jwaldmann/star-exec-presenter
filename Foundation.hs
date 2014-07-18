@@ -40,7 +40,7 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
-    , compResultsCache :: TVar (M.Map Text (TVar CompetitionResults))
+    , compResultsCache :: TVar (M.Map Text (TVar (Maybe CompetitionResults)))
     }
 
 instance HasHttpManager App where
