@@ -49,14 +49,7 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
       jobResults :: [JobResultInfo]
       jobResults = concat $ jobs
 
-      stat = Statistics 
-           { complete = False -- don't know
-           , startTime = Nothing, finishTime = Nothing
-           , cpu = sum $ map jobResultInfoCpuTime jobResults
-           , wallclock = sum $ map jobResultInfoWallclockTime jobResults
-           , pairs = length jobResults
-           , pairsCompleted = length $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) jobResults
-           }
+      stat = mconcat $ map jobStat jobResults
 
       benchmarks = L.sortBy compareBenchmarks $
                     getInfo extractBenchmark $ jobResults

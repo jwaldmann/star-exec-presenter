@@ -125,15 +125,9 @@ getCategoriesResult cat = do
       endTime = if complete && not (null jobInfos)
                   then maximum $ map jobInfoFinishDate jobInfos
                   else Nothing
-      cpuTotal = sum $ map jobResultInfoCpuTime results
-      wallTotal = sum $ map jobResultInfoWallclockTime results
-      stat = Statistics { complete = complete 
-                        , pairs = length results
-                        , pairsCompleted = length 
-                              $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) results
-                        , startTime = startTime, finishTime = endTime 
-                        , cpu = cpuTotal, wallclock = wallTotal
-                        }
+
+      stat = ( mconcat $ map jobStat results )
+           { startTime = startTime, finishTime = endTime }
 
   return $ CategoryResult catName
                           catScoring

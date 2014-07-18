@@ -1,6 +1,8 @@
 module StarExec.Statistics where
 
 import Prelude
+import Model
+import StarExec.Types 
 import Control.Applicative
 import Data.Monoid
 import Text.Blaze
@@ -15,6 +17,17 @@ data Statistics = Statistics
     , pairs :: ! Int, pairsCompleted :: ! Int
     , cpu :: ! Double, wallclock :: ! Double
     } deriving Show
+
+jobStat :: JobResultInfo -> Statistics
+jobStat i = 
+    let done = jobResultInfoStatus i == JobResultComplete
+    in  Statistics
+        { complete = done
+        , startTime = Nothing , finishTime = Nothing -- FIXME
+        , pairs = 1 , pairsCompleted = if done then 1 else 0
+        , cpu = jobResultInfoCpuTime i
+        , wallclock = jobResultInfoWallclockTime i
+        }
 
 instance ToMarkup Statistics where
     toMarkup s = let cls :: Text
