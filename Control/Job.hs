@@ -21,8 +21,12 @@ import Data.Hashable
 import Control.Applicative ((<$>))
 import Data.List ( sort )
 
+data Selection = SelectionCompetition | SelectionDemonstration 
+    deriving (Eq, Ord, Read, Show)
+
 data JobControl = JobControl
    { isPublic :: Bool
+   , selection :: Selection
    , queue :: Int
    , space :: Int
    , wallclock :: Int

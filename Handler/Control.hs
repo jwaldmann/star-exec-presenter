@@ -29,6 +29,7 @@ import Control.Exception.Base
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
+        <*> areq (radioFieldList [("Competition (at least 2 participants)"::T.Text,SelectionCompetition),("Demonstration (1 participant)",SelectionDemonstration)]) "categories" (Just SelectionCompetition)
         <*> areq (radioFieldList [("Termination.q"::T.Text,478),("all.q",1),("all2.q",4)]) "queue" (Just 478)
         <*> areq (radioFieldList [("autotest":: T.Text, 52915)]) "space" (Just 52915)
         <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
@@ -98,8 +99,16 @@ checkPrefix s con action next =
     let (pre, post) = T.splitAt (T.length s) con
     in  if pre == s then action post else next
 
+select input comp = case selection input of
+    SelectionCompetition -> 
+        comp { metacategories = map ( \ mc -> mc { categories = full_categories mc } ) 
+                              $ metacategories comp }
+    SelectionDemonstration -> 
+        comp { metacategories = map ( \ mc -> mc { categories = demonstration_categories mc } ) 
+                              $ metacategories comp }
+
 startComp input t = do
-    comp_with_jobs <- pushcomp input tc2014
+    comp_with_jobs <- pushcomp input $ select input tc2014
     let S.Competition name mcs = convertComp comp_with_jobs
         m = params input t 
         c = S.Competition m mcs
@@ -107,7 +116,7 @@ startComp input t = do
 
 startMC input t = do
     let [ mc ] = do 
-            mc <- metacategories tc2014
+            mc <- metacategories $ select input tc2014
             guard $ metaCategoryName mc == t
             return mc
     mc_with_jobs <- pushmetacat input mc
@@ -117,7 +126,7 @@ startMC input t = do
 
 startCat input t = do
     let [ cat ] = do 
-            mc <- metacategories tc2014
+            mc <- metacategories $ select input tc2014
             c <- categories mc
             guard $ categoryName c == t
             return c
@@ -128,7 +137,9 @@ startCat input t = do
 
 params :: JobControl -> Text -> S.CompetitionMeta
 params conf t = S.CompetitionMeta
-  { S.getMetaName = t
+  { S.getMetaName = T.append t $ case selection conf of
+        SelectionCompetition -> T.empty
+        SelectionDemonstration -> " (Demonstration)"
   , S.getMetaDescription =
       T.unwords [ "Test", t
                 , "wc", "=", T.pack $ show $ wallclock conf

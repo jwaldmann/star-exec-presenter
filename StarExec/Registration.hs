@@ -39,8 +39,8 @@ data MetaCategory a =
 full_categories mc = 
     filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
 
-underfull_categories mc =
-    filter ( \ c -> length (real_participants c) < 2 ) $  categories mc
+demonstration_categories mc =
+    filter ( \ c -> length (real_participants c) == 1 ) $  categories mc
 
 real_participants c = 
     filter ( isJust . solver_config ) $ participants $ contents c

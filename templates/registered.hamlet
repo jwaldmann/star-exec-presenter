@@ -20,9 +20,9 @@
                   $nothing
                       <span class="noconf">#{participantName part}
                   | 
-      will not be run because of low number of participants:
+      will be run as demonstation:
       <ul>
-        $forall cat <- underfull_categories mecat
+        $forall cat <- demonstration_categories mecat
           <li>
             #{categoryName cat}:
             $forall part <- participants (contents cat)
