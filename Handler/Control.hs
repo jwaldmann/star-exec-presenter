@@ -9,6 +9,7 @@ import StarExec.Connection (getLoginCredentials)
 import StarExec.Types (Login(..))
 import StarExec.Persist
 import StarExec.Commands (Job(..))
+import StarExec.STM (startWorker)
 import qualified StarExec.CompetitionResults as SCR
 
 import Yesod.Auth
@@ -53,33 +54,6 @@ getControlR = do
     let comp = tc2014
     defaultLayout $(widgetFile "control")
 
-start_worker comp = do
-    app <- getYesod
-
-    mSink <- lift $ atomically $ do
-      crc <- readTVar $ compResultsCache app
-      case M.lookup (S.getMetaData comp) crc of
-          Nothing -> do
-              sink <- newTVar Nothing
-              modifyTVar' (compResultsCache app) $ M.insert (S.getMetaData comp) sink
-              return $ Just sink
-          Just entry -> do
-              return Nothing
-    case mSink of
-        Nothing -> return ()
-        Just sink -> do
-            lift $ putStrLn $ "start worker for " ++ ( T.unpack $ S.getCompetitionName comp )
-            forkHandler error_handler $ forever $ do -- should finish when complete
-                compResults <- SCR.getCompetitionResults comp
-                lift $ atomically $ writeTVar sink $ Just compResults
-                lift $ threadDelay $ 30 * 10^6
-
-error_handler :: SomeException -> Handler ()
-error_handler e = lift $ do
-    putStrLn $ "ignoring exception:"
-    putStrLn $ show e
-
-
 postControlR :: Handler Html
 postControlR = do
     maid <- maybeAuthId
@@ -100,7 +74,7 @@ postControlR = do
                   now <- liftIO getCurrentTime
                   let competition = ( timed now c ) 
                   key <- runDB $ insert $ CompetitionInfo competition now public
-                  start_worker competition
+                  startWorker competition
                   return $ Just key
     defaultLayout $ do
         [whamlet|

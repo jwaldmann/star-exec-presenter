@@ -3,7 +3,6 @@ module StarExec.CompetitionResults.Type where
 import Prelude
 import Model
 import StarExec.Types
--- import StarExec.JobData
 import StarExec.Processing
 import StarExec.Statistics
 import qualified Data.List as L
