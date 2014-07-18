@@ -44,3 +44,14 @@
 /*.table {
   width: auto; 
 }*/
+
+@colorCompleted: #CCFF99;
+@colorRunning:  #FFCC99;
+
+span.completed {
+    background-color: #{colorCompleted}
+}
+
+span.running {
+    background-color: #{colorRunning}
+}

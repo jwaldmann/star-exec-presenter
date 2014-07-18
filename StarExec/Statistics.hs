@@ -5,6 +5,7 @@ import Control.Applicative
 import Data.Monoid
 import Text.Blaze
 import Text.Hamlet
+import Data.Text
 import Data.Time.Clock
 import Data.Double.Conversion.Text (toFixed)
 
@@ -16,7 +17,10 @@ data Statistics = Statistics
     } deriving Show
 
 instance ToMarkup Statistics where
-    toMarkup s = [shamlet|
+    toMarkup s = let cls :: Text
+                     cls = if complete s then "completed"  else "running"
+                 in [shamlet|    
+    <span class="#{cls}">
         $if complete s
           completed, 
         $else
