@@ -1,8 +1,10 @@
 module StarExec.Statistics where
 
-import Import
+import Prelude
+import Control.Applicative
 import Data.Monoid
 import Text.Blaze
+import Text.Hamlet
 import Data.Time.Clock
 import Data.Double.Conversion.Text (toFixed)
 

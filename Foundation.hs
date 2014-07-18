@@ -24,6 +24,10 @@ import StarExec.Types (ErrorID, JobIds, Competition)
 import Table.Query
 import Data.Text (Text)
 import StarExec.Auth (authSE)
+import StarExec.CompetitionResults.Type
+
+import qualified Data.Map.Strict as M
+import Control.Concurrent.STM
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -36,6 +40,7 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
+    , compResultsCache :: TVar (M.Map Text (TVar (Maybe CompetitionResults)))
     }
 
 instance HasHttpManager App where
