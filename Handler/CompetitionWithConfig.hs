@@ -31,6 +31,9 @@ getDuration (Just start) (Just end) =
 
 getCompetitionWithConfigR :: Competition -> Handler Html
 getCompetitionWithConfigR comp = do
+
+  app <- getYesod
+
   let metaCats = getMetaCategories comp
       cats = concat $ map getCategories metaCats
       jobIds = concat $ map getJobIds cats

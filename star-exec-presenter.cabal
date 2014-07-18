@@ -42,6 +42,7 @@ library
                      StarExec.Urls
                      StarExec.JobData
                      StarExec.CompetitionResults
+                     StarExec.CompetitionResults.Type
                      StarExec.Registration
                      StarExec.PersistTypes
                      StarExec.Complexity
@@ -129,6 +130,7 @@ library
                  -- , esqueleto
                  -- , lifted-base
                  , hashable
+                 , stm
 
 executable         star-exec-presenter
     if flag(library-only)
