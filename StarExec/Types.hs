@@ -87,7 +87,8 @@ data SpaceInfo = SpaceInfo
 -- | this is (some of) the data in the xml file returned by download-space-XML
 -- (for the moment, only benchmarks, ignoring permissions and solvers)
 data Space = Space 
-   { children :: [Space]
+   { spId :: Int
+   , children :: [Space]
    , benchmarks :: [ Int ]
    } deriving ( Show, Eq )
 

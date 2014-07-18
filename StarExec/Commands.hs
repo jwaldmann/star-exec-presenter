@@ -12,6 +12,7 @@ module StarExec.Commands
   , getPostProcInfo
   , pushJobXML, Job (..) -- FIXME: move to some other module
   , getSpaceXML
+  , getDefaultSpaceXML
   ) where
 
 import Import
@@ -244,6 +245,12 @@ getJobInfo (sec, man, cookies) _jobId = do
           tds = getTds fieldset
       return $ Just $ constructJobInfo _jobId jobTitle tds
 
+
+getDefaultSpaceXML :: FilePath -> Handler (Maybe Space)
+getDefaultSpaceXML fp = do
+    s <- lift $ BSL.readFile fp
+    makeSpace s
+
 getSpaceXML :: StarExecConnection -> Int -> Handler (Maybe Space)
 getSpaceXML (sec, man, cookies) _spaceId = do
   let req = sec { method = "GET"
@@ -257,7 +264,11 @@ getSpaceXML (sec, man, cookies) _spaceId = do
   resp <- sendRequest (req, man, cookies)
   --liftIO $ putStrLn "### <- getSpaceXML ###"
 
-  let archive = Zip.toArchive $ responseBody resp
+  makeSpace $ responseBody resp
+
+
+makeSpace bs = do
+  let archive = Zip.toArchive bs
       xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 
                  $ Zip.zEntries archive 
   let spaces =  case xml_entries of
@@ -266,7 +277,8 @@ getSpaceXML (sec, man, cookies) _spaceId = do
               root = laxElement "tns:Spaces" c >>= child
               walk :: [ Cursor ] -> [ Space ]
               walk root = root >>= laxElement "Space" >>= \ s -> return
-                     Space { benchmarks = map ( read . T.unpack )
+                     Space { spId = read $ T.unpack $ head $ attribute "id" s
+                           , benchmarks = map ( read . T.unpack )
                              $ child s >>= laxElement "benchmark" >>= attribute "id" 
                            , children = child s >>= \ c ->  walk [c]
                            }

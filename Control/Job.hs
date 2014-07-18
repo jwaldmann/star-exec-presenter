@@ -5,7 +5,8 @@ import Import
 import qualified Data.Text as T
 
 import StarExec.Registration 
-import StarExec.Commands (pushJobXML, Job (..), getSpaceXML)
+import StarExec.Commands 
+    (pushJobXML, Job (..), getSpaceXML, getDefaultSpaceXML)
 import StarExec.Connection (getConnection)
 import StarExec.Types (JobIds(..))
 import qualified StarExec.Types as S
@@ -18,6 +19,7 @@ import qualified Data.Map.Strict as M
 import System.Random
 import Data.Hashable
 import Control.Applicative ((<$>))
+import Data.List ( sort )
 
 data JobControl = JobControl
    { isPublic :: Bool
@@ -34,19 +36,32 @@ data JobControl = JobControl
 num_cores :: Int
 num_cores = 4
 
+tpdb_9_0_1 = "TPDB-65df8a308dd6_XML.zip"
+default_space = tpdb_9_0_1
+
+type SpaceMap = M.Map Int S.Space
+
+getSpaceMap :: FilePath -> Handler SpaceMap
+getSpaceMap fp = do
+    Just s <- getDefaultSpaceXML fp
+    let subspaces s = (S.spId s, s) : ( S.children s >>= subspaces )
+    return $ M.fromList $ subspaces s
+
 pushcat :: JobControl -> Category Catinfo -> Handler (Category ( Catinfo, [Int] ))
 pushcat config cat = do
+    sm <- getSpaceMap default_space
     let ci = contents cat
     now <- liftIO getCurrentTime
     con <- getConnection
-    jobs <- mkJobs config cat now
+    jobs <- mkJobs sm config cat now
     js <- pushJobXML con (Control.Job.space config) jobs
     return $ cat { contents = (contents cat, catMaybes $ map jobid js) }
 
 pushmetacat config mc = do
+    sm <- getSpaceMap default_space
     now <- liftIO getCurrentTime
     jobss <- forM (categories mc) $ \ cat ->  do 
-            mkJobs config cat now
+            mkJobs sm config cat now
     con <- getConnection
     js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
@@ -56,9 +71,10 @@ pushmetacat config mc = do
                  cat { contents = (contents cat, M.findWithDefault [] (repair $ categoryName cat) m ) } } 
 
 pushcomp config c = do
+    sm <- getSpaceMap default_space
     now <- liftIO getCurrentTime
     jobss <- forM ( metacategories c >>= categories ) $ \ cat -> do 
-            mkJobs config cat now
+            mkJobs sm config cat now
     con <- getConnection
     js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
@@ -75,21 +91,28 @@ compact = T.unwords . map (T.take 5) . T.words
 
 for = flip map
 
+getSpaceXMLquick sm id = 
+    case M.lookup id sm of
+        Just s -> return $ Just s
+        Nothing -> do
+            con <- getConnection
+            getSpaceXML con id
+
 -- FIXME: getspaceXML should be DB-cached (issue #29)
-select_benchmarks :: JobControl -> [Benchmark_Source] 
+select_benchmarks :: SpaceMap
+                  -> JobControl -> [Benchmark_Source] 
                   -> Handler [[Int]]
-select_benchmarks config bs = do
-    con <- getConnection
+select_benchmarks sm config bs = do
     bmss <- forM bs $ \ b -> case b of
         Bench { bench = id } -> do
             return [[id]]
         All { StarExec.Registration.space = id } -> do
-            s <- getSpaceXML con id
+            s <- getSpaceXMLquick sm id
             return $ case s of
                 Nothing -> []
                 Just s -> [S.benchmarks s ]
         Hierarchy { StarExec.Registration.space = id } -> do
-            s <- getSpaceXML con id
+            s <- getSpaceXMLquick sm id
             return $ case s of
                 Nothing -> []
                 Just s -> S.families s
@@ -127,12 +150,13 @@ permute (x:xs) = do
     let (pre,post) = splitAt k ys
     return $ pre ++ x : post
 
-mkJobs :: JobControl -> Category Catinfo -> UTCTime 
+mkJobs :: SpaceMap 
+       -> JobControl -> Category Catinfo -> UTCTime 
        -> Handler [ Job ]
-mkJobs config cat now = do
+mkJobs sm config cat now = do
     let ci = contents cat 
         (+>) = T.append
-    bss <- select_benchmarks config $ benchmarks ci
+    bss <- select_benchmarks sm config $ benchmarks ci
 
     -- FIXME: too many separate jobs give problems 
     let all_in_one bss = [ concat bss ]
@@ -140,14 +164,14 @@ mkJobs config cat now = do
     return $ for (all_in_one bss) $ \ bs -> Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
-         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash bs )
+         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash (bs, show now) )
          , queue_id = queue config
          , mem_limit = 128.0
          , wallclock_timeout = wallclock config
          , cpu_timeout = num_cores * wallclock config
          , start_paused = False
          , jobpairs = do 
-               b <- bs
+               b <- sort bs
                Participant { solver_config = Just (s,c) } <- participants ci
                return ( b, c )
          , jobid = Nothing
