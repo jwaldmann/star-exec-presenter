@@ -182,6 +182,8 @@ getMetaCategoryName (MetaCategory name _) = name
 getCategories :: MetaCategory -> [Category]
 getCategories (MetaCategory _ cs) = cs
 
+--data CompetitionMeta = ...
+
 {-
 -}
 data Competition = Competition Name [MetaCategory]

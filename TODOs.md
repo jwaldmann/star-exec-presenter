@@ -76,3 +76,4 @@ c = Competition "2014"
 * ~~route for competition_info by db-id~~
 * extend competition with meta-data
 * remove duration from category
+* add competition-meta -> name + desc
