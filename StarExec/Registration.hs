@@ -4,7 +4,7 @@
 
 module StarExec.Registration where
 
-import StarExec.Types ( Name )
+import StarExec.Types ( Name, CompetitionMeta(..) )
 import qualified Data.Text as T
 
 import Prelude 

@@ -183,12 +183,13 @@ mkJobs sm config cat now = do
 
 timed now (S.Competition meta mcs) = 
     --let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]
-    let meta' = meta { S.getMetaDescription = T.unwords ["(", T.pack $ show now, ")"] }
+    let meta' = meta { S.getMetaDescription 
+                 = T.unwords [ S.getMetaDescription meta, "(", T.pack $ show now, ")"] }
     in  S.Competition meta' mcs
 
 convertComp :: Competition (Catinfo,  [Int]) 
         -> S.Competition
-convertComp c = S.Competition ( S.CompetitionMeta (competitionName c) "" )
+convertComp c = S.Competition ( S.CompetitionMeta (competitionName c ) "(missing description)" )
           $ map convertMC (metacategories c)
 
 convertMC :: MetaCategory (Catinfo, [Int])

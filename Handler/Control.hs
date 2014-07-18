@@ -109,7 +109,7 @@ select input comp = case selection input of
 
 startComp input t = do
     comp_with_jobs <- pushcomp input $ select input tc2014
-    let S.Competition name mcs = convertComp comp_with_jobs
+    let S.Competition name mcs = convertComp comp_with_jobs 
         m = params input t 
         c = S.Competition m mcs
     return $ Just c
@@ -141,8 +141,7 @@ params conf t = S.CompetitionMeta
         SelectionCompetition -> T.empty
         SelectionDemonstration -> " (Demonstration)"
   , S.getMetaDescription =
-      T.unwords [ "Test", t
-                , "wc", "=", T.pack $ show $ wallclock conf
+      T.unwords [ "wc", "=", T.pack $ show $ wallclock conf
                 , "a", "=", T.pack $ show $ family_lower_bound conf
                 , "b", "=", T.pack $ show $ family_upper_bound conf
                 , "c", "=", T.pack $ show $ family_factor conf
@@ -150,7 +149,8 @@ params conf t = S.CompetitionMeta
   }
 
 metaToName :: S.CompetitionMeta -> S.Name
-metaToName meta = S.getMetaName meta `T.append` " | " `T.append` S.getMetaDescription meta
+metaToName meta = 
+    S.getMetaName meta -- `T.append` " | " `T.append` S.getMetaDescription meta
   
 
 

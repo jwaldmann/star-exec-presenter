@@ -1,9 +1,7 @@
-<h1>Competition #{competitionName compResults}
+<h1>#{competitionName compResults}
+<p>#{competitionDescription compResults} #{competitionStatistics compResults} #
 $if competitionComplete compResults
-  <p>Competition finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
-$else
-  Competition still running
-<p>#{competitionStatistics compResults}
+  finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
 <table class="table table-condensed">
   <tbody>
     $forall compMetaResults <- metaCategoryResults compResults
@@ -13,8 +11,6 @@ $else
           <br>
           $if metaCategoryComplete compMetaResults
             (finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)})
-          $else
-            (still running)
           <p>#{metaCategoryStatistics compMetaResults}
         <td>
           <table class="table table-condensed">

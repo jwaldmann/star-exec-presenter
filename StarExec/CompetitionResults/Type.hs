@@ -19,13 +19,16 @@ data SolverRankEntry = SolverRankEntry
   } deriving (Eq, Show)
 
 data CompetitionResults = CompetitionResults
-  { competitionName :: Name
+  { competitionMeta :: CompetitionMeta
   , metaCategoryResults :: [MetaCategoryResult]
   , competitionComplete :: Bool 
   , competitionStartTime :: Maybe UTCTime
   , competitionFinishTime :: Maybe UTCTime
   , competitionStatistics :: Statistics
   } deriving (Show)
+
+competitionName = getMetaName . competitionMeta
+competitionDescription = getMetaDescription . competitionMeta
 
 data MetaCategoryResult = MetaCategoryResult
   { metaCategoryName :: Name

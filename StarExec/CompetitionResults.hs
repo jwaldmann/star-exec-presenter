@@ -287,7 +287,8 @@ updateJob ((Just persist), (Just starexec)) = do
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
-  let compName = getCompetitionName comp
+  let compMeta = getMetaData comp
+      compName = getCompetitionName comp
       metaCats = getMetaCategories comp
       cats = concat $ map getCategories metaCats
       jobIds = concat $ map getJobIds cats
@@ -316,7 +317,7 @@ getCompetitionResults comp = do
                   then maximum $ map metaCategoryFinishTime metaResults
                   else Nothing
       stat = mconcat $ map metaCategoryStatistics metaResults
-  return $ CompetitionResults compName
+  return $ CompetitionResults compMeta
                               metaResults
                               complete
                               startTime
