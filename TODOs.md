@@ -77,3 +77,7 @@ c = Competition "2014"
 * extend competition with meta-data
 * remove duration from category
 * add competition-meta -> name + desc
+  - deriving Eq, Ord
+  - TVar-Map -> key = CompMeta
+* start test-competition with ~12h duration
+* post-proc-info
