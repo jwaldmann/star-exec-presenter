@@ -21,12 +21,19 @@ import StarExec.Types
 import StarExec.JobData
 import StarExec.Processing
 import StarExec.Statistics
+import StarExec.Connection
+import StarExec.Commands
+import StarExec.Persist
 import qualified Data.List as L
 import Data.Maybe
 import Data.Time.Clock
 import qualified Data.IntMap.Strict as IM
 
 import qualified Data.Map as M
+
+type PostProcInfoMap = IM.IntMap PostProcInfo
+type JobInfoMap = IM.IntMap JobInfo
+type JobResultsMap = IM.IntMap [JobResultInfo]
 
 sortScore :: (Solver, Score) -> (Solver, Score) -> Ordering
 sortScore (_,i1) (_,i2) = compare i1 i2
@@ -138,6 +145,49 @@ getCategoriesResult cat = do
                           endTime
                           stat
 
+lookupMap :: IM.IntMap a -> Int -> Maybe a
+lookupMap = flip IM.lookup
+
+getCategoriesResult_ :: PostProcInfoMap -> JobInfoMap -> JobResultsMap -> Category -> CategoryResult
+getCategoriesResult_ procs infos results cat =
+  let catName = getCategoryName cat
+      catScoring = getCategoryScoring cat
+      catPostProcId = getPostProcId cat
+      catJobIds = getJobIds cat
+      catResults = catMaybes $ map (lookupMap results) catJobIds
+      catInfos = catMaybes $ map (lookupMap infos) catJobIds
+      catPostProc = IM.lookup catPostProcId procs
+      jobResults = concat $ catResults
+      solver = getInfo extractSolver jobResults
+      scores = getScores solver catScoring jobResults
+      rankedSolver = getRanking scores
+      jobInfos = catInfos
+      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
+      startTime = if null jobInfos
+                    then Nothing
+                    else Just $ minimum $ map jobInfoStartDate jobInfos
+      endTime = if complete && not (null jobInfos)
+                  then maximum $ map jobInfoFinishDate jobInfos
+                  else Nothing
+      cpuTotal = sum $ map jobResultInfoCpuTime jobResults
+      wallTotal = sum $ map jobResultInfoWallclockTime jobResults
+      stat = Statistics { complete = complete 
+                        , pairs = length jobResults
+                        , pairsCompleted = length 
+                              $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) jobResults
+                        , startTime = startTime, finishTime = endTime 
+                        , cpu = cpuTotal, wallclock = wallTotal
+                        }
+  in CategoryResult catName
+                    catScoring
+                    catPostProc
+                    rankedSolver
+                    jobInfos
+                    complete
+                    startTime
+                    endTime
+                    stat
+
 getMetaResults :: MetaCategory -> Handler MetaCategoryResult
 getMetaResults metaCat = do
   let metaName = getMetaCategoryName metaCat
@@ -162,12 +212,103 @@ getMetaResults metaCat = do
                               endTime
                               stat
 
+getMetaResults_ :: PostProcInfoMap -> JobInfoMap -> JobResultsMap -> MetaCategory -> MetaCategoryResult
+getMetaResults_ procs infos results metaCat =
+  let metaName = getMetaCategoryName metaCat
+      categories = getCategories metaCat
+      catResults = map (getCategoriesResult_ procs infos results) categories
+      scores = getMetaScores $ map categoryRanking catResults
+      ranking = getRanking $ reverse $ L.sortBy sortScore scores
+      complete = all categoryComplete catResults
+      startTime = if null catResults
+                    then Nothing
+                    else minimum $ map categoryStartTime catResults
+      endTime = if complete
+                  then maximum $ map categoryFinishTime catResults
+                  else Nothing
+      stat = mconcat $ map categoryStatistics catResults
+  in MetaCategoryResult metaName
+                        catResults
+                        ranking
+                        complete
+                        startTime
+                        endTime
+                        stat
+
+--data StarExecRequest = Job Int | PostProc Int
+--type MetaCatName = Name
+--type CatName = Name
+--type SER_Entry = (MetaCatName, CatName, StarExecRequest)
+
+--getIntermediateStructure :: Competition -> [SER_Entry]
+
+filterMaybeTuple :: (a, Maybe b) -> Bool
+filterMaybeTuple (_,Nothing) = False
+filterMaybeTuple _ = True
+
+fromMaybeTuple :: (a, Maybe b) -> (a,b)
+fromMaybeTuple (a, Just b) = (a,b)
+
+updateJobInfo' :: JobInfo -> YesodDB App ()
+updateJobInfo' ji = do
+  mPersistInfo <- getBy $ UniqueJobInfo $ jobInfoStarExecId ji
+  case mPersistInfo of
+    Nothing -> updateJobInfo Nothing ji
+    Just en -> updateJobInfo (Just $ entityVal en) ji
+
+getProcessedResults :: (Maybe JobInfo,[JobResultInfo]) -> [JobResultInfo]
+getProcessedResults (mJobInfo, results) =
+  case mJobInfo of
+    Just ji -> if jobInfoIsComplexity ji
+                then getScoredResults results
+                else results
+    Nothing -> results
+
+updateJob :: (Maybe JobInfo, Maybe JobInfo) -> Handler (Maybe JobInfo)
+updateJob (Nothing, Nothing) = return Nothing
+updateJob ((Just ji), Nothing) = return $ Just ji
+updateJob (Nothing, (Just ji)) = return $ Just ji
+updateJob ((Just persist), (Just starexec)) = do
+  currentTime <- liftIO getCurrentTime
+  return $ Just persist
+    { jobInfoName = jobInfoName starexec
+    , jobInfoStatus = jobInfoStatus starexec
+    , jobInfoDate = jobInfoDate starexec
+    , jobInfoPreProc = jobInfoPreProc starexec
+    , jobInfoPostProc = jobInfoPostProc starexec
+    , jobInfoIsComplexity = jobInfoIsComplexity starexec
+    , jobInfoFinishDate = case jobInfoFinishDate persist of
+                            Nothing -> if jobInfoStatus starexec == Complete
+                                        then Just currentTime
+                                        else Nothing
+                            Just fd -> Just fd
+    , jobInfoLastUpdate = currentTime
+    }
+
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
   let compName = getCompetitionName comp
       metaCats = getMetaCategories comp
-  metaResults <- mapM getMetaResults metaCats
-  let complete = all metaCategoryComplete metaResults
+      cats = concat $ map getCategories metaCats
+      jobIds = concat $ map getJobIds cats
+      postProcIds = L.nub $ map getPostProcId cats
+  con <- getConnection
+  postProcs <- mapM (getPostProcInfo con) postProcIds
+  persistJobInfos <- mapM getPersistJobInfo jobIds
+  jobInfos <- mapM (getJobInfo con) jobIds
+  jobResults <- mapM (getJobResults con) jobIds
+  updatedJobs <- mapM updateJob $ zip persistJobInfos jobInfos
+  let jobs = zip jobInfos jobResults
+      processedResults = map getProcessedResults jobs
+  runDB $ do
+    mapM updatePostProcInfo $ catMaybes postProcs
+    mapM updateJobInfo' $ catMaybes jobInfos
+    updateJobResults $ concat processedResults
+  let postProcMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip postProcIds postProcs
+      jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds jobInfos
+      jobResultsMap = IM.fromList $ zip jobIds processedResults
+      metaResults = map (getMetaResults_ postProcMap jobInfoMap jobResultsMap) metaCats
+      complete = all metaCategoryComplete metaResults
       startTime = if null metaResults
                     then Nothing
                     else minimum $ map metaCategoryStarTime metaResults

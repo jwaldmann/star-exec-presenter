@@ -93,29 +93,6 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
                 mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
                 return $ QueryResult Latest mPersistInfo'
 
-updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
-updateJobInfo mJobInfo jobInfo = do
-  currentTime <- lift getTime
-  case mJobInfo of
-    Just ji -> updateWhere
-      [ JobInfoStarExecId ==. jobInfoStarExecId ji ]
-      [ JobInfoName =. jobInfoName jobInfo
-      , JobInfoStatus =. jobInfoStatus jobInfo
-      , JobInfoDate =. jobInfoDate jobInfo
-      , JobInfoPreProc =. jobInfoPreProc jobInfo
-      , JobInfoPostProc =. jobInfoPostProc jobInfo
-      , JobInfoIsComplexity =. jobInfoIsComplexity jobInfo
-      , JobInfoFinishDate =. case jobInfoFinishDate ji of
-                              Nothing -> if jobInfoStatus jobInfo == Complete
-                                          then Just currentTime
-                                          else Nothing
-                              Just fd -> Just fd
-      , JobInfoLastUpdate =. currentTime
-      ]
-    Nothing -> do
-      insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
-      return ()
-
 runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
 runQueryJob _jobId = do
   let q = GetJob _jobId

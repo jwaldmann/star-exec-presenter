@@ -8,6 +8,8 @@ import qualified Data.Text.Lazy as TL
 import StarExec.Types
 import Codec.Compression.GZip
 import Data.Time.Clock
+import qualified Data.List as L
+import Data.Time.Clock
 
 insertJobInfo :: JobInfo -> Handler ()
 insertJobInfo jobInfo = runDB $ insert_ jobInfo
@@ -74,3 +76,40 @@ registerJobs ids = do
     insertJob now _id = do
       let j = JobInfo _id "" Started "" "" "" False True now Nothing now
       runDB $ insertUnique j
+
+updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
+updateJobInfo mJobInfo jobInfo = do
+  currentTime <- liftIO getCurrentTime
+  case mJobInfo of
+    Just ji -> updateWhere
+      [ JobInfoStarExecId ==. jobInfoStarExecId ji ]
+      [ JobInfoName =. jobInfoName jobInfo
+      , JobInfoStatus =. jobInfoStatus jobInfo
+      , JobInfoDate =. jobInfoDate jobInfo
+      , JobInfoPreProc =. jobInfoPreProc jobInfo
+      , JobInfoPostProc =. jobInfoPostProc jobInfo
+      , JobInfoIsComplexity =. jobInfoIsComplexity jobInfo
+      , JobInfoFinishDate =. case jobInfoFinishDate ji of
+                              Nothing -> if jobInfoStatus jobInfo == Complete
+                                          then Just currentTime
+                                          else Nothing
+                              Just fd -> Just fd
+      , JobInfoLastUpdate =. currentTime
+      ]
+    Nothing -> do
+      insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
+      return ()
+
+updatePostProcInfo :: PostProcInfo -> YesodDB App ()
+updatePostProcInfo pInfo = do
+  let _id = postProcInfoStarExecId pInfo
+  deleteWhere [ PostProcInfoStarExecId ==. _id ]
+  insertUnique pInfo
+  return ()
+
+updateJobResults :: [JobResultInfo] -> YesodDB App ()
+updateJobResults results = do
+  let jobIds = L.nub $ map jobResultInfoJobId results
+      deleteFilter = map (JobResultInfoJobId ==.) jobIds
+  deleteWhere $ map (JobResultInfoJobId ==.) jobIds
+  mapM_ insertUnique results
