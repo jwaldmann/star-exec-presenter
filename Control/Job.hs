@@ -177,13 +177,14 @@ mkJobs sm config cat now = do
          , jobid = Nothing
          }
 
-timed now (S.Competition name mcs) = 
-    let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]
-    in  S.Competition name' mcs
+timed now (S.Competition meta mcs) = 
+    --let name' = T.unwords [ name, "(", T.pack $ show now , ")" ]
+    let meta' = meta { S.getMetaDescription = T.unwords ["(", T.pack $ show now, ")"] }
+    in  S.Competition meta' mcs
 
 convertComp :: Competition (Catinfo,  [Int]) 
         -> S.Competition
-convertComp c = S.Competition (competitionName c) 
+convertComp c = S.Competition ( S.CompetitionMeta (competitionName c) "" )
           $ map convertMC (metacategories c)
 
 convertMC :: MetaCategory (Catinfo, [Int])

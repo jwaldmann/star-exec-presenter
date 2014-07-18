@@ -25,6 +25,7 @@ import Table.Query
 import Data.Text (Text)
 import StarExec.Auth (authSE)
 import StarExec.CompetitionResults.Type
+import StarExec.Types
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
@@ -40,7 +41,7 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
-    , compResultsCache :: TVar (M.Map Text (TVar (Maybe CompetitionResults)))
+    , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
     }
 
 instance HasHttpManager App where

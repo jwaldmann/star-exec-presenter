@@ -41,7 +41,7 @@ getCompetitionWithConfigR comp = do
   app <- getYesod
   (mCompResults, start) <- lift $ atomically $ do
       crc <- readTVar $ compResultsCache app
-      case M.lookup (getCompetitionName comp) crc of
+      case M.lookup (getMetaData comp) crc of
           Nothing -> do
               return (Nothing, True)
           Just entry -> do

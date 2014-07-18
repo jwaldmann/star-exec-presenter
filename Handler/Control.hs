@@ -58,10 +58,10 @@ start_worker comp = do
 
     mSink <- lift $ atomically $ do
       crc <- readTVar $ compResultsCache app
-      case M.lookup (S.getCompetitionName comp) crc of
+      case M.lookup (S.getMetaData comp) crc of
           Nothing -> do
               sink <- newTVar Nothing
-              modifyTVar' (compResultsCache app) $ M.insert (S.getCompetitionName comp) sink
+              modifyTVar' (compResultsCache app) $ M.insert (S.getMetaData comp) sink
               return $ Just sink
           Just entry -> do
               return Nothing
@@ -127,8 +127,8 @@ checkPrefix s con action next =
 startComp input t = do
     comp_with_jobs <- pushcomp input tc2014
     let S.Competition name mcs = convertComp comp_with_jobs
-        n = params input t 
-        c = S.Competition n mcs
+        m = params input t 
+        c = S.Competition m mcs
     return $ Just c
 
 startMC input t = do
@@ -137,8 +137,8 @@ startMC input t = do
             guard $ metaCategoryName mc == t
             return mc
     mc_with_jobs <- pushmetacat input mc
-    let n = params input t
-        c = S.Competition n [ convertMC mc_with_jobs]
+    let m = params input t
+        c = S.Competition m [ convertMC mc_with_jobs]
     return $ Just c
 
 startCat input t = do
@@ -148,16 +148,24 @@ startCat input t = do
             guard $ categoryName c == t
             return c
     cat_with_jobs <- pushcat input cat    
-    let n = params input t
-        c = S.Competition n [ S.MetaCategory n [ convertC cat_with_jobs]]
+    let m = params input t
+        c = S.Competition m [ S.MetaCategory (metaToName m) [ convertC cat_with_jobs]]
     return $ Just c
 
-params conf t = T.unwords
-    [ "Test", t
-    , "wc", "=", T.pack $ show $ wallclock conf
-    , "a", "=", T.pack $ show $ family_lower_bound conf
-    , "b", "=", T.pack $ show $ family_upper_bound conf
-    , "c", "=", T.pack $ show $ family_factor conf
-    ]
+params :: JobControl -> Text -> S.CompetitionMeta
+params conf t = S.CompetitionMeta
+  { S.getMetaName = t
+  , S.getMetaDescription =
+      T.unwords [ "Test", t
+                , "wc", "=", T.pack $ show $ wallclock conf
+                , "a", "=", T.pack $ show $ family_lower_bound conf
+                , "b", "=", T.pack $ show $ family_upper_bound conf
+                , "c", "=", T.pack $ show $ family_factor conf
+                ]
+  }
+
+metaToName :: S.CompetitionMeta -> S.Name
+metaToName meta = S.getMetaName meta `T.append` " | " `T.append` S.getMetaDescription meta
+  
 
 

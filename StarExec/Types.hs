@@ -154,47 +154,61 @@ data Scoring = Standard | Complexity
 {-
   solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 -}
-data Category = Category Name Scoring PostProcId [Int]
-  deriving (Show, Read, Eq)
+data Category = Category
+  { getCategoryName :: Name
+  , getCategoryScoring :: Scoring
+  , getPostProcId :: PostProcId
+  , getJobIds :: [Int]
+  } deriving (Show, Read, Eq)
 
-getCategoryName :: Category -> Name
-getCategoryName (Category name _ _ _) = name
+--getCategoryName :: Category -> Name
+--getCategoryName (Category name _ _ _) = name
 
-getCategoryScoring :: Category -> Scoring
-getCategoryScoring (Category _ scoring _ _) = scoring
+--getCategoryScoring :: Category -> Scoring
+--getCategoryScoring (Category _ scoring _ _) = scoring
 
-getPostProcId :: Category -> PostProcId
-getPostProcId (Category _ _ pid _) = pid
+--getPostProcId :: Category -> PostProcId
+--getPostProcId (Category _ _ pid _) = pid
 
-getJobIds :: Category -> [Int]
-getJobIds (Category _ _ _ jis) = jis
+--getJobIds :: Category -> [Int]
+--getJobIds (Category _ _ _ jis) = jis
 
 {-
   solver by rank in the categories
 -}
-data MetaCategory = MetaCategory Name [Category]
-  deriving (Show, Read, Eq)
+data MetaCategory = MetaCategory
+  { getMetaCategoryName :: Name
+  , getCategories :: [Category]
+  } deriving (Show, Read, Eq)
 derivePersistField "MetaCategory"
 
-getMetaCategoryName :: MetaCategory -> Name
-getMetaCategoryName (MetaCategory name _) = name
+--getMetaCategoryName :: MetaCategory -> Name
+--getMetaCategoryName (MetaCategory name _) = name
 
-getCategories :: MetaCategory -> [Category]
-getCategories (MetaCategory _ cs) = cs
+--getCategories :: MetaCategory -> [Category]
+--getCategories (MetaCategory _ cs) = cs
 
---data CompetitionMeta = ...
+data CompetitionMeta = CompetitionMeta
+  { getMetaName :: Name
+  , getMetaDescription :: Description
+  } deriving (Eq, Ord, Read, Show)
 
 {-
 -}
-data Competition = Competition Name [MetaCategory]
-  deriving (Show, Read, Eq)
+data Competition = Competition
+  { getMetaData :: CompetitionMeta
+  , getMetaCategories :: [MetaCategory]
+  } deriving (Show, Read, Eq)
 derivePersistField "Competition"
 
 getCompetitionName :: Competition -> Name
-getCompetitionName (Competition name _) = name
+getCompetitionName = getMetaName . getMetaData
 
-getMetaCategories :: Competition -> [MetaCategory]
-getMetaCategories (Competition _ ms) = ms
+getCompetitionDescription :: Competition -> Description
+getCompetitionDescription = getMetaDescription . getMetaData
+
+--getMetaCategories :: Competition -> [MetaCategory]
+--getMetaCategories (Competition _ ms) = ms
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp
