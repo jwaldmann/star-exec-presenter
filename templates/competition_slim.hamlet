@@ -60,9 +60,11 @@ $else
                 <tr>
                   <th>name
                   <th>post-proc
-                  <th>completed
+                  $if False
+                    <th>completed
                   <th>rankings
-                  <th>duration
+                  $if False
+                    <th>duration
                   <th>statistics
               <tbody>
                 $forall compCatResult <- categoryResults compMetaResults
@@ -73,14 +75,16 @@ $else
                         <a href=@{ShowPostProcInfoR $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}
                       $nothing
                         /
-                    <td>
-                      $if categoryComplete compCatResult
-                        yes
-                      $else
-                        no
+                    $if False
+                      <td>
+                        $if categoryComplete compCatResult
+                          yes
+                        $else
+                          no
                     <td>
                       $forall (_, solver, score) <- categoryRanking compCatResult
                         <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
                         (#{show score}), 
-                    <td>#{getDuration (categoryStartTime compCatResult) (categoryFinishTime compCatResult)}
+                    $if False
+                      <td>#{getDuration (categoryStartTime compCatResult) (categoryFinishTime compCatResult)}
                     <td>#{categoryStatistics compCatResult}

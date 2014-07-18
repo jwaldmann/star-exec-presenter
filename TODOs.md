@@ -74,3 +74,5 @@ c = Competition "2014"
 * ~~authentication for hidden-test-runs (and job-results)~~
 * why 0.0 on incomplete job-results?
 * ~~route for competition_info by db-id~~
+* extend competition with meta-data
+* remove duration from category

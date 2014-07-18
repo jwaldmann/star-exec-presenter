@@ -14,13 +14,17 @@ data Statistics = Statistics
     } deriving Show
 
 instance ToMarkup Statistics where
-    toMarkup s = [shamlet| 
-#{pairsCompleted s} 
-$if not (complete s)
-   of #{pairs s} #
-pairs, 
-#{toFixed 1 $ cpu s} cpu, #{toFixed 1 $ wallclock s} wall
-|]
+    toMarkup s = [shamlet|
+        $if complete s
+          completed, 
+        $else
+          running, 
+        #{pairsCompleted s} 
+        $if not (complete s)
+           of #{pairs s} #
+        pairs, 
+        #{toFixed 1 $ cpu s} cpu, #{toFixed 1 $ wallclock s} wall
+      |]
 
 
 instance Monoid Statistics where
