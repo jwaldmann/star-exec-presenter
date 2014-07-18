@@ -12,6 +12,12 @@ import qualified Data.IntMap.Strict as IM
 
 import qualified Data.Map as M
 
+data SolverRankEntry = SolverRankEntry
+  { rank :: Maybe Rank
+  , solver :: Solver
+  , score :: Score
+  } deriving (Eq, Show)
+
 data CompetitionResults = CompetitionResults
   { competitionName :: Name
   , metaCategoryResults :: [MetaCategoryResult]
@@ -24,7 +30,7 @@ data CompetitionResults = CompetitionResults
 data MetaCategoryResult = MetaCategoryResult
   { metaCategoryName :: Name
   , categoryResults :: [CategoryResult]
-  , metaCategoryRanking :: [(Maybe Rank, Solver, Score)]
+  , metaCategoryRanking :: [SolverRankEntry]
   , metaCategoryComplete :: Bool
   , metaCategoryStarTime :: Maybe UTCTime
   , metaCategoryFinishTime :: Maybe UTCTime
@@ -35,7 +41,7 @@ data CategoryResult = CategoryResult
   { categoryName :: Name
   , categoryScoring :: Scoring
   , categoryPostProc :: Maybe PostProcInfo
-  , categoryRanking :: [(Maybe Rank, Solver, Score)]
+  , categoryRanking :: [SolverRankEntry]
   , categoryJobs :: [JobInfo]
   , categoryComplete :: Bool
   , categoryStartTime :: Maybe UTCTime

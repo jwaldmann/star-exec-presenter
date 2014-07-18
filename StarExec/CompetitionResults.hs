@@ -28,14 +28,6 @@ import qualified Data.IntMap.Strict as IM
 
 import qualified Data.Map as M
 
-
-{-
-  TODOs:
-    for all categories: show jobIds and their status
-      -> mark jobs Complete/Incomplete
-    same results -> special case
--}
-
 sortScore :: (Solver, Score) -> (Solver, Score) -> Ordering
 sortScore (_,i1) (_,i2) = compare i1 i2
 
@@ -57,27 +49,31 @@ getScores solver scoring results =
                 Nothing -> (s,0)
                 Just scr -> (s,scr)
 
-testGetRanking1 = 
-        getRanking [("foo", 30), ("bar", 20), ("what", 20), ("noh", 10)] 
-    ==  [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20), (Just 4, "noh", 10)]
+--testGetRanking1 = 
+--        getRanking [("foo", 30), ("bar", 20), ("what", 20), ("noh", 10)] 
+--    ==  [toRank (Just 1,"foo",30), toRank (Just 2,"bar",20), toRank (Nothing,"what",20), toRank (Just 4, "noh", 10)]
+--    where
+--      toRank (r,slv,scr) = SolverRankEntry r slv scr
 
 -- | input is decreasing by score, output has same order of solvers
-getRanking  :: (Eq solver, Eq score) 
-            => [(solver, score)] -> [(Maybe Int, solver, score)]
+getRanking  :: [(Solver, Score)] -> [SolverRankEntry]
 getRanking scores =
   let indexedScores = zip [1..] scores 
       equals score (_,(_,scr)) = score == scr
-      -- getRanking' :: (Solver, Score) -> (Maybe Rank, Solver, Score)
+      getRanking' :: (Solver, Score) -> SolverRankEntry
       getRanking' (solver, score) =
           case filter (equals score) indexedScores of
-            [] -> (Nothing, solver, score)
-            ((rank,(slv,_)):_) ->
-              (if solver /= slv then Nothing else Just rank, solver, score)
+            [] -> SolverRankEntry Nothing solver score
+            ((rank,(slv,_)):_) -> SolverRankEntry
+              { rank = if solver /= slv then Nothing else Just rank
+              , solver = solver
+              , score = score
+              }
   in map getRanking' scores
 
-testCalcScores1 = 
-       calcScores [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20),(Just 4,"noh",10)]
-    == [("foo",3),("bar",2),("what",2),("noh",0)]
+--testCalcScores1 = 
+--       calcScores [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20),(Just 4,"noh",10)]
+--    == [("foo",3),("bar",2),("what",2),("noh",0)]
 
 -- | input is decreasing by score (?), as computed by getRanking
 -- output is, for each solver, the number of solvers that it could beat.
@@ -85,18 +81,20 @@ testCalcScores1 =
 -- FIXME: as the test case shows, evaluation of x is number of y with score y <= score x
 -- (not  "<"  as the spec says)
 
-calcScores :: [(Maybe Int, solver, score)] -> [(solver, Int)]
-calcScores [(_, slv, _)] = [(slv, 0)]
+calcScores :: [SolverRankEntry] -> [(Solver, Int)]
+calcScores [entry] = [(solver entry, 0)]
 calcScores ranking = calcScores' 1 ranking
   where
     numRankings = length ranking
-    calcScores' rank ((mRank,slv,_):rs) =
-      case mRank of
-        Nothing -> (slv,numRankings - rank):calcScores' rank rs
-        Just r -> (slv,numRankings - r):calcScores' r rs
+    calcScores' rnk ((entry):rs) =
+      let mRank = rank entry
+          slv = solver entry
+      in case mRank of
+          Nothing -> (slv,numRankings - rnk):calcScores' rnk rs
+          Just r -> (slv,numRankings - r):calcScores' r rs
     calcScores' _ [] = []
 
-getMetaScores :: [[(Maybe Rank, Solver, Score)]] -> [(Solver, Score)]
+getMetaScores :: [[SolverRankEntry]] -> [(Solver, Score)]
 getMetaScores catScores =
     M.toList $ M.fromListWith (+) $ concat $ map calcScores catScores
 

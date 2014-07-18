@@ -3,6 +3,7 @@ module Handler.CompetitionWithConfig where
 import Import
 import StarExec.Types
 import StarExec.CompetitionResults
+import StarExec.CompetitionResults.Type
 import StarExec.JobData
 import StarExec.STM
 import Utils.WidgetMetaRefresh

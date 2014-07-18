@@ -24,14 +24,14 @@ $else
                   <th>solver
                   <th>score
             <tbody>
-              $forall (mRank, solver, score) <- take 3 $ metaCategoryRanking compMetaResults
+              $forall entry <- take 3 $ metaCategoryRanking compMetaResults
                 <tr>
-                  $maybe rank <- mRank
+                  $maybe rank <- rank entry
                     <td>#{show rank}.
                   $nothing
                     <td>
-                  <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
-                  <td>#{show score}
+                  <td><a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}
+                  <td>#{show $ score entry}
          $if not (null $ drop 3 $ metaCategoryRanking compMetaResults)
           <div>
            <input type="checkbox" id="lower-#{metaCategoryName compMetaResults}">
@@ -40,14 +40,14 @@ $else
              <div class="checked-container">
               <table class="table table-condensed">
                <tbody>
-                $forall (mRank, solver, score) <- drop 3 $ metaCategoryRanking compMetaResults
+                $forall entry <- drop 3 $ metaCategoryRanking compMetaResults
                   <tr>
-                    $maybe rank <- mRank
+                    $maybe rank <- rank entry
                       <td>#{show rank}.
                     $nothing
                       <td>
-                    <td><a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
-                    <td>#{show score}
+                    <td><a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}
+                    <td>#{show $ score entry}
       <tr>
         <td>
          <div>
@@ -60,11 +60,7 @@ $else
                 <tr>
                   <th>name
                   <th>post-proc
-                  $if False
-                    <th>completed
                   <th>rankings
-                  $if False
-                    <th>duration
                   <th>statistics
               <tbody>
                 $forall compCatResult <- categoryResults compMetaResults
@@ -75,16 +71,8 @@ $else
                         <a href=@{ShowPostProcInfoR $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}
                       $nothing
                         /
-                    $if False
-                      <td>
-                        $if categoryComplete compCatResult
-                          yes
-                        $else
-                          no
                     <td>
-                      $forall (_, solver, score) <- categoryRanking compCatResult
-                        <a href=@{ShowSolverInfoR $ fst solver}>#{snd solver}
-                        (#{show score}), 
-                    $if False
-                      <td>#{getDuration (categoryStartTime compCatResult) (categoryFinishTime compCatResult)}
+                      $forall entry <- categoryRanking compCatResult
+                        <a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}
+                        (#{show $ score entry}), 
                     <td>#{categoryStatistics compCatResult}
