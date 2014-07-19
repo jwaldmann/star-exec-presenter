@@ -229,13 +229,6 @@ getMetaResults_ procs infos results metaCat =
                         endTime
                         stat
 
---data StarExecRequest = Job Int | PostProc Int
---type MetaCatName = Name
---type CatName = Name
---type SER_Entry = (MetaCatName, CatName, StarExecRequest)
-
---getIntermediateStructure :: Competition -> [SER_Entry]
-
 filterMaybeTuple :: (a, Maybe b) -> Bool
 filterMaybeTuple (_,Nothing) = False
 filterMaybeTuple _ = True
@@ -258,13 +251,16 @@ getProcessedResults (mJobInfo, results) =
                 else results
     Nothing -> results
 
-updateJob :: (Maybe JobInfo, Maybe JobInfo) -> Handler (Maybe JobInfo)
-updateJob (Nothing, Nothing) = return Nothing
-updateJob ((Just ji), Nothing) = return $ Just ji
-updateJob (Nothing, (Just ji)) = return $ Just ji
-updateJob ((Just persist), (Just starexec)) = do
-  currentTime <- liftIO getCurrentTime
-  return $ Just persist
+updateJob :: UTCTime -> (Maybe JobInfo, Maybe JobInfo) -> (Maybe JobInfo)
+updateJob _ (Nothing, Nothing) = Nothing
+updateJob _ ((Just ji), Nothing) = Just ji
+updateJob currentTime (Nothing, (Just ji)) = Just ji
+  { jobInfoFinishDate = if jobInfoStatus ji == Complete
+                          then Just currentTime
+                          else Nothing
+  , jobInfoLastUpdate = currentTime
+  }
+updateJob currentTime ((Just persist), (Just starexec)) = Just persist
     { jobInfoName = jobInfoName starexec
     , jobInfoStatus = jobInfoStatus starexec
     , jobInfoDate = jobInfoDate starexec
@@ -292,15 +288,16 @@ getCompetitionResults comp = do
   persistJobInfos <- mapM getPersistJobInfo jobIds
   jobInfos <- mapM (getJobInfo con) jobIds
   jobResults <- mapM (getJobResults con) jobIds
-  updatedJobs <- mapM updateJob $ zip persistJobInfos jobInfos
-  let jobs = zip jobInfos jobResults
+  currentTime <- lift getCurrentTime
+  let updatedJobs = map (updateJob currentTime) $ zip persistJobInfos jobInfos
+      jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
   runDB $ do
     mapM updatePostProcInfo $ catMaybes postProcs
-    mapM updateJobInfo' $ catMaybes jobInfos
+    mapM updateJobInfo' $ catMaybes updatedJobs
     updateJobResults $ concat processedResults
   let postProcMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip postProcIds postProcs
-      jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds jobInfos
+      jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds updatedJobs
       jobResultsMap = IM.fromList $ zip jobIds processedResults
       metaResults = map (getMetaResults_ postProcMap jobInfoMap jobResultsMap) metaCats
       complete = all metaCategoryComplete metaResults
