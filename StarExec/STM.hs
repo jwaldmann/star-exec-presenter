@@ -49,8 +49,12 @@ startWorker comp = do
     Nothing -> return ()
     Just sink -> do
       lift $ putStrLn $ "start worker for " ++ ( T.unpack $ getCompetitionName comp )
-      forkHandler exceptionHandler runWorker
+      forkHandler errHandler runWorker
       where
+        errHandler e = do
+          exceptionHandler e
+          lift $ putStrLn "restarting worker:"
+          forkHandler errHandler runWorker
         runWorker = do
           compResults <- getCompetitionResults comp
           lift $ atomically $ writeTVar sink $ Just compResults
@@ -61,4 +65,3 @@ exceptionHandler :: SomeException -> Handler ()
 exceptionHandler e = lift $ do
   putStrLn $ "ignoring exception:"
   putStrLn $ show e
-
