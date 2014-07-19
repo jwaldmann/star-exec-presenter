@@ -115,25 +115,31 @@ startComp input t = do
     return $ Just c
 
 startMC input t = do
-    let [ mc ] = do 
+    let mcs = do 
             mc <- metacategories $ select input tc2014
             guard $ metaCategoryName mc == t
             return mc
-    mc_with_jobs <- pushmetacat input mc
-    let m = params input t
-        c = S.Competition m [ convertMC mc_with_jobs]
-    return $ Just c
+    case mcs of
+        [ mc ] -> do
+            mc_with_jobs <- pushmetacat input mc
+            let m = params input t
+                c = S.Competition m [ convertMC mc_with_jobs]
+            return $ Just c
+        _ -> return Nothing
 
 startCat input t = do
-    let [ cat ] = do 
+    let cats = do 
             mc <- metacategories $ select input tc2014
             c <- categories mc
             guard $ categoryName c == t
             return c
-    cat_with_jobs <- pushcat input cat    
-    let m = params input t
-        c = S.Competition m [ S.MetaCategory (metaToName m) [ convertC cat_with_jobs]]
-    return $ Just c
+    case cats of
+        [ cat ] -> do
+            cat_with_jobs <- pushcat input cat    
+            let m = params input t
+                c = S.Competition m [ S.MetaCategory (metaToName m) [ convertC cat_with_jobs]]
+            return $ Just c
+        _ -> return Nothing
 
 params :: JobControl -> Text -> S.CompetitionMeta
 params conf t = S.CompetitionMeta
