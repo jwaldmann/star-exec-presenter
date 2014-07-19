@@ -30,10 +30,8 @@ jobStat i =
         }
 
 instance ToMarkup Statistics where
-    toMarkup s = let cls :: Text
-                     cls = if complete s then "completed"  else "running"
-                 in [shamlet|    
-    <span class="#{cls}">
+    toMarkup s = [shamlet|    
+      <span>
         $if complete s
           completed, 
         $else

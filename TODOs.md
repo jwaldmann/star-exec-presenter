@@ -72,12 +72,12 @@ c = Competition "2014"
 * ~~add min-start-time and max-completition-time to competition, meta-cat and cat~~
 * completion time for job-results(?)
 * ~~authentication for hidden-test-runs (and job-results)~~
-* why 0.0 on incomplete job-results?
+* ~~why 0.0 on incomplete job-results?~~
 * ~~route for competition_info by db-id~~
-* extend competition with meta-data
+* ~~extend competition with meta-data~~
 * remove duration from category
-* add competition-meta -> name + desc
-  - deriving Eq, Ord
-  - TVar-Map -> key = CompMeta
-* start test-competition with ~12h duration
+* ~~add competition-meta -> name + desc~~
+  - ~~deriving Eq, Ord~~
+  - ~~TVar-Map -> key = CompMeta~~
+* ~~start test-competition with ~12h duration~~
 * post-proc-info

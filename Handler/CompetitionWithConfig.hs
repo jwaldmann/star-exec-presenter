@@ -31,6 +31,10 @@ getDuration (Just start) (Just end) =
                in (show minutes) ++ "m " ++ renderTime ( d - (fromIntegral minutes) * minute )
           else (show $ floor d) ++ "s"
 
+getCompletionClass :: Bool -> Text
+getCompletionClass True = "completed"
+getCompletionClass False = "running"
+
 getCompetitionWithConfigR :: Competition -> Handler Html
 getCompetitionWithConfigR comp = do
 
@@ -46,4 +50,4 @@ getCompetitionWithConfigR comp = do
       else return ()
     case mCompResults of
         Nothing -> [whamlet|competition currently not in results cache|]
-        Just compResults -> $(widgetFile "competition_slim")
+        Just compResults -> $(widgetFile "competition_slim2")
