@@ -309,9 +309,14 @@ getCompetitionResults comp = do
       jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
   runDB $ do
-    mapM updatePostProcInfo $ catMaybes postProcs
-    mapM updateJobInfo' $ catMaybes updatedJobs
-    updateJobResults $ concat processedResults
+    if not hasAllPostProcs
+      then mapM_ updatePostProcInfo $ catMaybes postProcs
+      else return ()
+    if not jobsComplete
+      then do
+        mapM updateJobInfo' $ catMaybes updatedJobs
+        updateJobResults $ concat processedResults
+      else return ()
   let postProcMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip postProcIds postProcs
       jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds updatedJobs
       jobResultsMap = IM.fromList $ zip jobIds processedResults

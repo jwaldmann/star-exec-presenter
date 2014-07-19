@@ -70,5 +70,12 @@
   ul {
     display: inline;
   }
-
+}
+.categories.table>thead>tr>th,
+.categories.table>tbody>tr>th,
+.categories.table>tfoot>tr>th,
+.categories.table>thead>tr>td,
+.categories.table>tbody>tr>td,
+.categories.table>tfoot>tr>td {
+  padding: 0;
 }

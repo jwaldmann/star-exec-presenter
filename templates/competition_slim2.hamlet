@@ -22,7 +22,7 @@
                 #{show rank}. 
               <a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}</a> (#{show $ score entry})
         <!-- The Categories -->
-        <table class="table table-condensed">
+        <table class="table table-condensed categories">
           <thead>
             <tr>
               <th>category
