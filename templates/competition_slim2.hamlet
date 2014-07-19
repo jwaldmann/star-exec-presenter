@@ -8,17 +8,19 @@ $if competitionComplete compResults
   $forall compMetaResults <- metaCategoryResults compResults
     <div class="container-fluid">
       <h3>#{metaCategoryName compMetaResults}
-      $if metaCategoryComplete compMetaResults
-        <p>(finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)})
-      #{metaCategoryStatistics compMetaResults}
+      <p>
+        $if metaCategoryComplete compMetaResults
+          (finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)})
+        #{metaCategoryStatistics compMetaResults}
       <div class="container-fluid">
         <!-- Ranks -->
+        Combined Ranking (<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014#Competition_Categories_and_Awards">Rules</a>):
         <ul class="list-inline">
           $forall entry <- metaCategoryRanking compMetaResults
             <li>
               $maybe rank <- rank entry
                 #{show rank}. 
-              <a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry} (#{show $ score entry})
+              <a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}</a> (#{show $ score entry})
         <!-- The Categories -->
         <table class="table table-condensed">
           <thead>

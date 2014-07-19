@@ -251,7 +251,7 @@ getProcessedResults (mJobInfo, results) =
                 else results
     Nothing -> results
 
-updateJob :: UTCTime -> (Maybe JobInfo, Maybe JobInfo) -> (Maybe JobInfo)
+updateJob :: UTCTime -> (Maybe JobInfo, Maybe JobInfo) -> Maybe JobInfo
 updateJob _ (Nothing, Nothing) = Nothing
 updateJob _ ((Just ji), Nothing) = Just ji
 updateJob currentTime (Nothing, (Just ji)) = Just ji
@@ -275,6 +275,10 @@ updateJob currentTime ((Just persist), (Just starexec)) = Just persist
     , jobInfoLastUpdate = currentTime
     }
 
+maybeJobComplete :: Maybe JobInfo -> Bool
+maybeJobComplete Nothing = False
+maybeJobComplete (Just ji) = jobInfoStatus ji == Complete
+
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
   let compMeta = getMetaData comp
@@ -283,13 +287,25 @@ getCompetitionResults comp = do
       cats = concat $ map getCategories metaCats
       jobIds = concat $ map getJobIds cats
       postProcIds = L.nub $ map getPostProcId cats
-  con <- getConnection
-  postProcs <- mapM (getPostProcInfo con) postProcIds
   persistJobInfos <- mapM getPersistJobInfo jobIds
-  jobInfos <- mapM (getJobInfo con) jobIds
-  jobResults <- mapM (getJobResults con) jobIds
+  persistPostProcs <- mapM getPersistPostProcInfo postProcIds
+  let jobsComplete = all maybeJobComplete persistJobInfos
+      hasAllPostProcs = all isJust persistPostProcs
+  liftIO $ putStrLn $ "jobs complete: " ++ (show jobsComplete)
+  con <- getConnection
+  postProcs <- if hasAllPostProcs
+                then return persistPostProcs
+                else mapM (getPostProcInfo con) postProcIds
+  jobInfos <- if jobsComplete
+                then return persistJobInfos
+                else mapM (getJobInfo con) jobIds
+  jobResults <- if jobsComplete
+                  then mapM (getPersistJobResults) jobIds
+                  else mapM (getJobResults con) jobIds
   currentTime <- lift getCurrentTime
-  let updatedJobs = map (updateJob currentTime) $ zip persistJobInfos jobInfos
+  let updatedJobs = if jobsComplete
+                    then jobInfos
+                    else map (updateJob currentTime) $ zip persistJobInfos jobInfos
       jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
   runDB $ do

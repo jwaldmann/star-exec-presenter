@@ -58,7 +58,7 @@
               $if jobResultInfoStatus result == JobResultComplete
                 <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
                   #{toFixed 1 $ jobResultInfoCpuTime result} /
-                  #{toFixed 1 $ jobResultInfoWallclockTime result}
+                  #{toFixed 1 $ jobResultInfoWallclockTime result} s
                   $if isComplexity
                     $maybe score <- jobResultInfoScore result
                       &nbsp;(#{getScore result})

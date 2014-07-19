@@ -32,15 +32,11 @@ jobStat i =
 instance ToMarkup Statistics where
     toMarkup s = [shamlet|    
       <span>
-        $if complete s
-          completed, 
-        $else
-          running, 
         #{pairsCompleted s} 
         $if not (complete s)
            of #{pairs s} #
         pairs, 
-        #{toFixed 1 $ cpu s} cpu, #{toFixed 1 $ wallclock s} wall
+        #{toFixed 1 $ cpu s} / #{toFixed 1 $ wallclock s} s
       |]
 
 
