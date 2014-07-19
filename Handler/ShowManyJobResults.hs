@@ -25,15 +25,6 @@ shorten t = if T.length t > 50
               then shorten $ T.tail t
               else t
 
---calcScore :: [Int] -> Int -> Handler Int
---calcScore [] _solverId = return 0
---calcScore _jobIds _solverId = do
---  let solverFilter = JobResultInfoSolverId ==. _solverId
---      eqFilters = map (\i -> [JobResultInfoJobId ==. i, solverFilter]) _jobIds
---      jobFilter = L.foldr1 (||.) $ eqFilters
---  solverResults <- runDB $ selectList jobFilter []
---  return $ sum $ catMaybes $ map (jobResultInfoScore . entityVal) solverResults
-
 --  | to keep old URLs working, as in
 --  http://lists.lri.fr/pipermail/termtools/2014-July/000965.html
 getShowManyJobResultsLegacyR :: JobIds -> Handler Html
@@ -55,13 +46,12 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
                     getInfo extractBenchmark $ jobResults
       groupedSolvers = map (getInfo extractSolver) jobs
       jobSolvers = concat $ map toTuples $ zip ids groupedSolvers
-      solvers = concat $ groupedSolvers
       benchmarkResults = getBenchmarkResults
-                          solvers
+                          jobSolvers
                           jobResults
                           benchmarks
       (+>) = T.append
-  let scores = flip map jobs $
+      scores = flip map jobs $
         \results ->
           if isComplexity
             then calcComplexityScores results

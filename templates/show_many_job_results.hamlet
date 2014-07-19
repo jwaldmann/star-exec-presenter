@@ -36,8 +36,8 @@
       $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
         <th colspan="#{i}"><a href=@{ShowJobInfoR $ jobInfoStarExecId jobInfo}>#{jobInfoName jobInfo}</a>
     <tr>
-      <th>Benchmarks
-      $forall (sId, sName) <- solvers
+      <th>Solver
+      $forall (_, (sId, sName)) <- jobSolvers
         <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
     <tr>
       <th>Scores

@@ -49,19 +49,20 @@ extractSolver :: JobResultInfo -> S.Set Solver -> S.Set Solver
 extractSolver jri set =
   S.insert (getSolver jri) set
 
-getBenchmarkResults :: [Solver] -> [JobResultInfo] -> [Benchmark] -> [BenchmarkRow]
+getBenchmarkResults :: [(Int, Solver)] -> [JobResultInfo] -> [Benchmark] -> [BenchmarkRow]
 getBenchmarkResults solvers jobInfos = map getBenchmarkRow 
   where
     getBenchmarkRow benchmark@(bId, _) =
       (benchmark, map (getSolverResults bId) solvers)
-    getSolverResults _benchmarkId (sId, _) =
-      let mResult = L.find (isResult _benchmarkId sId) jobInfos
+    getSolverResults _benchmarkId (i, (sId, _)) =
+      let mResult = L.find (isResult _benchmarkId sId i) jobInfos
       in case mResult of
         Just result -> Just result
         Nothing -> Nothing
-    isResult _benchmarkId _solverId jri =
+    isResult _benchmarkId _solverId _jobId jri =
       (jobResultInfoBenchmarkId jri == _benchmarkId) &&
-        (jobResultInfoSolverId jri == _solverId)
+        (jobResultInfoSolverId jri == _solverId) &&
+        (jobResultInfoJobId jri == _jobId)
 
 compareBenchmarks :: Benchmark -> Benchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
