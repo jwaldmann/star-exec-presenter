@@ -57,3 +57,18 @@
 .running td {
     background-color: #{colorRunning}
 }
+
+.container-fluid {
+  h3 {
+    display: inline;
+  }
+
+  h3 + p {
+    display: inline;
+  }
+
+  ul {
+    display: inline;
+  }
+
+}

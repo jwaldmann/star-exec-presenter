@@ -1,16 +1,16 @@
 <h1>#{competitionName compResults}
-<p>#{competitionDescription compResults} #{competitionStatistics compResults} #
-$if competitionComplete compResults
-  finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
-<p><a href="http://www.termination-portal.org/wiki/Termination_Competition_2014">General Information</a>
-<hr>
+<p>
+  <a href="http://www.termination-portal.org/wiki/Termination_Competition_2014">General Information</a>
+  #{competitionDescription compResults} #{competitionStatistics compResults} #
+  $if competitionComplete compResults
+    finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
 <div class="container-fluid">
   $forall compMetaResults <- metaCategoryResults compResults
     <div class="container-fluid">
       <h3>#{metaCategoryName compMetaResults}
       <p>
         $if metaCategoryComplete compMetaResults
-          (finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)})
+          finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)},&nbsp;
         #{metaCategoryStatistics compMetaResults}
       <div class="container-fluid">
         <!-- Ranks -->
