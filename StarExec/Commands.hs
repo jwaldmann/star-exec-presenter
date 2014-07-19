@@ -10,7 +10,7 @@ module StarExec.Commands
   , getBenchmarkInfo
   , getSolverInfo
   , getPostProcInfo
-  , pushJobXML, Job (..) -- FIXME: move to some other module
+  , pushJobXML, Job (..), JobPair (..) -- FIXME: move to some other module
   , getSpaceXML
   , getDefaultSpaceXML
   ) where
@@ -188,10 +188,17 @@ data Job =
          , wallclock_timeout :: Int
          , cpu_timeout :: Int
          , start_paused :: Bool
-         , jobpairs :: [ (Int,Int) ] -- ^ benchmark, config
+         , jobpairs :: [ JobPair ] -- ^ jobspace, benchmark, config
          , jobid :: Maybe Int
          }
     deriving Show
+
+data JobPair = 
+     JobPair { jobPairSpace :: T.Text   
+             , jobPairBench :: Int
+             , jobPairConfig :: Int 
+             }
+   deriving Show
 
 -- | create jobxml DOM according to spec
 jobs_to_XML :: [ Job ] -> Document
@@ -204,8 +211,8 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                          ,("xmlns:tns","https://www.starexec.org/starexec/public/batchJobSchema.xsd") ]) [xml|
        $forall j <- js
            <Job cpu-timeout="#{t $ cpu_timeout j}" description="#{description j}" mem-limit="#{t $ mem_limit j}" name="#{job_name j}" postproc-id="#{t $ postproc_id j}" queue-id="#{t $ queue_id j}" start-paused="#{b $ start_paused j}" wallclock-timeout="#{t $ wallclock_timeout j}">
-             $forall bc <- jobpairs j
-                 <JobPair bench-id="#{t $ fst bc}" config-id="#{t $ snd bc}">
+             $forall p <- jobpairs j
+                 <JobPair job-space-path="#{jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
 
 -- | need to take care of Issue #34.
@@ -277,7 +284,10 @@ makeSpace bs = do
               root = laxElement "tns:Spaces" c >>= child
               walk :: [ Cursor ] -> [ Space ]
               walk root = root >>= laxElement "Space" >>= \ s -> return
-                     Space { spId = read $ T.unpack $ head $ attribute "id" s
+                     Space { spId = case attribute "id" s of
+                                 [ i ] -> read $ T.unpack i ; _ -> -1
+                           , spName = case attribute "name" s of
+                                 [ n ] -> n ; _ -> "noname"
                            , benchmarks = map ( read . T.unpack )
                              $ child s >>= laxElement "benchmark" >>= attribute "id" 
                            , children = child s >>= \ c ->  walk [c]
@@ -431,7 +441,8 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
     liftIO $ print req 
 
-    --liftIO $ BSL.writeFile "command.zip" bs
+    -- liftIO $ BSL.writeFile "command.zip" bs
+    -- error "huh"
     
     resp <- sendRequest (req, man, cookies)
     -- the job ids are in the returned cookie.

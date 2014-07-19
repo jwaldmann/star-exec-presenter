@@ -88,15 +88,20 @@ data SpaceInfo = SpaceInfo
 -- (for the moment, only benchmarks, ignoring permissions and solvers)
 data Space = Space 
    { spId :: Int
+   , spName :: Name
    , children :: [Space]
    , benchmarks :: [ Int ]
    } deriving ( Show, Eq )
 
-families :: Space -> [[Int]]
+families :: Space -> [ (Name, [Int]) ]
 families s = 
-    let here = benchmarks s
-        below = children s >>= families
-    in  if Prelude.null here then below else here : below
+    let path ns = T.intercalate "/" ns
+        walk s = 
+            let here = benchmarks s
+                below = children s >>= walk 
+            in    map ( \ (p,b) -> (spName s : p, b) )
+                $ if Prelude.null here then below else ([], here) : below
+    in  map ( \ (p,b) -> (path p, b) ) $ walk s
 
 all_in_hierarchy :: Space -> [Int]
 all_in_hierarchy s =

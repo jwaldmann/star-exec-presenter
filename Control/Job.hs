@@ -6,7 +6,7 @@ import qualified Data.Text as T
 
 import StarExec.Registration 
 import StarExec.Commands 
-    (pushJobXML, Job (..), getSpaceXML, getDefaultSpaceXML)
+    (pushJobXML, Job (..), JobPair (..), getSpaceXML, getDefaultSpaceXML)
 import StarExec.Connection (getConnection)
 import StarExec.Types (JobIds(..))
 import qualified StarExec.Types as S
@@ -102,19 +102,18 @@ getSpaceXMLquick sm id =
             con <- getConnection
             getSpaceXML con id
 
--- FIXME: getspaceXML should be DB-cached (issue #29)
 select_benchmarks :: SpaceMap
                   -> JobControl -> [Benchmark_Source] 
-                  -> Handler [[Int]]
+                  -> Handler [(Text,[Int])]
 select_benchmarks sm config bs = do
     bmss <- forM bs $ \ b -> case b of
         Bench { bench = id } -> do
-            return [[id]]
+            return [("root", [id]) ]
         All { StarExec.Registration.space = id } -> do
             s <- getSpaceXMLquick sm id
             return $ case s of
                 Nothing -> []
-                Just s -> [S.benchmarks s ]
+                Just s -> [ (S.spName s, S.benchmarks s) ]
         Hierarchy { StarExec.Registration.space = id } -> do
             s <- getSpaceXMLquick sm id
             return $ case s of
@@ -126,15 +125,17 @@ select_benchmarks sm config bs = do
 
     liftIO $ putStrLn $ unlines
        [ "benchmark sources: " ++ show bs
-       , "familiy sizes (given): " ++ show (map length given)
-       , "familiy sizes (selected): " ++ show (map length result)
+       , "familiy sizes (given): " 
+                  ++ show (map (\(p,bs) -> (p,length bs)) given)
+       , "familiy sizes (selected): " 
+                  ++ show (map (\(p,bs) -> (p,length bs)) result)
        ]
 
     return $ result
 
 -- | random subset of size given by parameters
-select_from_family :: JobControl -> [Int] -> Handler [Int]
-select_from_family config bms = do
+select_from_family :: JobControl -> (S.Name, [Int]) -> Handler (S.Name, [Int])
+select_from_family config (jobspace, bms) = do
     let given = length bms
         part = round 
              $ family_factor config * fromIntegral given
@@ -145,7 +146,7 @@ select_from_family config bms = do
             then family_upper_bound config 
             else part
     bms' <- liftIO $ permute bms
-    return $ take selected  bms'
+    return ( jobspace, take selected  bms' )
 
 permute [] = return []
 permute (x:xs) = do
@@ -163,21 +164,21 @@ mkJobs sm config cat now = do
     bss <- select_benchmarks sm config $ benchmarks ci
 
     -- FIXME: too many separate jobs give problems 
-    let all_in_one bss = [ concat bss ]
 
-    return $ for (all_in_one bss) $ \ bs -> Job 
+    return $ return $ Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
-         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash (bs, show now) )
+         , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash (bss, show now) )
          , queue_id = queue config
          , mem_limit = 128.0
          , wallclock_timeout = wallclock config
          , cpu_timeout = num_cores * wallclock config
          , start_paused = False
          , jobpairs = do 
+               (jobspace, bs) <- bss  
                b <- sort bs
                Participant { solver_config = Just (s,c) } <- participants ci
-               return ( b, c )
+               return $ JobPair { jobPairSpace = jobspace, jobPairBench = b, jobPairConfig = c }
          , jobid = Nothing
          }
 

@@ -20,6 +20,9 @@ import Database.Persist.Class
 import Debug.Trace
 import Data.List ((\\))
 
+import Control.Monad ( when )
+import System.IO ( writeFile )
+
 {-
   FIXME: possible bug, that QueryInfo won't be deleted from DB after an exception or after a query is complete
 -}
@@ -120,6 +123,13 @@ runQueryJob _jobId = do
                         if isComplexJob
                           then getScoredResults results
                           else results
+
+                  when isComplexJob $ lift $ do
+                      writeFile "results.text" 
+                          $ unlines $ map show results
+                      writeFile "processedResults.text" 
+                          $ unlines $ map show processedResults
+
                   runDB $ do
                     updateJobInfo mPersistJobInfo ji
                     --mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
