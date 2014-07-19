@@ -110,6 +110,10 @@ updatePostProcInfo pInfo = do
 updateJobResults :: [JobResultInfo] -> YesodDB App ()
 updateJobResults results = do
   let jobIds = L.nub $ map jobResultInfoJobId results
-      deleteFilter = map (JobResultInfoJobId ==.) jobIds
-  deleteWhere $ map (JobResultInfoJobId ==.) jobIds
+      deleteFilter = map (\i -> [JobResultInfoJobId ==. i]) jobIds
+  deleteWhere $ linkByOr deleteFilter
   mapM_ insertUnique results
+  where
+    linkByOr [] = []
+    linkByOr [x] = x
+    linkByOr xs = L.foldr1 (||.) xs
