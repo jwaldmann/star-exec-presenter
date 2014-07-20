@@ -124,7 +124,10 @@ updateJobResults results = do
 runDB_exclusive query = do
     app <- getYesod
     lift $ Control.Concurrent.SSem.wait   $ dbSem app
+    lift $ putStrLn "Control.Concurrent.SSem.wait ...."
     out <- runDB query 
     lift $ Control.Concurrent.SSem.signal $ dbSem app
+    lift $ putStrLn "... Control.Concurrent.SSem.signal"
+    return out
 
 
