@@ -52,6 +52,7 @@ import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
 import Data.Maybe
+import Data.Char ( isAlphaNum )
 
 defaultDate :: UTCTime
 defaultDate = UTCTime
@@ -205,6 +206,9 @@ jobs_to_XML :: [ Job ] -> Document
 jobs_to_XML js = Document (Prologue [] Nothing []) root [] where 
     t x = T.pack $ show x
     b x = T.pack $ map Data.Char.toLower $ show x
+    -- path must be in  [_/\w\-\.\+\^=,!?:$%#@ ]*"
+    -- but there is a strange '-' in Runtime_Complexity_-_Full_Rewriting etc.
+    path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` "/_"
     root = Element "tns:Jobs" 
              (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
                          ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
@@ -212,7 +216,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
        $forall j <- js
            <Job cpu-timeout="#{t $ cpu_timeout j}" description="#{description j}" mem-limit="#{t $ mem_limit j}" name="#{job_name j}" postproc-id="#{t $ postproc_id j}" queue-id="#{t $ queue_id j}" start-paused="#{b $ start_paused j}" wallclock-timeout="#{t $ wallclock_timeout j}">
              $forall p <- jobpairs j
-                 <JobPair job-space-path="#{jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
+                 <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
 
 -- | need to take care of Issue #34.
