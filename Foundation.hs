@@ -29,6 +29,7 @@ import StarExec.Types
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
+import Control.Concurrent.SSem
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -42,6 +43,7 @@ data App = App
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
+    , dbSem :: SSem 
     }
 
 instance HasHttpManager App where

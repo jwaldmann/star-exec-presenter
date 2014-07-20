@@ -46,6 +46,7 @@ import Handler.ShowPostProcInfo
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
+import Control.Concurrent.SSem
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -100,9 +101,10 @@ makeFoundation conf = do
 
 
     crCache <- atomically $ newTVar M.empty
+    dbS <- Control.Concurrent.SSem.new 1
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger crCache
+        foundation = App conf s p manager dbconf logger crCache dbS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

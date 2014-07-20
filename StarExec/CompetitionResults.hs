@@ -308,7 +308,8 @@ getCompetitionResults comp = do
                     else map (updateJob currentTime) $ zip persistJobInfos jobInfos
       jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
-  runDB $ do
+
+  runDB_exclusive $ do
     if not hasAllPostProcs
       then mapM_ updatePostProcInfo $ catMaybes postProcs
       else return ()
@@ -317,6 +318,7 @@ getCompetitionResults comp = do
         mapM updateJobInfo' $ catMaybes updatedJobs
         updateJobResults $ concat processedResults
       else return ()
+
   let postProcMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip postProcIds postProcs
       jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds updatedJobs
       jobResultsMap = IM.fromList $ zip jobIds processedResults

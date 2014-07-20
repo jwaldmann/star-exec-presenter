@@ -132,6 +132,8 @@ library
                  -- , lifted-base
                  , hashable
                  , stm
+                 , SafeSemaphore
+                 , MonadCatchIO-transformers
 
 executable         star-exec-presenter
     if flag(library-only)

@@ -124,13 +124,7 @@ runQueryJob _jobId = do
                           then getScoredResults results
                           else results
 
-                  when isComplexJob $ lift $ do
-                      writeFile "results.text" 
-                          $ unlines $ map show results
-                      writeFile "processedResults.text" 
-                          $ unlines $ map show processedResults
-
-                  runDB $ do
+                  runDB_exclusive $ do
                     updateJobInfo mPersistJobInfo ji
                     --mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
                     deleteWhere [JobResultInfoJobId ==. _jobId]

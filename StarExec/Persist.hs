@@ -10,6 +10,8 @@ import Codec.Compression.GZip
 import Data.Time.Clock
 import qualified Data.List as L
 import Data.Time.Clock
+import Control.Concurrent.SSem
+import Control.Monad.CatchIO ( bracket_ )
 
 insertJobInfo :: JobInfo -> Handler ()
 insertJobInfo jobInfo = runDB $ insert_ jobInfo
@@ -117,3 +119,12 @@ updateJobResults results = do
     linkByOr [] = []
     linkByOr [x] = x
     linkByOr xs = L.foldr1 (||.) xs
+
+-- FIXME: this should use some form of bracketing
+runDB_exclusive query = do
+    app <- getYesod
+    lift $ Control.Concurrent.SSem.wait   $ dbSem app
+    out <- runDB query 
+    lift $ Control.Concurrent.SSem.signal $ dbSem app
+
+
