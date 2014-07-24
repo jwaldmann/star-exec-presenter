@@ -13,13 +13,25 @@ import qualified Data.Set as S
 
 import Data.Double.Conversion.Text
 
+getManyJobCells :: [[ JobResultInfo ]] -> Handler Table
 getManyJobCells iss = do
     --iss <- getManyJobResults ids
-    let cells :: M.Map (Text,Text) (M.Map Text Cell)
+    let cells :: M.Map (Int, (Int,Text),(Int,Text)) 
+                       (M.Map (Int,Text) Cell)
         cells = M.fromListWith M.union $ do
           p <- concat iss
-          return ( (jobResultInfoSolver p, jobResultInfoConfiguration p)
-               , M.singleton (jobResultInfoBenchmark p) $ cell_for_job_pair p
+          return ( ( jobResultInfoJobId p
+                   , ( jobResultInfoSolverId p
+                     , jobResultInfoSolver p 
+                     )
+                   , ( jobResultInfoConfigurationId p
+                     , jobResultInfoConfiguration p
+                     )
+                   )
+               , M.singleton ( jobResultInfoBenchmarkId p
+                             , jobResultInfoBenchmark p
+                             ) 
+                     $ cell_for_job_pair p
                )
         headers = M.keys cells
         benchmarks = M.keys $ foldr M.union M.empty $ M.elems cells
@@ -42,18 +54,23 @@ empty_cell =
          , url = T.pack "nothing"
          , tag = T.pack "OTHER" }
 
-cell_for_bench b = Cell { contents = [whamlet| #{b} |]
+cell_for_bench (bid, bname) = Cell { contents = [whamlet|
+<a href=@{ShowBenchmarkInfoR bid}>#{bname} 
+|]
                         , tdclass = T.pack "bench"
-                        , url = T.pack $ "URL for bench " ++ T.unpack b
+                        , url = ""
                         , tag = T.pack "nothing"
                         }
 
-cell_for_solver (s,c) = Cell { contents = [whamlet| #{s}/#{c} |] 
-                        , tdclass = T.pack "solver"
-                        , url = T.intercalate (T.pack " ")
-                          [ T.pack "URL for solver/config" , s, c ]
-                        , tag = T.pack "nothing"
-                        }
+cell_for_solver (j,(sid, sname),(cid, cname)) = Cell 
+    { contents = [whamlet|
+<a href=@{ShowSolverInfoR sid}>#{sname}</a>/#{cname}
+(<a href=@{ShowJobInfoR j}>#{j}</a>)
+|] 
+    , tdclass = T.pack "solver"
+    , url = ""
+    , tag = T.pack "nothing"
+    }
 
 cell_for_job_pair result = 
     Cell { mjri = Just result
