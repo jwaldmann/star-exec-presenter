@@ -23,7 +23,7 @@ type PostProcId = Int
 data Login = Login Email Password deriving (Show, Read, Eq)
 
 data SessionData = SessionData
-  { cookieData :: T.Text
+  { cookieData :: CookieJar
   , date :: UTCTime
   } deriving (Show, Read)
 

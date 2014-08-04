@@ -42,6 +42,7 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
+    , sessionData :: TVar (Maybe SessionData)
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
     , dbSem :: SSem 
     }

@@ -18,6 +18,19 @@ import StarExec.Types
 import StarExec.Urls
 import StarExec.Auth ( getLoginCredentials )
 import Data.Time.Clock
+import Control.Concurrent.STM
+
+getSessionData' :: Handler (Maybe SessionData)
+getSessionData' = do
+  app <- getYesod
+  lift $ atomically $ readTVar $ sessionData app
+
+writeSessionData' :: CookieJar -> UTCTime -> Handler ()
+writeSessionData' cj d = do
+  app <- getYesod
+  let session = SessionData cj d
+      appSession = sessionData app
+  lift $ atomically $ writeTVar appSession $ Just session
 
 getSessionData :: Handler (Maybe StarExecSessionData)
 getSessionData = do
@@ -90,7 +103,7 @@ index (sec, man, cookies) = do
 getConnection :: Handler StarExecConnection
 getConnection = do
   --liftIO $ putStrLn "getConnection >>>"
-  mSession <- getSessionData
+  mSession <- getSessionData'
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
   man <- withManager return
@@ -101,17 +114,16 @@ getConnection = do
       con'' <- login con' creds
       return con''
     Just session -> do
-      let date' = starExecSessionDataDate session
-          cookieData' = starExecSessionDataCookies session
+      let date' = date session
           since = diffTime currentTime date'
-          cookies = read $ T.unpack $ cookieData'
+          cookies = cookieData session
       if since < 3300.0
         then index (sec, man, cookies)
         else do
           con <- index (sec, man, createCookieJar [])
           creds <- getLoginCredentials
           login con creds
-  writeSessionData cookies currentTime
+  writeSessionData' cookies currentTime
   --liftIO $ putStrLn "<<< getConnection"
   return con
 

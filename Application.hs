@@ -102,9 +102,10 @@ makeFoundation conf = do
 
     crCache <- atomically $ newTVar M.empty
     dbS <- Control.Concurrent.SSem.new 1
+    session <- atomically $ newTVar Nothing
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger crCache dbS
+        foundation = App conf s p manager dbconf logger session crCache dbS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT
