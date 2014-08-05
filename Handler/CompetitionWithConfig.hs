@@ -16,11 +16,10 @@ hour :: Seconds
 hour = 60 * minute
 
 getDuration :: Maybe UTCTime -> Maybe UTCTime -> String
-getDuration Nothing _ = "unkown time"
-getDuration _ Nothing = "unkown time"
-getDuration (Just start) (Just end) =
-  let duration = diffTime end start
-  in renderTime duration
+getDuration mStart mEnd =
+  case diffTime <$> mEnd <*> mStart of
+    Nothing -> "unkown time"
+    Just d  -> renderTime d
   where
     renderTime d =
       if d >= hour
