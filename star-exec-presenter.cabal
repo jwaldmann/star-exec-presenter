@@ -56,6 +56,12 @@ library
                      Table.Query
                      Control.Job
                      Utils.WidgetMetaRefresh
+                     Presenter.RouteTypes
+                     Presenter.Models
+                     Importer.Parser.LRI
+                     Importer.Interpreter.LRI
+                     Importer.Internal
+                     Importer.LRI
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -112,6 +118,7 @@ library
                  , xml-conduit
                  , zip-archive
                  , zlib
+                 , tar
                  , vector
                  , cassava
                  , double-conversion
@@ -146,35 +153,6 @@ executable         star-exec-presenter
                      , yesod
 
     ghc-options:       -threaded -O2
-
--- executable         star-exec-controller
---     if flag(library-only)
---         Buildable: False
--- 
---     main-is:           Control/Job.hs
---     hs-source-dirs:    . app
---     build-depends:     base
---                      , star-exec-presenter
---                      , yesod
---                      , parsec, text, blaze-markup, http-conduit, cassava, wl-pprint
---                      , time, blaze-html, containers, shakespeare
---                      , xml-conduit, xml-hamlet, hashable
--- 
---     ghc-options:       -threaded -O2
--- 
---     extensions: TemplateHaskell
---                 QuasiQuotes
---                 OverloadedStrings
---                 NoImplicitPrelude
---                 CPP
---                 MultiParamTypeClasses
---                 TypeFamilies
---                 GADTs
---                 GeneralizedNewtypeDeriving
---                 FlexibleContexts
---                 EmptyDataDecls
---                 NoMonomorphismRestriction
---                 DeriveDataTypeable
 
 test-suite test
     type:              exitcode-stdio-1.0

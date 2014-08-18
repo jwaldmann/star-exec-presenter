@@ -1,7 +1,7 @@
 <h1>Overview of job-results
 <a href=@{Flexible_TableR (Query []) jids}>flexible query (experimental) 
 | view original jobs on star-exec:
-  $forall jid <- getids jids
+  $forall jid <- getIds jids
      <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{jid}">#{jid}</a>,
 
 <h2>Statistics

@@ -8,7 +8,7 @@ import StarExec.Registration
 import StarExec.Commands 
     (pushJobXML, Job (..), JobPair (..), getSpaceXML, getDefaultSpaceXML)
 import StarExec.Connection (getConnection)
-import StarExec.Types (JobIds(..))
+import Presenter.RouteTypes (JobIds(..))
 import qualified StarExec.Types as S
 
 import Data.Time.Clock
