@@ -121,7 +121,7 @@ runQueryJob _jobId = do
                   liftIO $ putStrLn $ show $ map jobResultInfoStatus results
                   let processedResults =
                         if isComplexJob
-                          then unwrapResults $ getScoredResults results
+                          then (unwrapResults . getScoredResults . wrapResults) results
                           else results
 
                   runDB_exclusive $ do

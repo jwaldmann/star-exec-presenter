@@ -23,7 +23,7 @@ library
                      Handler.Error
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
-                     Handler.Flexible_Table
+                     -- Handler.Flexible_Table
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Handler.Registered
@@ -51,9 +51,9 @@ library
                      StarExec.Auth
                      StarExec.Statistics
                      StarExec.STM
-                     Table.Data
-                     Table.Get
-                     Table.Query
+                     -- Table.Data
+                     -- Table.Get
+                     -- Table.Query
                      Control.Job
                      Utils.WidgetMetaRefresh
                      Presenter.RouteTypes
