@@ -144,18 +144,6 @@ data Category = Category
   , getJobIds :: [Int]
   } deriving (Show, Read, Eq)
 
---getCategoryName :: Category -> Name
---getCategoryName (Category name _ _ _) = name
-
---getCategoryScoring :: Category -> Scoring
---getCategoryScoring (Category _ scoring _ _) = scoring
-
---getPostProcId :: Category -> PostProcId
---getPostProcId (Category _ _ pid _) = pid
-
---getJobIds :: Category -> [Int]
---getJobIds (Category _ _ _ jis) = jis
-
 {-
   solver by rank in the categories
 -}
@@ -164,12 +152,6 @@ data MetaCategory = MetaCategory
   , getCategories :: [Category]
   } deriving (Show, Read, Eq)
 derivePersistField "MetaCategory"
-
---getMetaCategoryName :: MetaCategory -> Name
---getMetaCategoryName (MetaCategory name _) = name
-
---getCategories :: MetaCategory -> [Category]
---getCategories (MetaCategory _ cs) = cs
 
 data CompetitionMeta = CompetitionMeta
   { getMetaName :: Name

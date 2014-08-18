@@ -11,7 +11,7 @@
 /show_job_pair/#Int ShowJobPairR GET
 /display_proof/#Text DisplayProofR GET
 /show_job_info/#Int ShowJobInfoR GET
-/show_benchmark_info/#Int ShowBenchmarkInfoR GET
+/show_benchmark_info/#BenchmarkID ShowBenchmarkInfoR GET
 /show_solver_info/#Int ShowSolverInfoR GET
 /show_post_proc_info/#Int ShowPostProcInfoR GET
 /show_job_results/*JobIds ShowManyJobResultsR GET

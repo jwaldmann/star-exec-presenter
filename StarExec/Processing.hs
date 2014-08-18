@@ -1,30 +1,27 @@
 module StarExec.Processing where
 
--- import Import
-
 import Prelude
 import Model
 import StarExec.Types
+import Presenter.RouteTypes
+import Presenter.Models
 import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
-import Debug.Trace
 import qualified Data.IntMap.Strict as IM
 
-type BenchmarkID = Int
 type BenchmarkName = T.Text
-type Benchmark = (BenchmarkID, BenchmarkName)
-type SolverID = Int
-type Solver = (SolverID, SolverName)
+type BenchmarkIdent = (BenchmarkID, BenchmarkName)
+type SolverIdent = (SolverID, SolverName)
 type SolverName = T.Text
 type SolverResults = [Maybe SolverResult]
-type BenchmarkRow = (Benchmark, [Maybe JobResultInfo])
+type BenchmarkRow = (BenchmarkIdent, [Maybe JobResult])
 type TableHead = [SolverName]
 
-getClass :: JobResultInfo -> T.Text
+getClass :: JobResult -> T.Text
 getClass result =
-  case jobResultInfoResult result of
+  case getSolverResult result of
     YES _     -> "solver-yes"
     NO        -> "solver-no"
     MAYBE     -> "solver-maybe"
@@ -32,39 +29,42 @@ getClass result =
     ERROR     -> "solver-error"
     _         -> "solver-nothing"
 
-getInfo :: (JobResultInfo -> S.Set a -> S.Set a) -> [JobResultInfo] -> [a]
+getInfo :: (JobResult -> S.Set a -> S.Set a) -> [JobResult] -> [a]
 getInfo f = S.toList . L.foldr f S.empty
 
-getBenchmark :: JobResultInfo -> Benchmark
-getBenchmark jri = (jobResultInfoBenchmarkId jri, jobResultInfoBenchmark jri)
+getBenchmark :: JobResult -> BenchmarkIdent
+getBenchmark jri = (toBenchmarkID jri, toBenchmarkName jri)
 
-extractBenchmark :: JobResultInfo -> S.Set Benchmark -> S.Set Benchmark
+extractBenchmark :: JobResult -> S.Set BenchmarkIdent -> S.Set BenchmarkIdent
 extractBenchmark jri set =
   S.insert (getBenchmark jri) set
 
-getSolver :: JobResultInfo -> Solver
-getSolver jri = (jobResultInfoSolverId jri, jobResultInfoSolver jri)
+getSolver :: JobResult -> SolverIdent
+getSolver jri = (toSolverID jri, toSolverName jri)
 
-extractSolver :: JobResultInfo -> S.Set Solver -> S.Set Solver
+extractSolver :: JobResult -> S.Set SolverIdent -> S.Set SolverIdent
 extractSolver jri set =
   S.insert (getSolver jri) set
 
-getBenchmarkResults :: [(Int, Solver)] -> [JobResultInfo] -> [Benchmark] -> [BenchmarkRow]
+getBenchmarkResults :: [(JobID, SolverIdent)] -> [JobResult] -> [BenchmarkIdent] -> [BenchmarkRow]
 getBenchmarkResults solvers jobInfos = map getBenchmarkRow 
   where
+    getBenchmarkRow :: BenchmarkIdent -> BenchmarkRow
     getBenchmarkRow benchmark@(bId, _) =
       (benchmark, map (getSolverResults bId) solvers)
+    getSolverResults :: BenchmarkID -> (JobID, SolverIdent) -> Maybe JobResult
     getSolverResults _benchmarkId (i, (sId, _)) =
       let mResult = L.find (isResult _benchmarkId sId i) jobInfos
       in case mResult of
         Just result -> Just result
         Nothing -> Nothing
-    isResult _benchmarkId _solverId _jobId jri =
-      (jobResultInfoBenchmarkId jri == _benchmarkId) &&
-        (jobResultInfoSolverId jri == _solverId) &&
-        (jobResultInfoJobId jri == _jobId)
+    isResult :: BenchmarkID -> SolverID -> JobID -> JobResult -> Bool
+    isResult _benchmarkId _solverId _jobId resultInfo =
+      (toBenchmarkID resultInfo == _benchmarkId) &&
+      (toSolverID resultInfo == _solverId) &&
+      (toJobID resultInfo == _jobId)
 
-compareBenchmarks :: Benchmark -> Benchmark -> Ordering
+compareBenchmarks :: BenchmarkIdent -> BenchmarkIdent -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
 getScore :: JobResultInfo -> Int
@@ -72,23 +72,23 @@ getScore jri = case jobResultInfoScore jri of
                   Just i -> i
                   _      -> 0
 
-getScoredResults :: [JobResultInfo] -> [JobResultInfo]
+getScoredResults :: [JobResult] -> [JobResult]
 getScoredResults results =
   let insertResult m result = M.insertWith (++) (getBenchmark result) [result] m
       benchmarkMap = M.toList $ L.foldl' (insertResult) M.empty results
       result = L.foldl' (++) [] $ map (calcScores . snd) benchmarkMap
   in result
   where
-    calcScores :: [JobResultInfo] -> [JobResultInfo]
+    calcScores :: [JobResult] -> [JobResult]
     calcScores jris =
-      if any (\r -> jobResultInfoStatus r /= JobResultComplete) jris
+      if any isResultComplete jris
         then jris
         else
-          let hasScore jri = case jobResultInfoResult jri of
+          let hasScore jri = case getSolverResult jri of
                                 YES (Just _) -> True
                                 _            -> False
               getScoreFromResult jri =
-                case jobResultInfoResult jri of
+                case getSolverResult jri of
                   YES (Just i) -> i
                   _            -> 0
               insertScore jri set = S.insert (getScoreFromResult jri) set
@@ -98,13 +98,11 @@ getScoredResults results =
                 case L.elemIndex (getScoreFromResult jri) scores of
                   Nothing -> negate baseScore
                   Just i  -> i
-              updateScore jri = jri {
-                                  jobResultInfoScore = Just $
+              updateScore' jri = updateScore jri $ Just $
                                     if hasScore jri
                                       then baseScore - scoreIndex jri
                                       else 0
-                                }
-          in map updateScore jris
+          in map updateScore' jris
 
 calcScoresBase :: (JobResultInfo -> Int) -> [JobResultInfo] -> IM.IntMap Int
 calcScoresBase getScore = L.foldl' addScore IM.empty

@@ -21,7 +21,7 @@ import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
 import StarExec.Types (Competition)
-import Presenter.RouteTypes (ErrorID, JobIds)
+import Presenter.RouteTypes
 import Table.Query
 import Data.Text (Text)
 import StarExec.Auth (authSE)

@@ -32,6 +32,21 @@ JobResultInfo
     result SolverResult
     deriving Show
 
+LriResultInfo
+    jobId Text
+    score Int Maybe
+    pairId Text
+    UniqueLriResultInfo pairId
+    benchmarkId Text
+    solverId Text
+    result SolverResult
+    cpuTime Double
+    wallclockTime Double
+    checkResult SolverResult Maybe
+    checkCpuTime Double Maybe
+    checkWallclockTime Double Maybe
+    deriving Show
+
 JobPairInfo
     pairId Int
     UniqueJobPairInfo pairId
@@ -62,7 +77,23 @@ SolverInfo
     name Text
     description Text
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriSolverInfo
+    solverId Text
+    UniqueLriSolverInfo solverId
+    name Text
+    author Text
+    description Text
+    url Text
+    isStandard Bool
+    isRelative Bool
+    isConditional Bool
+    isContextSensitive Bool
+    isInnermost Bool
+    isTheory Bool
+    isCertifying Bool
+    deriving Eq Ord Read Show
 
 BenchmarkInfo
     starExecId Int
@@ -70,7 +101,22 @@ BenchmarkInfo
     name Text
     type Text
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriBenchmarkInfo
+    benchmarkId Text
+    UniqueLriBenchmarkInfo benchmarkId
+    name Text
+    file Text
+    rating Int
+    solved Int
+    isConditional Bool
+    isContextSensitive Bool
+    isInnermost Bool
+    isOutermost Bool
+    isRelative Bool
+    isTheory Bool
+    deriving Eq Ord Read Show
 
 QueryInfo
     query SEQuery
