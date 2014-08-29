@@ -8,6 +8,7 @@ module StarExec.JobData
   ) where
 
 import Import
+import Presenter.Models
 import StarExec.Types
 import StarExec.Connection
 import StarExec.Concurrent
@@ -24,8 +25,11 @@ updateThreshold = 300
 getTime :: Handler UTCTime
 getTime = liftIO getCurrentTime
 
-queryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
-queryJob _jobId = do
+queryJob :: JobID -> Handler (QueryResult QueryInfo (Maybe Job, [JobResult]))
+queryJob j@(LriJobID _jobId) = do
+  mPersistJobInfo <- getPersistJobInfo' j
+  case mPersistJobInfo
+queryJob j@(StarExecJobID _jobId) = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   currentTime <- getTime
   case mPersistJobInfo of
@@ -87,5 +91,5 @@ queryPostProc _procId = do
         else return $ QueryResult Latest $ Just persistPostProcInfo
     Nothing -> runQueryPostProcInfo _procId
 
-queryManyJobs :: [Int] -> Handler [QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo])]
+queryManyJobs :: [JobID] -> Handler [QueryResult QueryInfo (Maybe Job, [JobResult])]
 queryManyJobs = mapM queryJob
