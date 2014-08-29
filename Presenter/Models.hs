@@ -66,21 +66,14 @@ data JobResult =
 
 class FromJobResult a where
   fromJobResult :: JobResult -> Maybe a
-  toJobResult :: a -> JobResult
-  unwrapResults :: [JobResult] -> [a]
-  unwrapResults = catMaybes . (map fromJobResult)
-  wrapResults :: [a] -> [JobResult]
-  wrapResults = map toJobResult
 
 instance FromJobResult JobResultInfo where
   fromJobResult (StarExecResult r) = Just r
   fromJobResult _ = Nothing
-  toJobResult = StarExecResult
 
 instance FromJobResult LriResultInfo where
   fromJobResult (LriResult r) = Just r
   fromJobResult _ = Nothing
-  toJobResult = LriResult
 
 isStarExecResult :: JobResult -> Bool
 isStarExecResult (StarExecResult _) = True
@@ -89,6 +82,9 @@ isStarExecResult _ = False
 isLriResult :: JobResult -> Bool
 isLriResult (LriResult _) = True
 isLriResult _ = False
+
+unwrapResults :: FromJobResult a => [JobResult] -> [a]
+unwrapResults = catMaybes . (map fromJobResult)
 
 newtype JobResults = JobResults
   { getResults :: [JobResult]

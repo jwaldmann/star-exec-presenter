@@ -16,7 +16,7 @@
 /show_post_proc_info/#Int ShowPostProcInfoR GET
 /show_job_results/*JobIds ShowManyJobResultsR GET
 /show_many_job_results/*JobIds ShowManyJobResultsLegacyR GET
--- /flexible-table/#Query/*JobIds Flexible_TableR GET
+/flexible-table/#Query/*JobIds Flexible_TableR GET
 
 /competition/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
