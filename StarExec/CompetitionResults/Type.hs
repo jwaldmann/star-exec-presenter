@@ -2,7 +2,6 @@ module StarExec.CompetitionResults.Type where
 
 import Prelude
 import Model
-import Presenter.Models
 import StarExec.Types
 import StarExec.Processing
 import StarExec.Statistics

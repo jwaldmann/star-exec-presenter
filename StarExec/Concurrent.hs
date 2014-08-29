@@ -17,7 +17,7 @@ import StarExec.Commands
 import Data.Maybe
 import Data.Time.Clock
 import Database.Persist.Class
-import Presenter.Models
+import Debug.Trace
 import Data.List ((\\))
 
 import Control.Monad ( when )
@@ -121,11 +121,12 @@ runQueryJob _jobId = do
                   liftIO $ putStrLn $ show $ map jobResultInfoStatus results
                   let processedResults =
                         if isComplexJob
-                          then unwrapResults $ getScoredResults results
+                          then getScoredResults results
                           else results
 
                   runDB_exclusive $ do
                     updateJobInfo mPersistJobInfo ji
+                    --mapM_ (\r -> deleteBy $ UniqueJobResultInfo $ jobResultInfoPairId r) results
                     deleteWhere [JobResultInfoJobId ==. _jobId]
                     mapM_ insertUnique processedResults
                   return ()

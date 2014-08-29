@@ -7,7 +7,7 @@ $maybe pair <- mPair
     $maybe solverInfo <- mSolverInfo
       <p>The Solver was "<a href=@{ShowSolverInfoR $ solverInfoStarExecId solverInfo}>#{solverInfoName solverInfo}</a>"
     $maybe benchInfo <- mBenchmarkInfo
-      <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ toBenchmarkID benchInfo}>#{benchmarkInfoName benchInfo}</a>"
+      <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ benchmarkInfoStarExecId benchInfo}>#{benchmarkInfoName benchInfo}</a>"
     <p>view original job pair data on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{_pairId}">#{_pairId}</a>
   $if hasHtmlProof
     <a href=@{DisplayProofR $ int2Text _pairId}>Show Html-Proof</a>

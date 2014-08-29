@@ -3,7 +3,6 @@ module Handler.ShowJobPair where
 import Import
 import StarExec.Types
 import Presenter.RouteTypes
-import Presenter.Models
 import StarExec.JobData
 import StarExec.Persist
 import qualified Data.Text as T

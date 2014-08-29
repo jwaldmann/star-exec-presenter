@@ -5,8 +5,7 @@ import Import
 import Table.Data
 import StarExec.Processing ( getClass )
 import StarExec.Types
-import Presenter.RouteTypes
-import Presenter.Models
+
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
@@ -14,7 +13,7 @@ import qualified Data.Set as S
 
 import Data.Double.Conversion.Text
 
-getManyJobCells :: [[ JobResult ]] -> Handler Table
+getManyJobCells :: [[ JobResultInfo ]] -> Handler Table
 getManyJobCells iss = do
     --iss <- getManyJobResults ids
     let cells :: M.Map (Int, (Int,Text),(Int,Text)) 
@@ -56,7 +55,7 @@ empty_cell =
          , tag = T.pack "OTHER" }
 
 cell_for_bench (bid, bname) = Cell { contents = [whamlet|
-<a href=@{ShowBenchmarkInfoR $ StarExecBenchmarkID bid}>#{bname} 
+<a href=@{ShowBenchmarkInfoR bid}>#{bname} 
 |]
                         , tdclass = T.pack "bench"
                         , url = ""
