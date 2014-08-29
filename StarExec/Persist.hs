@@ -12,12 +12,25 @@ import qualified Data.List as L
 import Data.Time.Clock
 import Control.Concurrent.SSem
 import Control.Monad.CatchIO ( bracket_ )
+import Control.Applicative
 
 insertJobInfo :: JobInfo -> Handler ()
 insertJobInfo jobInfo = runDB $ insert_ jobInfo
 
 getPersistJobInfo :: Int -> Handler (Maybe JobInfo)
 getPersistJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
+
+getPersistJobInfo' :: JobID -> Handler (Maybe Job)
+getPersistJobInfo' (LriJobID _jobId) = do
+  mji <- getEntity $ UniqueLriJobInfo _jobId
+  case mji of
+    Just ji -> return $ Just $ LriJob ji
+    Nothing -> return Nothing
+getPersistJobInfo' (StarExecJobID _jobId) = do
+  mji <- getEntity $ UniqueJobInfo _jobId
+  case mji of
+    Just ji -> return $ Just $ StarExecJob ji
+    Nothing -> return Nothing
 
 getPersistPostProcInfo :: Int -> Handler (Maybe PostProcInfo)
 getPersistPostProcInfo _procId = getEntity $ UniquePostProcInfo _procId

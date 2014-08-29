@@ -71,6 +71,12 @@ JobInfo
     lastUpdate UTCTime default=now()
     deriving Show
 
+LriJobInfo
+    jobId Text
+    UniqueLriJobInfo jobId
+    name Text
+    deriving Show
+
 SolverInfo
     starExecId Int
     UniqueSolverInfo starExecId
