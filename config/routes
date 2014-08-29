@@ -4,25 +4,4 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/ HomeR GET
-
-/error/#ErrorID ErrorR GET
-
-/show_job_pair/#Int ShowJobPairR GET
-/display_proof/#Text DisplayProofR GET
-/show_job_info/#Int ShowJobInfoR GET
-/show_benchmark_info/#BenchmarkID ShowBenchmarkInfoR GET
-/show_solver_info/#Int ShowSolverInfoR GET
-/show_post_proc_info/#Int ShowPostProcInfoR GET
-/show_job_results/*JobIds ShowManyJobResultsR GET
-/show_many_job_results/*JobIds ShowManyJobResultsLegacyR GET
--- /flexible-table/#Query/*JobIds Flexible_TableR GET
-
-/competition/#CompetitionInfoId CompetitionR GET
-/competition_with_config/#Competition CompetitionWithConfigR GET
-
-/control ControlR GET POST
-/registered RegisteredR GET
-
-/test-runs ListCompetitionsR GET
-/hidden-test-runs ListHiddenCompetitionsR GET
+/ HomeR GET POST

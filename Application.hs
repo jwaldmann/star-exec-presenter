@@ -19,7 +19,6 @@ import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
 import Network.HTTP.Client.Conduit (newManager)
 import Control.Monad.Logger (runLoggingT)
-import Control.Concurrent (forkIO, threadDelay)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
 import Data.Default (def)
@@ -28,25 +27,6 @@ import Yesod.Core.Types (loggerSet, Logger (Logger))
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Home
-import Handler.Error
-import Handler.ShowJobPair
-import Handler.ShowManyJobResults
-import Handler.Flexible_Table
-import Handler.Competition
-import Handler.CompetitionWithConfig
-import Handler.Registered
-import Handler.Control
-import Handler.ShowJobInfo
-import Handler.ShowBenchmarkInfo
-import Handler.ShowSolverInfo
-import Handler.ListCompetitions
-import Handler.DisplayProof
-import Handler.ListHiddenCompetitions
-import Handler.ShowPostProcInfo
-
-import qualified Data.Map.Strict as M
-import Control.Concurrent.STM
-import Control.Concurrent.SSem
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -73,7 +53,7 @@ makeApplication conf = do
     -- Create the WAI application and apply middlewares
     app <- toWaiAppPlain foundation
     let logFunc = messageLoggerSource foundation (appLogger foundation)
-    return (logWare app, logFunc)
+    return (logWare $ defaultMiddlewaresNoLogging app, logFunc)
 
 -- | Loads up any necessary settings, creates your foundation datatype, and
 -- performs some initialization.
@@ -87,25 +67,10 @@ makeFoundation conf = do
     p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
 
     loggerSet' <- newStdoutLoggerSet defaultBufSize
-    (getter, updater) <- clockDateCacher
-
-    -- If the Yesod logger (as opposed to the request logger middleware) is
-    -- used less than once a second on average, you may prefer to omit this
-    -- thread and use "(updater >> getter)" in place of "getter" below.  That
-    -- would update the cache every time it is used, instead of every second.
-    let updateLoop = do
-            threadDelay 1000000
-            updater
-            updateLoop
-    _ <- forkIO updateLoop
-
-
-    crCache <- atomically $ newTVar M.empty
-    dbS <- Control.Concurrent.SSem.new 1
-    session <- atomically $ newTVar Nothing
+    (getter, _) <- clockDateCacher
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger session crCache dbS
+        foundation = App conf s p manager dbconf logger
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

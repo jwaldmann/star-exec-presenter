@@ -5,32 +5,19 @@ import Yesod
 import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.BrowserId
-import Yesod.Auth.GoogleEmail
-import Yesod.Auth.Dummy
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
 import qualified Settings
 import Settings.Development (development)
 import qualified Database.Persist
-import Database.Persist.Sql (SqlBackend, SqlPersistT)
+import Database.Persist.Sql (SqlPersistT)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
-import StarExec.Types (Competition)
-import Presenter.RouteTypes
-import Table.Query
-import Data.Text (Text)
-import StarExec.Auth (authSE)
-import StarExec.CompetitionResults.Type
-import StarExec.Types
-
-import qualified Data.Map.Strict as M
-import Control.Concurrent.STM
-import Control.Concurrent.SSem
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -43,9 +30,6 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
-    , sessionData :: TVar (Maybe SessionData)
-    , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
-    , dbSem :: SSem 
     }
 
 instance HasHttpManager App where
@@ -73,12 +57,12 @@ instance Yesod App where
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
     makeSessionBackend _ = fmap Just $ defaultClientSessionBackend
-        (120 * 60) -- 120 minutes
+        120    -- timeout in minutes
         "config/client_session_key.aes"
 
     defaultLayout widget = do
         master <- getYesod
-        --mmsg <- getMessage
+        mmsg <- getMessage
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -90,10 +74,6 @@ instance Yesod App where
             $(combineStylesheets 'StaticR
                 [ css_normalize_css
                 , css_bootstrap_css
-                ])
-            $(combineScripts 'StaticR
-                [ js_jquery_js
-                , js_bootstrap_js
                 ])
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -107,8 +87,11 @@ instance Yesod App where
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
 
-    isAuthorized ControlR _ = isAdmin
-    isAuthorized ListHiddenCompetitionsR _ = isAdmin
+    -- Routes not requiring authenitcation.
+    isAuthorized (AuthR _) _ = return Authorized
+    isAuthorized FaviconR _ = return Authorized
+    isAuthorized RobotsR _ = return Authorized
+    -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
@@ -140,8 +123,6 @@ instance YesodPersist App where
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner connPool
 
--- simple example copied from 
--- http://www.yesodweb.com/book/authentication-and-authorization
 instance YesodAuth App where
     type AuthId App = UserId
 
@@ -160,16 +141,10 @@ instance YesodAuth App where
                     , userPassword = Nothing
                     }
 
-    authPlugins _ = [ authSE ]
+    -- You can add other plugins like BrowserID, email or OAuth here
+    authPlugins _ = [authBrowserId def]
 
     authHttpManager = httpManager
-
-isAdmin = do
-    mu <- maybeAuthId
-    return $ case mu of
-        Nothing -> AuthenticationRequired
-        Just _ -> Authorized
-
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
