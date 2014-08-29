@@ -14,6 +14,12 @@ trimTrailingSpace = Char8.unwords . filterEmpty . Char8.words
   where
     filterEmpty = filter (not . Char8.null)
 
+checkPrefix :: Line -> Line -> a -> a ->  a
+checkPrefix s bs opt1 opt2 = if s `BSL.isPrefixOf` bs then opt1 else opt2
+
+checkSuffix :: Line -> Line -> a -> a -> a
+checkSuffix s bs opt1 opt2 = if s `BSL.isSuffixOf` bs then opt1 else opt2
+
 getEntries :: [Line] -> Either String [Entry]
 getEntries ls = parseLines ls (None, [])
   where
@@ -64,19 +70,17 @@ getEntries ls = parseLines ls (None, [])
     getValue :: [Line] -> Either String (Value, [Line])
     getValue [] = Left "getValue: no more lines"
     getValue ("[] ;":ls) = return ("[]", ls)
-    getValue vs@(l:ls)
-      | "[ " `BSL.isPrefixOf` l = getValue' "] ;" vs
-      | "\"" `BSL.isPrefixOf` l = getValue' "\" ;" vs
-      | otherwise = Left $ "donno: " ++ (show l) ++ " next left: " ++ (show $ take 5 vs) -- get text
+    getValue vs@(l:ls) =
+      checkPrefix "[ " l (getValue' "] ;" vs) -- get list
+      $ checkPrefix "\"" l (getValue' "\" ;" vs)
+      $ Left $ "donno: " ++ (show l) ++ " next left: " ++ (show $ take 5 vs) -- get text
       where
         getValue' :: BSL.ByteString -> [Line] -> Either String (Value, [Line])
         getValue' s (l:[]) = return (l,[])
         getValue' s (l:ls) =
-          if s `BSL.isSuffixOf` l
-            then return (Char8.take (BSL.length l - 2) l,ls)
-            else do
-              (v, rest) <- getValue' s ls
-              return (Char8.unwords (l:v:[]), rest)
+          checkSuffix s l (Right ( Char8.take (BSL.length l - 2) l,ls)) $ do
+            (v, rest) <- getValue' s ls
+            return (Char8.unwords (l:v:[]), rest)
 
 parse :: BSL.ByteString -> Either String [Entry]
 parse bs = do
