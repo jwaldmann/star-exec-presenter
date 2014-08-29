@@ -3,15 +3,9 @@ module Presenter.Models where
 import Prelude
 import Model
 import Presenter.RouteTypes
-import StarExec.Types
-  ( SolverResult
-  , JobResultStatus (..)
-  , Seconds
-  , JobStatus)
+import StarExec.Types (SolverResult, JobResultStatus (..))
 import qualified Data.Text as T
 import Data.Maybe
-
--- ###### TYPE-CLASSES ######
 
 class ResultEntity a where
   getSolverResult :: a -> SolverResult
@@ -27,59 +21,6 @@ class BenchmarkEntity a where
 class SolverEntity a where
   toSolverID :: a -> SolverID
   toSolverName :: a -> T.Text
-
-class JobEntity a where
-  toJobName :: a -> T.Text
-  toJobStatus :: a -> JobStatus
-  toJobDuration :: a -> Seconds
-
-class FromJobResult a where
-  fromJobResult :: JobResult -> Maybe a
-  toJobResult :: a -> JobResult
-  unwrapResults :: [JobResult] -> [a]
-  unwrapResults = catMaybes . (map fromJobResult)
-  wrapResults :: [a] -> [JobResult]
-  wrapResults = map toJobResult
-
--- ###### DATA-TYPES ######
-
-data Job =
-  StarExecJob JobInfo
-  | LriJob LriJobInfo
-
-newtype Jobs = Jobs
-  { getJobs :: [Job]
-  }
-
-data JobResult =
-  StarExecResult JobResultInfo
-  | LriResult LriResultInfo
-
-newtype JobResults = JobResults
-  { getResults :: [JobResult]
-  }
-
-data Benchmark =
-  StarExecBenchmark BenchmarkInfo
-  | LriBenchmark LriBenchmarkInfo
-  deriving (Eq, Ord, Read, Show)
-
-newtype Benchmarks = Benchmarks
-  { getBenchmarks :: [Benchmark]
-  }
-
-data Solver =
-  StarExecSolver SolverInfo
-  | LriSolver LriSolverInfo
-  deriving (Eq, Ord, Read, Show)
-
-newtype Solvers = Solvers
-  { getSolvers :: [Solver]
-  }
-
--- ###### INSTANCES ######
-
--- #### ResultEntity ####
 
 instance ResultEntity JobResult where
   getSolverResult (StarExecResult r) = getSolverResult r
@@ -119,7 +60,17 @@ instance ResultEntity LriResultInfo where
 
   updateScore r s = r { lriResultInfoScore = s }
 
--- #### FromJobResult ####
+data JobResult =
+  StarExecResult JobResultInfo
+  | LriResult LriResultInfo
+
+class FromJobResult a where
+  fromJobResult :: JobResult -> Maybe a
+  toJobResult :: a -> JobResult
+  unwrapResults :: [JobResult] -> [a]
+  unwrapResults = catMaybes . (map fromJobResult)
+  wrapResults :: [a] -> [JobResult]
+  wrapResults = map toJobResult
 
 instance FromJobResult JobResultInfo where
   fromJobResult (StarExecResult r) = Just r
@@ -131,7 +82,22 @@ instance FromJobResult LriResultInfo where
   fromJobResult _ = Nothing
   toJobResult = LriResult
 
--- #### BenchmarkEntity ####
+isStarExecResult :: JobResult -> Bool
+isStarExecResult (StarExecResult _) = True
+isStarExecResult _ = False
+
+isLriResult :: JobResult -> Bool
+isLriResult (LriResult _) = True
+isLriResult _ = False
+
+newtype JobResults = JobResults
+  { getResults :: [JobResult]
+  }
+
+data Benchmark =
+  StarExecBenchmark BenchmarkInfo
+  | LriBenchmark LriBenchmarkInfo
+  deriving (Eq, Ord, Read, Show)
 
 instance BenchmarkEntity Benchmark where
   toBenchmarkID (StarExecBenchmark b) = toBenchmarkID b
@@ -167,7 +133,14 @@ instance BenchmarkEntity LriBenchmarkInfo where
 
   toBenchmarkName = lriBenchmarkInfoName
 
--- #### SolverEntity ####
+newtype Benchmarks = Benchmarks
+  { getBenchmarks :: [Benchmark]
+  }
+
+data Solver =
+  StarExecSolver SolverInfo
+  | LriSolver LriSolverInfo
+  deriving (Eq, Ord, Read, Show)
 
 instance SolverEntity Solver where
   toSolverID (StarExecSolver s) = toSolverID s
@@ -203,12 +176,8 @@ instance SolverEntity LriSolverInfo where
 
   toSolverName = lriSolverInfoName
 
--- ###### HELPER ######
+newtype Solvers = Solvers
+  { getSolvers :: [Solver]
+  }
 
-isStarExecResult :: JobResult -> Bool
-isStarExecResult (StarExecResult _) = True
-isStarExecResult _ = False
 
-isLriResult :: JobResult -> Bool
-isLriResult (LriResult _) = True
-isLriResult _ = False

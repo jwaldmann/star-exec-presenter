@@ -6,8 +6,7 @@ import qualified Data.Text as T
 
 import StarExec.Registration 
 import StarExec.Commands 
-    (pushJobXML, getSpaceXML, getDefaultSpaceXML)
---import StarExec.Types
+    (pushJobXML, Job (..), JobPair (..), getSpaceXML, getDefaultSpaceXML)
 import StarExec.Connection (getConnection)
 import Presenter.RouteTypes (JobIds(..))
 import qualified StarExec.Types as S
@@ -59,7 +58,7 @@ pushcat config cat = do
     now <- liftIO getCurrentTime
     con <- getConnection
     jobs <- mkJobs sm config cat now
-    js <- pushJobXML con (StarExec.Types.SEJob.space config) jobs
+    js <- pushJobXML con (Control.Job.space config) jobs
     return $ cat { contents = (contents cat, catMaybes $ map jobid js) }
 
 pushmetacat config mc = do
@@ -68,7 +67,7 @@ pushmetacat config mc = do
     jobss <- forM (categories mc) $ \ cat ->  do 
             mkJobs sm config cat now
     con <- getConnection
-    js <- pushJobXML con (StarExec.Types.SEJob.space config) $ concat jobss
+    js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
             j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -81,9 +80,9 @@ pushcomp config c = do
     jobss <- forM ( metacategories c >>= categories ) $ \ cat -> do 
             mkJobs sm config cat now
     con <- getConnection
-    js <- pushJobXML con (StarExec.Types.SEJob.space config) $ concat jobss
+    js <- pushJobXML con (Control.Job.space config) $ concat jobss
     let m = M.fromList $ do
-            j @ SEJob { description = d, jobid = Just i } <- js
+            j @ Job { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
         for = flip map
     return $ c { metacategories = for (metacategories c) $ \ mc -> 
@@ -158,7 +157,7 @@ permute (x:xs) = do
 
 mkJobs :: SpaceMap 
        -> JobControl -> Category Catinfo -> UTCTime 
-       -> Handler [ SEJob ]
+       -> Handler [ Job ]
 mkJobs sm config cat now = do
     let ci = contents cat 
         (+>) = T.append
@@ -166,7 +165,7 @@ mkJobs sm config cat now = do
 
     -- FIXME: too many separate jobs give problems 
 
-    return $ return $ SEJob 
+    return $ return $ Job 
          { postproc_id = postproc ci
          , description = repair $ categoryName cat
          , job_name = compact $ repair $ categoryName cat +> "@" +> T.pack (show $ hash (bss, show now) )
@@ -179,7 +178,7 @@ mkJobs sm config cat now = do
                (jobspace, bs) <- bss  
                b <- sort bs
                Participant { solver_config = Just (s,c) } <- participants ci
-               return $ SEJobPair { jobPairSpace = jobspace, jobPairBench = b, jobPairConfig = c }
+               return $ JobPair { jobPairSpace = jobspace, jobPairBench = b, jobPairConfig = c }
          , jobid = Nothing
          }
 

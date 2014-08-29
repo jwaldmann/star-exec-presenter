@@ -204,24 +204,3 @@ fromDiffTime = fromRational . toRational
 
 diffTime :: UTCTime -> UTCTime -> Seconds
 diffTime t1 t2 = fromDiffTime $ diffUTCTime t1 t2
-
-data SEJob =
-     SEJob { postproc_id :: Int
-         , description :: T.Text
-         , job_name :: T.Text
-         , queue_id :: Int
-         , mem_limit :: Double
-         , wallclock_timeout :: Int
-         , cpu_timeout :: Int
-         , start_paused :: Bool
-         , jobpairs :: [ SEJobPair ] -- ^ jobspace, benchmark, config
-         , jobid :: Maybe Int
-         }
-    deriving Show
-
-data SEJobPair = 
-     SEJobPair { jobPairSpace :: T.Text   
-             , jobPairBench :: Int
-             , jobPairConfig :: Int 
-             }
-   deriving Show
