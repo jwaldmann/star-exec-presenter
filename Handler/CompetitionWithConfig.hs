@@ -6,7 +6,6 @@ import StarExec.CompetitionResults
 import StarExec.CompetitionResults.Type
 import StarExec.JobData
 import StarExec.STM
-import Presenter.RouteTypes
 import Utils.WidgetMetaRefresh
 import Data.Time.Clock
 

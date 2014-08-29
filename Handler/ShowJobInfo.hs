@@ -3,7 +3,6 @@ module Handler.ShowJobInfo where
 import Import
 import StarExec.JobData
 import StarExec.Types
-import Presenter.RouteTypes
 import Utils.WidgetMetaRefresh
 
 getShowJobInfoR :: Int -> Handler Html

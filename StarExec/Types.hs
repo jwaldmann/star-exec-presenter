@@ -10,7 +10,6 @@ import Text.Blaze
 import Text.Blaze.Internal
 import Network.HTTP.Conduit
 import GHC.Generics
-import Presenter.RouteTypes
 
 type Email = T.Text
 type Password = T.Text
@@ -125,11 +124,34 @@ data JobResultStatus = JobResultComplete | JobResultRunning | JobResultEnqueued
   deriving (Show, Read, Eq)
 derivePersistField "JobResultStatus"
 
+{-
+-}
+data ErrorID = LoginError | Unkown
+    deriving (Eq, Show, Read)
+
 instance PathPiece ErrorID where
     toPathPiece = toPathPiece . show
     fromPathPiece e = do
         err <- fromPathPiece e
         return $ read err
+
+{-
+-}
+newtype JobIds = JobIds [Int]
+  deriving (Show, Eq, Read)
+
+getids :: JobIds -> [Int]
+getids (JobIds ids) = ids
+
+instance PathMultiPiece JobIds where
+  toPathMultiPiece (JobIds ints) = toPathMultiPiece $ map show $ ints
+  fromPathMultiPiece (i:is) = do
+    int <- fromPathPiece i
+    (JobIds ints) <- case is of
+                          [] -> return $ JobIds []
+                          _ -> fromPathMultiPiece is
+    return $ JobIds (int:ints)
+  fromPathMultiPiece _ = Nothing
 
 data Scoring = Standard | Complexity
   deriving (Show, Read, Eq)
@@ -189,6 +211,9 @@ getCompetitionName = getMetaName . getMetaData
 
 getCompetitionDescription :: Competition -> Description
 getCompetitionDescription = getMetaDescription . getMetaData
+
+--getMetaCategories :: Competition -> [MetaCategory]
+--getMetaCategories (Competition _ ms) = ms
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp
