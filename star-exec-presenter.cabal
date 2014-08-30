@@ -24,6 +24,9 @@ library
                      Presenter.Model.Types
                      Presenter.Model.StarExec
                      Presenter.Model.Competition
+                     Presenter.Model.Complexity
+                     Presenter.Model.PersistInstances
+                     Presenter.Model
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
