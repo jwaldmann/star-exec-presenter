@@ -2,8 +2,17 @@ module Model where
 
 import Yesod
 import Data.Text (Text)
+import Data.ByteString (ByteString)
 import Database.Persist.Quasi
 import Data.Typeable (Typeable)
+import Data.Time.Clock (UTCTime)
+import Presenter.Model.StarExec
+  ( JobResultStatus
+  , SolverResult
+  , JobStatus
+  , SEQuery
+  )
+import Presenter.Model.Competition (Competition)
 import Prelude
 
 -- You can define all of your database entities in the entities file.

@@ -20,6 +20,10 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
+                     Presenter.Internal.Stringish
+                     Presenter.Model.Types
+                     Presenter.Model.StarExec
+                     Presenter.Model.Competition
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
