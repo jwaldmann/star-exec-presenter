@@ -1,0 +1,36 @@
+<h2>Registration for #{competitionName comp}
+
+<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014_Registration">
+   explanation
+
+<ul>
+  $forall mecat <- metacategories comp
+    <li>
+      <h3>#{metaCategoryName mecat}
+      will be run in the competition:
+      <ul>
+        $forall cat <- full_categories mecat
+          <li>
+            #{categoryName cat}:
+            $forall part <- participants (contents cat)
+                  $maybe conf <- solver_config part
+                       <span class="conf"> #{participantName part}
+                       (<a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}">#{show $ fst conf} </a>
+                       ,<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{snd conf}">#{show $ snd conf}</a>)
+                  $nothing
+                      <span class="noconf">#{participantName part}
+                  | 
+      will be run as demonstation:
+      <ul>
+        $forall cat <- demonstration_categories mecat
+          <li>
+            #{categoryName cat}:
+            $forall part <- participants (contents cat)
+                  $maybe conf <- solver_config part
+                       <span class="conf"> #{participantName part}
+                       (<a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}">#{show $ fst conf} </a>
+                       ,<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{snd conf}">#{show $ snd conf}</a>)
+                  $nothing
+                      <span class="noconf">#{participantName part}
+                  | 
+

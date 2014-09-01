@@ -14,5 +14,5 @@ cabal.sandbox.config
 *.swp
 .dir-locals.el
 examples.txt
-*~
 config/settings.yml
+*~

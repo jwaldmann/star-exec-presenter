@@ -36,6 +36,7 @@ library
                      Presenter.Model.Types
                      Presenter.Model
                      Presenter.Prelude
+                     Presenter.Registration
                      Presenter.Statistics
 
     if flag(dev) || flag(library-only)
