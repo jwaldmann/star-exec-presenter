@@ -20,6 +20,11 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
+                     Handler.Control
+                     Handler.ListHiddenCompetitions
+                     Handler.ListCompetitions
+                     Handler.Registered
+                     Presenter.Auth
                      Presenter.Internal.Stringish
                      Presenter.Model.Competition
                      Presenter.Model.CompetitionResults

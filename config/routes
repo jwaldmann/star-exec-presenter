@@ -4,4 +4,10 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/ HomeR GET POST
+/ HomeR GET
+
+/control ControlR GET POST
+/registered RegisteredR GET
+
+/hidden-test-runs ListHiddenCompetitionsR GET
+/test-runs ListCompetitionsR GET

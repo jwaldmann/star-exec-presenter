@@ -19,6 +19,13 @@ import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
 
+import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
+import Presenter.Auth (authSE)
+
+import qualified Data.Map.Strict as M
+import Control.Concurrent.STM
+import Control.Concurrent.SSem
+
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -30,6 +37,9 @@ data App = App
     , httpManager :: Manager
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
+    , sessionData :: TVar (Maybe SessionData)
+    , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
+    , dbSem :: SSem 
     }
 
 instance HasHttpManager App where
@@ -62,7 +72,7 @@ instance Yesod App where
 
     defaultLayout widget = do
         master <- getYesod
-        mmsg <- getMessage
+        --mmsg <- getMessage
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -74,6 +84,10 @@ instance Yesod App where
             $(combineStylesheets 'StaticR
                 [ css_normalize_css
                 , css_bootstrap_css
+                ])
+            $(combineScripts 'StaticR
+                [ js_jquery_js
+                , js_bootstrap_js
                 ])
             $(widgetFile "default-layout")
         giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
@@ -91,6 +105,11 @@ instance Yesod App where
     isAuthorized (AuthR _) _ = return Authorized
     isAuthorized FaviconR _ = return Authorized
     isAuthorized RobotsR _ = return Authorized
+
+    -- requires Authorization
+    isAuthorized ControlR _ = isAdmin
+    isAuthorized ListHiddenCompetitionsR _ = isAdmin
+    
     -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 
@@ -115,6 +134,13 @@ instance Yesod App where
         development || level == LevelWarn || level == LevelError
 
     makeLogger = return . appLogger
+
+isAdmin :: YesodAuth master => HandlerT master IO AuthResult
+isAdmin = do
+    mu <- maybeAuthId
+    return $ case mu of
+        Nothing -> AuthenticationRequired
+        Just _ -> Authorized
 
 -- How to run database actions.
 instance YesodPersist App where
@@ -142,7 +168,8 @@ instance YesodAuth App where
                     }
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def]
+    authPlugins _ = [ authSE ]
+    --authPlugins _ = [authBrowserId def]
 
     authHttpManager = httpManager
 
