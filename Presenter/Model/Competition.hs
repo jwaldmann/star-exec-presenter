@@ -2,9 +2,13 @@ module Presenter.Model.Competition where
 
 import Yesod
 import Presenter.Model.Types
-import Presenter.Model.StarExec
-import Prelude
+import Prelude (Show, Read, Eq, Ord, Int, ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
+
+data Scoring =
+  Standard
+  | Complexity
+  deriving (Show, Read, Eq)
 
 {-
   solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult

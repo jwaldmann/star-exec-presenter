@@ -38,11 +38,6 @@ data JobResultStatus =
   deriving (Show, Read, Eq)
 derivePersistField "JobResultStatus"
 
-data Scoring =
-  Standard
-  | Complexity
-  deriving (Show, Read, Eq)
-
 data StarExecSpace = StarExecSpace
   { spaceId :: Int
   , spaceParentId :: Maybe Int
@@ -73,7 +68,7 @@ all_in_hierarchy :: Space -> [Int]
 all_in_hierarchy s =
   benchmarks s ++ (children s >>= all_in_hierarchy)
 
-data StarExecJob = StarExecJob
+data StarExecJob = SEJob
   { postproc_id :: Int
   , description :: Text
   , job_name :: Text
@@ -86,7 +81,7 @@ data StarExecJob = StarExecJob
   , jobid :: Maybe Int
   } deriving ( Show )
 
-data StarExecJobPair = StarExecJobPair
+data StarExecJobPair = SEJobPair
   { jobPairSpace :: Text   
   , jobPairBench :: Int
   , jobPairConfig :: Int 

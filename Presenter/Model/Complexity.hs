@@ -17,7 +17,7 @@ import Control.Applicative
 data Bounds = Bounds
   { lower :: Function
   , upper :: Function
-  } deriving Eq
+  } deriving ( Eq )
 
 -- | test all branches of the original grammar:
 b1 = Bounds { lower = Infinite, upper = Infinite } -- NO

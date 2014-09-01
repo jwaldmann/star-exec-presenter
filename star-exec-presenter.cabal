@@ -21,12 +21,17 @@ library
                      Settings.Development
                      Handler.Home
                      Presenter.Internal.Stringish
-                     Presenter.Model.Types
-                     Presenter.Model.StarExec
                      Presenter.Model.Competition
+                     Presenter.Model.CompetitionResults
                      Presenter.Model.Complexity
+                     Presenter.Model.Entities
                      Presenter.Model.PersistInstances
+                     Presenter.Model.RouteTypes
+                     Presenter.Model.StarExec
+                     Presenter.Model.Types
                      Presenter.Model
+                     Presenter.Prelude
+                     Presenter.Statistics
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
