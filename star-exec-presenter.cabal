@@ -24,6 +24,24 @@ library
                      Handler.ListHiddenCompetitions
                      Handler.ListCompetitions
                      Handler.Registered
+                     Handler.ShowJobPair
+                     Handler.LegacyShowJobPair
+                     Handler.DisplayProof
+                     Handler.LegacyDisplayProof
+                     Handler.ShowJobInfo
+                     Handler.LegacyShowJobInfo
+                     Handler.ShowBenchmarkInfo
+                     Handler.LegacyShowBenchmarkInfo
+                     Handler.ShowSolverInfo
+                     Handler.LegacyShowSolverInfo
+                     Handler.ShowPostProcInfo
+                     Handler.LegacyShowPostProcInfo
+                     Handler.ShowManyJobResults
+                     Handler.LegacyShowManyJobResults
+                     Handler.LegacyShowJobResults
+                     Handler.FlexibleTable
+                     Handler.Competition
+                     Handler.CompetitionWithConfig
                      Presenter.Auth
                      Presenter.Internal.Stringish
                      Presenter.Model.Competition
@@ -31,6 +49,7 @@ library
                      Presenter.Model.Complexity
                      Presenter.Model.Entities
                      Presenter.Model.PersistInstances
+                     Presenter.Model.Query
                      Presenter.Model.RouteTypes
                      Presenter.Model.StarExec
                      Presenter.Model.Types

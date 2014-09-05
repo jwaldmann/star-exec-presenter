@@ -4,7 +4,42 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
+-- index-route
 / HomeR GET
+
+-- displays job-pair-infos
+/pair/#JobPairID ShowJobPairR GET
+/show_job_pair/#JobPairID LegacyShowJobPairR GET
+
+-- displays proofs of job-pairs
+/proof/#Text DisplayProofR GET
+/display_proof/#Text LegacyDisplayProofR GET
+
+-- displays job-infos
+/job/#JobID ShowJobInfoR GET
+/show_job_info/#JobID LegacyShowJobInfoR GET
+
+-- displays benchmark-infos
+/benchmark/#BenchmarkID ShowBenchmarkInfoR GET
+/show_benchmark_info/#BenchmarkID LegacyShowBenchmarkInfoR GET
+
+-- displays solver-infos
+/solver/#SolverID ShowSolverInfoR GET
+/show_solver_info/#SolverID LegacyShowSolverInfoR GET
+
+-- displays post-processor-infos
+/post_proc/#Int ShowPostProcInfoR GET
+/show_post_proc_info/#Int LegacyShowPostProcInfoR GET
+
+-- displays multiple job-results
+/results/#Query/*JobIds ShowManyJobResultsR GET
+/show_job_results/*JobIds LegacyShowJobResultsR GET
+/show_many_job_results/*JobIds LegacyShowManyJobResultsR GET
+/flexible-table/#Query/*JobIds FlexibleTableR GET
+
+-- displays competitions
+/competition/#CompetitionInfoId CompetitionR GET
+/competition_with_config/#Competition CompetitionWithConfigR GET
 
 /control ControlR GET POST
 /registered RegisteredR GET

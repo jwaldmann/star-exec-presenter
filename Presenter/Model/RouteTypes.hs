@@ -5,6 +5,7 @@ import Yesod
 import qualified Data.Text as T
 import qualified Data.Text.Read as TR
 import Presenter.Internal.Stringish
+import Presenter.Model.Query
 
 {-
 -}
@@ -75,9 +76,29 @@ instance PathPiece JobID where
   toPathPiece (LriJobID t) = toPathPiece ("lri." +> t)
   fromPathPiece t
     | "lri." `T.isPrefixOf` t = return $ LriJobID $ T.drop 4 t
-    | otherwise               =
+    | otherwise =
       case TR.decimal t of
         Right (i,_) -> return $ StarExecJobID i
+        Left _      -> Nothing
+
+instance PathPiece JobResultID where
+  toPathPiece (StarExecResultID i) = toPathPiece i
+  toPathPiece (LriResultID t) = toPathPiece ("lri." +> t)
+  fromPathPiece t
+    | "lri." `T.isPrefixOf` t = return $ LriResultID $ T.drop 4 t
+    | otherwise =
+      case TR.decimal t of
+        Right (i,_) -> return $ StarExecResultID i
+        Left _      -> Nothing
+
+instance PathPiece JobPairID where
+  toPathPiece (StarExecPairID i) = toPathPiece i
+  toPathPiece (LriPairID t) = toPathPiece ("lri." +> t)
+  fromPathPiece t
+    | "lri." `T.isPrefixOf` t = return $ LriPairID $ T.drop 4 t
+    | otherwise =
+      case TR.decimal t of
+        Right (i,_) -> return $ StarExecPairID i
         Left _      -> Nothing
 
 instance PathPiece BenchmarkID where
@@ -85,7 +106,7 @@ instance PathPiece BenchmarkID where
   toPathPiece (LriBenchmarkID t) = toPathPiece t
   fromPathPiece t
     | "lri." `T.isPrefixOf` t = return $ LriBenchmarkID $ T.drop 4 t
-    | otherwise               =
+    | otherwise =
       case TR.decimal t of
         Right (i,_) -> return $ StarExecBenchmarkID i
         Left _      -> Nothing
@@ -95,7 +116,7 @@ instance PathPiece SolverID where
   toPathPiece (LriSolverID t) = toPathPiece t
   fromPathPiece t
     | "lri." `T.isPrefixOf` t = return $ LriSolverID $ T.drop 4 t
-    | otherwise               =
+    | otherwise =
       case TR.decimal t of
         Right (i,_) -> return $ StarExecSolverID i
         Left _      -> Nothing
@@ -109,4 +130,12 @@ instance PathMultiPiece JobIds where
                           _ -> fromPathMultiPiece js
     return $ JobIds (job:jobs)
   fromPathMultiPiece _ = Nothing
+
+instance PathPiece Query where
+  fromPathPiece "noquery" = return NoQuery
+  fromPathPiece t = case reads (T.unpack t) of
+    [ (q, "") ] -> return q
+    _ -> Nothing
+  toPathPiece NoQuery = "noquery"
+  toPathPiece q = T.pack $ show q
 

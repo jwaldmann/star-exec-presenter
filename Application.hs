@@ -31,6 +31,24 @@ import Handler.Control
 import Handler.ListHiddenCompetitions
 import Handler.ListCompetitions
 import Handler.Registered
+import Handler.ShowJobPair
+import Handler.LegacyShowJobPair
+import Handler.DisplayProof
+import Handler.LegacyDisplayProof
+import Handler.ShowJobInfo
+import Handler.LegacyShowJobInfo
+import Handler.ShowBenchmarkInfo
+import Handler.LegacyShowBenchmarkInfo
+import Handler.ShowSolverInfo
+import Handler.LegacyShowSolverInfo
+import Handler.ShowPostProcInfo
+import Handler.LegacyShowPostProcInfo
+import Handler.ShowManyJobResults
+import Handler.LegacyShowManyJobResults
+import Handler.LegacyShowJobResults
+import Handler.FlexibleTable
+import Handler.Competition
+import Handler.CompetitionWithConfig
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
