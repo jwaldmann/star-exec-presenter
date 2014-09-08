@@ -77,9 +77,9 @@ getScoredResults results =
   in result
   where
     calcScores :: [JobResult] -> [JobResult]
-    calcScores jris =
-      if any (\r -> getResultStatus r /= JobResultComplete) jris
-        then jris
+    calcScores jrs =
+      if any (\r -> getResultStatus r /= JobResultComplete) jrs
+        then jrs
         else
           let hasScore jr = case getSolverResult jr of
                                 YES (Just _) -> True
@@ -89,8 +89,8 @@ getScoredResults results =
                   YES (Just i) -> i
                   _            -> 0
               insertScore jr set = S.insert (getScoreFromResult jr) set
-              scores = S.toList $ L.foldr insertScore S.empty $ filter hasScore jris
-              baseScore = 1 + length jris
+              scores = S.toList $ L.foldr insertScore S.empty $ filter hasScore jrs
+              baseScore = 1 + length jrs
               scoreIndex jr =
                 case L.elemIndex (getScoreFromResult jr) scores of
                   Nothing -> negate baseScore
@@ -99,7 +99,7 @@ getScoredResults results =
                                 if hasScore jri
                                   then baseScore - scoreIndex jri
                                   else 0
-          in map setScore jris
+          in map setScore jrs
 
 calcScoresBase :: (JobResult -> Int) -> [JobResult] -> M.Map SolverID Int
 calcScoresBase getScore = L.foldl' addScore M.empty

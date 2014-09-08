@@ -16,6 +16,7 @@ import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
+import Presenter.Prelude (diffTime)
 import Data.Time.Clock
 import Control.Concurrent.STM
 
