@@ -7,7 +7,7 @@ import Presenter.Model.StarExec
   ( SolverResult
   , JobResultStatus (..)
   , JobStatus)
-import Presenter.Model.Types (Seconds)
+import Presenter.Model.Types (Seconds, Name)
 import qualified Data.Text as T
 import Data.Maybe
 
@@ -22,14 +22,14 @@ class ResultEntity a where
 
 class BenchmarkEntity a where
   toBenchmarkID :: a -> BenchmarkID
-  toBenchmarkName :: a -> T.Text
+  toBenchmarkName :: a -> Name
 
 class SolverEntity a where
   toSolverID :: a -> SolverID
-  toSolverName :: a -> T.Text
+  toSolverName :: a -> Name
 
 class JobEntity a where
-  toJobName :: a -> T.Text
+  toJobName :: a -> Name
   toJobStatus :: a -> JobStatus
   toJobDuration :: a -> Seconds
 
@@ -46,6 +46,7 @@ class FromJobResult a where
 data Job =
   StarExecJob JobInfo
   | LriJob LriJobInfo
+  deriving (Eq, Ord, Read, Show)
 
 newtype Jobs = Jobs
   { getJobs :: [Job]
@@ -54,10 +55,15 @@ newtype Jobs = Jobs
 data JobResult =
   StarExecResult JobResultInfo
   | LriResult LriResultInfo
+  deriving (Eq, Ord, Read, Show)
 
 newtype JobResults = JobResults
   { getResults :: [JobResult]
   }
+
+data Pair  =
+  StarExecPair JobPairInfo
+  deriving (Eq, Ord, Read, Show)
 
 data Benchmark =
   StarExecBenchmark BenchmarkInfo

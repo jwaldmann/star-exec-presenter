@@ -12,7 +12,7 @@ data JobStatus =
   Complete
   | Incomplete
   | Started
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 derivePersistField "JobStatus"
 
 instance ToMarkup JobStatus where
@@ -26,7 +26,7 @@ data SolverResult =
   | MAYBE
   | ERROR
   | OTHER
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 derivePersistField "SolverResult"
 
 data JobResultStatus =
@@ -35,7 +35,7 @@ data JobResultStatus =
   | JobResultEnqueued
   | JobResultPending
   | JobResultUndetermined
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 derivePersistField "JobResultStatus"
 
 data StarExecSpace = StarExecSpace

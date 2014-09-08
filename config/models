@@ -30,7 +30,7 @@ JobResultInfo
     cpuTime Double
     wallclockTime Double
     result SolverResult
-    deriving Show
+    deriving Eq Ord Read Show
 
 LriResultInfo
     jobId Text
@@ -45,7 +45,7 @@ LriResultInfo
     checkResult SolverResult Maybe
     checkCpuTime Double Maybe
     checkWallclockTime Double Maybe
-    deriving Show
+    deriving Eq Ord Read Show
 
 JobPairInfo
     pairId Int
@@ -54,7 +54,7 @@ JobPairInfo
     log ByteString
     htmlProof ByteString Maybe
     resultStatus JobResultStatus default='JobResultUndetermined'
-    deriving Show
+    deriving Eq Ord Read Show
 
 JobInfo
     starExecId Int
@@ -69,13 +69,13 @@ JobInfo
     startDate UTCTime default=now()
     finishDate UTCTime Maybe
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
 
 LriJobInfo
     jobId Text
     UniqueLriJobInfo jobId
     name Text
-    deriving Show
+    deriving Eq Ord Read Show
 
 SolverInfo
     starExecId Int

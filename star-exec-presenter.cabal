@@ -47,6 +47,7 @@ library
                      Presenter.Model.Competition
                      Presenter.Model.CompetitionResults
                      Presenter.Model.Complexity
+                     Presenter.Model.Defaults
                      Presenter.Model.Entities
                      Presenter.Model.PersistInstances
                      Presenter.Model.Query
@@ -54,9 +55,17 @@ library
                      Presenter.Model.StarExec
                      Presenter.Model.Types
                      Presenter.Model
+                     Presenter.PersistHelper
                      Presenter.Prelude
+                     Presenter.Processing
                      Presenter.Registration
+                     Presenter.StarExec.Commands
+                     Presenter.StarExec.Concurrent
+                     Presenter.StarExec.Connection
+                     Presenter.StarExec.JobData
+                     Presenter.StarExec.Urls
                      Presenter.Statistics
+                     Presenter.Utils.WidgetMetaRefresh
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
