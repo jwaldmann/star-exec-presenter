@@ -15,10 +15,12 @@ import Data.Maybe
 
 class ResultEntity a where
   getSolverResult :: a -> SolverResult
+  getResultStatus :: a -> JobResultStatus
   toJobID :: a -> JobID
   toResultID :: a -> JobResultID
   isResultComplete :: a -> Bool
   updateScore :: a -> Maybe Int -> a
+  toScore :: a -> Maybe Int
 
 class BenchmarkEntity a where
   toBenchmarkID :: a -> BenchmarkID
@@ -91,6 +93,9 @@ instance ResultEntity JobResult where
   getSolverResult (StarExecResult r) = getSolverResult r
   getSolverResult (LriResult r) = getSolverResult r
 
+  getResultStatus (StarExecResult r) = getResultStatus r
+  getResultStatus (LriResult r) = getResultStatus r
+
   toJobID (StarExecResult r) = toJobID r
   toJobID (LriResult r) = toJobID r
 
@@ -103,8 +108,13 @@ instance ResultEntity JobResult where
   updateScore (StarExecResult r) = StarExecResult . (updateScore r)
   updateScore (LriResult r) = LriResult . (updateScore r)
 
+  toScore (StarExecResult r) = toScore r
+  toScore (LriResult r) = toScore r
+
 instance ResultEntity JobResultInfo where
   getSolverResult = jobResultInfoResult
+
+  getResultStatus = jobResultInfoStatus
 
   toJobID = StarExecJobID . jobResultInfoJobId
 
@@ -114,8 +124,12 @@ instance ResultEntity JobResultInfo where
 
   updateScore r s = r { jobResultInfoScore = s }
 
+  toScore = jobResultInfoScore
+
 instance ResultEntity LriResultInfo where
   getSolverResult = lriResultInfoResult
+
+  getResultStatus _ = JobResultComplete
 
   toJobID = LriJobID . lriResultInfoJobId
 
@@ -124,6 +138,8 @@ instance ResultEntity LriResultInfo where
   isResultComplete _ = True
 
   updateScore r s = r { lriResultInfoScore = s }
+
+  toScore = lriResultInfoScore
 
 -- #### FromJobResult ####
 
@@ -161,7 +177,7 @@ instance BenchmarkEntity JobResultInfo where
 instance BenchmarkEntity LriResultInfo where
   toBenchmarkID = LriBenchmarkID . lriResultInfoBenchmarkId
 
-  toBenchmarkName _ = ""
+  toBenchmarkName = lriResultInfoBenchmarkId
 
 instance BenchmarkEntity BenchmarkInfo where
   toBenchmarkID = StarExecBenchmarkID . benchmarkInfoStarExecId
@@ -197,7 +213,7 @@ instance SolverEntity JobResultInfo where
 instance SolverEntity LriResultInfo where
   toSolverID = LriSolverID . lriResultInfoSolverId
 
-  toSolverName _ = ""
+  toSolverName = lriResultInfoSolverId
 
 instance SolverEntity SolverInfo where
   toSolverID = StarExecSolverID . solverInfoStarExecId
