@@ -179,7 +179,7 @@ constructPostProcInfo _procId title tds =
   in parse basePostProcInfo $ zip keys' vals'
 
 -- | create jobxml DOM according to spec
-jobs_to_XML :: [ SEJob ] -> Document
+jobs_to_XML :: [ StarExecJob ] -> Document
 jobs_to_XML js = Document (Prologue [] Nothing []) root [] where 
     t x = T.pack $ show x
     b x = T.pack $ map Data.Char.toLower $ show x
@@ -202,7 +202,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
 -- then we produce an archive with the 5 non-empty jobs,
 -- and the extra result is
 -- [ Just 0, Nothing, Just 1, Just 2, Just 3, Nothing, Just 4 ]
-jobs_to_archive :: [ SEJob ] -> Maybe (BSL.ByteString, [Maybe Int])
+jobs_to_archive :: [ StarExecJob ] -> Maybe (BSL.ByteString, [Maybe Int])
 jobs_to_archive js = 
     let empty = null . jobpairs
         ne_js = filter ( not . empty ) js
@@ -379,10 +379,10 @@ getJobPairInfo (sec, man, cookies) _pairId = do
     then return Nothing
     else do
       respLog <- sendRequest (reqLog, man, responseCookieJar respStdout)
-      mPersistJobResult <- getPersistJobResult _pairId
+      mPersistJobResult <- getPersistJobResult $ StarExecPairID _pairId
       let resultStatus = case mPersistJobResult of
                             Nothing -> JobResultUndetermined
-                            Just jr -> jobResultInfoStatus jr
+                            Just jr -> getResultStatus jr
           stdout = responseBody respStdout
           htmlProof = getHtmlProof stdout
       return $ Just $ JobPairInfo _pairId
@@ -406,14 +406,14 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
-pushJobXML :: StarExecConnection -> Int -> [SEJob] -> Handler [SEJob]
+pushJobXML :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXML con spaceId jobs = do
   js <- pushJobXMLStarExec con spaceId jobs
   registerJobs $ catMaybes $ map jobid js
   return js
 
 
-pushJobXMLStarExec :: StarExecConnection -> Int -> [SEJob] -> Handler [SEJob]
+pushJobXMLStarExec :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just (bs, remap) -> do

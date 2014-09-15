@@ -15,6 +15,12 @@ import Control.Applicative
 
 -- ###### persist getter ######
 
+getEntity uniqueVal = runDB $ do
+  mVal <- getBy uniqueVal
+  case mVal of
+    Nothing -> return Nothing
+    Just val -> return $ Just $ entityVal val
+
 getPersistJobInfo :: JobID -> Handler (Maybe Job)
 getPersistJobInfo (StarExecJobID _id) = undefined
 getPersistJobInfo (LriJobID _id) = undefined
