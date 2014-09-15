@@ -2,11 +2,20 @@ module Handler.ShowSolverInfo where
 
 import Import
 import Presenter.StarExec.JobData
+import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 
+getDescription :: Solver -> Text
+getDescription (StarExecSolver s) = solverInfoDescription s
+getDescription _ = ""
+
+getLastUpdate :: Solver -> Text
+getLastUpdate (StarExecSolver s) = fromString $ show $ solverInfoLastUpdate s
+getLastUpdate _ = ""
+
 getShowSolverInfoR :: SolverID -> Handler Html
-getShowSolverInfoR (StarExecSolverID _id) = do
-  (QueryResult qStatus mSolverInfo) <- querySolverInfo _id
+getShowSolverInfoR sid@(StarExecSolverID _id) = do
+  (QueryResult qStatus mSolverInfo) <- querySolverInfo sid
   defaultLayout $ do
     case qStatus of
       Latest -> return ()

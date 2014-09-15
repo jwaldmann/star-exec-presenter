@@ -1,20 +1,20 @@
 $maybe solverInfo <- mSolverInfo
-  <h1>Solver-Info of "#{solverInfoName solverInfo}"
-  view original solver-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{show _solverId}">#{show _solverId}</a>
+  <h1>Solver-Info of "#{toSolverName solverInfo}"
+  view original solver-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{show _id}">#{show _id}</a>
 
   <div class="container">
     <table class="table" style="width: auto;">
       <tbody>
         <tr>
           <td>Name:
-          <td>#{solverInfoName solverInfo}
+          <td>#{toSolverName solverInfo}
         <tr>
           <td>Description:
-          <td>#{solverInfoDescription solverInfo}
+          <td>#{getDescription solverInfo}
         <tr>
           <td>Last Update from Star-Exec:
-          <td>#{show $ solverInfoLastUpdate solverInfo}
+          <td>#{getLastUpdate solverInfo}
 
 $nothing
-  <h1>Sorry, no solver with the id #{show _solverId} found!
+  <h1>Sorry, no solver with the id #{show _id} found!
   (try re-loading this page after a while)
