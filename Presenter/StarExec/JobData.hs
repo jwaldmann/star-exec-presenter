@@ -24,54 +24,74 @@ updateThreshold = 300
 getTime :: Handler UTCTime
 getTime = liftIO getCurrentTime
 
-queryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
-queryJob _jobId = do
+wrap :: (a -> b) -> QueryResult QueryInfo a -> Handler (QueryResult QueryInfo b)
+wrap f q = return $ QueryResult (queryStatus q) $ f (queryResult q)
+
+queryJob :: JobID -> Handler (QueryResult QueryInfo (Maybe Job, [JobResult]))
+queryJob _jobId@(StarExecJobID jid) = do
   mPersistJobInfo <- getPersistJobInfo _jobId
   currentTime <- getTime
   case mPersistJobInfo of
-    Just persistJobInfo -> do
+    Just (StarExecJob persistJobInfo) -> do
       let since = diffTime currentTime $ jobInfoLastUpdate persistJobInfo
           jobComplete = Complete == jobInfoStatus persistJobInfo
       if (not jobComplete) || (since > updateThreshold)
-        then runQueryJob _jobId
+        then runQueryJob jid >>= wrap'
         else do
           persistJobResults <- getPersistJobResults _jobId
-          return $ QueryResult Latest (Just persistJobInfo, persistJobResults)
-    Nothing -> runQueryJob _jobId
+          return $ QueryResult Latest (mPersistJobInfo, persistJobResults)
+    _ -> runQueryJob jid >>= wrap'
+  where
+    wrap' = wrap $ \(mJobInfo, results) ->
+      (StarExecJob <$> mJobInfo, map StarExecResult results)
+queryJob _jobId = do
+  mPersistJobInfo <- getPersistJobInfo _jobId
+  case mPersistJobInfo of
+    Just persistJobInfo -> do
+      persistJobResults <- getPersistJobResults _jobId
+      return $ QueryResult Latest (mPersistJobInfo, persistJobResults)
+    Nothing -> return $ QueryResult Latest (Nothing, [])
 
-querySolverInfo :: Int -> Handler (QueryResult QueryInfo (Maybe SolverInfo))
-querySolverInfo _solverId = do
+querySolverInfo :: SolverID -> Handler (QueryResult QueryInfo (Maybe Solver))
+querySolverInfo _solverId@(StarExecSolverID sid) = do
   mPersistSolverInfo <- getPersistSolverInfo _solverId
   currentTime <- getTime
   case mPersistSolverInfo of
-    Just persistSolverInfo -> do
+    Just (StarExecSolver persistSolverInfo) -> do
       let since = diffTime currentTime $ solverInfoLastUpdate persistSolverInfo
       if since > updateThreshold
-        then runQuerySolverInfo _solverId
-        else return $ QueryResult Latest $ Just persistSolverInfo
-    Nothing -> runQuerySolverInfo _solverId
+        then runQuerySolverInfo sid >>= wrap (fmap StarExecSolver)
+        else return $ QueryResult Latest mPersistSolverInfo
+    _ -> runQuerySolverInfo sid >>= wrap (fmap StarExecSolver)
+querySolverInfo _solverId = do
+  mPersistSolverInfo <- getPersistSolverInfo _solverId
+  return $ QueryResult Latest mPersistSolverInfo
 
-queryBenchmarkInfo :: Int -> Handler (QueryResult QueryInfo (Maybe BenchmarkInfo))
-queryBenchmarkInfo _benchmarkId = do
+queryBenchmarkInfo :: BenchmarkID -> Handler (QueryResult QueryInfo (Maybe Benchmark))
+queryBenchmarkInfo _benchmarkId@(StarExecBenchmarkID bid) = do
   mPersistBenchmarkInfo <- getPersistBenchmarkInfo _benchmarkId
   currentTime <- getTime
   case mPersistBenchmarkInfo of
-    Just persistBenchmarkInfo -> do
+    Just (StarExecBenchmark persistBenchmarkInfo) -> do
       let since = diffTime currentTime $ benchmarkInfoLastUpdate persistBenchmarkInfo
       if since > updateThreshold
-        then runQueryBenchmarkInfo _benchmarkId
-        else return $ QueryResult Latest $ Just persistBenchmarkInfo
-    Nothing -> runQueryBenchmarkInfo _benchmarkId
+        then runQueryBenchmarkInfo bid >>= wrap (fmap StarExecBenchmark)
+        else return $ QueryResult Latest mPersistBenchmarkInfo
+    _ -> runQueryBenchmarkInfo bid >>= wrap (fmap StarExecBenchmark)
+queryBenchmarkInfo _benchmarkId = do
+  mPersistBenchmarkInfo <- getPersistBenchmarkInfo _benchmarkId
+  return $ QueryResult Latest mPersistBenchmarkInfo
 
-queryJobPair :: Int -> Handler (QueryResult QueryInfo (Maybe JobPairInfo))
-queryJobPair _pairId = do
+queryJobPair :: JobPairID -> Handler (QueryResult QueryInfo (Maybe Pair))
+queryJobPair _pairId@(StarExecPairID pid) = do
   mPersistPairInfo <- getPersistJobPair _pairId
   case mPersistPairInfo of
-    Just persistPairInfo -> do
+    Just (StarExecPair persistPairInfo) -> do
       if jobPairInfoResultStatus persistPairInfo == JobResultComplete
-        then return $ QueryResult Latest $ Just persistPairInfo
-        else runQueryJobPair _pairId
-    Nothing -> runQueryJobPair _pairId
+        then return $ QueryResult Latest mPersistPairInfo
+        else runQueryJobPair pid >>= wrap (fmap StarExecPair)
+    _ -> runQueryJobPair pid >>= wrap (fmap StarExecPair)
+queryJobPair _pairId = undefined
 
 queryPostProc :: Int -> Handler (QueryResult QueryInfo (Maybe PostProcInfo))
 queryPostProc _procId = do
@@ -85,5 +105,5 @@ queryPostProc _procId = do
         else return $ QueryResult Latest $ Just persistPostProcInfo
     Nothing -> runQueryPostProcInfo _procId
 
-queryManyJobs :: [Int] -> Handler [QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo])]
+queryManyJobs :: [JobID] -> Handler [QueryResult QueryInfo (Maybe Job, [JobResult])]
 queryManyJobs = mapM queryJob

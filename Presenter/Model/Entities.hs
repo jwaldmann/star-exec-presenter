@@ -227,6 +227,10 @@ instance SolverEntity LriSolverInfo where
 
 -- ###### HELPER ######
 
+isStarExecJob :: Job -> Bool
+isStarExecJob (StarExecJob _) = True
+isStarExecJob _ = False
+
 isStarExecResult :: JobResult -> Bool
 isStarExecResult (StarExecResult _) = True
 isStarExecResult _ = False

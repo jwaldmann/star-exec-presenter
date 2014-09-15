@@ -93,15 +93,11 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
                 mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
                 return $ QueryResult Latest mPersistInfo'
 
-runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe Job, [JobResult]))
+runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
 runQueryJob _jobId = do
   let q = GetJob _jobId
-      j = StarExecJobID _jobId
-  mPersistJobInfo <- getPersistJobInfo j
-  let mJobInfo = case mPersistJobInfo of
-        Just (StarExecJob ji) -> Just ji
-        _                     -> Nothing
-  persistJobResults <- getPersistJobResults j
+  mPersistJobInfo <- getPersistStarExecJobInfo _jobId
+  persistJobResults <- getPersistStarExecJobResults _jobId
   runQueryBase q $ \mQuery ->
     case mQuery of
       Just eq -> 
@@ -138,7 +134,7 @@ runQueryJob _jobId = do
             mQuery' <- getQuery q
             case mQuery' of
               Just eq -> do
-                persistJobResults' <- getPersistJobResults j
+                persistJobResults' <- getPersistStarExecJobResults _jobId
                 return $ pendingQuery (entityKey eq) (mPersistJobInfo, persistJobResults')
               Nothing -> do
                 return $ QueryResult Latest (mPersistJobInfo, persistJobResults)

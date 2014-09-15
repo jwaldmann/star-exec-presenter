@@ -15,11 +15,18 @@ import Control.Applicative
 
 -- ###### persist getter ######
 
+getEntityList _filter _opts = runDB $ do
+  results <- selectList _filter _opts
+  return $ map entityVal results
+
 getEntity uniqueVal = runDB $ do
   mVal <- getBy uniqueVal
   case mVal of
     Nothing -> return Nothing
     Just val -> return $ Just $ entityVal val
+
+getPersistStarExecJobInfo :: Int -> Handler (Maybe JobInfo)
+getPersistStarExecJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
 
 getPersistJobInfo :: JobID -> Handler (Maybe Job)
 getPersistJobInfo (StarExecJobID _id) = undefined
@@ -35,6 +42,9 @@ getPersistJobResults (LriJobID _id) = undefined
 getPersistJobResult :: JobPairID -> Handler (Maybe JobResult)
 getPersistJobResult (StarExecPairID _id) = undefined
 getPersistJobResult (LriPairID _id) = undefined
+
+getPersistStarExecJobResults :: Int -> Handler [JobResultInfo]
+getPersistStarExecJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
 
 getPersistCompetitions :: Handler [Entity CompetitionInfo]
 getPersistCompetitions = undefined
