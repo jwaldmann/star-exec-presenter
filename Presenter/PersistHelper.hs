@@ -15,51 +15,97 @@ import Control.Applicative
 
 -- ###### persist getter ######
 
-getEntityList _filter _opts = runDB $ do
+getEntityList _filter _opts = runDB $ getEntityList' _filter _opts
+
+getEntityList' _filter _opts = do
   results <- selectList _filter _opts
   return $ map entityVal results
 
-getEntity uniqueVal = runDB $ do
+getEntity uniqueVal = runDB $ getEntity' uniqueVal
+
+getEntity' uniqueVal = do
   mVal <- getBy uniqueVal
-  case mVal of
-    Nothing -> return Nothing
-    Just val -> return $ Just $ entityVal val
+  return $ entityVal <$> mVal
+
+getEntityVal' uniqueVal dataConstructor = do
+  mVal <- getEntity' uniqueVal
+  return $ dataConstructor <$> mVal
 
 getPersistStarExecJobInfo :: Int -> Handler (Maybe JobInfo)
-getPersistStarExecJobInfo _jobId = getEntity $ UniqueJobInfo _jobId
+getPersistStarExecJobInfo = getEntity . UniqueJobInfo
+
+getPersistStarExecJobInfo' :: Int -> YesodDB App (Maybe JobInfo)
+getPersistStarExecJobInfo' = getEntity' . UniqueJobInfo
 
 getPersistJobInfo :: JobID -> Handler (Maybe Job)
-getPersistJobInfo (StarExecJobID _id) = undefined
-getPersistJobInfo (LriJobID _id) = undefined
+getPersistJobInfo = runDB . getPersistJobInfo'
+
+getPersistJobInfo' :: JobID -> YesodDB App (Maybe Job)
+getPersistJobInfo' (StarExecJobID _id) = getEntityVal' (UniqueJobInfo _id) StarExecJob
+getPersistJobInfo' (LriJobID _id) = getEntityVal' (UniqueLriJobInfo _id) LriJob
 
 getPersistPostProcInfo :: Int -> Handler (Maybe PostProcInfo)
-getPersistPostProcInfo _procId = undefined
+getPersistPostProcInfo = getEntity . UniquePostProcInfo
+
+getPersistPostProcInfo' :: Int -> YesodDB App (Maybe PostProcInfo)
+getPersistPostProcInfo' = getEntity' . UniquePostProcInfo
 
 getPersistJobResults :: JobID -> Handler [JobResult]
-getPersistJobResults (StarExecJobID _id) = undefined
-getPersistJobResults (LriJobID _id) = undefined
+getPersistJobResults = runDB . getPersistJobResults'
+
+getPersistJobResults' :: JobID -> YesodDB App [JobResult]
+getPersistJobResults' (StarExecJobID _id) = do
+  results <- getEntityList' [ JobResultInfoJobId ==. _id ] []
+  return $ StarExecResult <$> results
+getPersistJobResults' (LriJobID _id) = do
+  results <- getEntityList' [ LriResultInfoJobId ==. _id ] []
+  return $ LriResult <$> results
 
 getPersistJobResult :: JobPairID -> Handler (Maybe JobResult)
-getPersistJobResult (StarExecPairID _id) = undefined
-getPersistJobResult (LriPairID _id) = undefined
+getPersistJobResult = runDB . getPersistJobResult'
+
+getPersistJobResult' :: JobPairID -> YesodDB App (Maybe JobResult)
+getPersistJobResult' (StarExecPairID _id) = getEntityVal' (UniqueJobResultInfo _id) StarExecResult
+getPersistJobResult' _ = error "getPersistJobResult': not yet implemented"
 
 getPersistStarExecJobResults :: Int -> Handler [JobResultInfo]
 getPersistStarExecJobResults _jobId = getEntityList [ JobResultInfoJobId ==. _jobId ] []
 
+getPersistStarExecJobResults' :: Int -> YesodDB App [JobResultInfo]
+getPersistStarExecJobResults' _jobId = getEntityList' [ JobResultInfoJobId ==. _jobId ] []
+
 getPersistCompetitions :: Handler [Entity CompetitionInfo]
-getPersistCompetitions = undefined
+getPersistCompetitions = runDB $ getPersistCompetitions'
+
+getPersistCompetitions' :: YesodDB App [Entity CompetitionInfo]
+getPersistCompetitions' = selectList [] [ Desc CompetitionInfoDate ]
 
 getPersistPublicCompetitions :: Handler [Entity CompetitionInfo]
-getPersistPublicCompetitions = undefined
+getPersistPublicCompetitions = runDB $ getPersistPublicCompetitions'
+
+getPersistPublicCompetitions' :: YesodDB App [Entity CompetitionInfo]
+getPersistPublicCompetitions' = selectList [ CompetitionInfoPublic ==. True ] [ Desc CompetitionInfoDate ]
 
 getPersistJobPair :: JobPairID -> Handler (Maybe Pair)
-getPersistJobPair = undefined
+getPersistJobPair = runDB . getPersistJobPair'
+
+getPersistJobPair' :: JobPairID -> YesodDB App (Maybe Pair)
+getPersistJobPair' (StarExecPairID _id) = getEntityVal' (UniqueJobPairInfo _id) StarExecPair
+getPersistJobPair' _ = error "getPersistJobPair': not yet implemented"
 
 getPersistSolverInfo :: SolverID -> Handler (Maybe Solver)
-getPersistSolverInfo = undefined
+getPersistSolverInfo = runDB . getPersistSolverInfo'
+
+getPersistSolverInfo' :: SolverID -> YesodDB App (Maybe Solver)
+getPersistSolverInfo' (StarExecSolverID _id) = getEntityVal' (UniqueSolverInfo _id) StarExecSolver
+getPersistSolverInfo' (LriSolverID _id) = getEntityVal' (UniqueLriSolverInfo _id) LriSolver
 
 getPersistBenchmarkInfo :: BenchmarkID -> Handler (Maybe Benchmark)
-getPersistBenchmarkInfo = undefined
+getPersistBenchmarkInfo = runDB . getPersistBenchmarkInfo'
+
+getPersistBenchmarkInfo' :: BenchmarkID -> YesodDB App (Maybe Benchmark)
+getPersistBenchmarkInfo' (StarExecBenchmarkID _id) = getEntityVal' (UniqueBenchmarkInfo _id) StarExecBenchmark
+getPersistBenchmarkInfo' (LriBenchmarkID _id) = getEntityVal' (UniqueLriBenchmarkInfo _id) LriBenchmark
 
 -- ###### persist setter (inserts) ######
 
