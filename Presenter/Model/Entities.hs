@@ -2,14 +2,16 @@ module Presenter.Model.Entities where
 
 import Prelude
 import Model
+import Presenter.Prelude
 import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
   ( SolverResult
   , JobResultStatus (..)
-  , JobStatus)
+  , JobStatus(..))
 import Presenter.Model.Types (Seconds, Name)
 import qualified Data.Text as T
 import Data.Maybe
+import Control.Applicative
 
 -- ###### TYPE-CLASSES ######
 
@@ -33,7 +35,7 @@ class SolverEntity a where
 class JobEntity a where
   toJobName :: a -> Name
   toJobStatus :: a -> JobStatus
-  toJobDuration :: a -> Seconds
+  toJobDuration :: a -> Maybe Seconds
 
 class FromJobResult a where
   fromJobResult :: JobResult -> Maybe a
@@ -224,6 +226,33 @@ instance SolverEntity LriSolverInfo where
   toSolverID = LriSolverID . lriSolverInfoSolverId
 
   toSolverName = lriSolverInfoName
+
+-- #### JobEntity ####
+
+instance JobEntity Job where
+  toJobName (StarExecJob j) = toJobName j
+  toJobName (LriJob j) = toJobName j
+
+  toJobStatus (StarExecJob j) = toJobStatus j
+  toJobStatus _ = Complete
+
+  toJobDuration (StarExecJob j) = toJobDuration j
+  toJobDuration _ = Nothing
+
+instance JobEntity JobInfo where
+  toJobName = jobInfoName
+
+  toJobStatus = jobInfoStatus
+
+  toJobDuration j =
+    diffTime <$> (jobInfoFinishDate j) <*> Just (jobInfoStartDate j)
+
+instance JobEntity LriJobInfo where
+  toJobName = lriJobInfoName
+
+  toJobStatus _ = Complete
+
+  toJobDuration _ = Nothing
 
 -- ###### HELPER ######
 

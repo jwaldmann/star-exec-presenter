@@ -1,0 +1,16 @@
+$maybe jobInfo <- mJobInfo
+  <h1>Job-Infos of "#{toJobName jobInfo}"
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{toJobName jobInfo}
+        <tr>
+          <td>Status:
+          <td>#{show $ toJobStatus jobInfo}
+    <a href=@{ShowManyJobResultsR NoQuery (JobIds [jid])}>Show Job-Results</a>
+
+$nothing
+  <h1>Sorry, no job with the id #{show _id} found!

@@ -3,7 +3,7 @@ module Presenter.Prelude
   ) where
 
 import Prelude
-import Presenter.Model (Seconds)
+import Presenter.Model.Types (Seconds)
 import Data.Time.Clock
 
 fromDiffTime :: NominalDiffTime -> Seconds
