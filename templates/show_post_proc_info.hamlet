@@ -1,0 +1,18 @@
+$maybe procInfo <- mPostProcInfo
+  <h1>Post-Processor-Infos of "#{postProcInfoName procInfo}"
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{postProcInfoName procInfo}
+        <tr>
+          <td>Description:
+          <td>#{postProcInfoDescription procInfo}
+        <tr>
+          <td>Last Update from Star-Exec:
+          <td>#{show $ postProcInfoLastUpdate procInfo}
+
+$nothing
+  <h1>Sorry, no post-processor with the id #{show _procId} found!
