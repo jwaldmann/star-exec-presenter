@@ -3,6 +3,7 @@ module Presenter.Statistics where
 import Prelude
 import Model
 import Presenter.Model.StarExec
+import Presenter.Model.Entities
 import Control.Applicative
 import Data.Monoid
 import Text.Blaze
@@ -18,15 +19,15 @@ data Statistics = Statistics
     , cpu :: ! Double, wallclock :: ! Double
     } deriving Show
 
-jobStat :: JobResultInfo -> Statistics
+jobStat :: JobResult -> Statistics
 jobStat i = 
-    let done = jobResultInfoStatus i == JobResultComplete
+    let done = isResultComplete i
     in  Statistics
         { complete = done
         , startTime = Nothing , finishTime = Nothing -- FIXME
         , pairs = 1 , pairsCompleted = if done then 1 else 0
-        , cpu = jobResultInfoCpuTime i
-        , wallclock = jobResultInfoWallclockTime i
+        , cpu = toCpuTime i
+        , wallclock = toWallclockTime i
         }
 
 instance ToMarkup Statistics where

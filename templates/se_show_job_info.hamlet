@@ -22,7 +22,7 @@ $maybe jobInfo <- mJobInfo
           <td>#{getPostProc jobInfo}
         <tr>
           <td>IsComplexity:
-          <td>#{isComplexity jobInfo}
+          <td>#{isComplexity_ jobInfo}
         <tr>
           <td>Start-Date:
           <td>#{getStartDate jobInfo}

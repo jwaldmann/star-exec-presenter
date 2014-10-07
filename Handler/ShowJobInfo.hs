@@ -18,9 +18,8 @@ getPostProc :: Job -> Text
 getPostProc (StarExecJob j) = jobInfoPostProc j
 getPostProc _ = notAvailable
 
-isComplexity :: Job -> Text
-isComplexity (StarExecJob j) = fromBool $ jobInfoIsComplexity j
-isComplexity _ = no
+isComplexity_ :: Job -> Text
+isComplexity_ j = fromBool $ isComplexity j
 
 getStartDate :: Job -> Text
 getStartDate (StarExecJob j) = fromString $ show $ jobInfoStartDate j

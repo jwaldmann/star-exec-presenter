@@ -18,11 +18,14 @@ import Control.Applicative
 class ResultEntity a where
   getSolverResult :: a -> SolverResult
   getResultStatus :: a -> JobResultStatus
-  toJobID :: a -> JobID
+  getJobID :: a -> JobID
+  getPairID :: a -> JobPairID
   toResultID :: a -> JobResultID
   isResultComplete :: a -> Bool
   updateScore :: a -> Maybe Int -> a
   toScore :: a -> Maybe Int
+  toCpuTime :: a -> Double
+  toWallclockTime :: a -> Double
 
 class BenchmarkEntity a where
   toBenchmarkID :: a -> BenchmarkID
@@ -34,8 +37,10 @@ class SolverEntity a where
 
 class JobEntity a where
   toJobName :: a -> Name
+  toJobID :: a -> JobID
   toJobStatus :: a -> JobStatus
   toJobDuration :: a -> Maybe Seconds
+  isComplexity :: a -> Bool
 
 class FromJobResult a where
   fromJobResult :: JobResult -> Maybe a
@@ -98,8 +103,11 @@ instance ResultEntity JobResult where
   getResultStatus (StarExecResult r) = getResultStatus r
   getResultStatus (LriResult r) = getResultStatus r
 
-  toJobID (StarExecResult r) = toJobID r
-  toJobID (LriResult r) = toJobID r
+  getJobID (StarExecResult r) = getJobID r
+  getJobID (LriResult r) = getJobID r
+
+  getPairID (StarExecResult r) = getPairID r
+  getPairID (LriResult r) = getPairID r
 
   toResultID (StarExecResult r) = toResultID r
   toResultID (LriResult r) = toResultID r
@@ -113,12 +121,20 @@ instance ResultEntity JobResult where
   toScore (StarExecResult r) = toScore r
   toScore (LriResult r) = toScore r
 
+  toCpuTime (StarExecResult r) = toCpuTime r
+  toCpuTime (LriResult r) = toCpuTime r
+
+  toWallclockTime (StarExecResult r) = toWallclockTime r
+  toWallclockTime (LriResult r) = toWallclockTime r
+
 instance ResultEntity JobResultInfo where
   getSolverResult = jobResultInfoResult
 
   getResultStatus = jobResultInfoStatus
 
-  toJobID = StarExecJobID . jobResultInfoJobId
+  getJobID = StarExecJobID . jobResultInfoJobId
+
+  getPairID = StarExecPairID . jobResultInfoPairId
 
   toResultID = StarExecResultID . jobResultInfoPairId
 
@@ -128,12 +144,18 @@ instance ResultEntity JobResultInfo where
 
   toScore = jobResultInfoScore
 
+  toCpuTime = jobResultInfoCpuTime
+
+  toWallclockTime = jobResultInfoWallclockTime
+
 instance ResultEntity LriResultInfo where
   getSolverResult = lriResultInfoResult
 
   getResultStatus _ = JobResultComplete
 
-  toJobID = LriJobID . lriResultInfoJobId
+  getJobID = LriJobID . lriResultInfoJobId
+
+  getPairID = LriPairID . lriResultInfoPairId
 
   toResultID = LriResultID . lriResultInfoPairId
 
@@ -142,6 +164,10 @@ instance ResultEntity LriResultInfo where
   updateScore r s = r { lriResultInfoScore = s }
 
   toScore = lriResultInfoScore
+
+  toCpuTime = lriResultInfoCpuTime
+
+  toWallclockTime = lriResultInfoWallclockTime
 
 -- #### FromJobResult ####
 
@@ -233,26 +259,40 @@ instance JobEntity Job where
   toJobName (StarExecJob j) = toJobName j
   toJobName (LriJob j) = toJobName j
 
+  toJobID (StarExecJob j) = toJobID j
+  toJobID (LriJob j) = toJobID j
+
   toJobStatus (StarExecJob j) = toJobStatus j
   toJobStatus _ = Complete
 
   toJobDuration (StarExecJob j) = toJobDuration j
   toJobDuration _ = Nothing
 
+  isComplexity (StarExecJob j) = isComplexity j
+  isComplexity _ = False
+
 instance JobEntity JobInfo where
   toJobName = jobInfoName
+
+  toJobID = StarExecJobID . jobInfoStarExecId
 
   toJobStatus = jobInfoStatus
 
   toJobDuration j =
     diffTime <$> (jobInfoFinishDate j) <*> Just (jobInfoStartDate j)
 
+  isComplexity = jobInfoIsComplexity
+
 instance JobEntity LriJobInfo where
   toJobName = lriJobInfoName
+
+  toJobID = LriJobID . lriJobInfoJobId
 
   toJobStatus _ = Complete
 
   toJobDuration _ = Nothing
+
+  isComplexity _ = False
 
 -- ###### HELPER ######
 

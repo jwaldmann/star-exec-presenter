@@ -132,6 +132,8 @@ registerJobs ids = do
 
 updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
 updateJobInfo mJobInfo jobInfo = do
+  liftIO $ putStrLn "#### updateJobInfo: jobInfo"
+  liftIO $ putStrLn $ show jobInfo
   currentTime <- liftIO getCurrentTime
   case mJobInfo of
     Just ji -> updateWhere

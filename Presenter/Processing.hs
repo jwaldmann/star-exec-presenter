@@ -59,7 +59,7 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
     isResult _benchmarkId _solverId _jobId jr =
       (toBenchmarkID jr == _benchmarkId) &&
         (toSolverID jr == _solverId) &&
-        (toJobID jr == _jobId)
+        (getJobID jr == _jobId)
 
 compareBenchmarks :: UniqueBenchmark -> UniqueBenchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
