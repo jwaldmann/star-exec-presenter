@@ -122,7 +122,7 @@ runQueryJob _jobId = do
                           else results
 
                   runDB_exclusive $ do
-                    updateJobInfo mJobInfo ji
+                    updateJobInfo mPersistJobInfo ji
                     deleteWhere [JobResultInfoJobId ==. _jobId]
                     mapM_ insertUnique processedResults
                   return ()
