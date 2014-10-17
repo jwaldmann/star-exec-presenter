@@ -35,6 +35,10 @@ class SolverEntity a where
   toSolverID :: a -> SolverID
   toSolverName :: a -> Name
 
+class ConfigEntity a where
+  toConfigID :: a -> ConfigID
+  toConfigName :: a -> Name
+
 class JobEntity a where
   toJobName :: a -> Name
   toJobID :: a -> JobID
@@ -91,6 +95,14 @@ data Solver =
 newtype Solvers = Solvers
   { getSolvers :: [Solver]
   }
+
+data ConfigID = 
+  StarExecConfigID Int
+  | LriConfigID
+  deriving (Eq, Ord, Read, Show)
+
+lriConfigName :: Name
+lriConfigName = "lri_config"
 
 -- ###### INSTANCES ######
 
@@ -252,6 +264,25 @@ instance SolverEntity LriSolverInfo where
   toSolverID = LriSolverID . lriSolverInfoSolverId
 
   toSolverName = lriSolverInfoName
+
+-- #### ConfigEntity ####
+
+instance ConfigEntity JobResult where
+  toConfigID (StarExecResult r) = toConfigID r
+  toConfigID (LriResult r) = toConfigID r
+
+  toConfigName (StarExecResult r) = toConfigName r
+  toConfigName (LriResult r) = toConfigName r
+
+instance ConfigEntity JobResultInfo where
+  toConfigID = StarExecConfigID . jobResultInfoConfigurationId
+
+  toConfigName = jobResultInfoConfiguration
+
+instance ConfigEntity LriResultInfo where
+  toConfigID _ = LriConfigID
+
+  toConfigName _ = lriConfigName
 
 -- #### JobEntity ####
 

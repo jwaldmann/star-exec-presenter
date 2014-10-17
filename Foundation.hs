@@ -15,11 +15,17 @@ import Database.Persist.Sql (SqlPersistT)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Presenter.Model
+--import Presenter.Model.Types (SessionData)
+--import Presenter.Model.CompetitionResults (CompetitionResults)
+--import Presenter.Model.Competition (CompetitionMeta, Competition)
+--import Presenter.Model.RouteTypes
+--import Presenter.Model.Query
+--import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
 
-import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
+--import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
 import Presenter.Auth (authSE)
 import Data.Text (Text)
 

@@ -6,6 +6,7 @@ import Presenter.Internal.Stringish
 import Presenter.Processing
 import Presenter.Statistics
 import Presenter.Utils.WidgetMetaRefresh
+import Presenter.Utils.WidgetTable
 import Text.Lucius (luciusFile)
 import Data.Double.Conversion.Text
 import Data.Maybe
@@ -54,4 +55,34 @@ getShowManyJobResultsR NoQuery  jids@(JobIds ids) = do
       else return ()
     $(widgetFile "show_many_job_results")
 
-getShowManyJobResultsR query ids = error "Not yet implemented: getShowManyJobResultsR with query"
+getShowManyJobResultsR q@(Query ts) jids @ (JobIds ids) = do
+  qJobs <- queryManyJobs ids
+  tab <- getManyJobCells $ map (snd . queryResult) qJobs
+  defaultLayout $ do
+    setTitle "Flexible Table"
+    toWidget $(luciusFile "templates/solver_result.lucius")
+    if any (\q -> queryStatus q /= Latest) qJobs
+      then insertWidgetMetaRefresh
+      else return ()
+    [whamlet|
+            <pre>#{show q}
+        |]
+    display jids [] ts tab
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

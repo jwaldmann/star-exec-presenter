@@ -44,6 +44,7 @@ library
                      Handler.CompetitionWithConfig
                      Presenter.Auth
                      Presenter.Internal.Stringish
+                     Presenter.Model.Additional.Table
                      Presenter.Model.Competition
                      Presenter.Model.CompetitionResults
                      Presenter.Model.Complexity
@@ -66,6 +67,7 @@ library
                      Presenter.StarExec.Urls
                      Presenter.Statistics
                      Presenter.Utils.WidgetMetaRefresh
+                     Presenter.Utils.WidgetTable
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

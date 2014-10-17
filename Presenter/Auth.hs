@@ -12,7 +12,7 @@ import Yesod.Form (runInputPost, textField, ireq)
 import Text.Hamlet (hamlet)
 import Yesod.Core
 
-import Presenter.Model ( Login (..))
+import Presenter.Model.Types ( Login (..))
 import System.Directory ( getHomeDirectory )
 import qualified Yesod.Auth.Message as Msg
 
