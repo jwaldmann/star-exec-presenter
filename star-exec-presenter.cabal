@@ -43,6 +43,7 @@ library
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Presenter.Auth
+                     Presenter.CompetitionResults
                      Presenter.Internal.Stringish
                      Presenter.Model.Additional.Table
                      Presenter.Model.Competition
@@ -66,6 +67,7 @@ library
                      Presenter.StarExec.JobData
                      Presenter.StarExec.Urls
                      Presenter.Statistics
+                     Presenter.STM
                      Presenter.Utils.WidgetMetaRefresh
                      Presenter.Utils.WidgetTable
 
