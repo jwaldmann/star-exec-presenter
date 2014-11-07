@@ -5,12 +5,16 @@ import Model
 import Presenter.Model.Types
 import Presenter.Model.Competition
 import Presenter.Model.Entities
+import Presenter.Model.RouteTypes
 import Presenter.Statistics
 import Data.Time.Clock
 
+type SolverName = Name
+type UniqueSolver = (SolverID, SolverName)
+
 data SolverRankEntry = SolverRankEntry
   { rank :: Maybe Rank
-  , solver :: Solver
+  , solver :: UniqueSolver
   , score :: Score
   } deriving (Eq, Show)
 
@@ -41,7 +45,7 @@ data CategoryResult = CategoryResult
   , categoryScoring :: Scoring
   , categoryPostProc :: Maybe PostProcInfo
   , categoryRanking :: [SolverRankEntry]
-  , categoryJobs :: [JobInfo]
+  , categoryJobs :: [Job]
   , categoryComplete :: Bool
   , categoryStartTime :: Maybe UTCTime
   , categoryFinishTime :: Maybe UTCTime

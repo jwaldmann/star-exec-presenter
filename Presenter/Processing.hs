@@ -11,8 +11,8 @@ import qualified Data.IntMap.Strict as IM
 
 type BenchmarkName = Name
 type UniqueBenchmark = (BenchmarkID, BenchmarkName)
-type UniqueSolver = (SolverID, SolverName)
-type SolverName = Name
+--type UniqueSolver = (SolverID, SolverName)
+--type SolverName = Name
 type SolverResults = [Maybe SolverResult]
 type BenchmarkRow = (UniqueBenchmark, [Maybe JobResult])
 type TableHead = [SolverName]

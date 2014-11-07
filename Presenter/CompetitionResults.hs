@@ -28,10 +28,10 @@ import qualified Data.IntMap.Strict as IM
 import qualified Data.Map.Strict as M
 
 type PostProcInfoMap = IM.IntMap PostProcInfo
-type JobInfoMap = IM.IntMap JobInfo
-type JobResultsMap = IM.IntMap [JobResultInfo]
+type JobInfoMap = M.Map JobID Job
+type JobResultsMap = M.Map JobID [JobResult]
 
-sortScore :: (Solver, Score) -> (Solver, Score) -> Ordering
+sortScore :: (a, Score) -> (a, Score) -> Ordering
 sortScore (_,i1) (_,i2) = compare i1 i2
 
 isYes :: SolverResult -> Bool
@@ -39,7 +39,7 @@ isYes (YES _) = True
 isYes _       = False
 
 -- | output is decreasing by Score
-getScores :: [Solver] -> Scoring -> [JobResult] -> [(Solver,Score)]
+getScores :: [UniqueSolver] -> Scoring -> [JobResult] -> [(UniqueSolver,Score)]
 getScores solver scoring results =
   reverse $ L.sortBy sortScore scores
   where
@@ -48,7 +48,7 @@ getScores solver scoring results =
         Standard -> calcStandardScores results
         Complexity -> calcComplexityScores results
     scores = flip map solver $ \s@(sId,_) ->
-              case IM.lookup sId scoreMap of
+              case M.lookup sId scoreMap of
                 Nothing -> (s,0)
                 Just scr -> (s,scr)
 
@@ -59,11 +59,11 @@ getScores solver scoring results =
 --      toRank (r,slv,scr) = SolverRankEntry r slv scr
 
 -- | input is decreasing by score, output has same order of solvers
-getRanking  :: [(Solver, Score)] -> [SolverRankEntry]
+getRanking  :: [(UniqueSolver, Score)] -> [SolverRankEntry]
 getRanking scores =
   let indexedScores = zip [1..] scores 
       equals score (_,(_,scr)) = score == scr
-      getRanking' :: (Solver, Score) -> SolverRankEntry
+      getRanking' :: (UniqueSolver, Score) -> SolverRankEntry
       getRanking' (solver, score) =
           case filter (equals score) indexedScores of
             [] -> SolverRankEntry Nothing solver score
@@ -84,7 +84,7 @@ getRanking scores =
 -- FIXME: as the test case shows, evaluation of x is number of y with score y <= score x
 -- (not  "<"  as the spec says)
 
-calcScores :: [SolverRankEntry] -> [(Solver, Int)]
+calcScores :: [SolverRankEntry] -> [(UniqueSolver, Int)]
 calcScores [entry] = [(solver entry, 0)]
 calcScores ranking = calcScores' 1 ranking
   where
@@ -97,7 +97,7 @@ calcScores ranking = calcScores' 1 ranking
           Just r -> (slv,numRankings - r):calcScores' r rs
     calcScores' _ [] = []
 
-getMetaScores :: [[SolverRankEntry]] -> [(Solver, Score)]
+getMetaScores :: [[SolverRankEntry]] -> [(UniqueSolver, Score)]
 getMetaScores catScores =
     M.toList $ M.fromListWith (+) $ concat $ map calcScores catScores
 
@@ -114,12 +114,12 @@ getCategoriesResult cat = do
       scores = getScores solver catScoring results
       rankedSolver = getRanking scores
       jobInfos = catMaybes $ map (fst . queryResult) qResults
-      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
+      complete = length jobInfos == length catJobIds && all ((==Complete) . toJobStatus) jobInfos
       startTime = if null jobInfos
                     then Nothing
-                    else Just $ minimum $ map jobInfoStartDate jobInfos
+                    else minimum <$> (sequence $ map toJobStartDate jobInfos)
       endTime = if complete && not (null jobInfos)
-                  then maximum $ map jobInfoFinishDate jobInfos
+                  then maximum <$> (sequence $ map toJobFinishDate jobInfos)
                   else Nothing
 
       stat = ( mconcat $ map jobStat results )
@@ -135,8 +135,8 @@ getCategoriesResult cat = do
                           endTime
                           stat
 
-lookupMap :: IM.IntMap a -> Int -> Maybe a
-lookupMap = flip IM.lookup
+lookupMap :: Ord k => M.Map k a -> k -> Maybe a
+lookupMap = flip M.lookup
 
 getCategoriesResult_ :: PostProcInfoMap -> JobInfoMap -> JobResultsMap -> Category -> CategoryResult
 getCategoriesResult_ procs infos results cat =
@@ -152,19 +152,21 @@ getCategoriesResult_ procs infos results cat =
       scores = getScores solver catScoring jobResults
       rankedSolver = getRanking scores
       jobInfos = catInfos
-      complete = length jobInfos == length catJobIds && all ((==Complete) . jobInfoStatus) jobInfos
+      complete = length jobInfos == length catJobIds && all ((==Complete) . toJobStatus) jobInfos
       startTime = if null jobInfos
                     then Nothing
-                    else Just $ minimum $ map jobInfoStartDate jobInfos
+                    else minimum <$> (sequence $ map toJobStartDate jobInfos)
+--                    else Just $ minimum $ map jobInfoStartDate jobInfos
       endTime = if complete && not (null jobInfos)
-                  then maximum $ map jobInfoFinishDate jobInfos
+                  then maximum <$> (sequence $ map toJobFinishDate jobInfos)
+--                  then maximum $ map jobInfoFinishDate jobInfos
                   else Nothing
-      cpuTotal = sum $ map jobResultInfoCpuTime jobResults
-      wallTotal = sum $ map jobResultInfoWallclockTime jobResults
+      cpuTotal = sum $ map toCpuTime jobResults
+      wallTotal = sum $ map toWallclockTime jobResults
       stat = Statistics { complete = complete 
                         , pairs = length jobResults
                         , pairsCompleted = length 
-                              $ filter ( ( == JobResultComplete) . jobResultInfoStatus ) jobResults
+                              $ filter ( ( == JobResultComplete) . getResultStatus ) jobResults
                         , startTime = startTime, finishTime = endTime 
                         , cpu = cpuTotal, wallclock = wallTotal
                         }
@@ -239,10 +241,10 @@ updateJobInfo' ji = do
     Nothing -> updateJobInfo Nothing ji
     Just en -> updateJobInfo (Just $ entityVal en) ji
 
-getProcessedResults :: (Maybe JobInfo,[JobResultInfo]) -> [JobResultInfo]
+getProcessedResults :: (Maybe Job,[JobResult]) -> [JobResult]
 getProcessedResults (mJobInfo, results) =
   case mJobInfo of
-    Just ji -> if jobInfoIsComplexity ji
+    Just ji -> if isComplexity ji
                 then getScoredResults results
                 else results
     Nothing -> results
@@ -271,9 +273,36 @@ updateJob currentTime ((Just persist), (Just starexec)) = Just persist
     , jobInfoLastUpdate = currentTime
     }
 
-maybeJobComplete :: Maybe JobInfo -> Bool
+updateJobs :: UTCTime -> [(Maybe Job, Maybe Job)] -> [Maybe Job]
+updateJobs now = map updateJob'
+  where
+    updateJob' :: (Maybe Job, Maybe Job) -> Maybe Job
+    updateJob' (Nothing, Nothing) = Nothing
+    updateJob' (j@(Just _), Nothing) = j
+    updateJob' (Nothing, (Just (StarExecJob j))) = StarExecJob <$> updateJob now (Nothing, Just j)
+    updateJob' (Nothing, j@(Just _)) = j
+
+maybeJobComplete :: Maybe Job -> Bool
 maybeJobComplete Nothing = False
-maybeJobComplete (Just ji) = jobInfoStatus ji == Complete
+maybeJobComplete (Just ji) = toJobStatus ji == Complete
+
+getJobInfos :: StarExecConnection -> [JobID] -> Handler [Maybe Job]
+getJobInfos con = mapM fetchJobInfo
+  where
+    fetchJobInfo :: JobID -> Handler (Maybe Job)
+    fetchJobInfo (StarExecJobID j) = do
+      ji <- getJobInfo con j
+      return (StarExecJob <$> ji)
+    fetchJobInfo j = getPersistJobInfo j
+
+getJobResults' :: StarExecConnection -> [JobID] -> Handler [[JobResult]]
+getJobResults' con = mapM fetchResults
+  where
+    fetchResults :: JobID -> Handler [JobResult]
+    fetchResults (StarExecJobID j) = do
+      results <- getJobResults con j
+      return (StarExecResult <$> results)
+    fetchResults j = getPersistJobResults j
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
@@ -294,14 +323,14 @@ getCompetitionResults comp = do
                 else mapM (getPostProcInfo con) postProcIds
   jobInfos <- if jobsComplete
                 then return persistJobInfos
-                else mapM (getJobInfo con) jobIds
+                else getJobInfos con jobIds
   jobResults <- if jobsComplete
                   then mapM (getPersistJobResults) jobIds
-                  else mapM (getJobResults con) jobIds
+                  else getJobResults' con jobIds
   currentTime <- lift getCurrentTime
   let updatedJobs = if jobsComplete
                     then jobInfos
-                    else map (updateJob currentTime) $ zip persistJobInfos jobInfos
+                    else updateJobs currentTime $ zip persistJobInfos jobInfos
       jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
 
@@ -311,13 +340,13 @@ getCompetitionResults comp = do
       else return ()
     if not jobsComplete
       then do
-        mapM updateJobInfo' $ catMaybes updatedJobs
-        updateJobResults $ concat processedResults
+        mapM updateJobInfo' $ getStarExecJobs $ catMaybes updatedJobs
+        updateJobResults $ getStarExecResults $ concat processedResults
       else return ()
 
   let postProcMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip postProcIds postProcs
-      jobInfoMap = IM.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds updatedJobs
-      jobResultsMap = IM.fromList $ zip jobIds processedResults
+      jobInfoMap = M.fromList $ map fromMaybeTuple $ filter filterMaybeTuple $ zip jobIds updatedJobs
+      jobResultsMap = M.fromList $ zip jobIds processedResults
       metaResults = map (getMetaResults_ postProcMap jobInfoMap jobResultsMap) metaCats
       complete = all metaCategoryComplete metaResults
       startTime = if null metaResults

@@ -4,6 +4,7 @@ import Import
 import Presenter.StarExec.JobData
 import Presenter.STM
 import Presenter.Utils.WidgetMetaRefresh
+import Presenter.Prelude
 import Data.Time.Clock
 
 minute :: Seconds

@@ -2,6 +2,7 @@ module Presenter.Model.Competition where
 
 import Yesod
 import Presenter.Model.Types
+import Presenter.Model.RouteTypes
 import Prelude (Show, Read, Eq, Ord, Int, ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
 
@@ -17,7 +18,7 @@ data Category = Category
   { getCategoryName :: Name
   , getCategoryScoring :: Scoring
   , getPostProcId :: PostProcId
-  , getJobIds :: [Int]
+  , getJobIds :: [JobID]
   } deriving (Show, Read, Eq)
 
 {-

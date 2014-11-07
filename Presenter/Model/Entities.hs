@@ -12,6 +12,7 @@ import Presenter.Model.Types (Seconds, Name)
 import qualified Data.Text as T
 import Data.Maybe
 import Control.Applicative
+import Data.Time.Clock ( UTCTime )
 
 -- ###### TYPE-CLASSES ######
 
@@ -44,6 +45,8 @@ class JobEntity a where
   toJobID :: a -> JobID
   toJobStatus :: a -> JobStatus
   toJobDuration :: a -> Maybe Seconds
+  toJobStartDate :: a -> Maybe UTCTime
+  toJobFinishDate :: a -> Maybe UTCTime
   isComplexity :: a -> Bool
 
 class FromJobResult a where
@@ -299,6 +302,12 @@ instance JobEntity Job where
   toJobDuration (StarExecJob j) = toJobDuration j
   toJobDuration _ = Nothing
 
+  toJobStartDate ( StarExecJob j ) = toJobStartDate j
+  toJobStartDate _ = Nothing
+
+  toJobFinishDate ( StarExecJob j ) = toJobFinishDate j
+  toJobFinishDate _ = Nothing
+
   isComplexity (StarExecJob j) = isComplexity j
   isComplexity _ = False
 
@@ -312,6 +321,10 @@ instance JobEntity JobInfo where
   toJobDuration j =
     diffTime <$> (jobInfoFinishDate j) <*> Just (jobInfoStartDate j)
 
+  toJobStartDate = Just . jobInfoStartDate
+
+  toJobFinishDate = jobInfoFinishDate
+
   isComplexity = jobInfoIsComplexity
 
 instance JobEntity LriJobInfo where
@@ -322,6 +335,10 @@ instance JobEntity LriJobInfo where
   toJobStatus _ = Complete
 
   toJobDuration _ = Nothing
+
+  toJobStartDate _ = Nothing
+
+  toJobFinishDate _ = Nothing
 
   isComplexity _ = False
 
@@ -338,3 +355,13 @@ isStarExecResult _ = False
 isLriResult :: JobResult -> Bool
 isLriResult (LriResult _) = True
 isLriResult _ = False
+
+getStarExecJobs :: [Job] -> [JobInfo]
+getStarExecJobs (StarExecJob j:js) = j:getStarExecJobs js
+getStarExecJobs (_:js) = getStarExecJobs js
+getStarExecJobs [] = []
+
+getStarExecResults :: [JobResult] -> [JobResultInfo]
+getStarExecResults (StarExecResult r:rs) = r:getStarExecResults rs
+getStarExecResults (_:rs) = getStarExecResults rs
+getStarExecResults [] = []

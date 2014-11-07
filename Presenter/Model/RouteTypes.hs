@@ -114,6 +114,8 @@ getStarExecIds = (map getStarExecId) . (filter isStarExecID) . getIds
 getLriIds :: JobIds -> [T.Text]
 getLriIds = (map getLriId) . (filter isLriID) . getIds
 
+-- ReadP als Alternative -> Compilerbau-VO
+
 instance ShowID JobID where
   showID (StarExecJobID i) = show i
   showID (LriJobID t) = showID_' lriJobPrefix t

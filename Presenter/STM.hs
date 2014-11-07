@@ -41,7 +41,7 @@ startWorker comp = do
           sink <- newTVar Nothing
           modifyTVar' (compResultsCache app) $ M.insert (getMetaData comp) sink
           return $ Just sink
-      Just entry -> do
+      Just _ -> do
           return Nothing
   case mSink of
     Nothing -> return ()
