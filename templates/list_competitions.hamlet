@@ -1,0 +1,8 @@
+<h2>Test runs for preparing the Termination Competition 2014
+
+$if null competitionInfos
+    <h1>Sorry, currently no test runs to be listed
+$else
+    <ul>
+        $forall ci <- competitionInfos
+            <li><a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}</a>
