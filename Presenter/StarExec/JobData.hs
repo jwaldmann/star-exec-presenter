@@ -91,7 +91,9 @@ queryJobPair _pairId@(StarExecPairID pid) = do
         then return $ QueryResult Latest mPersistPairInfo
         else runQueryJobPair pid >>= wrap (fmap StarExecPair)
     _ -> runQueryJobPair pid >>= wrap (fmap StarExecPair)
-queryJobPair _pairId = undefined
+queryJobPair _pairId = do
+  mPersistPairInfo <- getPersistJobPair _pairId
+  return $ QueryResult Latest mPersistPairInfo
 
 queryPostProc :: Int -> Handler (QueryResult QueryInfo (Maybe PostProcInfo))
 queryPostProc _procId = do

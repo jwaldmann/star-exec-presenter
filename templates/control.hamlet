@@ -1,0 +1,42 @@
+<h1>Create Jobs on Star-Exec
+
+beware: depending on parameter settings below, you can burn a lot of cpu cycles on star-exec.
+
+<form method=post action=@{ControlR} enctype=#{enctype}>
+
+  <p><a href=@{AuthR LogoutR}>Logout</a>
+
+  <h2>Job Parameters
+  <table>
+    ^{widget} 
+
+  <h2>Select Benchmarks
+  
+  <h3><input type=submit name=control value="comp:#{R.competitionName comp}">
+
+  <ul>
+    $forall mecat <- R.metacategories comp
+      <li>
+        <h3><input type=submit name=control value="mc:#{R.metaCategoryName mecat}">
+        <ul>
+          $forall cat <- R.categories mecat
+            <li>
+              <input type=submit name=control value="cat:#{R.categoryName cat}">
+              <ul>
+                <li>Benchmarks:
+                  $forall b <- benches $ R.benchmarks (R.contents cat)
+                    Bench <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{b}">#{b}</a>,
+                  $forall s <- alls $ R.benchmarks (R.contents cat)
+                    All #{s},
+                  $forall s <- hierarchies $ R.benchmarks (R.contents cat)
+                    Hier #{s},
+                <li>Solvers:
+                  $forall part <- R.participants (R.contents cat)
+                    $maybe conf <- R.solver_config part
+                      <span class="conf">
+                         <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}">#{R.participantName part}</a>
+                         (<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{snd conf}">#{snd conf}</a>)
+                    $nothing
+                      <span class="noconf">#{R.participantName part}
+                    | 
+

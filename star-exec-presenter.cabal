@@ -44,6 +44,7 @@ library
                      Handler.CompetitionWithConfig
                      Presenter.Auth
                      Presenter.CompetitionResults
+                     Presenter.Control.Job
                      Presenter.Internal.Stringish
                      Presenter.Model.Additional.Table
                      Presenter.Model.Competition
