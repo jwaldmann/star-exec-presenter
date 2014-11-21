@@ -8,10 +8,7 @@ import qualified Data.Text.Lazy as TL
 import Codec.Compression.GZip
 import Data.Time.Clock
 import qualified Data.List as L
-import Data.Time.Clock
 import Control.Concurrent.SSem
-import Control.Monad.CatchIO ( bracket_ )
-import Control.Applicative
 
 -- ###### persist getter ######
 
@@ -152,14 +149,14 @@ updateJobInfo mJobInfo jobInfo = do
       , JobInfoLastUpdate =. currentTime
       ]
     Nothing -> do
-      insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
+      _ <- insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
       return ()
 
 updatePostProcInfo :: PostProcInfo -> YesodDB App ()
 updatePostProcInfo pInfo = do
   let _id = postProcInfoStarExecId pInfo
   deleteWhere [ PostProcInfoStarExecId ==. _id ]
-  insertUnique pInfo
+  _ <- insertUnique pInfo
   return ()
 
 updateJobResults :: [JobResultInfo] -> YesodDB App ()

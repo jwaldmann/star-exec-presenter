@@ -4,7 +4,7 @@
 
 module Presenter.Registration where
 
-import Presenter.Model ( Name, CompetitionMeta(..) )
+import Presenter.Model ( Name )
 import qualified Data.Text as T
 
 import Prelude 
@@ -36,12 +36,15 @@ data MetaCategory a =
                   }
     deriving ( Generic )
 
+full_categories :: MetaCategory Catinfo -> [Category Catinfo]
 full_categories mc = 
     filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
 
+demonstration_categories :: MetaCategory Catinfo -> [Category Catinfo]
 demonstration_categories mc =
     filter ( \ c -> length (real_participants c) == 1 ) $  categories mc
 
+real_participants :: Category Catinfo -> [Participant]
 real_participants c = 
     filter ( isJust . solver_config ) $ participants $ contents c
 
@@ -84,10 +87,16 @@ certified :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 172 , benchmarks = bs , participants = ps } }
 
+trss :: [Benchmark_Source]
 trss = [ Hierarchy 56849 ]
+
+srss :: [Benchmark_Source]
 srss = [ Hierarchy 56810 ]
 
+mixed_rel_srs :: Benchmark_Source
 mixed_rel_srs = Hierarchy 56805
+
+mixed_rel_trs :: Benchmark_Source
 mixed_rel_trs = Hierarchy 56846
 
 tc2014 :: Registration
@@ -222,6 +231,7 @@ tc2014 = Competition "Termination Competition 2014"
 
 class Input t where input :: Parser t
 
+lexer :: TokenParser st
 lexer = haskell
 
 instance Input Int where input = fromIntegral <$> T.integer lexer
@@ -278,10 +288,13 @@ instance Output Catinfo where
 instance Output Benchmark_Source where
     output s = case s of
         Bench { bench = i } -> "Bench" <+> output i
-        All { space = s } -> "All" <+> output s
-        Hierarchy { space = s } -> "Hierarchy" <+> output s
+        All { space = s' } -> "All" <+> output s'
+        Hierarchy { space = s' } -> "Hierarchy" <+> output s'
 
+(<#>) :: Doc -> Doc -> Doc
 p <#> q = fillBreak 4 p <+> q
+
+showp :: Output a => a -> String
 showp = ( \ d -> displayS d "" ) . renderPretty 1.0 80 . output
 
 instance Output a => Show ( Competition a) where show = showp

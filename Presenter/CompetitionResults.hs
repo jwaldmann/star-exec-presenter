@@ -281,6 +281,7 @@ updateJobs now = map updateJob'
     updateJob' (j@(Just _), Nothing) = j
     updateJob' (Nothing, (Just (StarExecJob j))) = StarExecJob <$> updateJob now (Nothing, Just j)
     updateJob' (Nothing, j@(Just _)) = j
+    updateJob' (Just (StarExecJob j1), Just (StarExecJob j2)) = StarExecJob <$> updateJob now (Just j1, Just j2)
 
 maybeJobComplete :: Maybe Job -> Bool
 maybeJobComplete Nothing = False
@@ -340,7 +341,7 @@ getCompetitionResults comp = do
       else return ()
     if not jobsComplete
       then do
-        mapM updateJobInfo' $ getStarExecJobs $ catMaybes updatedJobs
+        mapM_ updateJobInfo' $ getStarExecJobs $ catMaybes updatedJobs
         updateJobResults $ getStarExecResults $ concat processedResults
       else return ()
 

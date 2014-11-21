@@ -12,13 +12,7 @@ import Presenter.PersistHelper
 import Presenter.Processing
 import Presenter.StarExec.Connection
 import Presenter.StarExec.Commands
-import Data.Maybe
 import Data.Time.Clock
-import Database.Persist.Class
-import Data.List ((\\))
-
-import Control.Monad ( when )
-import System.IO ( writeFile )
 
 {-
   FIXME: possible bug, that QueryInfo won't be deleted from DB after an exception or after a query is complete
@@ -80,7 +74,7 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
         case mKey of
           Just queryKey -> do
             runConcurrent (queryExceptionHandler q) $ do
-              queryAction _id
+              _ <- queryAction _id
               deleteQuery q
               liftIO $ putStrLn $ "Job done: " ++ (show q)
             return $ pendingQuery queryKey mPersistInfo
@@ -150,7 +144,6 @@ runQueryJobPair = runQueryInfo GetJobPair UniqueJobPairInfo queryStarExec
           case mJobPair of
             Nothing -> return ()
             Just jp -> do
-              currentTime <- getTime
               _ <- runDB $ do
                 deleteBy $ UniqueJobPairInfo _pairId
                 insertUnique jp

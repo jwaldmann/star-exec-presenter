@@ -6,6 +6,15 @@ import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.PersistHelper
 
+int2Text :: Int -> Text
+int2Text = fromString . show
+
+getStdout :: Pair -> Text
+getStdout (StarExecPair p) = decompressText $ jobPairInfoStdout p
+
+getLog :: Pair -> Text
+getLog (StarExecPair p) = decompressText $ jobPairInfoLog p
+
 getShowJobPairR :: JobPairID -> Handler Html
 getShowJobPairR pid@(StarExecPairID _id) = do
   (QueryResult qStatus mPair) <- queryJobPair pid
@@ -22,7 +31,7 @@ getShowJobPairR pid@(StarExecPairID _id) = do
       mSolverInfo = queryResult ms
       hasHtmlProof = case mPair of
         Nothing -> False
-        Just (StarExecPair pair) -> Nothing /= (jobPairInfoHtmlProof pair)
+        Just (StarExecPair p) -> Nothing /= (jobPairInfoHtmlProof p)
   defaultLayout $ do
     case qStatus of
       Latest -> return ()

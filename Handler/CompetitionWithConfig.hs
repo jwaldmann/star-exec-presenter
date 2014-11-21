@@ -1,7 +1,6 @@
 module Handler.CompetitionWithConfig where
 
 import Import
-import Presenter.StarExec.JobData
 import Presenter.STM
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.Prelude

@@ -1,7 +1,7 @@
 module Presenter.Model.Additional.Table where
 
 import Model
-import Presenter.Model
+import Presenter.Model.Entities
 import Prelude (Maybe)
 import Foundation (Widget)
 

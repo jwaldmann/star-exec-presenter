@@ -16,7 +16,7 @@ module Presenter.StarExec.Commands
   ) where
 
 import Import
-import Prelude (head, Maybe(..))
+import Prelude (head)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
@@ -24,7 +24,6 @@ import System.IO ( stderr )
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
-import Data.Word
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
 import Presenter.StarExec.Urls
@@ -108,7 +107,7 @@ constructJobInfo _jobId title tds =
       getJobStatus t = case t of
                         "complete" -> Complete
                         _ -> Incomplete
-      isComplexity s = 0 < (T.count "complex" $ T.toLower s)
+      isCompl s = 0 < (T.count "complex" $ T.toLower s)
       parseTDs info xs =
         case xs of
           ("status":t:ts) ->
@@ -120,7 +119,7 @@ constructJobInfo _jobId title tds =
           ("preprocessor":t:ts) ->
             parseTDs (info { jobInfoPreProc = t }) ts
           ("description":t:ts) ->
-            parseTDs (info { jobInfoIsComplexity = isComplexity t }) ts
+            parseTDs (info { jobInfoIsComplexity = isCompl t }) ts
           (_:ts) -> parseTDs info ts
           _ -> info
       tds' = map (safeHead "" . content) tds
@@ -263,17 +262,17 @@ getSpaceXML (sec, man, cookies) _spaceId = do
 
   makeSpace $ responseBody resp
 
-
+makeSpace :: BSL.ByteString -> Handler (Maybe Space)
 makeSpace bs = do
   let archive = Zip.toArchive bs
       xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 
                  $ Zip.zEntries archive 
   let spaces =  case xml_entries of
         [ e ] -> do
-          let c = cursorFromDOM $ Zip.fromEntry e
-              root = laxElement "tns:Spaces" c >>= child
+          let cursor = cursorFromDOM $ Zip.fromEntry e
+              root = laxElement "tns:Spaces" cursor >>= child
               walk :: [ Cursor ] -> [ Space ]
-              walk root = root >>= laxElement "Space" >>= \ s -> return
+              walk r = r >>= laxElement "Space" >>= \ s -> return
                      Space { spId = case attribute "id" s of
                                  [ i ] -> read $ T.unpack i ; _ -> -1
                            , spName = case attribute "name" s of
@@ -416,17 +415,17 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- org.starexec.command.Connection:uploadXML
 
 pushJobXML :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
-pushJobXML con spaceId jobs = do
-  js <- pushJobXMLStarExec con spaceId jobs
+pushJobXML con sId jobs = do
+  js <- pushJobXMLStarExec con sId jobs
   registerJobs $ catMaybes $ map jobid js
   return js
 
 
 pushJobXMLStarExec :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
-pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs of
+pushJobXMLStarExec (sec, man, cookies) sId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just (bs, remap) -> do
-    req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show spaceId ) 
+    req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
     liftIO $ print req 
@@ -442,13 +441,13 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
     let cs = destroyCookieJar $ responseCookieJar resp
     liftIO $ print cs
     let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
-        cut c s = if null s then []
+        cut' c s = if null s then []
                   else let (pre,post) = span (/= c) s
-                       in  pre : cut c ( drop 1 post)
+                       in  pre : cut' c ( drop 1 post)
     return $ case vs of
          [] ->  jobs
          [s] -> do
-             let ids = map read $ cut ',' 
+             let ids = map read $ cut' ',' 
 
 -- FIXME, actually EXPLAINME:
 -- single job: 

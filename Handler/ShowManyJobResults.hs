@@ -2,7 +2,7 @@ module Handler.ShowManyJobResults where
 
 import Import
 import Presenter.StarExec.JobData
-import Presenter.Internal.Stringish
+import Presenter.Internal.Stringish()
 import Presenter.Processing
 import Presenter.Statistics
 import Presenter.Utils.WidgetMetaRefresh
@@ -34,15 +34,14 @@ getShowManyJobResultsR NoQuery  jids@(JobIds ids) = do
 
       stat = mconcat $ map jobStat jobResults
 
-      benchmarks = L.sortBy compareBenchmarks $
-                    getInfo extractBenchmark $ jobResults
+      benchmarks' = L.sortBy compareBenchmarks $
+                      getInfo extractBenchmark $ jobResults
       groupedSolvers = map (getInfo extractSolver) jobs
       jobSolvers = concat $ map toTuples $ zip ids groupedSolvers
       benchmarkResults = getBenchmarkResults
                           jobSolvers
                           jobResults
-                          benchmarks
-      (+>) = T.append
+                          benchmarks'
       scores = flip map jobs $
         \results ->
           if complexity
@@ -61,7 +60,7 @@ getShowManyJobResultsR q@(Query ts) jids @ (JobIds ids) = do
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget $(luciusFile "templates/solver_result.lucius")
-    if any (\q -> queryStatus q /= Latest) qJobs
+    if any (\q' -> queryStatus q' /= Latest) qJobs
       then insertWidgetMetaRefresh
       else return ()
     [whamlet|

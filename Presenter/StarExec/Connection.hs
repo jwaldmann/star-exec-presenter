@@ -6,14 +6,12 @@ module Presenter.StarExec.Connection
     ) where
 
 import Import
-import Prelude (head, readFile, writeFile)
-import System.Directory
+import Prelude (head)
 import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.Text.Encoding as TE
 --import qualified Data.Text.IO as TIO
-import qualified Data.Text as T
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
 import Presenter.Prelude (diffTime)

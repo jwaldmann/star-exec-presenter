@@ -6,8 +6,6 @@ import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
-import Debug.Trace
-import qualified Data.IntMap.Strict as IM
 
 type BenchmarkName = Name
 type UniqueBenchmark = (BenchmarkID, BenchmarkName)
@@ -71,7 +69,7 @@ getScore jr = case toScore jr of
 
 getScoredResults :: [JobResult] -> [JobResult]
 getScoredResults results =
-  let insertResult m result = M.insertWith (++) (getBenchmark result) [result] m
+  let insertResult m r = M.insertWith (++) (getBenchmark r) [r] m
       benchmarkMap = M.toList $ L.foldl' (insertResult) M.empty results
       result = L.foldl' (++) [] $ map (calcScores . snd) benchmarkMap
   in result
@@ -102,21 +100,21 @@ getScoredResults results =
           in map setScore jrs
 
 calcScoresBase :: (JobResult -> Int) -> [JobResult] -> M.Map SolverID Int
-calcScoresBase getScore = L.foldl' addScore M.empty
-  where addScore m jr = M.insertWith (+) (toSolverID jr) (getScore jr) m
+calcScoresBase f = L.foldl' addScore M.empty
+  where addScore m jr = M.insertWith (+) (toSolverID jr) (f jr) m
 
 calcComplexityScores :: [JobResult] -> M.Map SolverID Int
-calcComplexityScores = calcScoresBase getScore
+calcComplexityScores = calcScoresBase getScore'
   where
-    getScore jr =
+    getScore' jr =
       case toScore jr of
         Nothing -> 0
         Just i  -> i
 
 calcStandardScores :: [JobResult] -> M.Map SolverID Int
-calcStandardScores = calcScoresBase getScore
+calcStandardScores = calcScoresBase getScore'
   where
-    getScore jr =
+    getScore' jr =
       case getSolverResult jr of
         YES _ -> 1
         NO    -> 1

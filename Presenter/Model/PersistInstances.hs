@@ -5,7 +5,6 @@ import Prelude
 import qualified Data.Csv as CSV
 import qualified Data.Text as T
 import Data.Text.Encoding
-import GHC.Generics
 import Control.Applicative
 import Presenter.Model.StarExec
 import qualified Presenter.Model.Complexity as C

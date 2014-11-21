@@ -1,9 +1,11 @@
 module Presenter.Utils.WidgetTable where
 
 import Import
+import Text.Blaze (ToMarkup)
 
 import Presenter.Processing ( getClass )
 import Presenter.Model.Additional.Table
+import Presenter.Internal.Stringish
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
@@ -34,44 +36,57 @@ getManyJobCells iss = do
                      $ cell_for_job_pair p
                )
         headers = M.keys cells
-        benchmarks = M.keys $ foldr M.union M.empty $ M.elems cells
+        benchmarks' = M.keys $ foldr M.union M.empty $ M.elems cells
     return $ Table 
            { header = Cell { contents = [whamlet| Benchmark |]
-                           , url = T.pack "nothing"
-                           , tag = T.pack "nothing"
+                           , url = "nothing"
+                           , tag = "nothing"
+                           , tdclass = ""
+                           , mjr = Nothing
                            } : map cell_for_solver headers
-           , rows = for benchmarks $ \ bench -> 
+           , rows = for benchmarks' $ \ bench -> 
                ( cell_for_bench bench : ) $ for headers $ \ h -> 
                    case M.lookup bench ( M.findWithDefault M.empty h cells ) of
                        Nothing -> empty_cell
                        Just c -> c
            }
 
+for :: [a] -> (a -> b) -> [b]
 for = flip map
 
+empty_cell :: Cell
 empty_cell = 
-    Cell { contents = [whamlet| |], tdclass = T.pack "empty"
-         , url = T.pack "nothing"
-         , tag = T.pack "OTHER" }
+    Cell { contents = [whamlet| |]
+         , tdclass = fromString "empty"
+         , url = fromString "nothing"
+         , tag = fromString "OTHER"
+         , mjr = Nothing
+         }
 
-cell_for_bench (bid, bname) = Cell { contents = [whamlet|
+cell_for_bench :: ToMarkup a => (BenchmarkID, a) -> Cell
+cell_for_bench (bid, bname) = Cell
+  { contents = [whamlet|
 <a href=@{ShowBenchmarkInfoR bid}>#{bname} 
 |]
-                        , tdclass = T.pack "bench"
-                        , url = ""
-                        , tag = T.pack "nothing"
-                        }
+  , tdclass = fromString "bench"
+  , url = fromString ""
+  , tag = fromString "nothing"
+  , mjr = Nothing
+  }
 
-cell_for_solver (j,(sid, sname),(cid, cname)) = Cell 
-    { contents = [whamlet|
+cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (t, b)) -> Cell
+cell_for_solver (j,(sid, sname),(_, cname)) = Cell 
+  { contents = [whamlet|
 <a href=@{ShowSolverInfoR sid}>#{sname}</a>/#{cname}
 (<a href=@{ShowJobInfoR j}>#{show j}</a>)
 |] 
-    , tdclass = T.pack "solver"
-    , url = ""
-    , tag = T.pack "nothing"
-    }
+  , tdclass = fromString "solver"
+  , url = fromString ""
+  , tag = fromString "nothing"
+  , mjr = Nothing
+  }
 
+cell_for_job_pair :: JobResult -> Cell
 cell_for_job_pair result = 
     Cell { mjr = Just result
          , contents = [whamlet|
@@ -80,10 +95,11 @@ cell_for_job_pair result =
                 #{toFixed 1 $ toWallclockTime result}
              |]
          , tdclass = getClass result
-         , url = T.pack $ "nothing"
+         , url = fromString "nothing"
          , tag = getClass result
          }
 
+display :: JobIds -> [Transform] -> [Transform] -> Table -> Widget
 display jids previous ts tab  = do
   summary jids previous tab
   [whamlet| 
@@ -116,6 +132,7 @@ display jids previous ts tab  = do
                             <td class="#{tdclass cell}"> ^{contents cell} 
             |]
 
+summary :: JobIds -> [Transform] -> Table -> Widget
 summary jids previous tab = do
     let total = length $ rows tab
         column_stats = M.fromListWith (+) $ do
@@ -179,14 +196,17 @@ summary jids previous tab = do
                    <a href=@{FlexibleTableR others jids}>others
     |]
     
+apply :: Transform -> Table -> Table
 apply t tab = case t of
     Filter_Rows p -> 
             tab { rows = filter ( \ row -> predicate p $ map tag row ) $ rows tab }
 
+predicate :: Predicate -> [Text] -> Bool
 predicate p tags = case p of
     And fs -> and $ zipWith matches fs tags
     Not q -> not $ predicate q tags
 
+matches :: Cell_Filter -> Text -> Bool
 matches f c = case f of
     Any -> True
     Equals s -> s == c

@@ -1,7 +1,6 @@
 module Presenter.Utils.WidgetMetaRefresh where
 
 import Import
-import Text.Blaze
 
 -- insertWidgetMetaRefresh ::  (ToWidgetHead (HandlerSite m) (t1 -> Markup), ToWidget (HandlerSite m) (t -> Markup), MonadWidget m) =>  m ()
 insertWidgetMetaRefresh :: MonadWidget m => m ()

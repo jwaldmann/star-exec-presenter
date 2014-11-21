@@ -9,7 +9,6 @@ import Presenter.Model.StarExec
   , JobResultStatus (..)
   , JobStatus(..))
 import Presenter.Model.Types (Seconds, Name)
-import qualified Data.Text as T
 import Data.Maybe
 import Control.Applicative
 import Data.Time.Clock ( UTCTime )

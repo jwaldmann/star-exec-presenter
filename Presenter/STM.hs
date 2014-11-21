@@ -12,7 +12,7 @@ import qualified Data.Text as T
 import Control.Concurrent.STM
 import Control.Concurrent ( threadDelay )
 import Control.Exception.Base
-import Control.Monad ( forever, when )
+import Control.Monad ( when )
 
 defaultWorkerDelay :: Int
 defaultWorkerDelay = 10 * 10^6

@@ -27,7 +27,10 @@ data CompetitionResults = CompetitionResults
   , competitionStatistics :: Statistics
   } deriving (Show)
 
+competitionName :: CompetitionResults -> Name
 competitionName = getMetaName . competitionMeta
+
+competitionDescription :: CompetitionResults -> Description
 competitionDescription = getMetaDescription . competitionMeta
 
 data MetaCategoryResult = MetaCategoryResult

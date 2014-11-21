@@ -6,8 +6,7 @@ import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import Data.Maybe
 import Data.Time.Clock
-import Control.Monad ( guard, forM )
-import Control.Applicative ((<$>))
+import Control.Monad ( forM )
 import Data.Char (isAlphaNum)
 import Data.Hashable
 import Data.List ( sort )
@@ -45,9 +44,9 @@ type SpaceMap = M.Map Int Space
 
 getSpaceMap :: FilePath -> Handler SpaceMap
 getSpaceMap fp = do
-  Just s <- getDefaultSpaceXML fp
+  Just sp <- getDefaultSpaceXML fp
   let subspaces s = (spId s, s) : ( children s >>= subspaces )
-  return $ M.fromList $ subspaces s
+  return $ M.fromList $ subspaces sp
 
 timed :: Show a => a -> Competition -> Competition
 timed now (Competition meta mcs) = 
@@ -58,7 +57,7 @@ timed now (Competition meta mcs) =
 pushcat :: JobControl -> R.Category R.Catinfo -> Handler (R.Category ( R.Catinfo, [Int] ))
 pushcat config cat = do
   sm <- getSpaceMap default_space
-  let ci = R.contents cat
+  --let ci = R.contents cat
   now <- liftIO getCurrentTime
   con <- getConnection
   jobs <- mkJobs sm config cat now
@@ -74,7 +73,7 @@ pushmetacat config mc = do
   con <- getConnection
   js <- pushJobXML con (space config) $ concat jobs
   let m = M.fromList $ do
-          j @ SEJob { description = d, jobid = Just i } <- js
+          SEJob { description = d, jobid = Just i } <- js
           return ( d, [i] ) 
   return $ mc {
               R.categories = for (R.categories mc) $ \ cat -> 
@@ -92,7 +91,7 @@ pushcomp config c = do
     con <- getConnection
     js <- pushJobXML con (space config) $ concat jobs
     let m = M.fromList $ do
-            j @ SEJob { description = d, jobid = Just i } <- js
+            SEJob { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
     return $ c {
                 R.metacategories = for (R.metacategories c) $ \ mc -> 
@@ -114,12 +113,12 @@ for :: [a] -> (a -> b) -> [b]
 for = flip map
 
 getSpaceXMLquick :: M.Map Int Space -> Int -> Handler (Maybe Space)
-getSpaceXMLquick sm id = 
-    case M.lookup id sm of
+getSpaceXMLquick sm sId = 
+    case M.lookup sId sm of
         Just s -> return $ Just s
         Nothing -> do
             con <- getConnection
-            getSpaceXML con id
+            getSpaceXML con sId
 
 convertC :: R.Category (R.Catinfo, [Int]) -> Category
 convertC c = 
@@ -159,7 +158,7 @@ mkJobs sm config cat now = do
          , jobpairs = do 
                (jobspace, bs) <- bss  
                b <- sort bs
-               R.Participant { R.solver_config = Just (s,c) } <- R.participants ci
+               R.Participant { R.solver_config = Just (_,c) } <- R.participants ci
                return $ SEJobPair
                           { jobPairSpace = jobspace
                           , jobPairBench = b
@@ -171,16 +170,16 @@ mkJobs sm config cat now = do
 select_benchmarks :: SpaceMap -> JobControl -> [R.Benchmark_Source] -> Handler [(Text,[Int])]
 select_benchmarks sm config bs = do
     bmss <- forM bs $ \ b -> case b of
-        R.Bench { R.bench = id } -> do
-            return [("root", [id]) ]
-        R.All { R.space = id } -> do
-            s <- getSpaceXMLquick sm id
-            return $ case s of
+        R.Bench { R.bench = sId } -> do
+            return [("root", [sId]) ]
+        R.All { R.space = sId } -> do
+            sp <- getSpaceXMLquick sm sId
+            return $ case sp of
                 Nothing -> []
                 Just s -> [ (spName s, benchmarks s) ]
-        R.Hierarchy { R.space = id } -> do
-            s <- getSpaceXMLquick sm id
-            return $ case s of
+        R.Hierarchy { R.space = sId } -> do
+            sp <- getSpaceXMLquick sm sId
+            return $ case sp of
                 Nothing -> []
                 Just s -> families s
             
@@ -190,9 +189,9 @@ select_benchmarks sm config bs = do
     liftIO $ putStrLn $ unlines
        [ "benchmark sources: " ++ show bs
        , "familiy sizes (given): " 
-                  ++ show (map (\(p,bs) -> (p,length bs)) given)
+                  ++ show (map (\(p,bs') -> (p,length bs')) given)
        , "familiy sizes (selected): " 
-                  ++ show (map (\(p,bs) -> (p,length bs)) result)
+                  ++ show (map (\(p,bs') -> (p,length bs')) result)
        ]
 
     return $ result

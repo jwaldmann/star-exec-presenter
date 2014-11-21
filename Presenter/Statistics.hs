@@ -1,14 +1,11 @@
 module Presenter.Statistics where
 
 import Prelude
-import Model
-import Presenter.Model.StarExec
 import Presenter.Model.Entities
 import Control.Applicative
 import Data.Monoid
 import Text.Blaze
 import Text.Hamlet
---import Data.Text
 import Data.Time.Clock
 import Data.Double.Conversion.Text (toFixed)
 

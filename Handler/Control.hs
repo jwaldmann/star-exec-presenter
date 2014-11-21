@@ -11,7 +11,7 @@ import Presenter.STM
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import Data.Time.Clock
-import Control.Monad ( guard, forM )
+import Control.Monad ( guard )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
