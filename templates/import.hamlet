@@ -1,0 +1,14 @@
+$maybe uploadContent <- mUploadContent
+  File-Upload successfull:
+  #{show $ source uploadContent}
+  #{show $ fileName $ file uploadContent}
+
+$maybe formError <- mFormError
+  Form-Upload failed:
+  #{formError}
+
+<h1>Import old data from previous competitions
+
+<form method=post action=@{ImportR} enctype=#{enctype}>
+  ^{widget}
+  <button type="submit" .btn .btn-primary>Upload

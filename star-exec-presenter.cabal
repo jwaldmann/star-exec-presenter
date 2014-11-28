@@ -42,6 +42,7 @@ library
                      Handler.FlexibleTable
                      Handler.Competition
                      Handler.CompetitionWithConfig
+                     Handler.Import
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job

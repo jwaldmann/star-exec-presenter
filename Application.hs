@@ -49,6 +49,7 @@ import Handler.LegacyShowJobResults
 import Handler.FlexibleTable
 import Handler.Competition
 import Handler.CompetitionWithConfig
+import Handler.Import
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

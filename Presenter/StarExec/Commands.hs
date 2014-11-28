@@ -428,10 +428,7 @@ pushJobXMLStarExec (sec, man, cookies) sId jobs = case jobs_to_archive jobs of
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
-    liftIO $ print req 
-
-    -- liftIO $ BSL.writeFile "command.zip" bs
-    -- error "huh"
+    liftIO $ print req
     
     resp <- sendRequest (req, man, cookies)
     -- the job ids are in the returned cookie.

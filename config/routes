@@ -46,3 +46,6 @@
 
 /hidden-test-runs ListHiddenCompetitionsR GET
 /test-runs ListCompetitionsR GET
+
+-- Import route
+/import ImportR GET POST
