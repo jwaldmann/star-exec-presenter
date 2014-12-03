@@ -1,11 +1,15 @@
 $maybe uploadContent <- mUploadContent
-  File-Upload successfull:
+  <h3>File-Upload successfull:
   #{show $ source uploadContent}
   #{show $ fileName $ file uploadContent}
 
 $maybe formError <- mFormError
-  Form-Upload failed:
+  <h3>Form-Upload failed:
   #{formError}
+
+$maybe bytes <- mBytes
+  <h3>File-Content:
+  <pre>#{toString bytes}
 
 <h1>Import old data from previous competitions
 
