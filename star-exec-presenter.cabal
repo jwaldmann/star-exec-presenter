@@ -72,6 +72,10 @@ library
                      Presenter.STM
                      Presenter.Utils.WidgetMetaRefresh
                      Presenter.Utils.WidgetTable
+                     Importer.Parser.LRI
+                     Importer.Interpreter.LRI
+                     Importer.Internal
+                     Importer.LRI
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
