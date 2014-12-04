@@ -7,10 +7,6 @@ $maybe formError <- mFormError
   <h3>Form-Upload failed:
   #{formError}
 
-$maybe bytes <- mBytes
-  <h3>File-Content:
-  <pre>#{toString bytes}
-
 <h1>Import old data from previous competitions
 
 <form method=post action=@{ImportR} enctype=#{enctype}>
