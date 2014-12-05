@@ -4,12 +4,16 @@ import Import
 
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.List as L
+import qualified Data.Text.Lazy.Encoding as TLE
+import qualified Data.Text.Lazy as TL
 
 import Yesod.Auth
 import Yesod.Form.Bootstrap3
+import Data.Either
 import Data.Conduit
 import Data.Conduit.Binary
 import Control.Monad.Trans.Resource
+import Control.Exception.Base
 import qualified Codec.Archive.Zip as Zip
 import qualified Codec.Compression.GZip as GZip
 import qualified Codec.Archive.Tar as Tar
@@ -28,7 +32,7 @@ data UploadContent = UploadContent
 uploadForm :: Form UploadContent
 uploadForm = renderBootstrap3 BootstrapBasicForm $ UploadContent
   <$> areq (selectFieldList [("LRI"::Text, LRISelection), ("UIBK"::Text, UIBKSelection)]) "Source:" Nothing
-  <*> fileAFormReq "Archive:"
+  <*> fileAFormReq "Zip-Archive:"
 
 getImportR :: Handler Html
 getImportR = do
@@ -36,35 +40,7 @@ getImportR = do
   ((_, widget), enctype) <- runFormPost uploadForm
   let mUploadContent = Nothing :: Maybe UploadContent
       mFormError = Nothing :: Maybe Text
-      mBytes = Nothing :: Maybe BSL.ByteString
   defaultLayout $(widgetFile "import")
-
-listEntries :: Tar.Entries e -> [String]
-listEntries = Tar.foldEntries addEntry [] (\_ -> [])
-  where
-    addEntry entry list = Tar.entryPath entry : list
-
-getFileContents :: Tar.Entries e -> [(String, BSL.ByteString)]
-getFileContents = Tar.foldEntries processEntry [] (\_ -> [])
-  where
-    processEntry entry es =
-      case Tar.entryContent entry of
-        Tar.NormalFile bs _ -> (Tar.entryPath entry, bs):es
-        _                   -> es
-
---getBytes :: UploadContent -> Handler BSL.ByteString
---getBytes uc = do
---  let fileBytes = fileSource $ file uc
---  bytes <- runResourceT $ fileBytes $$ sinkLbs
---  let entries = (Tar.read . GZip.decompress) bytes
---      contents = getFileContents entries
---      parsedContents = map (LRI.parse . snd) contents
---  return $ L.foldl' mngParsedContent "" $ zip (map fst contents) parsedContents
---    where
---      mngParsedContent bs (filename, parsedContent) =
---        case parsedContent of
---          Right r -> bs +> fromString filename +> "\n" +> (fromString $ show r)
---          Left e -> bs +> fromString filename +> "\nError: " +> (fromString $ show e)
 
 readZip :: BSL.ByteString -> [(String, BSL.ByteString)]
 readZip bs = zip (Zip.filesInArchive archive) (map Zip.fromEntry $ Zip.zEntries archive)
@@ -73,6 +49,30 @@ readZip bs = zip (Zip.filesInArchive archive) (map Zip.fromEntry $ Zip.zEntries 
 
 getBytes :: UploadContent -> Handler BSL.ByteString
 getBytes uc = runResourceT $ (fileSource $ file uc) $$ sinkLbs
+
+validateParsing :: Either String a -> Either String Bool
+validateParsing p = do
+  _ <- p
+  return True
+
+splitBy :: (a -> Bool) -> [a] -> [[a]]
+splitBy p xs = case L.dropWhile p xs of
+  [] -> []
+  x -> w : splitBy p xs'
+    where
+      (w, xs') = break p x
+
+handleError :: SomeException -> Handler ()
+handleError e = lift $ do
+  putStrLn "An error occurred while importing into the DB!"
+  print e
+
+normalizeString :: String -> String
+normalizeString = map replaceString
+  where
+    replaceString '/' = '_'
+    replaceString '\\' = '_'
+    replaceString c = c
 
 postImportR :: Handler Html
 postImportR = do
@@ -89,14 +89,100 @@ postImportR = do
     Just uc -> do
       bytes <- getBytes uc
       let contents = readZip bytes
-          entryNames = map fst contents
+          entryNames = map (normalizeString . fst) contents
           parsedContents = map (LRI.parse . snd) contents
           results = map (>>= LRI.getResults) parsedContents
           solvers = map (>>= LRI.getSolvers) parsedContents
           benchmarks = map (>>= LRI.getBenchmarks) parsedContents
-      liftIO $ mapM_ print results
-      liftIO $ mapM_ print solvers
-      liftIO $ mapM_ print benchmarks
-      return ()
+          parsings = concat
+            [ map validateParsing parsedContents
+            , map validateParsing results
+            , map validateParsing solvers
+            , map validateParsing benchmarks
+            ]
+      if all isRight parsings
+        then forkHandler handleError $ runDB $ do
+          clearLRI
+          insertResults $ zip entryNames $ rights results
+          insertSolvers $ concat $ rights solvers
+          insertBenchmarks $ concat $ rights benchmarks
+          insertJobs $ entryNames
+          return ()
+        else do
+          let invalids = filter isLeft parsings
+          error $ "One or more errors occurred: " ++ (show invalids)
     _ -> return ()
   defaultLayout $(widgetFile "import")
+
+clearLRI :: YesodDB App ()
+clearLRI = do
+  deleteWhere ([] :: [Filter LriResultInfo])
+  deleteWhere ([] :: [Filter LriJobInfo])
+  deleteWhere ([] :: [Filter LriSolverInfo])
+  deleteWhere ([] :: [Filter LriBenchmarkInfo])
+  return ()
+
+toText :: BSL.ByteString -> Text
+toText = TL.toStrict . TLE.decodeUtf8
+
+insertResults :: [(String, [LRI.LRIResult])] -> YesodDB App ()
+insertResults = Import.mapM_ insertMany
+  where
+    insertMany (jobName, rs) = Import.mapM_ (insert jobName) rs
+    insert jobName r = insertUnique $ LriResultInfo
+        (fromString jobName)
+        Nothing
+        (toText $ LRI.lrirPair r)
+        (toText $ LRI.lrirBenchmark r)
+        (toText $ LRI.lrirSolver r)
+        (getResult $ LRI.lrirResult r)
+        (LRI.lrirCpuTime r)
+        (LRI.lrirWallclockTime r)
+        (getResult <$> LRI.lrirCheckResult r)
+        (LRI.lrirCheckCpuTime r)
+        (LRI.lrirCheckWallclockTime r)
+    getResult LRI.LRIYES    = YES Nothing
+    getResult LRI.LRINO     = NO
+    getResult LRI.LRIERROR  = ERROR
+    getResult LRI.LRIMAYBE  = MAYBE
+    getResult _             = OTHER
+
+insertSolvers :: [LRI.LRISolver] -> YesodDB App ()
+insertSolvers = Import.mapM_ insert
+  where
+    --insertMany (jobName, slvs) = Import.mapM_ (insert jobName) slvs
+    insert s = insertUnique $ LriSolverInfo
+        (toText $ LRI.lrisIdentifier s)
+        (toText $ LRI.lrisName s)
+        (toText $ LRI.lrisAuthor s)
+        (toText $ LRI.lrisDescription s)
+        (toText $ LRI.lrisURL s)
+        (LRI.lrisStandard s)
+        (LRI.lrisRelative s)
+        (LRI.lrisConditional s)
+        (LRI.lrisContextSensitive s)
+        (LRI.lrisInnermost s)
+        (LRI.lrisTheory s)
+        (LRI.lrisCertifying s)
+
+insertBenchmarks :: [LRI.LRIBenchmark] -> YesodDB App ()
+insertBenchmarks = Import.mapM_ insert
+  where
+    --insertMany (jobName, bs) = Import.mapM_ (insert jobName) bs
+    insert b = insertUnique $ LriBenchmarkInfo
+      (toText $ LRI.lribIdentifier b)
+      (toText $ LRI.lribName b)
+      (toText $ LRI.lribFile b)
+      (LRI.lribRating b)
+      (LRI.lribSolved b)
+      (LRI.lribConditional b)
+      (LRI.lribContextSensitive b)
+      (LRI.lribInnermost b)
+      (LRI.lribOutermost b)
+      (LRI.lribRelative b)
+      (LRI.lribTheory b)
+
+insertJobs :: [String] -> YesodDB App ()
+insertJobs = Import.mapM_ $ \j -> do
+  let tj = fromString j
+  insertUnique $ LriJobInfo tj tj
