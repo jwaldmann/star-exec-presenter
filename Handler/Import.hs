@@ -74,6 +74,9 @@ normalizeString = map replaceString
     replaceString '\\' = '_'
     replaceString c = c
 
+toText :: BSL.ByteString -> Text
+toText = TL.toStrict . TLE.decodeUtf8
+
 postImportR :: Handler Html
 postImportR = do
   maid <- maybeAuthId
@@ -86,33 +89,40 @@ postImportR = do
         FormMissing -> Just ("FormMissing" :: Text)
         FormFailure ts -> Just (mconcat ts)
   case mUploadContent of
-    Just uc -> do
-      bytes <- getBytes uc
-      let contents = readZip bytes
-          entryNames = map (normalizeString . fst) contents
-          parsedContents = map (LRI.parse . snd) contents
-          results = map (>>= LRI.getResults) parsedContents
-          solvers = map (>>= LRI.getSolvers) parsedContents
-          benchmarks = map (>>= LRI.getBenchmarks) parsedContents
-          parsings = concat
-            [ map validateParsing parsedContents
-            , map validateParsing results
-            , map validateParsing solvers
-            , map validateParsing benchmarks
-            ]
-      if all isRight parsings
-        then forkHandler handleError $ runDB $ do
-          clearLRI
-          insertResults $ zip entryNames $ rights results
-          insertSolvers $ concat $ rights solvers
-          insertBenchmarks $ concat $ rights benchmarks
-          insertJobs $ entryNames
-          return ()
-        else do
-          let invalids = filter isLeft parsings
-          error $ "One or more errors occurred: " ++ (show invalids)
+    Just uc -> case source uc of
+      UIBKSelection -> return ()
+      LRISelection -> forkHandler handleError $ importLRI uc
     _ -> return ()
   defaultLayout $(widgetFile "import")
+
+importLRI :: UploadContent -> Handler ()
+importLRI uc = do
+  bytes <- getBytes uc
+  let contents = readZip bytes
+      entryNames = map (normalizeString . fst) contents
+      parsedContents = map (LRI.parse . snd) contents
+      results = map (>>= LRI.getResults) parsedContents
+      solvers = map (>>= LRI.getSolvers) parsedContents
+      benchmarks = map (>>= LRI.getBenchmarks) parsedContents
+      parsings = concat
+        [ map validateParsing parsedContents
+        , map validateParsing results
+        , map validateParsing solvers
+        , map validateParsing benchmarks
+        ]
+  if all isRight parsings
+    then runDB $ do
+      clearLRI
+      insertLRIResults $ zip entryNames $ rights results
+      insertLRISolvers $ concat $ rights solvers
+      insertLRIBenchmarks $ concat $ rights benchmarks
+      insertLRIJobs $ entryNames
+      return ()
+    else do
+      let invalids = filter isLeft parsings
+      error $ "One or more errors occurred: " ++ (show invalids)
+
+-- ### IMPORT LRI ###
 
 clearLRI :: YesodDB App ()
 clearLRI = do
@@ -122,11 +132,8 @@ clearLRI = do
   deleteWhere ([] :: [Filter LriBenchmarkInfo])
   return ()
 
-toText :: BSL.ByteString -> Text
-toText = TL.toStrict . TLE.decodeUtf8
-
-insertResults :: [(String, [LRI.LRIResult])] -> YesodDB App ()
-insertResults = Import.mapM_ insertMany
+insertLRIResults :: [(String, [LRI.LRIResult])] -> YesodDB App ()
+insertLRIResults = Import.mapM_ insertMany
   where
     insertMany (jobName, rs) = Import.mapM_ (insert jobName) rs
     insert jobName r = insertUnique $ LriResultInfo
@@ -147,8 +154,8 @@ insertResults = Import.mapM_ insertMany
     getResult LRI.LRIMAYBE  = MAYBE
     getResult _             = OTHER
 
-insertSolvers :: [LRI.LRISolver] -> YesodDB App ()
-insertSolvers = Import.mapM_ insert
+insertLRISolvers :: [LRI.LRISolver] -> YesodDB App ()
+insertLRISolvers = Import.mapM_ insert
   where
     --insertMany (jobName, slvs) = Import.mapM_ (insert jobName) slvs
     insert s = insertUnique $ LriSolverInfo
@@ -165,8 +172,8 @@ insertSolvers = Import.mapM_ insert
         (LRI.lrisTheory s)
         (LRI.lrisCertifying s)
 
-insertBenchmarks :: [LRI.LRIBenchmark] -> YesodDB App ()
-insertBenchmarks = Import.mapM_ insert
+insertLRIBenchmarks :: [LRI.LRIBenchmark] -> YesodDB App ()
+insertLRIBenchmarks = Import.mapM_ insert
   where
     --insertMany (jobName, bs) = Import.mapM_ (insert jobName) bs
     insert b = insertUnique $ LriBenchmarkInfo
@@ -182,7 +189,7 @@ insertBenchmarks = Import.mapM_ insert
       (LRI.lribRelative b)
       (LRI.lribTheory b)
 
-insertJobs :: [String] -> YesodDB App ()
-insertJobs = Import.mapM_ $ \j -> do
+insertLRIJobs :: [String] -> YesodDB App ()
+insertLRIJobs = Import.mapM_ $ \j -> do
   let tj = fromString j
   insertUnique $ LriJobInfo tj tj
