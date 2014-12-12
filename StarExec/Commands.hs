@@ -214,7 +214,16 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                          ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
                          ,("xmlns:tns","https://www.starexec.org/starexec/public/batchJobSchema.xsd") ]) [xml|
        $forall j <- js
-           <Job cpu-timeout="#{t $ cpu_timeout j}" description="#{description j}" mem-limit="#{t $ mem_limit j}" name="#{job_name j}" postproc-id="#{t $ postproc_id j}" queue-id="#{t $ queue_id j}" start-paused="#{b $ start_paused j}" wallclock-timeout="#{t $ wallclock_timeout j}">
+           <Job name="#{job_name j}">
+             <JobAttributes>
+               <description value="#{description j}"/>
+               <queue-id value="#{t $ queue_id j}"/>
+               <start-paused value="#{b $ start_paused j}"/>
+               <postproc-id value="#{t $ postproc_id j}"/>
+               <cpu-timeout value="#{t $ cpu_timeout j}"/>
+               <wallclock-timeout value="#{t $ wallclock_timeout j}"/>
+               <mem-limit value="#{t $ mem_limit j}"/>
+             </JobAttributes>
              $forall p <- jobpairs j
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
