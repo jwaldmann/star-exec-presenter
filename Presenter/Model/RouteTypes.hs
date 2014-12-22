@@ -8,54 +8,20 @@ import Presenter.Internal.Stringish
 import Presenter.Model.Query
 import Presenter.Internal.Stringish
 
-openingParenthese :: Char
-openingParenthese = '('
-
-closingParenthese :: Char
-closingParenthese = ')'
-
-lriResultPrefix :: String
+lriResultPrefix :: T.Text
 lriResultPrefix = "lri_result."
 
-lriJobPrefix :: String
+lriJobPrefix :: T.Text
 lriJobPrefix = "lri_job."
 
-lriPairPrefix :: String
+lriPairPrefix :: T.Text
 lriPairPrefix = "lri_pair."
 
-lriSolverPrefix :: String
+lriSolverPrefix :: T.Text
 lriSolverPrefix = "lri_solver."
 
-lriBenchmarkPrefix :: String
+lriBenchmarkPrefix :: T.Text
 lriBenchmarkPrefix = "lri_benchmark."
-
-class ShowID a where
-  showID :: a -> String
-
-class ReadID a where
-  readsPrecID :: ReadS a
-
-showID_ :: String -> Char -> String -> Char -> String
-showID_ prefix p1 s p2 = prefix ++ [p1] ++ s ++ [p2]
-
-showID_' :: String -> T.Text -> String
-showID_' prefix t = showID_ prefix openingParenthese (toString t) closingParenthese
-
-lexID :: Char -> Char -> ReadS String
-lexID p1 p2 s = lexID_ s
-  where
-    lexID_ (x:xs) = if x == p1
-                      then lexID_' ("", xs) 1
-                      else []
-    lexID_ _      = []
-    lexID_' (v,(x:xs)) n
-      | x == p1           = lexID_' (v ++ [p1], xs) (n+1)
-      | x == p2 && n == 1 = [(v,xs)]
-      | x == p2           = lexID_' (v ++ [p2], xs) (n-1)
-      | otherwise         = lexID_' (v ++ [x], xs) n
-
-lexID' :: ReadS String
-lexID' = lexID openingParenthese closingParenthese
 
 {-
 -}
@@ -69,7 +35,7 @@ data ErrorID =
 data JobID =
   StarExecJobID Int
   | LriJobID T.Text
-  deriving (Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 getStarExecId :: JobID -> Int
 getStarExecId (StarExecJobID i) = i
@@ -90,22 +56,22 @@ isLriID _ = False
 data SolverID =
   StarExecSolverID Int
   | LriSolverID T.Text
-  deriving (Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 data BenchmarkID =
   StarExecBenchmarkID Int
   | LriBenchmarkID T.Text
-  deriving (Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 data JobResultID =
   StarExecResultID Int
   | LriResultID T.Text
-  deriving (Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 data JobPairID =
   StarExecPairID Int
   | LriPairID T.Text
-  deriving (Eq, Ord)
+  deriving (Show, Read, Eq, Ord)
 
 
 getStarExecIds :: JobIds -> [Int]
@@ -116,101 +82,6 @@ getLriIds = (map getLriId) . (filter isLriID) . getIds
 
 -- ReadP als Alternative -> Compilerbau-VO
 
-instance ShowID JobID where
-  showID (StarExecJobID i) = show i
-  showID (LriJobID t) = showID_' lriJobPrefix t
-
-instance ReadID JobID where
-  readsPrecID s = [(LriJobID (fromString t), w) | ("lri_job", u) <- lex s,
-                                                  (".", v)          <- lex u,
-                                                  (t, w)            <- lexID openingParenthese closingParenthese v ]
-                  ++
-                  [(StarExecJobID i, x) | (i, x) <- reads s ]
-
-instance Show JobID where
-  show = showID
-
-instance Read JobID where
-  readsPrec _ = readsPrecID
-
-
-
-instance ShowID SolverID where
-  showID (StarExecSolverID i) = show i
-  showID (LriSolverID t) = showID_ lriSolverPrefix openingParenthese (toString t) closingParenthese
-
-instance ReadID SolverID where
-  readsPrecID s = [(LriSolverID (fromString t), w) | ("lri_solver", u) <- lex s,
-                                                     (".", v)          <- lex u,
-                                                     (t, w)            <- lexID openingParenthese closingParenthese v ]
-                  ++
-                  [(StarExecSolverID i, x) | (i, x) <- reads s ]
-
-instance Show SolverID where
-  show = showID
-
-instance Read SolverID where
-  readsPrec _ = readsPrecID
-
-
-
-instance ShowID BenchmarkID where
-  showID (StarExecBenchmarkID i) = show i
-  showID (LriBenchmarkID t) = showID_ lriBenchmarkPrefix openingParenthese (toString t) closingParenthese
-
-instance ReadID BenchmarkID where
-  readsPrecID s = [(LriBenchmarkID (fromString t), w) | ("lri_benchmark", u) <- lex s,
-                                                        (".", v)             <- lex u,
-                                                        (t, w)               <- lexID openingParenthese closingParenthese v ]
-                  ++
-                  [(StarExecBenchmarkID i, x) | (i, x) <- reads s ]
-
-instance Show BenchmarkID where
-  show = showID
-
-instance Read BenchmarkID where
-  readsPrec _ = readsPrecID
-
-
-
-instance ShowID JobResultID where
-  showID (StarExecResultID i) = show i
-  showID (LriResultID t) = showID_ lriResultPrefix openingParenthese (toString t) closingParenthese
-
-instance ReadID JobResultID where
-  readsPrecID s = [(LriResultID (fromString t), w) | ("lri_result", u) <- lex s,
-                                                     (".", v)          <- lex u,
-                                                     (t, w)            <- lexID openingParenthese closingParenthese v ]
-                  ++
-                  [(StarExecResultID i, x) | (i, x) <- reads s ]
-
-instance Show JobResultID where
-  show = showID
-
-instance Read JobResultID where
-  readsPrec _ = readsPrecID
-
-
-
-instance ShowID JobPairID where
-  showID (StarExecPairID i) = show i
-  showID (LriPairID t) = showID_ lriPairPrefix openingParenthese (toString t) closingParenthese
-
-instance ReadID JobPairID where
-  readsPrecID s = [(LriPairID (fromString t), w) | ("lri_pair", u) <- lex s,
-                                                   (".", v)          <- lex u,
-                                                   (t, w)            <- lexID openingParenthese closingParenthese v ]
-                  ++
-                  [(StarExecPairID i, x) | (i, x) <- reads s ]
-
-instance Show JobPairID where
-  show = showID
-
-instance Read JobPairID where
-  readsPrec _ = readsPrecID
-
-
-
 {-
 -}
 newtype JobIds = JobIds 
@@ -218,75 +89,71 @@ newtype JobIds = JobIds
   }
   deriving (Show, Eq, Read)
 
+readInt :: T.Text -> Maybe Int
+readInt t = case reads $ toString t of
+  [(i,_)] -> return i
+  _       -> Nothing
+
+dePrefix :: T.Text -> T.Text -> T.Text
+dePrefix p = T.drop (T.length p)
+
+fromInt :: Int -> T.Text
+fromInt = fromString . show
+
 instance PathPiece JobID where
-  toPathPiece = fromString . show
-  --toPathPiece (StarExecJobID i) = toPathPiece i
-  --toPathPiece (LriJobID t) = toPathPiece (lriJobPrefix +> t)
-  fromPathPiece t = case reads $ toString t of
-    [(i,_)] -> return i
-    _       -> Nothing
-  --fromPathPiece t
-  --  | lriJobPrefix `T.isPrefixOf` t = return $ LriJobID $ T.drop 4 t
-  --  | otherwise =
-  --    case TR.decimal t of
-  --      Right (i,_) -> return $ StarExecJobID i
-  --      Left _      -> Nothing
+  toPathPiece (StarExecJobID i) = fromInt i
+  toPathPiece (LriJobID t) = lriJobPrefix +> t
+  fromPathPiece t
+    | lriJobPrefix `T.isPrefixOf` t =
+        return $ LriJobID $ dePrefix lriJobPrefix t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecJobID i
+          _       -> Nothing
 
 instance PathPiece JobResultID where
-  toPathPiece = fromString . show
-  --toPathPiece (StarExecResultID i) = toPathPiece i
-  --toPathPiece (LriResultID t) = toPathPiece (lriResultPrefix +> t)
-  fromPathPiece t = case reads $ toString t of
-    [(i,_)] -> return i
-    _       -> Nothing
-  --fromPathPiece t
-  --  | lriResultPrefix `T.isPrefixOf` t = return $ LriResultID $ T.drop 4 t
-  --  | otherwise =
-  --    case TR.decimal t of
-  --      Right (i,_) -> return $ StarExecResultID i
-  --      Left _      -> Nothing
+  toPathPiece (StarExecResultID i) = fromInt i
+  toPathPiece (LriResultID t) = lriResultPrefix +> t
+  fromPathPiece t
+    | lriResultPrefix `T.isPrefixOf` t =
+        return $ LriResultID $ dePrefix lriResultPrefix t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecResultID i
+          _       -> Nothing
 
 instance PathPiece JobPairID where
-  toPathPiece = fromString . show
-  --toPathPiece (StarExecPairID i) = toPathPiece i
-  --toPathPiece (LriPairID t) = toPathPiece (lriPairPrefix +> t)
-  fromPathPiece t = case reads $ toString t of
-    [(i,_)] -> return i
-    _       -> Nothing
-  --fromPathPiece t
-  --  | lriPairPrefix `T.isPrefixOf` t = return $ LriPairID $ T.drop 4 t
-  --  | otherwise =
-  --    case TR.decimal t of
-  --      Right (i,_) -> return $ StarExecPairID i
-  --      Left _      -> Nothing
+  toPathPiece (StarExecPairID i) = fromInt i
+  toPathPiece (LriPairID t) = lriPairPrefix +> t
+  fromPathPiece t
+    | lriPairPrefix `T.isPrefixOf` t =
+        return $ LriPairID $ dePrefix lriPairPrefix t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecPairID i
+          _       -> Nothing
 
 instance PathPiece BenchmarkID where
-  toPathPiece = fromString . show
-  --toPathPiece (StarExecBenchmarkID i) = toPathPiece i
-  --toPathPiece (LriBenchmarkID t) = toPathPiece (lriBenchmarkPrefix +> t)
-  fromPathPiece t = case reads $ toString t of
-    [(i,_)] -> return i
-    _       -> Nothing
-  --fromPathPiece t
-  --  | lriBenchmarkPrefix `T.isPrefixOf` t = return $ LriBenchmarkID $ T.drop 4 t
-  --  | otherwise =
-  --    case TR.decimal t of
-  --      Right (i,_) -> return $ StarExecBenchmarkID i
-  --      Left _      -> Nothing
+  toPathPiece (StarExecBenchmarkID i) = fromInt i
+  toPathPiece (LriBenchmarkID t) = lriBenchmarkPrefix +> t
+  fromPathPiece t
+    | lriBenchmarkPrefix `T.isPrefixOf` t =
+        return $ LriBenchmarkID $ dePrefix lriBenchmarkPrefix t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecBenchmarkID i
+          _       -> Nothing
 
 instance PathPiece SolverID where
-  toPathPiece = fromString . show
-  --toPathPiece (StarExecSolverID i) = toPathPiece i
-  --toPathPiece (LriSolverID t) = toPathPiece t
-  fromPathPiece t = case reads $ toString t of
-    [(i,_)] -> return i
-    _       -> Nothing
-  --fromPathPiece t
-  --  | "lri_solver." `T.isPrefixOf` t = return $ LriSolverID $ T.drop 4 t
-  --  | otherwise =
-  --    case TR.decimal t of
-  --      Right (i,_) -> return $ StarExecSolverID i
-  --      Left _      -> Nothing
+  toPathPiece (StarExecSolverID i) = fromInt i
+  toPathPiece (LriSolverID t) = lriSolverPrefix +> t
+  fromPathPiece t
+    | lriSolverPrefix `T.isPrefixOf` t =
+        return $ LriSolverID $ dePrefix lriSolverPrefix t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecSolverID i
+          _       -> Nothing
 
 instance PathMultiPiece JobIds where
   toPathMultiPiece (JobIds jobs) = toPathMultiPiece $ map toPathPiece $ jobs
@@ -305,4 +172,3 @@ instance PathPiece Query where
     _ -> Nothing
   toPathPiece NoQuery = "noquery"
   toPathPiece q = T.pack $ show q
-

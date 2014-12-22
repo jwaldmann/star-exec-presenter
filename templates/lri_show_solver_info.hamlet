@@ -15,7 +15,7 @@ $maybe solverInfo <- mSolverInfo
           <td>#{getDescription solverInfo}
         <tr>
           <td>Url:
-          <td>#{getUrl solverInfo}
+          <td><a href="#{getUrl solverInfo}">#{getUrl solverInfo}</a>
         <tr>
           <td>isStandard:
           <td>#{isStandard solverInfo}
