@@ -35,7 +35,7 @@
                 <td><a href=@{ShowManyJobResultsR NoQuery $ JobIds $ map toJobID $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
                 <td>
                   $maybe postProc <- categoryPostProc compCatResult
-                    <a href=@{ShowPostProcInfoR $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}
+                    <a href=@{ShowPostProcInfoR $ StarExecPostProcID $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}
                   $nothing
                     /
                 <td>

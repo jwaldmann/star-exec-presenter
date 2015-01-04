@@ -63,9 +63,13 @@ data BenchmarkID =
   | LriBenchmarkID T.Text
   deriving (Show, Read, Eq, Ord)
 
-data JobResultID =
-  StarExecResultID Int
-  | LriResultID T.Text
+--data JobResultID =
+--  StarExecResultID Int
+--  | LriResultID T.Text
+--  deriving (Show, Read, Eq, Ord)
+
+data PostProcID =
+  StarExecPostProcID Int
   deriving (Show, Read, Eq, Ord)
 
 data JobPairID =
@@ -111,16 +115,16 @@ instance PathPiece JobID where
           Just i  -> return $ StarExecJobID i
           _       -> Nothing
 
-instance PathPiece JobResultID where
-  toPathPiece (StarExecResultID i) = fromInt i
-  toPathPiece (LriResultID t) = lriResultPrefix +> t
-  fromPathPiece t
-    | lriResultPrefix `T.isPrefixOf` t =
-        return $ LriResultID $ dePrefix lriResultPrefix t
-    | otherwise =
-        case readInt t of
-          Just i  -> return $ StarExecResultID i
-          _       -> Nothing
+--instance PathPiece JobResultID where
+--  toPathPiece (StarExecResultID i) = fromInt i
+--  toPathPiece (LriResultID t) = lriResultPrefix +> t
+--  fromPathPiece t
+--    | lriResultPrefix `T.isPrefixOf` t =
+--        return $ LriResultID $ dePrefix lriResultPrefix t
+--    | otherwise =
+--        case readInt t of
+--          Just i  -> return $ StarExecResultID i
+--          _       -> Nothing
 
 instance PathPiece JobPairID where
   toPathPiece (StarExecPairID i) = fromInt i
@@ -153,6 +157,14 @@ instance PathPiece SolverID where
     | otherwise =
         case readInt t of
           Just i  -> return $ StarExecSolverID i
+          _       -> Nothing
+
+instance PathPiece PostProcID where
+  toPathPiece (StarExecPostProcID i) = fromInt i
+  fromPathPiece t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecPostProcID i
           _       -> Nothing
 
 instance PathMultiPiece JobIds where

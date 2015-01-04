@@ -3,5 +3,5 @@ module Handler.LegacyShowPostProcInfo where
 import Import
 import Handler.ShowPostProcInfo
 
-getLegacyShowPostProcInfoR :: Int -> Handler Html
+getLegacyShowPostProcInfoR :: PostProcID -> Handler Html
 getLegacyShowPostProcInfoR = getShowPostProcInfoR

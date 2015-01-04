@@ -4,8 +4,8 @@ import Import
 import Presenter.StarExec.JobData
 import Presenter.Utils.WidgetMetaRefresh
 
-getShowPostProcInfoR :: Int -> Handler Html
-getShowPostProcInfoR _procId = do
+getShowPostProcInfoR :: PostProcID -> Handler Html
+getShowPostProcInfoR (StarExecPostProcID _procId) = do
   (QueryResult qStatus mPostProcInfo) <- queryPostProc _procId
   defaultLayout $ do
     case qStatus of

@@ -20,7 +20,7 @@ class ResultEntity a where
   getResultStatus :: a -> JobResultStatus
   getJobID :: a -> JobID
   getPairID :: a -> JobPairID
-  toResultID :: a -> JobResultID
+  --toResultID :: a -> JobResultID
   isResultComplete :: a -> Bool
   updateScore :: a -> Maybe Int -> a
   toScore :: a -> Maybe Int
@@ -123,8 +123,8 @@ instance ResultEntity JobResult where
   getPairID (StarExecResult r) = getPairID r
   getPairID (LriResult r) = getPairID r
 
-  toResultID (StarExecResult r) = toResultID r
-  toResultID (LriResult r) = toResultID r
+  --toResultID (StarExecResult r) = toResultID r
+  --toResultID (LriResult r) = toResultID r
 
   isResultComplete (StarExecResult r) = isResultComplete r
   isResultComplete (LriResult r) = isResultComplete r
@@ -150,7 +150,7 @@ instance ResultEntity JobResultInfo where
 
   getPairID = StarExecPairID . jobResultInfoPairId
 
-  toResultID = StarExecResultID . jobResultInfoPairId
+  --toResultID = StarExecResultID . jobResultInfoPairId
 
   isResultComplete r = jobResultInfoStatus r == JobResultComplete
 
@@ -171,7 +171,7 @@ instance ResultEntity LriResultInfo where
 
   getPairID = LriPairID . lriResultInfoPairId
 
-  toResultID = LriResultID . lriResultInfoPairId
+  --toResultID = LriResultID . lriResultInfoPairId
 
   isResultComplete _ = True
 

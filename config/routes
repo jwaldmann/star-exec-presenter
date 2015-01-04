@@ -28,8 +28,8 @@
 /show_solver_info/#SolverID LegacyShowSolverInfoR GET
 
 -- displays post-processor-infos
-/post_proc/#Int ShowPostProcInfoR GET
-/show_post_proc_info/#Int LegacyShowPostProcInfoR GET
+/post_proc/#PostProcID ShowPostProcInfoR GET
+/show_post_proc_info/#PostProcID LegacyShowPostProcInfoR GET
 
 -- displays multiple job-results
 /results/#Query/*JobIds ShowManyJobResultsR GET
