@@ -21,7 +21,10 @@ import qualified Codec.Archive.Tar as Tar
 import Presenter.Internal.Stringish
 import qualified Importer.LRI as LRI
 
-data SourceSelection = LRISelection | UIBKSelection
+data SourceSelection = LRIResultsSelection
+  | LRIOutputsSelection
+  | UIBKResultsSelection
+  | UIBKOutputsSelection
   deriving (Eq, Ord, Read, Show)
 
 data UploadContent = UploadContent
@@ -31,7 +34,13 @@ data UploadContent = UploadContent
 
 uploadForm :: Form UploadContent
 uploadForm = renderBootstrap3 BootstrapBasicForm $ UploadContent
-  <$> areq (selectFieldList [("LRI"::Text, LRISelection), ("UIBK"::Text, UIBKSelection)]) "Source:" Nothing
+  <$> areq
+        (selectFieldList
+          [ ("LRI Results"::Text, LRIResultsSelection)
+          , ("LRI Outputs"::Text, LRIOutputsSelection)
+          , ("UIBK Results"::Text, UIBKResultsSelection)
+          , ("UIBK Outputs"::Text, UIBKOutputsSelection)
+          ]) "Source:" Nothing
   <*> fileAFormReq "Zip-Archive:"
 
 getImportR :: Handler Html
@@ -90,8 +99,10 @@ postImportR = do
         FormFailure ts -> Just (mconcat ts)
   case mUploadContent of
     Just uc -> case source uc of
-      UIBKSelection -> return ()
-      LRISelection -> forkHandler handleError $ importLRI uc
+      UIBKResultsSelection -> return ()
+      UIBKOutputsSelection -> return ()
+      LRIOutputsSelection -> return ()
+      LRIResultsSelection -> forkHandler handleError $ importLRI uc
     _ -> return ()
   defaultLayout $(widgetFile "import")
 
