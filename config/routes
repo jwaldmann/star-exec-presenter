@@ -8,27 +8,33 @@
 / HomeR GET
 
 -- displays job-pair-infos
-/pair/#JobPairID ShowJobPairR GET
+/pairs ListJobPairsR GET
+/pairs/#JobPairID ShowJobPairR GET
 /show_job_pair/#JobPairID LegacyShowJobPairR GET
 
 -- displays proofs of job-pairs
-/proof/#Text DisplayProofR GET
+/proofs ListProofsR GET
+/proofs/#Text DisplayProofR GET
 /display_proof/#Text LegacyDisplayProofR GET
 
 -- displays job-infos
-/job/#JobID ShowJobInfoR GET
+/jobs ListJobsR GET
+/jobs/#JobID ShowJobInfoR GET
 /show_job_info/#JobID LegacyShowJobInfoR GET
 
 -- displays benchmark-infos
-/benchmark/#BenchmarkID ShowBenchmarkInfoR GET
+/benchmarks ListBenchmarksR GET
+/benchmarks/#BenchmarkID ShowBenchmarkInfoR GET
 /show_benchmark_info/#BenchmarkID LegacyShowBenchmarkInfoR GET
 
 -- displays solver-infos
-/solver/#SolverID ShowSolverInfoR GET
+/solvers ListSolversR GET
+/solvers/#SolverID ShowSolverInfoR GET
 /show_solver_info/#SolverID LegacyShowSolverInfoR GET
 
 -- displays post-processor-infos
-/post_proc/#PostProcID ShowPostProcInfoR GET
+/post_procs ListPostProcsR GET
+/post_procs/#PostProcID ShowPostProcInfoR GET
 /show_post_proc_info/#PostProcID LegacyShowPostProcInfoR GET
 
 -- displays multiple job-results
@@ -38,14 +44,16 @@
 /flexible-table/#Query/*JobIds FlexibleTableR GET
 
 -- displays competitions
-/competition/#CompetitionInfoId CompetitionR GET
+/competitions/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
 
 /control ControlR GET POST
 /registered RegisteredR GET
 
-/hidden-test-runs ListHiddenCompetitionsR GET
-/test-runs ListCompetitionsR GET
+/competitions ListCompetitionsR GET
+/test-runs LegacyListCompetitionsR GET
+/hidden_competitions ListHiddenCompetitionsR GET
+/hidden-test-runs LegacyListHiddenCompetitionsR GET
 
 -- Import route
 /import ImportR GET POST

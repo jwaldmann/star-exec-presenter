@@ -1,0 +1,7 @@
+module Handler.LegacyListHiddenCompetitions where
+
+import Import
+import Handler.ListHiddenCompetitions
+
+getLegacyListHiddenCompetitionsR :: Handler Html
+getLegacyListHiddenCompetitionsR = getListHiddenCompetitionsR

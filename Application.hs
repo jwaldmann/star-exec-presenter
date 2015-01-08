@@ -50,6 +50,14 @@ import Handler.FlexibleTable
 import Handler.Competition
 import Handler.CompetitionWithConfig
 import Handler.Import
+import Handler.ListJobPairs
+import Handler.ListProofs
+import Handler.ListJobs
+import Handler.ListBenchmarks
+import Handler.ListSolvers
+import Handler.ListPostProcs
+import Handler.LegacyListCompetitions
+import Handler.LegacyListHiddenCompetitions
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

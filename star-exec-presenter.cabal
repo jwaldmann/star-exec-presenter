@@ -43,6 +43,14 @@ library
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Handler.Import
+                     Handler.ListJobPairs
+                     Handler.ListProofs
+                     Handler.ListJobs
+                     Handler.ListBenchmarks
+                     Handler.ListSolvers
+                     Handler.ListPostProcs
+                     Handler.LegacyListCompetitions
+                     Handler.LegacyListHiddenCompetitions
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
