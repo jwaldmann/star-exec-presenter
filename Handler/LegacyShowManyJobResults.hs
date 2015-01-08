@@ -1,7 +1,7 @@
 module Handler.LegacyShowManyJobResults where
 
 import Import
-import Handler.ShowManyJobResults
+import Network.HTTP.Types.Status
 
 getLegacyShowManyJobResultsR :: JobIds -> Handler Html
-getLegacyShowManyJobResultsR = getShowManyJobResultsR NoQuery
+getLegacyShowManyJobResultsR = (redirectWith movedPermanently301) . ShowManyJobResultsR NoQuery

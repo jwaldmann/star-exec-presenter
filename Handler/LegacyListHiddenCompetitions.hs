@@ -1,7 +1,7 @@
 module Handler.LegacyListHiddenCompetitions where
 
 import Import
-import Handler.ListHiddenCompetitions
+import Network.HTTP.Types.Status
 
 getLegacyListHiddenCompetitionsR :: Handler Html
-getLegacyListHiddenCompetitionsR = getListHiddenCompetitionsR
+getLegacyListHiddenCompetitionsR = redirectWith movedPermanently301 ListHiddenCompetitionsR

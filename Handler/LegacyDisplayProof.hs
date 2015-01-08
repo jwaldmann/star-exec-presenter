@@ -1,7 +1,7 @@
 module Handler.LegacyDisplayProof where
 
 import Import
-import Handler.DisplayProof
+import Network.HTTP.Types.Status
 
 getLegacyDisplayProofR :: Text -> Handler TypedContent
-getLegacyDisplayProofR = getDisplayProofR
+getLegacyDisplayProofR = (redirectWith movedPermanently301) . DisplayProofR

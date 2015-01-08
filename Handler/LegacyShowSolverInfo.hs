@@ -1,7 +1,7 @@
 module Handler.LegacyShowSolverInfo where
 
 import Import
-import Handler.ShowSolverInfo
+import Network.HTTP.Types.Status
 
 getLegacyShowSolverInfoR :: SolverID -> Handler Html
-getLegacyShowSolverInfoR = getShowSolverInfoR
+getLegacyShowSolverInfoR = (redirectWith movedPermanently301) . ShowSolverInfoR

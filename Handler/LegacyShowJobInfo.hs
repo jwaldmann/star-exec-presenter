@@ -1,7 +1,7 @@
 module Handler.LegacyShowJobInfo where
 
 import Import
-import Handler.ShowJobInfo
+import Network.HTTP.Types.Status
 
 getLegacyShowJobInfoR :: JobID -> Handler Html
-getLegacyShowJobInfoR = getShowJobInfoR
+getLegacyShowJobInfoR = (redirectWith movedPermanently301) . ShowJobInfoR

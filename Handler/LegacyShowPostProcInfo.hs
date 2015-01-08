@@ -1,7 +1,7 @@
 module Handler.LegacyShowPostProcInfo where
 
 import Import
-import Handler.ShowPostProcInfo
+import Network.HTTP.Types.Status
 
 getLegacyShowPostProcInfoR :: PostProcID -> Handler Html
-getLegacyShowPostProcInfoR = getShowPostProcInfoR
+getLegacyShowPostProcInfoR = (redirectWith movedPermanently301) . ShowPostProcInfoR

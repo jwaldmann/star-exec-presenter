@@ -1,7 +1,7 @@
 module Handler.LegacyShowBenchmarkInfo where
 
 import Import
-import Handler.ShowBenchmarkInfo
+import Network.HTTP.Types.Status
 
 getLegacyShowBenchmarkInfoR :: BenchmarkID -> Handler Html
-getLegacyShowBenchmarkInfoR = getShowBenchmarkInfoR
+getLegacyShowBenchmarkInfoR = (redirectWith movedPermanently301) . ShowBenchmarkInfoR
