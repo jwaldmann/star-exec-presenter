@@ -24,3 +24,32 @@ data Cell_Filter =
   | Equals T.Text 
   | Not_Equals T.Text 
   deriving (Read,Show, Eq)
+
+-- draft for a more generic querrying
+
+data NQuery =
+  NNoQuery
+  | NQuery [ NTransform ]
+  deriving (Read,Show, Eq)
+
+data NTransform =
+  Columns [ Int ]
+  | Solvers [ Name ]
+  | Rows RowFilter
+  deriving (Read,Show, Eq)
+
+data RowFilter =
+  RAnd [ CellFilter ]
+  | RNot [ CellFilter ]
+  deriving (Read,Show, Eq)
+
+data CellFilter =
+  CAny
+  | CAnd SolverResult
+  | COr SolverResult
+  | CNot SolverResult
+  -- maybe add CAndYes, COrYes and CNotYes
+  -- for all YESes
+  -- because "YES (Maybe Int)" is not expressive enough
+  -- what does "YES Nothing" mean in this context?
+  deriving (Read,Show, Eq)
