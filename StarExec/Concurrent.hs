@@ -1,3 +1,6 @@
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module StarExec.Concurrent 
   ( runQuerySolverInfo
   , runQueryBenchmarkInfo
@@ -23,6 +26,10 @@ import Data.List ((\\))
 import Control.Monad ( when )
 import System.IO ( writeFile )
 
+deriving instance (Eq (QueryStatus QueryInfo))
+         
+
+       
 {-
   FIXME: possible bug, that QueryInfo won't be deleted from DB after an exception or after a query is complete
 -}

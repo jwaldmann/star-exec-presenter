@@ -75,7 +75,7 @@ BenchmarkInfo
 QueryInfo
     query SEQuery
     UniqueQueryInfo query
-    deriving Show
+    deriving Show Eq
 
 CompetitionInfo
     competition Competition

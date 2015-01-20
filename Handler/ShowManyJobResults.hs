@@ -1,3 +1,6 @@
+{-# language StandaloneDeriving #-}
+{-# language FlexibleInstances #-}
+
 module Handler.ShowManyJobResults
   ( getShowManyJobResultsR
   , getShowManyJobResultsLegacyR
