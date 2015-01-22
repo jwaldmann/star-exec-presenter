@@ -84,6 +84,9 @@ library
                      Importer.Interpreter.LRI
                      Importer.Internal
                      Importer.LRI
+                     Importer.Parser.UIBK
+                     Importer.Interpreter.UIBK
+                     Importer.UIBK
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

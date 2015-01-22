@@ -2,6 +2,8 @@ module Presenter.Model.Query where
 
 import Yesod
 import Prelude
+import Presenter.Model.Types
+import Presenter.Model.StarExec
 import qualified Data.Text as T
 
 data Query =
@@ -33,9 +35,9 @@ data NQuery =
   deriving (Read,Show, Eq)
 
 data NTransform =
-  Columns [ Int ]
-  | Solvers [ Name ]
-  | Rows RowFilter
+  ColumnsT [ Int ]
+  | SolversT [ Name ]
+  | RowsT RowFilter
   deriving (Read,Show, Eq)
 
 data RowFilter =

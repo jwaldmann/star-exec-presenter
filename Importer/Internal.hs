@@ -4,6 +4,8 @@ import Prelude
 import Data.ByteString.Lazy
 import Data.Maybe
 
+-- datatypes and type synonyms for LRI data
+
 type Line = ByteString
 type Lines = [ByteString]
 type Name = ByteString
@@ -57,3 +59,46 @@ data LRIResult = LRIResult
   , lrirCheckCpuTime :: !(Maybe Double)
   , lrirCheckWallclockTime :: !(Maybe Double)
   } deriving (Show)
+
+-- datatypes and type synonyms for UIBK data
+
+type Version = ByteString
+type UIBKSolverResult = ByteString
+type Path = ByteString
+
+data UIBKCompetition = UIBKCompetition
+  { uibkCompID :: !Int
+  , uibkCompName :: !Name
+  , uibkCompCategories :: ![UIBKCategory]
+  }
+  deriving (Show, Read)
+
+data UIBKCategory = UIBKCategory
+  { uibkCatID :: !Int
+  , uibkCatName :: !Name
+  , uibkCatEntries :: ![UIBKResult]
+  }
+  deriving (Show, Read)
+
+data UIBKResult = UIBKResult
+  { uibkResultID :: !Int
+  , uibkResultInputProblemID :: !Int
+  , uibkResultInputProblemPath :: !Path
+  , uibkResult :: !UIBKSolverResult
+  , uibkResultWallclockTime :: !Int
+  , uibkResultTool :: !Name
+  , uibkResultToolVersion :: !Version
+  }
+  deriving (Show, Read, Eq)
+
+data UIBKBenchmark = UIBKBenchmark
+  { uibkBenchmarkID :: !Int
+  , uibkBenchmarkPath :: !Path
+  }
+  deriving (Show, Read, Eq)
+
+data UIBKSolver = UIBKSolver
+  { uibkSolverName :: !Name
+  , uibkSolverVersion :: !Version
+  }
+  deriving (Show, Read, Eq)

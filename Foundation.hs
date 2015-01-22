@@ -77,6 +77,8 @@ instance Yesod App where
         120    -- timeout in minutes
         "config/client_session_key.aes"
 
+    maximumContentLength _ _ = Nothing
+
     defaultLayout widget = do
         master <- getYesod
         --mmsg <- getMessage

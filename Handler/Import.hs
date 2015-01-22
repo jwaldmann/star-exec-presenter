@@ -20,6 +20,7 @@ import qualified Codec.Archive.Tar as Tar
 
 import Presenter.Internal.Stringish
 import qualified Importer.LRI as LRI
+import qualified Importer.UIBK as UIBK
 
 data SourceSelection = LRIResultsSelection
   | LRIOutputsSelection
@@ -99,12 +100,25 @@ postImportR = do
         FormFailure ts -> Just (mconcat ts)
   case mUploadContent of
     Just uc -> case source uc of
-      UIBKResultsSelection -> return ()
+      UIBKResultsSelection -> forkHandler handleError $ importUIBK uc
       UIBKOutputsSelection -> return ()
       LRIOutputsSelection -> return ()
       LRIResultsSelection -> forkHandler handleError $ importLRI uc
     _ -> return ()
   defaultLayout $(widgetFile "import")
+
+importUIBK :: UploadContent -> Handler ()
+importUIBK uc = do
+  bytes <- getBytes uc
+  let entries = readZip bytes
+  Import.mapM_ parseEntry $ readZip bytes
+    where
+      parseEntry ("..", _) = return ()
+      parseEntry (".", _) = return ()
+      parseEntry (xmlName, xmlBytes) = do
+        let parsedContents = UIBK.parse xmlBytes
+        liftIO $ print xmlName
+        return ()
 
 importLRI :: UploadContent -> Handler ()
 importLRI uc = do
