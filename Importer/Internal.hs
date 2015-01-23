@@ -89,16 +89,16 @@ data UIBKResult = UIBKResult
   , uibkResultTool :: !Name
   , uibkResultToolVersion :: !Version
   }
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 
 data UIBKBenchmark = UIBKBenchmark
   { uibkBenchmarkID :: !Int
   , uibkBenchmarkPath :: !Path
   }
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)
 
 data UIBKSolver = UIBKSolver
   { uibkSolverName :: !Name
   , uibkSolverVersion :: !Version
   }
-  deriving (Show, Read, Eq)
+  deriving (Show, Read, Eq, Ord)

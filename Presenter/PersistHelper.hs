@@ -40,6 +40,7 @@ getPersistJobInfo = runDB . getPersistJobInfo'
 getPersistJobInfo' :: JobID -> YesodDB App (Maybe Job)
 getPersistJobInfo' (StarExecJobID _id) = getEntityVal' (UniqueJobInfo _id) StarExecJob
 getPersistJobInfo' (LriJobID _id) = getEntityVal' (UniqueLriJobInfo _id) LriJob
+getPersistJobInfo' (UibkJobID _id) = getEntityVal' (UniqueUibkJobInfo _id) UibkJob
 
 getPersistPostProcInfo :: Int -> Handler (Maybe PostProcInfo)
 getPersistPostProcInfo = getEntity . UniquePostProcInfo
@@ -57,6 +58,9 @@ getPersistJobResults' (StarExecJobID _id) = do
 getPersistJobResults' (LriJobID _id) = do
   results <- getEntityList' [ LriResultInfoJobId ==. _id ] []
   return $ LriResult <$> results
+getPersistJobResults' (UibkJobID _id) = do
+  results <- getEntityList' [ UibkResultInfoJobId ==. _id ] []
+  return $ UibkResult <$> results
 
 getPersistJobResult :: JobPairID -> Handler (Maybe JobResult)
 getPersistJobResult = runDB . getPersistJobResult'
@@ -96,6 +100,7 @@ getPersistSolverInfo = runDB . getPersistSolverInfo'
 getPersistSolverInfo' :: SolverID -> YesodDB App (Maybe Solver)
 getPersistSolverInfo' (StarExecSolverID _id) = getEntityVal' (UniqueSolverInfo _id) StarExecSolver
 getPersistSolverInfo' (LriSolverID _id) = getEntityVal' (UniqueLriSolverInfo _id) LriSolver
+getPersistSolverInfo' (UibkSolverID _id) = getEntityVal' (UniqueUibkSolverInfo _id) UibkSolver
 
 getPersistBenchmarkInfo :: BenchmarkID -> Handler (Maybe Benchmark)
 getPersistBenchmarkInfo = runDB . getPersistBenchmarkInfo'
@@ -103,6 +108,7 @@ getPersistBenchmarkInfo = runDB . getPersistBenchmarkInfo'
 getPersistBenchmarkInfo' :: BenchmarkID -> YesodDB App (Maybe Benchmark)
 getPersistBenchmarkInfo' (StarExecBenchmarkID _id) = getEntityVal' (UniqueBenchmarkInfo _id) StarExecBenchmark
 getPersistBenchmarkInfo' (LriBenchmarkID _id) = getEntityVal' (UniqueLriBenchmarkInfo _id) LriBenchmark
+getPersistBenchmarkInfo' (UibkBenchmarkID _id) = getEntityVal' (UniqueUibkBenchmarkInfo _id) UibkBenchmark
 
 -- ###### persist setter (inserts) ######
 

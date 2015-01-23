@@ -61,6 +61,7 @@ class FromJobResult a where
 data Job =
   StarExecJob JobInfo
   | LriJob LriJobInfo
+  | UibkJob UibkJobInfo
   deriving (Eq, Ord, Read, Show)
 
 newtype Jobs = Jobs
@@ -70,6 +71,7 @@ newtype Jobs = Jobs
 data JobResult =
   StarExecResult JobResultInfo
   | LriResult LriResultInfo
+  | UibkResult UibkResultInfo
   deriving (Eq, Ord, Read, Show)
 
 newtype JobResults = JobResults
@@ -83,6 +85,7 @@ data Pair  =
 data Benchmark =
   StarExecBenchmark BenchmarkInfo
   | LriBenchmark LriBenchmarkInfo
+  | UibkBenchmark UibkBenchmarkInfo
   deriving (Eq, Ord, Read, Show)
 
 newtype Benchmarks = Benchmarks
@@ -92,6 +95,7 @@ newtype Benchmarks = Benchmarks
 data Solver =
   StarExecSolver SolverInfo
   | LriSolver LriSolverInfo
+  | UibkSolver UibkSolverInfo
   deriving (Eq, Ord, Read, Show)
 
 newtype Solvers = Solvers
@@ -113,33 +117,42 @@ lriConfigName = "lri_config"
 instance ResultEntity JobResult where
   getSolverResult (StarExecResult r) = getSolverResult r
   getSolverResult (LriResult r) = getSolverResult r
+  getSolverResult (UibkResult r) = getSolverResult r
 
   getResultStatus (StarExecResult r) = getResultStatus r
   getResultStatus (LriResult r) = getResultStatus r
+  getResultStatus (UibkResult r) = getResultStatus r
 
   getJobID (StarExecResult r) = getJobID r
   getJobID (LriResult r) = getJobID r
+  getJobID (UibkResult r) = getJobID r
 
   getPairID (StarExecResult r) = getPairID r
   getPairID (LriResult r) = getPairID r
+  getPairID (UibkResult r) = getPairID r
 
   --toResultID (StarExecResult r) = toResultID r
   --toResultID (LriResult r) = toResultID r
 
   isResultComplete (StarExecResult r) = isResultComplete r
   isResultComplete (LriResult r) = isResultComplete r
+  isResultComplete (UibkResult r) = isResultComplete r
 
   updateScore (StarExecResult r) = StarExecResult . (updateScore r)
   updateScore (LriResult r) = LriResult . (updateScore r)
+  updateScore (UibkResult r) = UibkResult . (updateScore r)
 
   toScore (StarExecResult r) = toScore r
   toScore (LriResult r) = toScore r
+  toScore (UibkResult r) = toScore r
 
   toCpuTime (StarExecResult r) = toCpuTime r
   toCpuTime (LriResult r) = toCpuTime r
+  toCpuTime (UibkResult r) = toCpuTime r
 
   toWallclockTime (StarExecResult r) = toWallclockTime r
   toWallclockTime (LriResult r) = toWallclockTime r
+  toWallclockTime (UibkResult r) = toWallclockTime r
 
 instance ResultEntity JobResultInfo where
   getSolverResult = jobResultInfoResult
@@ -183,6 +196,27 @@ instance ResultEntity LriResultInfo where
 
   toWallclockTime = lriResultInfoWallclockTime
 
+instance ResultEntity UibkResultInfo where
+  getSolverResult = uibkResultInfoResult
+
+  getResultStatus _ = JobResultComplete
+
+  getJobID = UibkJobID . uibkResultInfoJobId
+
+  getPairID = UibkPairID . uibkResultInfoPairId
+
+  --toResultID = LriResultID . lriResultInfoPairId
+
+  isResultComplete _ = True
+
+  updateScore r s = r { uibkResultInfoScore = s }
+
+  toScore = uibkResultInfoScore
+
+  toCpuTime _ = -1
+
+  toWallclockTime = uibkResultInfoWallclockTime
+
 -- #### FromJobResult ####
 
 instance FromJobResult JobResultInfo where
@@ -195,21 +229,30 @@ instance FromJobResult LriResultInfo where
   fromJobResult _ = Nothing
   toJobResult = LriResult
 
+instance FromJobResult UibkResultInfo where
+  fromJobResult (UibkResult r) = Just r
+  fromJobResult _ = Nothing
+  toJobResult = UibkResult
+
 -- #### BenchmarkEntity ####
 
 instance BenchmarkEntity Benchmark where
   toBenchmarkID (StarExecBenchmark b) = toBenchmarkID b
   toBenchmarkID (LriBenchmark b) = toBenchmarkID b
+  toBenchmarkID (UibkBenchmark b) = toBenchmarkID b
 
   toBenchmarkName (StarExecBenchmark b) = toBenchmarkName b
   toBenchmarkName (LriBenchmark b) = toBenchmarkName b
+  toBenchmarkName (UibkBenchmark b) = toBenchmarkName b
 
 instance BenchmarkEntity JobResult where
   toBenchmarkID (StarExecResult r) = toBenchmarkID r
   toBenchmarkID (LriResult r) = toBenchmarkID r
+  toBenchmarkID (UibkResult r) = toBenchmarkID r
 
   toBenchmarkName (StarExecResult r) = toBenchmarkName r
   toBenchmarkName (LriResult r) = toBenchmarkName r
+  toBenchmarkName (UibkResult r) = toBenchmarkName r
 
 instance BenchmarkEntity JobResultInfo where
   toBenchmarkID = StarExecBenchmarkID . jobResultInfoBenchmarkId
@@ -221,6 +264,11 @@ instance BenchmarkEntity LriResultInfo where
 
   toBenchmarkName = lriResultInfoBenchmarkId
 
+instance BenchmarkEntity UibkResultInfo where
+  toBenchmarkID = UibkBenchmarkID . uibkResultInfoBenchmarkId
+
+  toBenchmarkName = uibkResultInfoBenchmarkName
+
 instance BenchmarkEntity BenchmarkInfo where
   toBenchmarkID = StarExecBenchmarkID . benchmarkInfoStarExecId
 
@@ -231,21 +279,30 @@ instance BenchmarkEntity LriBenchmarkInfo where
 
   toBenchmarkName = lriBenchmarkInfoName
 
+instance BenchmarkEntity UibkBenchmarkInfo where
+  toBenchmarkID = UibkBenchmarkID . uibkBenchmarkInfoBenchmarkId
+
+  toBenchmarkName = uibkBenchmarkInfoPath
+
 -- #### SolverEntity ####
 
 instance SolverEntity Solver where
   toSolverID (StarExecSolver s) = toSolverID s
   toSolverID (LriSolver s) = toSolverID s
+  toSolverID (UibkSolver s) = toSolverID s
 
   toSolverName (StarExecSolver s) = toSolverName s
   toSolverName (LriSolver s) = toSolverName s
+  toSolverName (UibkSolver s) = toSolverName s
 
 instance SolverEntity JobResult where
   toSolverID (StarExecResult r) = toSolverID r
   toSolverID (LriResult r) = toSolverID r
+  toSolverID (UibkResult r) = toSolverID r
 
   toSolverName (StarExecResult r) = toSolverName r
   toSolverName (LriResult r) = toSolverName r
+  toSolverName (UibkResult r) = toSolverName r
 
 instance SolverEntity JobResultInfo where
   toSolverID = StarExecSolverID . jobResultInfoSolverId
@@ -257,6 +314,11 @@ instance SolverEntity LriResultInfo where
 
   toSolverName = lriResultInfoSolverId
 
+instance SolverEntity UibkResultInfo where
+  toSolverID = UibkSolverID . uibkResultInfoSolverId
+
+  toSolverName = uibkResultInfoSolverName
+
 instance SolverEntity SolverInfo where
   toSolverID = StarExecSolverID . solverInfoStarExecId
 
@@ -266,6 +328,11 @@ instance SolverEntity LriSolverInfo where
   toSolverID = LriSolverID . lriSolverInfoSolverId
 
   toSolverName = lriSolverInfoName
+
+instance SolverEntity UibkSolverInfo where
+  toSolverID = UibkSolverID . uibkSolverInfoSolverId
+
+  toSolverName = uibkSolverInfoName
 
 -- #### ConfigEntity ####
 
@@ -291,9 +358,11 @@ instance ConfigEntity LriResultInfo where
 instance JobEntity Job where
   toJobName (StarExecJob j) = toJobName j
   toJobName (LriJob j) = toJobName j
+  toJobName (UibkJob j) = toJobName j
 
   toJobID (StarExecJob j) = toJobID j
   toJobID (LriJob j) = toJobID j
+  toJobID (UibkJob j) = toJobID j
 
   toJobStatus (StarExecJob j) = toJobStatus j
   toJobStatus _ = Complete
@@ -330,6 +399,21 @@ instance JobEntity LriJobInfo where
   toJobName = lriJobInfoName
 
   toJobID = LriJobID . lriJobInfoJobId
+
+  toJobStatus _ = Complete
+
+  toJobDuration _ = Nothing
+
+  toJobStartDate _ = Nothing
+
+  toJobFinishDate _ = Nothing
+
+  isComplexity _ = False
+
+instance JobEntity UibkJobInfo where
+  toJobName = uibkJobInfoName
+
+  toJobID = UibkJobID . uibkJobInfoJobId
 
   toJobStatus _ = Complete
 

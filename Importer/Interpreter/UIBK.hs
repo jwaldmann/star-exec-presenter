@@ -1,7 +1,6 @@
 module Importer.Interpreter.UIBK
   ( getBenchmarks
   , getSolvers
-  , getResults
   ) where
 
 import Prelude
@@ -28,6 +27,3 @@ getSolvers = L.nub . L.map createSolver
       { uibkSolverName = uibkResultTool r
       , uibkSolverVersion = uibkResultToolVersion r
       }
-
-getResults :: [UIBKResult] -> [UIBKResult]
-getResults = id

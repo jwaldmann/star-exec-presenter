@@ -6,9 +6,12 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.List as L
 import qualified Data.Text.Lazy.Encoding as TLE
 import qualified Data.Text.Lazy as TL
+import qualified Data.IntMap.Strict as IM
+import qualified Data.Map.Strict as M
 
 import Yesod.Auth
 import Yesod.Form.Bootstrap3
+import Data.Monoid
 import Data.Either
 import Data.Conduit
 import Data.Conduit.Binary
@@ -110,15 +113,93 @@ postImportR = do
 importUIBK :: UploadContent -> Handler ()
 importUIBK uc = do
   bytes <- getBytes uc
-  let entries = readZip bytes
   Import.mapM_ parseEntry $ readZip bytes
     where
-      parseEntry ("..", _) = return ()
-      parseEntry (".", _) = return ()
+      parseEntry :: (String, BSL.ByteString) -> Handler ()
       parseEntry (xmlName, xmlBytes) = do
-        let parsedContents = UIBK.parse xmlBytes
-        liftIO $ print xmlName
-        return ()
+        let eParsedContents = UIBK.parse xmlBytes
+        case eParsedContents of
+          Right comps -> runDB $ do
+            clearUibk
+            Import.mapM_ insertCompetition comps
+            liftIO $ putStrLn $ "finished importing into db: " ++ xmlName
+          Left e -> liftIO $ do
+            putStrLn $ "couldn't import: " ++ xmlName
+            putStrLn $ "the following error occured: " ++ show e
+
+clearUibk :: YesodDB App ()
+clearUibk = do
+  deleteWhere ([] :: [Filter UibkResultInfo])
+  deleteWhere ([] :: [Filter UibkJobInfo])
+  deleteWhere ([] :: [Filter UibkSolverInfo])
+  deleteWhere ([] :: [Filter UibkBenchmarkInfo])
+  return ()
+
+insertCompetition :: UIBK.UIBKCompetition -> YesodDB App ()
+insertCompetition uc = do
+  let compID = UIBK.uibkCompID uc
+      compName = UIBK.uibkCompName uc
+      cats = UIBK.uibkCompCategories uc
+      results = mconcat $ L.map UIBK.uibkCatEntries cats
+      rawSolvers = L.zip [1..] $ L.nub $ UIBK.getSolvers results
+      rawBenchmarks = L.nub $ UIBK.getBenchmarks results
+      solversMap = M.fromList $ L.map (\(i,s) ->
+          (s, i)
+        ) rawSolvers
+      resultsMap = IM.fromList $ L.map (\r ->
+          (UIBK.uibkResultID r, UibkResultInfo
+              (getCatIdFrom r cats)
+              Nothing
+              (UIBK.uibkResultID r)
+              (UIBK.uibkResultInputProblemID r)
+              (toText $ UIBK.uibkResultInputProblemPath r)
+              (getSolverIdFrom r solversMap)
+              (toText $ UIBK.uibkResultTool r)
+              (read $ toString $ UIBK.uibkResult r)
+              (fromIntegral $ UIBK.uibkResultWallclockTime r)
+            )
+        ) results
+      jobs = L.map toUibkJobInfo cats
+      solvers = L.map toUibkSolverInfo $ M.toList solversMap
+      benchmarks = L.map toUibkBenchmarkInfo rawBenchmarks
+  Import.mapM_ insertUnique jobs
+  Import.mapM_ insertUnique solvers
+  Import.mapM_ insertUnique benchmarks
+  Import.mapM_ (insertUnique . snd) $ IM.toList resultsMap
+
+toUibkBenchmarkInfo :: UIBK.UIBKBenchmark -> UibkBenchmarkInfo
+toUibkBenchmarkInfo b =
+  UibkBenchmarkInfo
+    (UIBK.uibkBenchmarkID b)
+    (toText $ UIBK.uibkBenchmarkPath b)
+
+toUibkSolverInfo :: (UIBK.UIBKSolver, Int) -> UibkSolverInfo
+toUibkSolverInfo (s,i) =
+  UibkSolverInfo i
+    (toText $ UIBK.uibkSolverName s)
+    (toText $ UIBK.uibkSolverVersion s)
+
+toUibkJobInfo :: UIBK.UIBKCategory -> UibkJobInfo
+toUibkJobInfo cat =
+  let catId = UIBK.uibkCatID cat
+      catName = toText $ UIBK.uibkCatName cat
+  in UibkJobInfo catId catName
+
+getSolverIdFrom :: UIBK.UIBKResult -> M.Map UIBK.UIBKSolver Int -> Int
+getSolverIdFrom r m =
+  let solver = UIBK.UIBKSolver (UIBK.uibkResultTool r) (UIBK.uibkResultToolVersion r)
+      mIndex = M.lookup solver m
+  in case mIndex of
+        Just i  -> i
+        _       -> -1
+
+getCatIdFrom :: UIBK.UIBKResult -> [UIBK.UIBKCategory] -> Int
+getCatIdFrom r cats =
+  let indexedCats = zip [1..] $ L.map (elem r . UIBK.uibkCatEntries) cats
+      filteredCats = L.filter (\(_,b) -> b) indexedCats
+  in case filteredCats of
+    ((i,b):cs)  -> i
+    _           -> -1
 
 importLRI :: UploadContent -> Handler ()
 importLRI uc = do

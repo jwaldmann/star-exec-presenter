@@ -47,6 +47,19 @@ LriResultInfo
     checkWallclockTime Double Maybe
     deriving Eq Ord Read Show
 
+UibkResultInfo
+    jobId Int
+    score Int Maybe
+    pairId Int
+    UniqueUibkResultInfo pairId
+    benchmarkId Int
+    benchmarkName Text
+    solverId Int
+    solverName Text
+    result SolverResult
+    wallclockTime Double
+    deriving Eq Ord Read Show
+
 JobPairInfo
     pairId Int
     UniqueJobPairInfo pairId
@@ -77,6 +90,12 @@ LriJobInfo
     name Text
     deriving Eq Ord Read Show
 
+UibkJobInfo
+    jobId Int
+    UniqueUibkJobInfo jobId
+    name Text
+    deriving Eq Ord Read Show
+
 SolverInfo
     starExecId Int
     UniqueSolverInfo starExecId
@@ -101,6 +120,13 @@ LriSolverInfo
     isCertifying Bool
     deriving Eq Ord Read Show
 
+UibkSolverInfo
+    solverId Int
+    UniqueUibkSolverInfo solverId
+    name Text
+    version Text
+    deriving Eq Ord Read Show
+
 BenchmarkInfo
     starExecId Int
     UniqueBenchmarkInfo starExecId
@@ -122,6 +148,12 @@ LriBenchmarkInfo
     isOutermost Bool
     isRelative Bool
     isTheory Bool
+    deriving Eq Ord Read Show
+
+UibkBenchmarkInfo
+    benchmarkId Int
+    UniqueUibkBenchmarkInfo benchmarkId
+    path Text
     deriving Eq Ord Read Show
 
 QueryInfo
