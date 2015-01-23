@@ -155,7 +155,7 @@ insertCompetition uc = do
               (toText $ UIBK.uibkResultInputProblemPath r)
               (getSolverIdFrom r solversMap)
               (toText $ UIBK.uibkResultTool r)
-              (read $ toString $ UIBK.uibkResult r)
+              (parseResult $ toString $ UIBK.uibkResult r)
               (fromIntegral $ UIBK.uibkResultWallclockTime r)
             )
         ) results
@@ -166,6 +166,15 @@ insertCompetition uc = do
   Import.mapM_ insertUnique solvers
   Import.mapM_ insertUnique benchmarks
   Import.mapM_ (insertUnique . snd) $ IM.toList resultsMap
+
+parseResult :: String -> SolverResult
+parseResult "NO" = NO
+parseResult "CERTIFIED" = CERTIFIED
+parseResult "MAYBE" = MAYBE
+parseResult "ERROR" = ERROR
+parseResult s = case reads s of
+                  [(r,_)] -> r
+                  _       -> OTHER
 
 toUibkBenchmarkInfo :: UIBK.UIBKBenchmark -> UibkBenchmarkInfo
 toUibkBenchmarkInfo b =
