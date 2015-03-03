@@ -28,7 +28,7 @@ data LRIBenchmark = LRIBenchmark
   , lribOutermost :: !Bool          -- key: outermost, value: true | false
   , lribRelative :: !Bool           -- key: relative, value: true | false
   , lribTheory :: !Bool             -- key: theory, value: true | false
-  } deriving (Show)
+  } deriving (Show,Eq)
 
 data LRISolver = LRISolver
   { lrisIdentifier :: !Name
@@ -43,10 +43,10 @@ data LRISolver = LRISolver
   , lrisInnermost :: !Bool          -- key: innermost, value: true | false
   , lrisTheory :: !Bool             -- key: theory, value: true | false
   , lrisCertifying :: !Bool         -- key: certifying, value: true | false
-  } deriving (Show)
+  } deriving (Show,Eq)
 
 data LRIPairResult = LRIYES | LRINO | LRIERROR | LRIMAYBE | LRITIMEOUT | LRIOTHER ByteString
-  deriving (Show)
+  deriving (Show,Eq)
 
 data LRIResult = LRIResult
   { lrirPair :: !Key
@@ -58,7 +58,7 @@ data LRIResult = LRIResult
   , lrirCheckResult :: !(Maybe LRIPairResult)
   , lrirCheckCpuTime :: !(Maybe Double)
   , lrirCheckWallclockTime :: !(Maybe Double)
-  } deriving (Show)
+  } deriving (Show,Eq)
 
 -- datatypes and type synonyms for UIBK data
 

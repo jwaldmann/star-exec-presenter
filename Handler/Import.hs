@@ -228,10 +228,15 @@ importLRI uc = do
   if all isRight parsings
     then runDB $ do
       clearLRI
-      insertLRIResults $ zip entryNames $ rights results
-      insertLRISolvers $ concat $ rights solvers
-      insertLRIBenchmarks $ concat $ rights benchmarks
-      insertLRIJobs $ entryNames
+      let jobs = zip [0..] entryNames
+          solvers' = L.nub $ concat $ rights solvers
+          benchmarks' = L.nub $ concat $ rights benchmarks
+          solversMap = M.fromList $ zip (Import.map LRI.lrisIdentifier solvers') [0..]
+          benchmarksMap = M.fromList $ zip (Import.map LRI.lribIdentifier benchmarks') [0..]
+      insertLRIJobs jobs
+      insertLRISolvers $ zip [0..] solvers'
+      insertLRIBenchmarks $ zip [0..] benchmarks'
+      insertLRIResults solversMap benchmarksMap (zip jobs $ rights results)
       return ()
     else do
       let invalids = filter isLeft parsings
@@ -247,16 +252,28 @@ clearLRI = do
   deleteWhere ([] :: [Filter LriBenchmarkInfo])
   return ()
 
-insertLRIResults :: [(String, [LRI.LRIResult])] -> YesodDB App ()
-insertLRIResults = Import.mapM_ insertMany
+type BSMap = M.Map BSL.ByteString Int
+
+getIntFromMap :: BSMap -> BSL.ByteString -> Int
+getIntFromMap bsmap bs = case M.lookup bs bsmap of
+  Just i -> i
+  _      -> -1
+
+insertLRIResults :: BSMap -> BSMap -> [((Int,String), [LRI.LRIResult])] -> YesodDB App ()
+insertLRIResults solversMap benchmarksMap pairs = do
+  let fullPairs = concat $ Import.map pairs2List pairs
+  Import.mapM_ insert $ zip [0..] fullPairs
   where
-    insertMany (jobName, rs) = Import.mapM_ (insert jobName) rs
-    insert jobName r = insertUnique $ LriResultInfo
-        (fromString jobName)
+    pairs2List ((ji,_),rs) = zip (replicate (L.length rs) ji) rs
+    --insertMany (jobName, rs) = Import.mapM_ (insert jobName) rs
+    insert (i,(jobId,r)) = insertUnique $ LriResultInfo
+        jobId
         Nothing
-        (toText $ LRI.lrirPair r)
+        i
         (toText $ LRI.lrirBenchmark r)
+        (getIntFromMap benchmarksMap $ LRI.lrirBenchmark r)
         (toText $ LRI.lrirSolver r)
+        (getIntFromMap solversMap $ LRI.lrirSolver r)
         (getResult $ LRI.lrirResult r)
         (LRI.lrirCpuTime r)
         (LRI.lrirWallclockTime r)
@@ -269,11 +286,12 @@ insertLRIResults = Import.mapM_ insertMany
     getResult LRI.LRIMAYBE  = MAYBE
     getResult _             = OTHER
 
-insertLRISolvers :: [LRI.LRISolver] -> YesodDB App ()
+insertLRISolvers :: [(Int, LRI.LRISolver)] -> YesodDB App ()
 insertLRISolvers = Import.mapM_ insert
   where
     --insertMany (jobName, slvs) = Import.mapM_ (insert jobName) slvs
-    insert s = insertUnique $ LriSolverInfo
+    insert (i,s) = insertUnique $ LriSolverInfo
+        i
         (toText $ LRI.lrisIdentifier s)
         (toText $ LRI.lrisName s)
         (toText $ LRI.lrisAuthor s)
@@ -287,11 +305,12 @@ insertLRISolvers = Import.mapM_ insert
         (LRI.lrisTheory s)
         (LRI.lrisCertifying s)
 
-insertLRIBenchmarks :: [LRI.LRIBenchmark] -> YesodDB App ()
+insertLRIBenchmarks :: [(Int,LRI.LRIBenchmark)] -> YesodDB App ()
 insertLRIBenchmarks = Import.mapM_ insert
   where
     --insertMany (jobName, bs) = Import.mapM_ (insert jobName) bs
-    insert b = insertUnique $ LriBenchmarkInfo
+    insert (i,b) = insertUnique $ LriBenchmarkInfo
+      i
       (toText $ LRI.lribIdentifier b)
       (toText $ LRI.lribName b)
       (toText $ LRI.lribFile b)
@@ -304,7 +323,9 @@ insertLRIBenchmarks = Import.mapM_ insert
       (LRI.lribRelative b)
       (LRI.lribTheory b)
 
-insertLRIJobs :: [String] -> YesodDB App ()
-insertLRIJobs = Import.mapM_ $ \j -> do
-  let tj = fromString j
-  insertUnique $ LriJobInfo tj tj
+insertLRIJobs :: [(Int,String)] -> YesodDB App ()
+insertLRIJobs = Import.mapM_ insert
+  where
+    insert (i,j) = do
+      let tj = fromString j
+      insertUnique $ LriJobInfo i tj tj

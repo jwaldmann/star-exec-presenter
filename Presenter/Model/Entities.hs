@@ -262,7 +262,7 @@ instance BenchmarkEntity JobResultInfo where
 instance BenchmarkEntity LriResultInfo where
   toBenchmarkID = LriBenchmarkID . lriResultInfoBenchmarkId
 
-  toBenchmarkName = lriResultInfoBenchmarkId
+  toBenchmarkName = lriResultInfoBenchmark
 
 instance BenchmarkEntity UibkResultInfo where
   toBenchmarkID = UibkBenchmarkID . uibkResultInfoBenchmarkId
@@ -312,7 +312,7 @@ instance SolverEntity JobResultInfo where
 instance SolverEntity LriResultInfo where
   toSolverID = LriSolverID . lriResultInfoSolverId
 
-  toSolverName = lriResultInfoSolverId
+  toSolverName = lriResultInfoSolver
 
 instance SolverEntity UibkResultInfo where
   toSolverID = UibkSolverID . uibkResultInfoSolverId

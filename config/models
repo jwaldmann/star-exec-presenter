@@ -33,12 +33,14 @@ JobResultInfo
     deriving Eq Ord Read Show
 
 LriResultInfo
-    jobId Text
+    jobId Int
     score Int Maybe
-    pairId Text
+    pairId Int
     UniqueLriResultInfo pairId
-    benchmarkId Text
-    solverId Text
+    benchmark Text
+    benchmarkId Int
+    solver Text
+    solverId Int
     result SolverResult
     cpuTime Double
     wallclockTime Double
@@ -85,7 +87,8 @@ JobInfo
     deriving Eq Ord Read Show
 
 LriJobInfo
-    jobId Text
+    jobId Int
+    identifier Text
     UniqueLriJobInfo jobId
     name Text
     deriving Eq Ord Read Show
@@ -105,7 +108,8 @@ SolverInfo
     deriving Eq Ord Read Show
 
 LriSolverInfo
-    solverId Text
+    solverId Int
+    identifier Text
     UniqueLriSolverInfo solverId
     name Text
     author Text
@@ -136,7 +140,8 @@ BenchmarkInfo
     deriving Eq Ord Read Show
 
 LriBenchmarkInfo
-    benchmarkId Text
+    benchmarkId Int
+    identifier Text
     UniqueLriBenchmarkInfo benchmarkId
     name Text
     file Text

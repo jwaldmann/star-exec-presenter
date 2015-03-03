@@ -51,7 +51,7 @@ data ErrorID =
 -}
 data JobID =
   StarExecJobID Int
-  | LriJobID T.Text
+  | LriJobID Int
   | UibkJobID Int
   deriving (Show, Read, Eq, Ord)
 
@@ -59,7 +59,7 @@ getStarExecId :: JobID -> Int
 getStarExecId (StarExecJobID i) = i
 getStarExecId _ = error "is no starexec-id!"
 
-getLriId :: JobID -> T.Text
+getLriId :: JobID -> Int
 getLriId (LriJobID t) = t
 getLriId _ = error "is no lri-id!"
 
@@ -81,13 +81,13 @@ isUibkID _ = False
 
 data SolverID =
   StarExecSolverID Int
-  | LriSolverID T.Text
+  | LriSolverID Int
   | UibkSolverID Int
   deriving (Show, Read, Eq, Ord)
 
 data BenchmarkID =
   StarExecBenchmarkID Int
-  | LriBenchmarkID T.Text
+  | LriBenchmarkID Int
   | UibkBenchmarkID Int
   deriving (Show, Read, Eq, Ord)
 
@@ -102,7 +102,7 @@ data PostProcID =
 
 data JobPairID =
   StarExecPairID Int
-  | LriPairID T.Text
+  | LriPairID Int
   | UibkPairID Int
   deriving (Show, Read, Eq, Ord)
 
@@ -110,7 +110,7 @@ data JobPairID =
 getStarExecIds :: JobIds -> [Int]
 getStarExecIds = (map getStarExecId) . (filter isStarExecID) . getIds
 
-getLriIds :: JobIds -> [T.Text]
+getLriIds :: JobIds -> [Int]
 getLriIds = (map getLriId) . (filter isLriID) . getIds
 
 getUibkIds :: JobIds -> [Int]
@@ -138,11 +138,13 @@ fromInt = fromString . show
 
 instance PathPiece JobID where
   toPathPiece (StarExecJobID i) = fromInt i
-  toPathPiece (LriJobID t) = lriJobPrefix +> t
+  toPathPiece (LriJobID t) = lriJobPrefix +> (fromString . show) t
   toPathPiece (UibkJobID i) = uibkJobPrefix +> (fromString . show) i
   fromPathPiece t
     | lriJobPrefix `T.isPrefixOf` t =
-        return $ LriJobID $ dePrefix lriJobPrefix t
+        case readInt $ dePrefix lriJobPrefix t of
+          Just i  -> return $ LriJobID i
+          _       -> Nothing
     | uibkJobPrefix `T.isPrefixOf` t =
         case readInt $ dePrefix uibkJobPrefix t of
           Just i  -> return $ UibkJobID i
@@ -165,11 +167,13 @@ instance PathPiece JobID where
 
 instance PathPiece JobPairID where
   toPathPiece (StarExecPairID i) = fromInt i
-  toPathPiece (LriPairID t) = lriPairPrefix +> t
+  toPathPiece (LriPairID t) = lriPairPrefix +> (fromString . show) t
   toPathPiece (UibkPairID i) = uibkPairPrefix +> (fromString . show) i
   fromPathPiece t
     | lriPairPrefix `T.isPrefixOf` t =
-        return $ LriPairID $ dePrefix lriPairPrefix t
+        case readInt $ dePrefix lriPairPrefix t of
+          Just i  -> return $ LriPairID i
+          _       -> Nothing
     | uibkPairPrefix `T.isPrefixOf` t =
         case readInt $ dePrefix uibkPairPrefix t of
           Just i  -> return $ UibkPairID i
@@ -181,11 +185,13 @@ instance PathPiece JobPairID where
 
 instance PathPiece BenchmarkID where
   toPathPiece (StarExecBenchmarkID i) = fromInt i
-  toPathPiece (LriBenchmarkID t) = lriBenchmarkPrefix +> t
+  toPathPiece (LriBenchmarkID t) = lriBenchmarkPrefix +> (fromString . show) t
   toPathPiece (UibkBenchmarkID i) = uibkBenchmarkPrefix +> (fromString . show) i
   fromPathPiece t
     | lriBenchmarkPrefix `T.isPrefixOf` t =
-        return $ LriBenchmarkID $ dePrefix lriBenchmarkPrefix t
+        case readInt $ dePrefix lriBenchmarkPrefix t of
+          Just i  -> return $ LriBenchmarkID i
+          _       -> Nothing
     | uibkBenchmarkPrefix `T.isPrefixOf` t =
         case readInt $ dePrefix uibkBenchmarkPrefix t of
           Just i  -> return $ UibkBenchmarkID i
@@ -197,11 +203,13 @@ instance PathPiece BenchmarkID where
 
 instance PathPiece SolverID where
   toPathPiece (StarExecSolverID i) = fromInt i
-  toPathPiece (LriSolverID t) = lriSolverPrefix +> t
+  toPathPiece (LriSolverID t) = lriSolverPrefix +> (fromString . show) t
   toPathPiece (UibkSolverID i) = uibkSolverPrefix +> (fromString . show) i
   fromPathPiece t
     | lriSolverPrefix `T.isPrefixOf` t =
-        return $ LriSolverID $ dePrefix lriSolverPrefix t
+        case readInt $ dePrefix lriSolverPrefix t of
+          Just i  -> return $ LriSolverID i
+          _       -> Nothing
     | uibkSolverPrefix `T.isPrefixOf` t =
         case readInt $ dePrefix uibkSolverPrefix t of
           Just i  -> return $ UibkSolverID i
