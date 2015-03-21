@@ -7,7 +7,7 @@ import Text.Hamlet (hamletFile)
 
 getRegisteredR :: Handler Html
 getRegisteredR = do
-    let comp = StarExec.Registration.tc2014
+    let comp = StarExec.Registration.the_competition
     defaultLayout $ do
         $(widgetFile "registered")
 

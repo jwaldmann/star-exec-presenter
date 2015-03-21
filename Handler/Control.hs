@@ -52,7 +52,7 @@ getControlR :: Handler Html
 getControlR = do
     maid <- maybeAuthId
     (widget, enctype) <- generateFormPost inputForm
-    let comp = tc2014
+    let comp = the_competition
     defaultLayout $(widgetFile "control")
 
 postControlR :: Handler Html
@@ -60,7 +60,7 @@ postControlR = do
     maid <- maybeAuthId
     ((result,widget), enctype) <- runFormPost inputForm
 
-    let comp = tc2014
+    let comp = the_competition
         public = case result of
                   FormSuccess input -> isPublic input
                   _ -> False
@@ -108,7 +108,7 @@ select input comp = case selection input of
                               $ metacategories comp }
 
 startComp input t = do
-    comp_with_jobs <- pushcomp input $ select input tc2014
+    comp_with_jobs <- pushcomp input $ select input the_competition
     let S.Competition name mcs = convertComp comp_with_jobs 
         m = params input t 
         c = S.Competition m mcs
@@ -116,7 +116,7 @@ startComp input t = do
 
 startMC input t = do
     let mcs = do 
-            mc <- metacategories $ select input tc2014
+            mc <- metacategories $ select input the_competition
             guard $ metaCategoryName mc == t
             return mc
     case mcs of
@@ -129,7 +129,7 @@ startMC input t = do
 
 startCat input t = do
     let cats = do 
-            mc <- metacategories $ select input tc2014
+            mc <- metacategories $ select input the_competition
             c <- categories mc
             guard $ categoryName c == t
             return c
