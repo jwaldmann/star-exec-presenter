@@ -70,7 +70,7 @@ cell_for_solver (j,(sid, sname),(cid, cname)) = Cell
       <a href=@{ShowSolverInfoR sid}>#{sname}</a>
   <tr>
     <td>   
-      #{cname}
+      <a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{cid}"> #{cname}</a>
   <tr>
     <td>
       Job <a href=@{ShowJobInfoR j}>#{j}</a>
