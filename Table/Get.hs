@@ -64,8 +64,16 @@ cell_for_bench (bid, bname) = Cell { contents = [whamlet|
 
 cell_for_solver (j,(sid, sname),(cid, cname)) = Cell 
     { contents = [whamlet|
-<a href=@{ShowSolverInfoR sid}>#{sname}</a>/#{cname}
-(<a href=@{ShowJobInfoR j}>#{j}</a>)
+<table>
+  <tr>
+    <td>
+      <a href=@{ShowSolverInfoR sid}>#{sname}</a>
+  <tr>
+    <td>   
+      #{cname}
+  <tr>
+    <td>
+      Job <a href=@{ShowJobInfoR j}>#{j}</a>
 |] 
     , tdclass = T.pack "solver"
     , url = ""
