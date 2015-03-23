@@ -22,7 +22,8 @@ import qualified Data.GraphViz.Printing as V
 import qualified Data.GraphViz.Attributes as V
 import qualified Data.GraphViz.Attributes.Complete as V
 import qualified System.Process as P
-import qualified Data.Text.Lazy as T
+import qualified Data.Text.Lazy as TL
+import qualified Data.Text as T
 import qualified Text.Blaze as B
 import Control.Monad ( guard )
 import Data.Maybe ( isJust, maybeToList )
@@ -132,22 +133,23 @@ summary jids previous tab = do
           q <- predecessors p
           i <- maybeToList $ M.lookup q inodes
           return (i, k, () )
-        -- cf.   http://stackoverflow.com/a/20860364/2868481
-        dot =  V.renderDot $ V.toDot
+    render <- getUrlRender      
+    -- cf.   http://stackoverflow.com/a/20860364/2868481
+    let dot =  V.renderDot $ V.toDot
             $ V.graphToDot
                V.nonClusteredParams
                 { V.fmtNode = \ (n,l) ->
                    [ V.toLabel $ show $ concept_stats M.! l
-                   , V.Tooltip $ T.pack $ show l
-                   , V.URL [shamlet|@{Flexible_TableR (Query previous) jids}|] 
+                   , V.Tooltip $ TL.pack $ show l
+                   , V.URL $ TL.pack $ T.unpack $ render  $ Flexible_TableR (Query previous) jids
                    ]
                 }
             $ concept_graph
     -- FIXME: this uses String, but it should use Text:        
-    svg <- liftIO $ P.readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] $ T.unpack dot
+    svg <- liftIO $ P.readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] $ TL.unpack dot
     -- FIXME: there must be a better way
     let svg_contents = B.preEscapedLazyText
-                     $ T.pack $ unlines
+                     $ TL.pack $ unlines
                      $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
     [whamlet|
         <h3>summary
