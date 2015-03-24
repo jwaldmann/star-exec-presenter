@@ -24,6 +24,7 @@ library
                      Handler.ShowJobPair
                      Handler.ShowManyJobResults
                      Handler.Flexible_Table
+                     Handler.Colors
                      Handler.Competition
                      Handler.CompetitionWithConfig
                      Handler.Registered
