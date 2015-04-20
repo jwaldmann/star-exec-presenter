@@ -1,3 +1,6 @@
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE FlexibleInstances #-}
+
 module Presenter.Model
   ( module Presenter.Model.Competition
   , module Presenter.Model.CompetitionResults
@@ -23,3 +26,5 @@ import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
 import Presenter.Model.Types
 import Model
+
+deriving instance (Eq (QueryStatus QueryInfo))

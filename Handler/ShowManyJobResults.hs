@@ -1,3 +1,6 @@
+{-# language StandaloneDeriving #-}
+{-# language FlexibleInstances #-}
+
 module Handler.ShowManyJobResults where
 
 import Import

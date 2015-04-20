@@ -89,7 +89,7 @@ data StarExecJobPair = SEJobPair
 
 
 data QueryStatus k = Pending (Key k) | Latest
-  deriving (Show, Eq)
+--  deriving (Show, Eq)
 data QueryResult k a = QueryResult
   { queryStatus :: QueryStatus k
   , queryResult :: a

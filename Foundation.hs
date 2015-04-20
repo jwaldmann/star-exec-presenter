@@ -152,8 +152,12 @@ isAdmin = do
         Just _ -> Authorized
 
 -- How to run database actions.
+
+-- cf.    http://www.yesodweb.com/blog/2014/09/announcing-yesod-1-4
+instance YesodAuthPersist App
+
 instance YesodPersist App where
-    type YesodPersistBackend App = SqlPersistT
+    type YesodPersistBackend App = SqlBackend
     runDB = defaultRunDB persistConfig connPool
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner connPool
