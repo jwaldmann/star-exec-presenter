@@ -58,7 +58,7 @@ getShowManyJobResultsR jids @ (JobIds ids) = do
             else calcStandardScores results
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
-    if any (\q -> queryStatus q /= Latest) qJobs
+    if any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs
       then insertWidgetMetaRefresh
       else return ()
     $(widgetFile "show_many_job_results")

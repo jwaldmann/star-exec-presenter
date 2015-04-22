@@ -6,7 +6,8 @@ Default: &defaults
   #analytics: UA-YOURCODE
 
 Development:
-  #approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
+  port: 3000
+  approot: "http://kernkraft.imn.htwk-leipzig.de/termcomp-devel"
   <<: *defaults
 
 Testing:

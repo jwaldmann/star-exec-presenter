@@ -23,7 +23,7 @@ getFlexible_TableR q @ (Query ts) jids @ (JobIds ids) = do
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget $(luciusFile "templates/solver_result.lucius")
-    if any (\q -> queryStatus q /= Latest) qJobs
+    if any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs
       then insertWidgetMetaRefresh
       else return ()
     [whamlet|
