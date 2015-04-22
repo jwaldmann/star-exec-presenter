@@ -107,6 +107,7 @@ library
                 EmptyDataDecls
                 NoMonomorphismRestriction
                 DeriveDataTypeable
+                ViewPatterns
 
     build-depends: base
                  , yesod
@@ -117,8 +118,8 @@ library
                  , bytestring
                  , text
                  , persistent
-                 , persistent
-                 , persistent
+                 , persistent-postgresql
+                 , persistent-template
                  , template-haskell
                  , shakespeare
                  , hjsmin

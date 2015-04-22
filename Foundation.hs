@@ -11,7 +11,7 @@ import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
 import qualified Settings
 import Settings.Development (development)
 import qualified Database.Persist
-import Database.Persist.Sql (SqlPersistT)
+import Database.Persist.Sql (SqlPersistT, SqlBackend)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Presenter.Model

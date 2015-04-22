@@ -26,5 +26,6 @@ import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
 import Presenter.Model.Types
 import Model
+import Prelude
 
 deriving instance (Eq (QueryStatus QueryInfo))
