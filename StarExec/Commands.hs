@@ -208,7 +208,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
     b x = T.pack $ map Data.Char.toLower $ show x
     -- path must be in  [_/\w\-\.\+\^=,!?:$%#@ ]*"
     -- but there is a strange '-' in Runtime_Complexity_-_Full_Rewriting etc.
-    path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` "/_"
+    path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` ("/_" :: String)
     root = Element "tns:Jobs" 
              (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
                          ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
