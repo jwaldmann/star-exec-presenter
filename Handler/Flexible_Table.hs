@@ -122,6 +122,7 @@ summary jids previous tab = do
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] ) 
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] ) 
                 )
+{-
         concept_stats = M.fromListWith (+) $ do
           row <- rows tab
           concept <- supertypes $ map tag row
@@ -187,6 +188,7 @@ summary jids previous tab = do
     let svg_contents = B.preEscapedLazyText
                      $ TL.pack $ unlines
                      $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
+-}
     [whamlet|
         <h3>summary
         total number of rows: #{show total}
@@ -223,6 +225,9 @@ summary jids previous tab = do
                    <a href=@{Flexible_TableR these jids}>these
                 <td>
                    <a href=@{Flexible_TableR others jids}>others
+    |]
+
+{-
         <h3>concepts (partial row types)        
         <div>
           #{svg_contents}
@@ -244,7 +249,7 @@ summary jids previous tab = do
                    <a href=@{Flexible_TableR these jids}>these
                 <td>
                    <a href=@{Flexible_TableR others jids}>others
-    |]
+-}
     
 apply t tab = case t of
     Filter_Rows p -> 
