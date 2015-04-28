@@ -111,8 +111,10 @@ experiment2015 = Competition "Experiments for 2015"
      [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ -- Participant "matchbox-complex-boolector" ( Just ( 2536, 17921 ))
            -- , Participant "matchbox-complex-satchmo" ( Just ( 2536, 17912 ))             
-             Participant "matchbox-nocon-complex-boolector" ( Just ( 2536, 17918 )) 
-           , Participant "matchbox-nocon-complex-satchmo" ( Just ( 2536, 17919 )) 
+             Participant "matchbox-complex-satchmo-repaired" ( Just ( 2649, 19511 ))             
+           --  Participant "matchbox-nocon-complex-boolector" ( Just ( 2536, 17918 )) 
+           -- , Participant "matchbox-nocon-complex-satchmo" ( Just ( 2536, 17919 ))
+           , Participant "matchbox-nocon-complex-satchmo-repaired" ( Just ( 2649, 19518 )) 
            ]
      ]
    , MetaCategory "Termination of Term Rewriting (and Transition Systems)"
@@ -126,15 +128,19 @@ experiment2015 = Competition "Experiments for 2015"
 maparts_std = 
   [ -- Participant "matchbox-dp-boolector" ( Just ( 2536, 17916 ))
   -- , Participant "matchbox-dp-satchmo" ( Just ( 2536, 17913 ))
-    Participant "matchbox-dp-ur-boolector" ( Just ( 2536, 17911 ))
-  , Participant "matchbox-dp-ur-satchmo" ( Just ( 2536, 17920 ))
+    Participant "matchbox-dp-satchmo-repaired" ( Just ( 2649, 19512 ))
+  --  Participant "matchbox-dp-ur-boolector" ( Just ( 2536, 17911 ))
+  -- , Participant "matchbox-dp-ur-satchmo" ( Just ( 2536, 17920 ))
+  , Participant "matchbox-dp-ur-satchmo-repaired" ( Just ( 2649, 19519 ))
   ]
 
 maparts_cert = 
-  [ Participant "matchbox-nocon-dp-boolector" ( Just ( 2536, 17910 ))
-  , Participant "matchbox-nocon-dp-satchmo" ( Just ( 2536, 17914 ))
-  , Participant "matchbox-nocon-dp-ur-boolector" ( Just ( 2536, 17917 ))
-  , Participant "matchbox-nocon-dp-ur-satchmo" ( Just ( 2536, 17915 ))
+  [ -- Participant "matchbox-nocon-dp-boolector" ( Just ( 2536, 17910 ))
+  -- , Participant "matchbox-nocon-dp-satchmo" ( Just ( 2536, 17914 ))
+    Participant "matchbox-nocon-dp-satchmo-repaired" ( Just ( 2649, 19513 ))
+  -- , Participant "matchbox-nocon-dp-ur-boolector" ( Just ( 2536, 17917 ))
+  -- , Participant "matchbox-nocon-dp-ur-satchmo" ( Just ( 2536, 17915 ))
+  , Participant "matchbox-nocon-dp-ur-satchmo-repaired" ( Just ( 2649, 19514 ))
   ]
 
 tc2014 :: Registration
