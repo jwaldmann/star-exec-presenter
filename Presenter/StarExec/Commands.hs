@@ -192,14 +192,14 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
        $forall j <- js
           <Job name="#{job_name j}">
             <JobAttributes>
-              <description value="#{description j}"/>
-              <queue-id value="#{t $ queue_id j}"/>
-              <start-paused value="#{b $ start_paused j}"/>
-              <postproc-id value="#{t $ postproc_id j}"/>
-              <cpu-timeout value="#{t $ cpu_timeout j}"/>
-              <wallclock-timeout value="#{t $ wallclock_timeout j}"/>
-              <mem-limit value="#{t $ mem_limit j}"/>
-            </JobAttributes>
+              <description value="#{description j}">
+              <queue-id value="#{t $ queue_id j}">
+              <start-paused value="#{b $ start_paused j}">
+              <postproc-id value="#{t $ postproc_id j}">
+              <cpu-timeout value="#{t $ cpu_timeout j}">
+              <wallclock-timeout value="#{t $ wallclock_timeout j}">
+              <mem-limit value="#{t $ mem_limit j}">
+
             $forall p <- jobpairs j
                 <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
