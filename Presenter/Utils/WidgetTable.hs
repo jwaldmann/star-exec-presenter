@@ -77,8 +77,16 @@ cell_for_bench (bid, bname) = Cell
 cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (t, b)) -> Cell
 cell_for_solver (j,(sid, sname),(_, cname)) = Cell 
   { contents = [whamlet|
-<a href=@{ShowSolverInfoR sid}>#{sname}</a>/#{cname}
-(<a href=@{ShowJobInfoR j}>#{show j}</a>)
+<table>
+  <tr>
+    <td>
+      <a href=@{ShowSolverInfoR sid}>#{sname}</a>
+  <tr>
+    <td>   
+      #{cname}
+  <tr>
+    <td>
+      Job <a href=@{ShowJobInfoR j}>#{show j}</a>
 |] 
   , tdclass = fromString "solver"
   , url = fromString ""
