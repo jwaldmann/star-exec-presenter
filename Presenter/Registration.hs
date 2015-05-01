@@ -2,7 +2,18 @@
 {-# language OverloadedStrings #-}
 {-# language DisambiguateRecordFields #-}
 
-module Presenter.Registration where
+module Presenter.Registration 
+( the_competition
+, full_categories
+, demonstration_categories
+, real_participants
+, Competition (..)
+, MetaCategory (..)
+, Category (..)
+, Catinfo (..)
+, Benchmark_Source (..)
+, Participant (..)
+) where
 
 import Presenter.Model ( Name )
 import qualified Data.Text as T
@@ -98,6 +109,28 @@ mixed_rel_srs = Hierarchy 56805
 
 mixed_rel_trs :: Benchmark_Source
 mixed_rel_trs = Hierarchy 56846
+
+the_competition = experiment2015
+
+experiment2015 :: Registration
+experiment2015 = Competition "Experiments for 2015"
+   [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+       [ standard "TRS Standard"  trss
+           [ Participant "matchbox-dp-boolector" ( Just ( 2533, 17895 ))
+           , Participant "matchbox-dp-satchmo" ( Just ( 2533, 17894 ))
+           ]
+       , standard "SRS Standard"  srss
+           [ Participant "matchbox-dp-boolector" ( Just ( 2533, 17895 ))
+           , Participant "matchbox-dp-satchmo" ( Just ( 2533, 17894 ))             
+           ]
+     ]
+   , MetaCategory "Complexity Analysis of Term Rewriting"
+     [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
+           [ Participant "matchbox-complex-boolector" ( Just ( 2533, 17896 ))
+           , Participant "matchbox-complex-satchmo" ( Just ( 2533, 17893 ))             
+           ]
+     ]
+   ]
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"

@@ -7,6 +7,6 @@ import Presenter.Registration
 
 getRegisteredR :: Handler Html
 getRegisteredR = do
-    let comp = Presenter.Registration.tc2014
+    let comp = Presenter.Registration.the_competition
     defaultLayout $ do
         $(widgetFile "registered")
