@@ -226,6 +226,7 @@ instance PathPiece Competition where
 -}
 data QueryStatus k = Pending (Key k) | Latest
 --  deriving (Eq, Show)
+
 data QueryResult k a = QueryResult
   { queryStatus :: QueryStatus k
   , queryResult :: a

@@ -13,10 +13,23 @@ Our Web App will provide these extra features:
 * caching (and permanent storage) of results 
   (we intend to include also results of earlier competitions)
 
+Getting source
+--------------
+There may be submodules, so:
+
+    git clone --recursive ...
+
 
 Installation
 ------------
-cabal sandbox init && cabal install --enable-tests . yesod-platform yesod-bin --max-backjumps=-1 --reorder-goals && yesod devel
+    cabal sandbox init
+    cabal sandbox add-source graphviz
+    cabal install --enable-tests . yesod-platform yesod-bin
+
+Usage
+-----
+
+    yesod devel
 
 * create user: sudo -u postgres createuser -P yesod
 * clear db: sudo -u postgres dropdb yesod

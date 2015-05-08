@@ -7,6 +7,7 @@ Default: &defaults
 
 Development:
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
+  port: 3000
   <<: *defaults
 
 Testing:

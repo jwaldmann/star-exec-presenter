@@ -143,6 +143,8 @@ instance YesodPersist App where
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner connPool
 
+instance YesodAuthPersist App
+ 
 -- simple example copied from 
 -- http://www.yesodweb.com/book/authentication-and-authorization
 instance YesodAuth App where
