@@ -47,7 +47,7 @@ import Text.Hamlet.XML
 import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
-import Control.Monad ( guard )
+import Control.Monad ( guard, when )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
@@ -208,7 +208,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
     b x = T.pack $ map Data.Char.toLower $ show x
     -- path must be in  [_/\w\-\.\+\^=,!?:$%#@ ]*"
     -- but there is a strange '-' in Runtime_Complexity_-_Full_Rewriting etc.
-    path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` "/_"
+    path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` ("/_" :: String)
     root = Element "tns:Jobs" 
              (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
                          ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
@@ -216,14 +216,18 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
        $forall j <- js
            <Job name="#{job_name j}">
              <JobAttributes>
-               <description value="#{description j}"/>
-               <queue-id value="#{t $ queue_id j}"/>
-               <start-paused value="#{b $ start_paused j}"/>
-               <postproc-id value="#{t $ postproc_id j}"/>
-               <cpu-timeout value="#{t $ cpu_timeout j}"/>
-               <wallclock-timeout value="#{t $ wallclock_timeout j}"/>
-               <mem-limit value="#{t $ mem_limit j}"/>
-             </JobAttributes>
+               <description value="#{description j}">
+               <queue-id value="#{t $ queue_id j}">
+               <start-paused value="#{b $ start_paused j}">
+               <cpu-timeout value="#{t $ cpu_timeout j}">
+               <wallclock-timeout value="#{t $ wallclock_timeout j}">
+               <mem-limit value="#{t $ mem_limit j}">
+             <StageAttributes>
+               <stage-num value="1">
+               <cpu-timeout value="#{t $ cpu_timeout j}">
+               <wallclock-timeout value="#{t $ wallclock_timeout j}">
+               <mem-limit value="#{t $ mem_limit j}">
+               <postproc-id value="#{t $ postproc_id j}">
              $forall p <- jobpairs j
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
@@ -454,8 +458,9 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
     liftIO $ print req 
 
-    -- liftIO $ BSL.writeFile "command.zip" bs
-    -- error "huh"
+    when (False) $ do
+        liftIO $ BSL.writeFile "command.zip" bs
+        error "huh"
     
     resp <- sendRequest (req, man, cookies)
     -- the job ids are in the returned cookie.
