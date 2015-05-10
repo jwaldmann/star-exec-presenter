@@ -12,7 +12,18 @@ import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 
 import Data.Function (on)
-import Data.List (sortBy)
+import Data.List (sortBy, inits, tails, isPrefixOf)
+
+import qualified Data.Graph.Inductive as G
+import qualified Data.GraphViz as V
+import qualified Data.GraphViz.Printing as V
+import qualified Data.GraphViz.Attributes as V
+import qualified Data.GraphViz.Attributes.Complete as V
+import qualified System.Process as P
+import qualified Data.Text.Lazy as TL
+import qualified Text.Blaze as B
+import Control.Monad ( guard )
+import Data.Maybe ( isJust, maybeToList )
 import Data.Double.Conversion.Text
 
 getManyJobCells :: [[ JobResult ]] -> Handler Table
@@ -74,16 +85,20 @@ cell_for_bench (bid, bname) = Cell
   , mjr = Nothing
   }
 
-cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (t, b)) -> Cell
-cell_for_solver (j,(sid, sname),(_, cname)) = Cell 
+cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (ConfigID, b)) -> Cell
+cell_for_solver (j,(sid, sname),(cid, cname)) = Cell 
   { contents = [whamlet|
 <table>
   <tr>
     <td>
       <a href=@{ShowSolverInfoR sid}>#{sname}</a>
   <tr>
-    <td>   
-      #{cname}
+    <td>
+      $case cid
+        $of StarExecConfigID i
+          <a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{i}"> #{cname}</a>
+        $of LriConfigID
+          #{cname}
   <tr>
     <td>
       Job <a href=@{ShowJobInfoR j}>#{show j}</a>
@@ -111,7 +126,7 @@ display :: JobIds -> [Transform] -> [Transform] -> Table -> Widget
 display jids previous ts tab  = do
   summary jids previous tab
   [whamlet| 
-      <a href=@{FlexibleTableR (Query []) jids}>remove following #{show (length ts)} transformations
+      <a href=@{ShowManyJobResultsR (Query []) jids}>remove following #{show (length ts)} transformations
   |]
   case ts of
     (t:later) -> do
@@ -140,8 +155,19 @@ display jids previous ts tab  = do
                             <td class="#{tdclass cell}"> ^{contents cell} 
             |]
 
+supertypes :: [a] -> [[Maybe a]]
+supertypes xs = sequence $ map ( \ x -> [Just x, Nothing] ) xs
+
+predecessors :: [Maybe a] -> [[Maybe a]]
+predecessors xs = do
+  (pre, Just x : post) <- splits xs
+  return $ pre ++ Nothing : post
+
+splits xs = zip (inits xs) (tails xs)
+
 summary :: JobIds -> [Transform] -> Table -> Widget
 summary jids previous tab = do
+    render <- getUrlRender
     let total = length $ rows tab
         column_stats = M.fromListWith (+) $ do
             row <- rows tab
@@ -166,6 +192,46 @@ summary jids previous tab = do
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] ) 
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] ) 
                 )
+        -- http://hackage.haskell.org/package/fgl-5.5.1.0/docs/Data-Graph-Inductive-Graph.html#t:LNode
+        concept_stats = M.fromListWith (+) $ do
+          row <- rows tab
+          concept <- supertypes $ map tag row
+          -- next line is hack (1st column is benchmark with attribute "nothing")
+          guard $ case concept of Nothing : _ -> False ; _ -> True
+          return (concept, 1)
+        concept_table = for ( sortBy (compare `on` snd) $ M.toList concept_stats )
+          $ \ (c, n) ->
+            let f = And $ for c $ \ x ->
+                      case x of Nothing -> Any ; Just t -> Equals t
+            in  (c, n , Query (previous ++ [ Filter_Rows f ] )
+                      , Query (previous ++ [ Filter_Rows $ Not f ] )
+                )
+        nodes = M.fromList $ zip [ 1 .. ] (M.keys concept_stats) 
+        inodes = M.fromList $ zip (M.keys concept_stats) [ 1.. ]
+        concept_graph :: G.Gr [Maybe Text] ()
+        concept_graph = G.mkGraph (M.toList nodes) $ do
+          (k,p) <- M.toList nodes
+          q <- predecessors p
+          i <- maybeToList $ M.lookup q inodes
+          return (i, k, () )
+        -- cf.   http://stackoverflow.com/a/20860364/2868481
+        dot =  V.renderDot $ V.toDot
+            $ V.graphToDot
+               V.nonClusteredParams
+                { V.fmtNode = \ (n,l) ->
+                   [ V.toLabel $ show $ concept_stats M.! l
+                   , V.Tooltip $ TL.pack $ show l
+                   --, V.URL [shamlet|@{ShowManyJobResultsR (Query previous) jids}|]
+                   , V.URL (TL.fromStrict $ render $ ShowManyJobResultsR (Query previous) jids)
+                   ]
+                }
+            $ concept_graph
+    -- FIXME: this uses String, but it should use Text:        
+    svg <- liftIO $ P.readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] $ TL.unpack dot
+    -- FIXME: there must be a better way
+    let svg_contents = B.preEscapedLazyText
+                     $ TL.pack $ unlines
+                     $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
     [whamlet|
         <h3>summary
         total number of rows: #{show total}
@@ -182,8 +248,8 @@ summary jids previous tab = do
                     $if positive n
                         <td class="#{t}"> 
                           #{t} #{show n}
-                          <a href=@{FlexibleTableR these jids}>these
-                          | <a href=@{FlexibleTableR others jids}>others
+                          <a href=@{ShowManyJobResultsR these jids}>these
+                          | <a href=@{ShowManyJobResultsR others jids}>others
                     $else 
                         <td>
         <h3>row types
@@ -199,9 +265,30 @@ summary jids previous tab = do
                     <td class="#{t}"> #{t}
                 <td> #{show n}
                 <td> 
-                   <a href=@{FlexibleTableR these jids}>these
+                   <a href=@{ShowManyJobResultsR these jids}>these
                 <td>
-                   <a href=@{FlexibleTableR others jids}>others
+                   <a href=@{ShowManyJobResultsR others jids}>others
+        <h3>concepts (partial row types)        
+        <div>
+          #{svg_contents}
+        <table class="table">
+          <thead>
+           <tr>             
+             $forall h <- header tab
+                <th> ^{contents h}
+          <tbody>
+            $forall (rt, n, these,others) <- concept_table
+              <tr>
+                $forall mt <- rt
+                    $maybe t <- mt
+                        <td class="#{t}"> #{t}
+                    $nothing
+                        <td>
+                <td> #{show n}
+                <td> 
+                   <a href=@{ShowManyJobResultsR these jids}>these
+                <td>
+                   <a href=@{ShowManyJobResultsR others jids}>others
     |]
     
 apply :: Transform -> Table -> Table

@@ -168,6 +168,9 @@ library
                  , SafeSemaphore
                  , MonadCatchIO-transformers
                  , conduit-extra
+                 , fgl
+                 , graphviz
+                 , process
 
 executable         star-exec-presenter
     if flag(library-only)

@@ -114,23 +114,35 @@ the_competition = experiment2015
 
 experiment2015 :: Registration
 experiment2015 = Competition "Experiments for 2015"
-   [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-       [ standard "TRS Standard"  trss
-           [ Participant "matchbox-dp-boolector" ( Just ( 2533, 17895 ))
-           , Participant "matchbox-dp-satchmo" ( Just ( 2533, 17894 ))
-           ]
-       , standard "SRS Standard"  srss
-           [ Participant "matchbox-dp-boolector" ( Just ( 2533, 17895 ))
-           , Participant "matchbox-dp-satchmo" ( Just ( 2533, 17894 ))             
-           ]
-     ]
-   , MetaCategory "Complexity Analysis of Term Rewriting"
+   [ MetaCategory "Complexity Analysis of Term Rewriting"
      [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
-           [ Participant "matchbox-complex-boolector" ( Just ( 2533, 17896 ))
-           , Participant "matchbox-complex-satchmo" ( Just ( 2533, 17893 ))             
+           [ -- Participant "matchbox-complex-boolector" ( Just ( 2536, 17921 ))
+           -- , Participant "matchbox-complex-satchmo" ( Just ( 2536, 17912 ))             
+             Participant "matchbox-nocon-complex-boolector" ( Just ( 2536, 17918 )) 
+           , Participant "matchbox-nocon-complex-satchmo" ( Just ( 2536, 17919 )) 
            ]
      ]
+   , MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+       [ -- standard "TRS Standard"  trss maparts_std
+         standard "SRS Standard"  srss maparts_std
+       -- , certified "TRS Standard certified"  trss maparts_cert
+       , certified "SRS Standard certified"  srss maparts_cert
+       ]
    ]
+
+maparts_std = 
+  [ -- Participant "matchbox-dp-boolector" ( Just ( 2536, 17916 ))
+  -- , Participant "matchbox-dp-satchmo" ( Just ( 2536, 17913 ))
+    Participant "matchbox-dp-ur-boolector" ( Just ( 2536, 17911 ))
+  , Participant "matchbox-dp-ur-satchmo" ( Just ( 2536, 17920 ))
+  ]
+
+maparts_cert = 
+  [ Participant "matchbox-nocon-dp-boolector" ( Just ( 2536, 17910 ))
+  , Participant "matchbox-nocon-dp-satchmo" ( Just ( 2536, 17914 ))
+  , Participant "matchbox-nocon-dp-ur-boolector" ( Just ( 2536, 17917 ))
+  , Participant "matchbox-nocon-dp-ur-satchmo" ( Just ( 2536, 17915 ))
+  ]
 
 tc2014 :: Registration
 tc2014 = Competition "Termination Competition 2014"
