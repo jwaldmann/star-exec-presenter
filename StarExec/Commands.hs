@@ -222,6 +222,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                <cpu-timeout value="#{t $ cpu_timeout j}">
                <wallclock-timeout value="#{t $ wallclock_timeout j}">
                <mem-limit value="#{t $ mem_limit j}">
+               <postproc-id value="#{t $ postproc_id j}">
              $forall p <- jobpairs j
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
@@ -452,6 +453,7 @@ pushJobXMLStarExec (sec, man, cookies) spaceId jobs = case jobs_to_archive jobs 
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
     liftIO $ print req 
 
+    -- replace False with True to write the job file to disk (and not submit it)
     when (False) $ do
         liftIO $ BSL.writeFile "command.zip" bs
         error "huh"
