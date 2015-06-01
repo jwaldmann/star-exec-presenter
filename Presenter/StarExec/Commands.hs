@@ -198,11 +198,6 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
               <cpu-timeout value="#{t $ cpu_timeout j}">
               <wallclock-timeout value="#{t $ wallclock_timeout j}">
               <mem-limit value="#{t $ mem_limit j}">
-            <StageAttributes>
-              <stage-num value="1">
-              <cpu-timeout value="#{t $ cpu_timeout j}">
-              <wallclock-timeout value="#{t $ wallclock_timeout j}">
-              <mem-limit value="#{t $ mem_limit j}">
               <postproc-id value="#{t $ postproc_id j}">
             $forall p <- jobpairs j
                 <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
