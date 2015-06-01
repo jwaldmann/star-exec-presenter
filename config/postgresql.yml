@@ -4,7 +4,7 @@ Default: &defaults
   host: localhost
   port: 5432
   database: yesod
-  poolsize: 10
+  poolsize: 100
 
 Development:
   <<: *defaults

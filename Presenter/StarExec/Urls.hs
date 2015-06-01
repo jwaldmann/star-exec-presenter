@@ -32,7 +32,7 @@ primPath :: ByteString
 primPath = "starexec/services/space/{id}/{type}/pagination"
 
 pairStdoutPath :: ByteString
-pairStdoutPath = "starexec/services/jobs/pairs/{pairId}/stdout"
+pairStdoutPath = "starexec/services/jobs/pairs/{pairId}/stdout/1"
 
 pairLogPath :: ByteString
 pairLogPath = "starexec/services/jobs/pairs/{pairId}/log"
