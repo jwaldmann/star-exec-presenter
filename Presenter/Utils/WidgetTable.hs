@@ -6,6 +6,7 @@ import Text.Blaze (ToMarkup)
 import Presenter.Processing ( getClass )
 import Presenter.Model.Additional.Table
 import Presenter.Internal.Stringish
+import qualified Presenter.Utils.Colors as C
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
@@ -19,6 +20,7 @@ import qualified Data.GraphViz as V
 import qualified Data.GraphViz.Printing as V
 import qualified Data.GraphViz.Attributes as V
 import qualified Data.GraphViz.Attributes.Complete as V
+import qualified Data.GraphViz.Attributes.HTML as H
 import qualified System.Process as P
 import qualified Data.Text.Lazy as TL
 import qualified Text.Blaze as B
@@ -97,7 +99,7 @@ cell_for_solver (j,(sid, sname),(cid, cname)) = Cell
       $case cid
         $of StarExecConfigID i
           <a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{i}"> #{cname}</a>
-        $of LriConfigID
+        $of _
           #{cname}
   <tr>
     <td>
@@ -199,30 +201,55 @@ summary jids previous tab = do
           -- next line is hack (1st column is benchmark with attribute "nothing")
           guard $ case concept of Nothing : _ -> False ; _ -> True
           return (concept, 1)
+        q_these f = Query $ previous ++ [ Filter_Rows f ]
+        q_others f = Query $ previous ++ [ Filter_Rows $ Not f ]
+        q_filter c = And $ for c $ \ x ->
+                      case x of Nothing -> Any ; Just t -> Equals t 
         concept_table = for ( sortBy (compare `on` snd) $ M.toList concept_stats )
           $ \ (c, n) ->
-            let f = And $ for c $ \ x ->
-                      case x of Nothing -> Any ; Just t -> Equals t
-            in  (c, n , Query (previous ++ [ Filter_Rows f ] )
-                      , Query (previous ++ [ Filter_Rows $ Not f ] )
-                )
+            let f = q_filter c
+            in  (c, n , q_these f, q_others f )
         nodes = M.fromList $ zip [ 1 .. ] (M.keys concept_stats) 
         inodes = M.fromList $ zip (M.keys concept_stats) [ 1.. ]
-        concept_graph :: G.Gr [Maybe Text] ()
+        concept_graph :: G.Gr [Maybe Text] (Int, Maybe Text)
         concept_graph = G.mkGraph (M.toList nodes) $ do
           (k,p) <- M.toList nodes
           q <- predecessors p
+          let idx = length $ takeWhile id $ zipWith (==) p q
           i <- maybeToList $ M.lookup q inodes
-          return (i, k, () )
+          return (i, k, ( idx, p !! idx ) )
         -- cf.   http://stackoverflow.com/a/20860364/2868481
+        counter l = H.LabelCell [] $ H.Text $ return $ H.Str
+                 $ TL.pack $ show $ concept_stats M.! l
         dot =  V.renderDot $ V.toDot
             $ V.graphToDot
                V.nonClusteredParams
-                { V.fmtNode = \ (n,l) ->
-                   [ V.toLabel $ show $ concept_stats M.! l
+                { V.globalAttributes = [  ]
+                , V.fmtNode = \ (n,l) ->
+                   [ V.Shape V.PlainText
+                   , V.Label $ V.HtmlLabel $ H.Table
+                     $ H.HTable Nothing [ H.CellBorder 0 ]
+                     $ return $ H.Cells $ counter l : do
+                         e <- drop 1 l
+                         let (col,txt) = case e of
+                               Just "solver-yes" -> (C.colorYes, "yes")
+                               Just "solver-maybe" -> (C.colorMaybe, "maybe")
+                               Just "solver-no" -> (C.colorNo, "no")
+                               Just "solver-certified" -> (C.colorCertified, "cert")
+                               Just "solver-error" -> (C.colorError, "err")
+                               Just s -> (C.colorNothing, case T.stripPrefix "solver-" s of
+                                 Just suff -> suff ; Nothing -> s )
+                               Nothing -> (C.colorAnything, " ")
+                         return $ H.LabelCell [ H.BGColor col ]
+                                $ H.Text $ return 
+                                $ H.Str $  TL.fromStrict txt -- $ show e
                    , V.Tooltip $ TL.pack $ show l
                    --, V.URL [shamlet|@{ShowManyJobResultsR (Query previous) jids}|]
-                   , V.URL (TL.fromStrict $ render $ ShowManyJobResultsR (Query previous) jids)
+                   , V.URL $ TL.fromStrict $ render
+                     $ ShowManyJobResultsR (q_these $ q_filter l) jids
+                   ]
+                , V.fmtEdge = \ (p,q,(idx,v)) ->
+                   [ -- V.toLabel $ show (idx,v)
                    ]
                 }
             $ concept_graph

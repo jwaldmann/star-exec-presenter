@@ -78,6 +78,7 @@ library
                      Presenter.StarExec.Urls
                      Presenter.Statistics
                      Presenter.STM
+                     Presenter.Utils.Colors
                      Presenter.Utils.WidgetMetaRefresh
                      Presenter.Utils.WidgetTable
                      Importer.Parser.LRI
