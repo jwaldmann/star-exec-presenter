@@ -167,6 +167,14 @@ predecessors xs = do
 
 splits xs = zip (inits xs) (tails xs)
 
+-- | ignore nodes with exactly one successor
+remove_units g =
+  case G.gsel (\ c -> 1 == length (G.suc' c)) g of
+    c : _ -> remove_units 
+       $ G.insEdges ( do p <- G.pre' c ; q <- G.suc' c ; return (p,q,()) )
+       $ G.delNode (G.node' c) g
+    _ -> g
+
 summary :: JobIds -> [Transform] -> Table -> Widget
 summary jids previous tab = do
     render <- getUrlRender
@@ -211,20 +219,20 @@ summary jids previous tab = do
             in  (c, n , q_these f, q_others f )
         nodes = M.fromList $ zip [ 1 .. ] (M.keys concept_stats) 
         inodes = M.fromList $ zip (M.keys concept_stats) [ 1.. ]
-        concept_graph :: G.Gr [Maybe Text] (Int, Maybe Text)
-        concept_graph = G.mkGraph (M.toList nodes) $ do
+        concept_graph :: G.Gr [Maybe Text] () -- (Int, Maybe Text)
+        concept_graph = remove_units $ G.mkGraph (M.toList nodes) $ do
           (k,p) <- M.toList nodes
           q <- predecessors p
           let idx = length $ takeWhile id $ zipWith (==) p q
           i <- maybeToList $ M.lookup q inodes
-          return (i, k, ( idx, p !! idx ) )
+          return (i, k, ( {-idx, p !! idx-} ) )
         -- cf.   http://stackoverflow.com/a/20860364/2868481
         counter l = H.LabelCell [] $ H.Text $ return $ H.Str
                  $ TL.pack $ show $ concept_stats M.! l
         dot =  V.renderDot $ V.toDot
             $ V.graphToDot
                V.nonClusteredParams
-                { V.globalAttributes = [  ]
+                { V.globalAttributes = [ V.GraphAttrs [ V.RankDir V.FromLeft ] ]
                 , V.fmtNode = \ (n,l) ->
                    [ V.Shape V.PlainText
                    , V.Label $ V.HtmlLabel $ H.Table
@@ -243,12 +251,12 @@ summary jids previous tab = do
                          return $ H.LabelCell [ H.BGColor col ]
                                 $ H.Text $ return 
                                 $ H.Str $  TL.fromStrict txt -- $ show e
-                   , V.Tooltip $ TL.pack $ show l
+                   -- , V.Tooltip $ TL.pack $ show l
                    --, V.URL [shamlet|@{ShowManyJobResultsR (Query previous) jids}|]
                    , V.URL $ TL.fromStrict $ render
                      $ ShowManyJobResultsR (q_these $ q_filter l) jids
                    ]
-                , V.fmtEdge = \ (p,q,(idx,v)) ->
+                , V.fmtEdge = \ (p,q,({-idx,v-})) ->
                    [ -- V.toLabel $ show (idx,v)
                    ]
                 }
