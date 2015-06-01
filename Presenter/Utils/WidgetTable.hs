@@ -202,6 +202,7 @@ summary jids previous tab = do
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] ) 
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] ) 
                 )
+{-
         -- http://hackage.haskell.org/package/fgl-5.5.1.0/docs/Data-Graph-Inductive-Graph.html#t:LNode
         concept_stats = M.fromListWith (+) $ do
           row <- rows tab
@@ -267,6 +268,7 @@ summary jids previous tab = do
     let svg_contents = B.preEscapedLazyText
                      $ TL.pack $ unlines
                      $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
+-}
     [whamlet|
         <h3>summary
         total number of rows: #{show total}
@@ -303,6 +305,9 @@ summary jids previous tab = do
                    <a href=@{ShowManyJobResultsR these jids}>these
                 <td>
                    <a href=@{ShowManyJobResultsR others jids}>others
+    |]
+
+{-
         <h3>concepts (partial row types)        
         <div>
           #{svg_contents}
@@ -325,6 +330,7 @@ summary jids previous tab = do
                 <td>
                    <a href=@{ShowManyJobResultsR others jids}>others
     |]
+-}
     
 apply :: Transform -> Table -> Table
 apply t tab = case t of
