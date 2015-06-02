@@ -11,6 +11,12 @@ yesod-devel/
 .cabal-sandbox
 cabal.sandbox.config
 .DS_Store
+*.swp
+.dir-locals.el
 examples.txt
-*~
 config/settings.yml
+*.iml
+*.ipr
+*.iws
+.idea
+*~

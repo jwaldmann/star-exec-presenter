@@ -1,12 +1,9 @@
 module Handler.CompetitionWithConfig where
 
 import Import
-import StarExec.Types
-import StarExec.CompetitionResults
-import StarExec.CompetitionResults.Type
-import StarExec.JobData
-import StarExec.STM
-import Utils.WidgetMetaRefresh
+import Presenter.STM
+import Presenter.Utils.WidgetMetaRefresh
+import Presenter.Prelude
 import Data.Time.Clock
 
 minute :: Seconds

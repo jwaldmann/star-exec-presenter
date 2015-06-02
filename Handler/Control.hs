@@ -1,31 +1,17 @@
-{-# language OverloadedStrings #-}
-
 module Handler.Control where
 
-
 import Import
-import StarExec.Registration 
-import StarExec.Connection (getLoginCredentials)
-import StarExec.Types (Login(..))
-import StarExec.Persist
-import StarExec.Commands (Job(..))
-import StarExec.STM (startWorker)
-import qualified StarExec.CompetitionResults as SCR
 
 import Yesod.Auth
 
-import Control.Monad ( guard, forever )
-import qualified StarExec.Types as S
+import qualified Presenter.Registration as R
+import Presenter.Control.Job
+import Presenter.STM
+
 import qualified Data.Text as T
-import Data.Time.Clock
-
-import Control.Job
-
 import qualified Data.Map.Strict as M
-import Control.Concurrent.STM
-import Control.Concurrent (threadDelay)
-import Control.Exception.Base
-
+import Data.Time.Clock
+import Control.Monad ( guard )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
@@ -43,51 +29,55 @@ inputForm = renderTable $ JobControl
             e <- askParams 
             return ( FormSuccess $ maybe M.empty id e, [] ) )
 
+benches :: Monad m => m R.Benchmark_Source -> m Int
+benches bs = do R.Bench b <- bs ; return b
 
-benches bs = do Bench b <- bs ; return b
-alls bs = do All b <- bs ; return b
-hierarchies bs = do Hierarchy b <- bs ; return b
+alls :: Monad m => m R.Benchmark_Source -> m Int
+alls bs = do R.All b <- bs ; return b
+
+hierarchies :: Monad m => m R.Benchmark_Source -> m Int
+hierarchies bs = do R.Hierarchy b <- bs ; return b
 
 getControlR :: Handler Html
 getControlR = do
-    maid <- maybeAuthId
-    (widget, enctype) <- generateFormPost inputForm
-    let comp = tc2014
-    defaultLayout $(widgetFile "control")
+  maid <- maybeAuthId
+  (widget, enctype) <- generateFormPost inputForm
+  let comp = R.the_competition
+  defaultLayout $(widgetFile "control")
 
 postControlR :: Handler Html
 postControlR = do
-    maid <- maybeAuthId
-    ((result,widget), enctype) <- runFormPost inputForm
+  maid <- maybeAuthId
+  ((result, widget), enctype) <- runFormPost inputForm
 
-    let comp = tc2014
-        public = case result of
-                  FormSuccess input -> isPublic input
+  let comp = R.the_competition
+      public = case result of 
+                  FormSuccess input-> isPublic input
                   _ -> False
-    mc <- case result of
-            FormSuccess input -> do
-                    Just [con] <- return $ M.lookup "control" $ env input
-                    startjobs input con 
-            _ -> return Nothing
-    mKey <- case mc of 
-              Nothing -> return Nothing
-              Just c -> do
-                  now <- liftIO getCurrentTime
-                  let competition = ( timed now c ) 
-                  key <- runDB $ insert $ CompetitionInfo competition now public
-                  startWorker competition
-                  return $ Just key
-    defaultLayout $ do
-        [whamlet|
-          <h2>Result of previous command
-          $maybe key <- mKey
-            jobs started, <a href=@{CompetitionR key}>output</a>
-          $nothing
-            could not start jobs
-        |] 
-        $(widgetFile "control")
+  mc <- case result of
+          FormSuccess input -> do
+            Just [con] <- return $ M.lookup "control" $ env input
+            startjobs input con
+          _ -> return Nothing
+  mKey <- case mc of
+            Nothing -> return Nothing
+            Just c -> do
+              now <- liftIO getCurrentTime
+              let competition = ( timed now c )
+              key <- runDB $ insert $ CompetitionInfo competition now public
+              startWorker competition
+              return $ Just key
+  defaultLayout $ do
+    [whamlet|
+      <h2>Result of previous command
+      $maybe key <- mKey
+        jobs started, <a href=@{CompetitionR key}>output</a>
+      $nothing
+        could not start jobs
+    |]
+    $(widgetFile "control")
 
-startjobs :: JobControl -> Text -> Handler (Maybe S.Competition)
+startjobs :: JobControl -> Text -> Handler (Maybe Competition)
 startjobs input con = 
       checkPrefix "cat:"  con (startCat input)
     $ checkPrefix "mc:" con (startMC input)
@@ -99,54 +89,58 @@ checkPrefix s con action next =
     let (pre, post) = T.splitAt (T.length s) con
     in  if pre == s then action post else next
 
+select :: JobControl -> R.Competition R.Catinfo -> R.Competition R.Catinfo
 select input comp = case selection input of
     SelectionCompetition -> 
-        comp { metacategories = map ( \ mc -> mc { categories = full_categories mc } ) 
-                              $ metacategories comp }
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.full_categories mc } ) 
+                              $ R.metacategories comp }
     SelectionDemonstration -> 
-        comp { metacategories = map ( \ mc -> mc { categories = demonstration_categories mc } ) 
-                              $ metacategories comp }
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.demonstration_categories mc } ) 
+                              $ R.metacategories comp }
 
-startComp input t = do
-    comp_with_jobs <- pushcomp input $ select input tc2014
-    let S.Competition name mcs = convertComp comp_with_jobs 
-        m = params input t 
-        c = S.Competition m mcs
-    return $ Just c
-
-startMC input t = do
-    let mcs = do 
-            mc <- metacategories $ select input tc2014
-            guard $ metaCategoryName mc == t
-            return mc
-    case mcs of
-        [ mc ] -> do
-            mc_with_jobs <- pushmetacat input mc
-            let m = params input t
-                c = S.Competition m [ convertMC mc_with_jobs]
-            return $ Just c
-        _ -> return Nothing
-
+startCat :: JobControl -> Name -> Handler (Maybe Competition)
 startCat input t = do
     let cats = do 
-            mc <- metacategories $ select input tc2014
-            c <- categories mc
-            guard $ categoryName c == t
+            mc <- R.metacategories $ select input R.the_competition
+            c <- R.categories mc
+            guard $ R.categoryName c == t
             return c
     case cats of
         [ cat ] -> do
             cat_with_jobs <- pushcat input cat    
             let m = params input t
-                c = S.Competition m [ S.MetaCategory (metaToName m) [ convertC cat_with_jobs]]
+                c = Competition m [ MetaCategory (metaToName m) [ convertC cat_with_jobs]]
             return $ Just c
         _ -> return Nothing
 
-params :: JobControl -> Text -> S.CompetitionMeta
-params conf t = S.CompetitionMeta
-  { S.getMetaName = T.append t $ case selection conf of
+startMC :: JobControl -> Name -> Handler (Maybe Competition)
+startMC input t = do
+    let mcs = do 
+            mc <- R.metacategories $ select input R.the_competition
+            guard $ R.metaCategoryName mc == t
+            return mc
+    case mcs of
+        [ mc ] -> do
+            mc_with_jobs <- pushmetacat input mc
+            let m = params input t
+                c = Competition m [ convertMC mc_with_jobs]
+            return $ Just c
+        _ -> return Nothing
+
+startComp :: JobControl -> Text -> Handler (Maybe Competition)
+startComp input t = do
+    comp_with_jobs <- pushcomp input $ select input R.the_competition
+    let Competition name mcs = convertComp comp_with_jobs 
+        m = params input t 
+        c = Competition m mcs
+    return $ Just c
+
+params :: JobControl -> Text -> CompetitionMeta
+params conf t = CompetitionMeta
+  { getMetaName = T.append t $ case selection conf of
         SelectionCompetition -> T.empty
         SelectionDemonstration -> " (Demonstration)"
-  , S.getMetaDescription =
+  , getMetaDescription =
       T.unwords [ "wc", "=", T.pack $ show $ wallclock conf
                 , "a", "=", T.pack $ show $ family_lower_bound conf
                 , "b", "=", T.pack $ show $ family_upper_bound conf
@@ -154,9 +148,5 @@ params conf t = S.CompetitionMeta
                 ]
   }
 
-metaToName :: S.CompetitionMeta -> S.Name
-metaToName meta = 
-    S.getMetaName meta -- `T.append` " | " `T.append` S.getMetaDescription meta
-  
-
-
+metaToName :: CompetitionMeta -> Name
+metaToName meta = getMetaName meta

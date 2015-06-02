@@ -4,7 +4,7 @@ Default: &defaults
   host: localhost
   port: 5432
   database: yesod
-  poolsize: 10
+  poolsize: 1000
 
 Development:
   <<: *defaults
@@ -15,10 +15,8 @@ Testing:
 
 Staging:
   # database: star-exec-presenter_staging
-  poolsize: 100
   <<: *defaults
 
 Production:
   # database: star-exec-presenter_production
-  poolsize: 100
   <<: *defaults

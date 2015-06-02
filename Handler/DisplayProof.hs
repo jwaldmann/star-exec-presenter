@@ -26,7 +26,6 @@ getFile path = do
   if fileExists
     then do
       file <- liftIO $ TIO.readFile filePath
-      --addHeader "Content-Type" "text/xsl; charset=utf-8"
       return $ toTypedContent (typeXSL, toContent file)
     else notFound
 
@@ -43,8 +42,6 @@ getProof _pairId = do
         if isHTML dom
           then return $ toTypedContent $ (typeHtml, toContent proof)
           else return $ toTypedContent $ repXml proof
-            --addHeader "Content-Type" "text/xml; charset=utf-8"
-        --return $ preEscapedToMarkup $ decodeUtf8 $ proof
   where renderFail = do
           html <- defaultLayout $ do
                     [whamlet| 
@@ -57,4 +54,3 @@ isHTML dom = let htmlRoot = element "html" dom
              in case htmlRoot of
               [] -> False
               _ -> True
-             --trace (show htmlRoot) $ length htmlRoot > 0

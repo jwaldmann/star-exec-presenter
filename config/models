@@ -30,7 +30,37 @@ JobResultInfo
     cpuTime Double
     wallclockTime Double
     result SolverResult
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriResultInfo
+    jobId Int
+    score Int Maybe
+    pairId Int
+    UniqueLriResultInfo pairId
+    benchmark Text
+    benchmarkId Int
+    solver Text
+    solverId Int
+    result SolverResult
+    cpuTime Double
+    wallclockTime Double
+    checkResult SolverResult Maybe
+    checkCpuTime Double Maybe
+    checkWallclockTime Double Maybe
+    deriving Eq Ord Read Show
+
+UibkResultInfo
+    jobId Int
+    score Int Maybe
+    pairId Int
+    UniqueUibkResultInfo pairId
+    benchmarkId Int
+    benchmarkName Text
+    solverId Int
+    solverName Text
+    result SolverResult
+    wallclockTime Double
+    deriving Eq Ord Read Show
 
 JobPairInfo
     pairId Int
@@ -39,7 +69,7 @@ JobPairInfo
     log ByteString
     htmlProof ByteString Maybe
     resultStatus JobResultStatus default='JobResultUndetermined'
-    deriving Show
+    deriving Eq Ord Read Show
 
 JobInfo
     starExecId Int
@@ -54,7 +84,20 @@ JobInfo
     startDate UTCTime default=now()
     finishDate UTCTime Maybe
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriJobInfo
+    jobId Int
+    identifier Text
+    UniqueLriJobInfo jobId
+    name Text
+    deriving Eq Ord Read Show
+
+UibkJobInfo
+    jobId Int
+    UniqueUibkJobInfo jobId
+    name Text
+    deriving Eq Ord Read Show
 
 SolverInfo
     starExecId Int
@@ -62,7 +105,31 @@ SolverInfo
     name Text
     description Text
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriSolverInfo
+    solverId Int
+    identifier Text
+    UniqueLriSolverInfo solverId
+    name Text
+    author Text
+    description Text
+    url Text
+    isStandard Bool
+    isRelative Bool
+    isConditional Bool
+    isContextSensitive Bool
+    isInnermost Bool
+    isTheory Bool
+    isCertifying Bool
+    deriving Eq Ord Read Show
+
+UibkSolverInfo
+    solverId Int
+    UniqueUibkSolverInfo solverId
+    name Text
+    version Text
+    deriving Eq Ord Read Show
 
 BenchmarkInfo
     starExecId Int
@@ -70,12 +137,34 @@ BenchmarkInfo
     name Text
     type Text
     lastUpdate UTCTime default=now()
-    deriving Show
+    deriving Eq Ord Read Show
+
+LriBenchmarkInfo
+    benchmarkId Int
+    identifier Text
+    UniqueLriBenchmarkInfo benchmarkId
+    name Text
+    file Text
+    rating Int
+    solved Int
+    isConditional Bool
+    isContextSensitive Bool
+    isInnermost Bool
+    isOutermost Bool
+    isRelative Bool
+    isTheory Bool
+    deriving Eq Ord Read Show
+
+UibkBenchmarkInfo
+    benchmarkId Int
+    UniqueUibkBenchmarkInfo benchmarkId
+    path Text
+    deriving Eq Ord Read Show
 
 QueryInfo
     query SEQuery
     UniqueQueryInfo query
-    deriving Show
+    deriving Show Eq
 
 CompetitionInfo
     competition Competition

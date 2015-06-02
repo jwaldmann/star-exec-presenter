@@ -1,0 +1,25 @@
+<h2>All proofs listed in the database
+
+<div class="container-fluid">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Job-Name
+        <th>Job-Pair-Result
+        <th>Additional
+    <tbody>
+      $forall (pair, mResult, mJob) <- pairs
+        <tr>
+          <td>
+            $maybe job <- mJob
+              <a href=@{ShowJobInfoR $ toJobID job}>#{toJobName job}</a>
+            $nothing
+              no job found
+          <td>
+            $maybe result <- mResult
+              #{show $ getSolverResult result}
+            $nothing
+              no result
+          <td>
+            <a href=@{DisplayProofR $ id2Text pair}>view proof</a> /
+            <a href=@{ShowJobPairR $ getPairID_ pair}>view job-pair</a>

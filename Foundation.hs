@@ -5,27 +5,29 @@ import Yesod
 import Yesod.Static
 import Yesod.Auth
 import Yesod.Auth.BrowserId
-import Yesod.Auth.GoogleEmail
-import Yesod.Auth.Dummy
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
 import qualified Settings
 import Settings.Development (development)
 import qualified Database.Persist
-import Database.Persist.Sql (SqlBackend, SqlPersistT)
+import Database.Persist.Sql (SqlPersistT, SqlBackend)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
-import Model
+import Presenter.Model
+--import Presenter.Model.Types (SessionData)
+--import Presenter.Model.CompetitionResults (CompetitionResults)
+--import Presenter.Model.Competition (CompetitionMeta, Competition)
+--import Presenter.Model.RouteTypes
+--import Presenter.Model.Query
+--import Model
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
-import StarExec.Types (ErrorID, JobIds, Competition)
-import Table.Query
+
+--import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
+import Presenter.Auth (authSE)
 import Data.Text (Text)
-import StarExec.Auth (authSE)
-import StarExec.CompetitionResults.Type
-import StarExec.Types
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
@@ -72,8 +74,10 @@ instance Yesod App where
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
     makeSessionBackend _ = fmap Just $ defaultClientSessionBackend
-        (120 * 60) -- 120 minutes
+        120    -- timeout in minutes
         "config/client_session_key.aes"
+
+    maximumContentLength _ _ = Nothing
 
     defaultLayout widget = do
         master <- getYesod
@@ -106,8 +110,16 @@ instance Yesod App where
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
 
+    -- Routes not requiring authenitcation.
+    isAuthorized (AuthR _) _ = return Authorized
+    isAuthorized FaviconR _ = return Authorized
+    isAuthorized RobotsR _ = return Authorized
+
+    -- requires Authorization
     isAuthorized ControlR _ = isAdmin
     isAuthorized ListHiddenCompetitionsR _ = isAdmin
+    
+    -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 
     -- This function creates static content files in the static folder
@@ -132,15 +144,24 @@ instance Yesod App where
 
     makeLogger = return . appLogger
 
+isAdmin :: YesodAuth master => HandlerT master IO AuthResult
+isAdmin = do
+    mu <- maybeAuthId
+    return $ case mu of
+        Nothing -> AuthenticationRequired
+        Just _ -> Authorized
+
 -- How to run database actions.
+
+-- cf.    http://www.yesodweb.com/blog/2014/09/announcing-yesod-1-4
+instance YesodAuthPersist App
+
 instance YesodPersist App where
-    type YesodPersistBackend App = SqlPersistT
+    type YesodPersistBackend App = SqlBackend
     runDB = defaultRunDB persistConfig connPool
 instance YesodPersistRunner App where
     getDBRunner = defaultGetDBRunner connPool
 
--- simple example copied from 
--- http://www.yesodweb.com/book/authentication-and-authorization
 instance YesodAuth App where
     type AuthId App = UserId
 
@@ -159,16 +180,11 @@ instance YesodAuth App where
                     , userPassword = Nothing
                     }
 
+    -- You can add other plugins like BrowserID, email or OAuth here
     authPlugins _ = [ authSE ]
+    --authPlugins _ = [authBrowserId def]
 
     authHttpManager = httpManager
-
-isAdmin = do
-    mu <- maybeAuthId
-    return $ case mu of
-        Nothing -> AuthenticationRequired
-        Just _ -> Authorized
-
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

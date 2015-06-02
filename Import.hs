@@ -10,7 +10,7 @@ import           Control.Applicative  as Import (pure, (<$>), (<*>))
 import           Data.Text            as Import (Text)
 
 import           Foundation           as Import
-import           Model                as Import
+import           Presenter.Model      as Import
 import           Settings             as Import
 import           Settings.Development as Import
 import           Settings.StaticFiles as Import
@@ -27,4 +27,3 @@ infixr 5 <>
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 #endif
-

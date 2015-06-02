@@ -1,0 +1,39 @@
+$maybe benchInfo <- mBenchmarkInfo
+  <h1>Benchmark-Infos of "#{toBenchmarkName benchInfo}"
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{toBenchmarkName benchInfo}
+        <tr>
+          <td>File:
+          <td>#{getFile benchInfo}
+        <tr>
+          <td>Rating:
+          <td>#{getRating benchInfo}
+        <tr>
+          <td>Solved:
+          <td>#{getSolved benchInfo}
+        <tr>
+          <td>isConditional:
+          <td>#{isConditional benchInfo}
+        <tr>
+          <td>isContextSensitive:
+          <td>#{isContextSensitive benchInfo}
+        <tr>
+          <td>isInnermost:
+          <td>#{isInnermost benchInfo}
+        <tr>
+          <td>isOutermost:
+          <td>#{isOutermost benchInfo}
+        <tr>
+          <td>isRelative:
+          <td>#{isRelative benchInfo}
+        <tr>
+          <td>isTheory:
+          <td>#{isTheory benchInfo}
+
+$nothing
+  <h1>Sorry, no benchmark with the id #{show _id} found!

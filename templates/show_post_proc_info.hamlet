@@ -16,4 +16,3 @@ $maybe procInfo <- mPostProcInfo
 
 $nothing
   <h1>Sorry, no post-processor with the id #{show _procId} found!
-  (try re-loading this page after a while)

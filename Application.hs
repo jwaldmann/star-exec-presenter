@@ -19,7 +19,6 @@ import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
 import Network.HTTP.Client.Conduit (newManager)
 import Control.Monad.Logger (runLoggingT)
-import Control.Concurrent (forkIO, threadDelay)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
 import Data.Default (def)
@@ -28,21 +27,37 @@ import Yesod.Core.Types (loggerSet, Logger (Logger))
 -- Import all relevant handler modules here.
 -- Don't forget to add new modules to your cabal file!
 import Handler.Home
-import Handler.Error
+import Handler.Control
+import Handler.ListHiddenCompetitions
+import Handler.ListCompetitions
+import Handler.Registered
 import Handler.ShowJobPair
+import Handler.LegacyShowJobPair
+import Handler.DisplayProof
+import Handler.LegacyDisplayProof
+import Handler.ShowJobInfo
+import Handler.LegacyShowJobInfo
+import Handler.ShowBenchmarkInfo
+import Handler.LegacyShowBenchmarkInfo
+import Handler.ShowSolverInfo
+import Handler.LegacyShowSolverInfo
+import Handler.ShowPostProcInfo
+import Handler.LegacyShowPostProcInfo
 import Handler.ShowManyJobResults
-import Handler.Flexible_Table
+import Handler.LegacyShowManyJobResults
+import Handler.LegacyShowJobResults
+import Handler.FlexibleTable
 import Handler.Competition
 import Handler.CompetitionWithConfig
-import Handler.Registered
-import Handler.Control
-import Handler.ShowJobInfo
-import Handler.ShowBenchmarkInfo
-import Handler.ShowSolverInfo
-import Handler.ListCompetitions
-import Handler.DisplayProof
-import Handler.ListHiddenCompetitions
-import Handler.ShowPostProcInfo
+import Handler.Import
+import Handler.ListJobPairs
+import Handler.ListProofs
+import Handler.ListJobs
+import Handler.ListBenchmarks
+import Handler.ListSolvers
+import Handler.ListPostProcs
+import Handler.LegacyListCompetitions
+import Handler.LegacyListHiddenCompetitions
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
@@ -73,7 +88,7 @@ makeApplication conf = do
     -- Create the WAI application and apply middlewares
     app <- toWaiAppPlain foundation
     let logFunc = messageLoggerSource foundation (appLogger foundation)
-    return (logWare app, logFunc)
+    return (logWare $ defaultMiddlewaresNoLogging app, logFunc)
 
 -- | Loads up any necessary settings, creates your foundation datatype, and
 -- performs some initialization.
@@ -87,21 +102,13 @@ makeFoundation conf = do
     p <- Database.Persist.createPoolConfig (dbconf :: Settings.PersistConf)
 
     loggerSet' <- newStdoutLoggerSet defaultBufSize
-    (getter, updater) <- clockDateCacher
+    (getter, _) <- clockDateCacher
 
-    -- If the Yesod logger (as opposed to the request logger middleware) is
-    -- used less than once a second on average, you may prefer to omit this
-    -- thread and use "(updater >> getter)" in place of "getter" below.  That
-    -- would update the cache every time it is used, instead of every second.
-    let updateLoop = do
-            threadDelay 1000000
-            updater
-            updateLoop
-    _ <- forkIO updateLoop
-
-
+    -- CompetitonResults-Cache
     crCache <- atomically $ newTVar M.empty
+    -- DB-Semaphore
     dbS <- Control.Concurrent.SSem.new 1
+    -- Session for Connections to starexec.org
     session <- atomically $ newTVar Nothing
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter

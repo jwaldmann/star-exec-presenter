@@ -93,3 +93,14 @@ c = Competition "2014"
   - import form
   - import settings
   - import cases (LRI, UIBK)
+
+# 140924
+
+* Listing of jobs (with filter)
+  - checkbox-selection for comparison of results
+* mapping of Benchmarks and Solver
+  - StarExec-Benchmark <-> LRI-Benchmark
+  - StarExec-Solver <-> LRI-Solver
+  - also considering UIBK
+* url-shortener
+* research best-practices for REST 

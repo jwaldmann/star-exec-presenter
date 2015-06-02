@@ -1,0 +1,20 @@
+$maybe benchInfo <- mBenchmarkInfo
+  <h1>Benchmark-Infos of "#{toBenchmarkName benchInfo}"
+  view original benchmark-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/benchmark.jsp?id=#{show _id}">#{show _id}</a>
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{toBenchmarkName benchInfo}
+        <tr>
+          <td>Type:
+          <td>#{getBenchmarkType benchInfo}
+        <tr>
+          <td>Last Update from Star-Exec:
+          <td>#{getLastUpdate benchInfo}
+
+$nothing
+  <h1>Sorry, no benchmark with the id #{show _id} found!
+  (try re-loading this page after a while)
