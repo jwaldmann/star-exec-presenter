@@ -136,7 +136,7 @@ library
                  , stm
                  , SafeSemaphore
                  , MonadCatchIO-transformers
-                 , fgl, graphviz , process 
+                 , fgl, graphviz == 2999.17.0.2.1 , process 
 
 executable         star-exec-presenter
     if flag(library-only)
