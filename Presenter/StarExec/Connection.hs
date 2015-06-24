@@ -11,12 +11,15 @@ import Network.HTTP.Conduit
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.Text.Encoding as TE
+import qualified Data.Text as T
 --import qualified Data.Text.IO as TIO
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
 import Presenter.Prelude (diffTime)
 import Data.Time.Clock
 import Control.Concurrent.STM
+
+import Control.Monad.Logger
 
 getSessionData' :: Handler (Maybe SessionData)
 getSessionData' = do
@@ -107,4 +110,7 @@ getConnection = do
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do
   let req' =  req { cookieJar = Just cookies }
-  httpLbs req' man
+  logWarnN  $ T.pack  $ "sendRequest: " <> show req
+  resp <- httpLbs req' man
+  logInfoN $ T.pack $ "response status: " <> show (responseStatus resp)
+  return resp
