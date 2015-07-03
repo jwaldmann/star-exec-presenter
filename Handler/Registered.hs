@@ -1,13 +1,12 @@
 module Handler.Registered where
 
-import Import
-import StarExec.Registration
-import Text.Lucius (luciusFile)
-import Text.Hamlet (hamletFile)
+import Import hiding (competitionName, metaCategoryName, categoryName)
+import Presenter.Registration
+--import Text.Lucius (luciusFile)
+--import Text.Hamlet (hamletFile)
 
 getRegisteredR :: Handler Html
 getRegisteredR = do
-    let comp = StarExec.Registration.the_competition
+    let comp = Presenter.Registration.the_competition
     defaultLayout $ do
         $(widgetFile "registered")
-

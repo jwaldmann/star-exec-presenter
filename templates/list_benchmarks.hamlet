@@ -1,0 +1,11 @@
+<h2>All solvers listed in the database
+
+<div class="container-fluid">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Name
+    <tbody>
+      $forall benchmark <- benchmarks
+        <tr>
+          <td><a href=@{ShowBenchmarkInfoR $ toBenchmarkID benchmark}>#{toBenchmarkName benchmark}</a>

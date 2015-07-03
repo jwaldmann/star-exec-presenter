@@ -1,5 +1,5 @@
 name:              star-exec-presenter
-version:           0.0.0
+version:           0.2.0
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -20,43 +20,74 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      Handler.Home
-                     Handler.Error
+                     Handler.Control
+                     Handler.ListHiddenCompetitions
+                     Handler.ListCompetitions
+                     Handler.Registered
                      Handler.ShowJobPair
+                     Handler.LegacyShowJobPair
+                     Handler.DisplayProof
+                     Handler.LegacyDisplayProof
+                     Handler.ShowJobInfo
+                     Handler.LegacyShowJobInfo
+                     Handler.ShowBenchmarkInfo
+                     Handler.LegacyShowBenchmarkInfo
+                     Handler.ShowSolverInfo
+                     Handler.LegacyShowSolverInfo
+                     Handler.ShowPostProcInfo
+                     Handler.LegacyShowPostProcInfo
                      Handler.ShowManyJobResults
-                     Handler.Flexible_Table
-                     Handler.Colors
+                     Handler.LegacyShowManyJobResults
+                     Handler.LegacyShowJobResults
+                     Handler.FlexibleTable
                      Handler.Competition
                      Handler.CompetitionWithConfig
-                     Handler.Registered
-                     Handler.Control
-                     Handler.ShowJobInfo
-                     Handler.ShowBenchmarkInfo
-                     Handler.ShowSolverInfo
-                     Handler.ListCompetitions
-                     Handler.DisplayProof
-                     Handler.ListHiddenCompetitions
-                     Handler.ShowPostProcInfo
-                     StarExec.Commands
-                     StarExec.Connection
-                     StarExec.Types
-                     StarExec.Persist
-                     StarExec.Urls
-                     StarExec.JobData
-                     StarExec.CompetitionResults
-                     StarExec.CompetitionResults.Type
-                     StarExec.Registration
-                     StarExec.PersistTypes
-                     StarExec.Complexity
-                     StarExec.Concurrent
-                     StarExec.Processing
-                     StarExec.Auth
-                     StarExec.Statistics
-                     StarExec.STM
-                     Table.Data
-                     Table.Get
-                     Table.Query
-                     Control.Job
-                     Utils.WidgetMetaRefresh
+                     Handler.Import
+                     Handler.ListJobPairs
+                     Handler.ListProofs
+                     Handler.ListJobs
+                     Handler.ListBenchmarks
+                     Handler.ListSolvers
+                     Handler.ListPostProcs
+                     Handler.LegacyListCompetitions
+                     Handler.LegacyListHiddenCompetitions
+                     Presenter.Auth
+                     Presenter.CompetitionResults
+                     Presenter.Control.Job
+                     Presenter.Internal.Stringish
+                     Presenter.Model.Additional.Table
+                     Presenter.Model.Competition
+                     Presenter.Model.CompetitionResults
+                     Presenter.Model.Complexity
+                     Presenter.Model.Defaults
+                     Presenter.Model.Entities
+                     Presenter.Model.PersistInstances
+                     Presenter.Model.Query
+                     Presenter.Model.RouteTypes
+                     Presenter.Model.StarExec
+                     Presenter.Model.Types
+                     Presenter.Model
+                     Presenter.PersistHelper
+                     Presenter.Prelude
+                     Presenter.Processing
+                     Presenter.Registration
+                     Presenter.StarExec.Commands
+                     Presenter.StarExec.Concurrent
+                     Presenter.StarExec.Connection
+                     Presenter.StarExec.JobData
+                     Presenter.StarExec.Urls
+                     Presenter.Statistics
+                     Presenter.STM
+                     Presenter.Utils.Colors
+                     Presenter.Utils.WidgetMetaRefresh
+                     Presenter.Utils.WidgetTable
+                     Importer.Parser.LRI
+                     Importer.Interpreter.LRI
+                     Importer.Internal
+                     Importer.LRI
+                     Importer.Parser.UIBK
+                     Importer.Interpreter.UIBK
+                     Importer.UIBK
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -78,33 +109,33 @@ library
                 NoMonomorphismRestriction
                 DeriveDataTypeable
                 ViewPatterns
-		
-    build-depends: base                  
-                 , yesod                 
-                 , yesod-core            
-                 , yesod-auth            
-                 , yesod-static          
-                 , yesod-form            
-                 , bytestring            
-                 , text                  
-                 , persistent            
-                 , persistent-postgresql 
-                 , persistent-template   
+
+    build-depends: base
+                 , yesod
+                 , yesod-core
+                 , yesod-auth
+                 , yesod-static
+                 , yesod-form
+                 , bytestring
+                 , text
+                 , persistent
+                 , persistent-postgresql
+                 , persistent-template
                  , template-haskell
-                 , shakespeare           
-                 , hjsmin                
-                 , monad-control         
-                 , wai-extra             
-                 , yaml                  
-                 , http-conduit          
-                 , directory             
-                 , warp                  
+                 , shakespeare
+                 , hjsmin
+                 , monad-control
+                 , wai-extra
+                 , yaml
+                 , http-conduit
+                 , directory
+                 , warp
                  , data-default
-                 , aeson                 
-                 , conduit               
-                 , monad-logger          
-                 , fast-logger           
-                 , wai-logger            
+                 , aeson
+                 , conduit
+                 , monad-logger
+                 , fast-logger
+                 , wai-logger
                  , transformers
                  , exceptions
                  , resourcet
@@ -114,6 +145,7 @@ library
                  , xml-conduit
                  , zip-archive
                  , zlib
+                 , tar
                  , vector
                  , cassava
                  , double-conversion
@@ -136,7 +168,10 @@ library
                  , stm
                  , SafeSemaphore
                  , MonadCatchIO-transformers
-                 , fgl, graphviz == 2999.17.0.2.1 , process 
+                 , conduit-extra
+                 , fgl
+                 , graphviz
+                 , process
 
 executable         star-exec-presenter
     if flag(library-only)
@@ -148,36 +183,7 @@ executable         star-exec-presenter
                      , star-exec-presenter
                      , yesod
 
-    ghc-options:       -threaded -O2
-
--- executable         star-exec-controller
---     if flag(library-only)
---         Buildable: False
--- 
---     main-is:           Control/Job.hs
---     hs-source-dirs:    . app
---     build-depends:     base
---                      , star-exec-presenter
---                      , yesod
---                      , parsec, text, blaze-markup, http-conduit, cassava, wl-pprint
---                      , time, blaze-html, containers, shakespeare
---                      , xml-conduit, xml-hamlet, hashable
--- 
---     ghc-options:       -threaded -O2
--- 
---     extensions: TemplateHaskell
---                 QuasiQuotes
---                 OverloadedStrings
---                 NoImplicitPrelude
---                 CPP
---                 MultiParamTypeClasses
---                 TypeFamilies
---                 GADTs
---                 GeneralizedNewtypeDeriving
---                 FlexibleContexts
---                 EmptyDataDecls
---                 NoMonomorphismRestriction
---                 DeriveDataTypeable
+    ghc-options:       -threaded -O2 -rtsopts -with-rtsopts=-N
 
 test-suite test
     type:              exitcode-stdio-1.0
@@ -194,8 +200,8 @@ test-suite test
                  , persistent-postgresql
                  , resourcet
                  , monad-logger
-                 , hspec
                  , transformers
+                 , hspec
                  , containers
                  , html-conduit
                  , time

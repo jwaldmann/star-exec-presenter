@@ -1,0 +1,39 @@
+$maybe solverInfo <- mSolverInfo
+  <h1>Solver-Info of "#{toSolverName solverInfo}"
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{toSolverName solverInfo}
+        <tr>
+          <td>Author:
+          <td>#{getAuthor solverInfo}
+        <tr>
+          <td>Description:
+          <td>#{getDescription solverInfo}
+        <tr>
+          <td>Url:
+          <td><a href="#{getUrl solverInfo}">#{getUrl solverInfo}</a>
+        <tr>
+          <td>isStandard:
+          <td>#{isStandard solverInfo}
+        <tr>
+          <td>isConditional:
+          <td>#{isConditional solverInfo}
+        <tr>
+          <td>isContextSensitive:
+          <td>#{isContextSensitive solverInfo}
+        <tr>
+          <td>isInnermost:
+          <td>#{isInnermost solverInfo}
+        <tr>
+          <td>isTheory:
+          <td>#{isTheory solverInfo}
+        <tr>
+          <td>isCertifying:
+          <td>#{isCertifying solverInfo}
+
+$nothing
+  <h1>Sorry, no solver with the id #{show _id} found!

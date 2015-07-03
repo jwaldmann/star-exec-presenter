@@ -1,0 +1,11 @@
+<h2>All Post Processprs listed in the database
+
+<div class="container-fluid">
+  <table class="table table-condensed">
+    <thead>
+      <tr>
+        <th>Name
+    <tbody>
+      $forall proc <- postProcs
+        <tr>
+          <td><a href=@{ShowPostProcInfoR $ StarExecPostProcID $ postProcInfoStarExecId proc}>#{postProcInfoName proc}</a>

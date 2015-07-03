@@ -1,0 +1,21 @@
+$maybe pair <- mPair
+  <h1>Overview of the job-pair #{_id}
+  view original pair-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{show _id}">#{show _id}</a>
+  $maybe jobInfo <- mJobInfo
+    <p>This job-pair is a result of the job "<a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>"<br/>
+      <a href=@{ShowManyJobResultsR NoQuery $ JobIds [toJobID jobInfo]}>View Job-Results</a>
+    $maybe solverInfo <- mSolverInfo
+      <p>The Solver was "<a href=@{ShowSolverInfoR $ toSolverID solverInfo}>#{toSolverName solverInfo}</a>"
+    $maybe benchInfo <- mBenchmarkInfo
+      <p>The Benchmark was "<a href=@{ShowBenchmarkInfoR $ toBenchmarkID benchInfo}>#{toBenchmarkName benchInfo}</a>"
+    <p>view original job pair data on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{_id}">#{_id}</a>
+  $if hasHtmlProof
+    <a href=@{DisplayProofR $ int2Text _id}>Show Html-Proof</a>
+  <h2>The data of the job-pair
+  <h3>Stdout:
+  <pre>#{getStdout pair}
+  <h3>Log:
+  <pre>#{getLog pair}
+$nothing
+  <h1>Sorry, no pair with the id #{int2Text _id} found!
+  (try re-loading this page after a while)

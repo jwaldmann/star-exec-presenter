@@ -1,8 +1,9 @@
 <h1>Overview of job-results
-<a href=@{Flexible_TableR (Query []) jids}>flexible query (experimental) 
+<a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental) 
 | view original jobs on star-exec:
-  $forall jid <- getids jids
-     <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{jid}">#{jid}</a>,
+  $forall jid <- getIds jids
+    $if isStarExecID jid
+      <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid}</a>,
 
 <h2>Statistics
 #{stat}
@@ -34,7 +35,7 @@
     <tr>
       <th>Jobs
       $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
-        <th colspan="#{i}"><a href=@{ShowJobInfoR $ jobInfoStarExecId jobInfo}>#{jobInfoName jobInfo}</a>
+        <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
     <tr>
       <th>Solver
       $forall (_, (sId, sName)) <- jobSolvers
@@ -44,7 +45,7 @@
       $forall (solvers, scores) <- zip groupedSolvers scores
         $forall (sId,_) <- solvers
           <th>
-            $maybe score <- IM.lookup sId scores
+            $maybe score <- M.lookup sId scores
               #{score}
             $nothing
               0
@@ -55,12 +56,12 @@
         $forall mResult <- results
           $maybe result <- mResult
             <td class="#{getClass result}">
-              $if jobResultInfoStatus result == JobResultComplete
-                <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
-                  #{toFixed 1 $ jobResultInfoCpuTime result} /
-                  #{toFixed 1 $ jobResultInfoWallclockTime result} s
-                  $if isComplexity
-                    $maybe score <- jobResultInfoScore result
+              $if isResultComplete result
+                <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
+                  #{toFixed 1 $ toCpuTime result} /
+                  #{toFixed 1 $ toWallclockTime result} s
+                  $if complexity
+                    $maybe score <- toScore result
                       &nbsp;(#{getScore result})
                     $nothing
                       &nbsp;(-)

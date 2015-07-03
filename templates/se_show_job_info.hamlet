@@ -1,0 +1,43 @@
+$maybe jobInfo <- mJobInfo
+  <h1>Job-Infos of "#{toJobName jobInfo}"
+  view original job-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{show _id}">#{show _id}</a>
+
+  <div class="container">
+    <table class="table" style="width: auto;">
+      <tbody>
+        <tr>
+          <td>Name:
+          <td>#{toJobName jobInfo}
+        <tr>
+          <td>Status:
+          <td>#{show $ toJobStatus jobInfo}
+        <tr>
+          <td>Date (Star-Exec):
+          <td>#{getStarExecDate jobInfo}
+        <tr>
+          <td>Pre-Processor:
+          <td>#{getPreProc jobInfo}
+        <tr>
+          <td>Post-Processor:
+          <td>#{getPostProc jobInfo}
+        <tr>
+          <td>IsComplexity:
+          <td>#{isComplexity_ jobInfo}
+        <tr>
+          <td>Start-Date:
+          <td>#{getStartDate jobInfo}
+        <tr>
+          <td>Finish-Date:
+          <td>
+            $maybe date <- getFinishDate jobInfo
+              #{date}
+            $nothing
+              The Job is not yet finished
+        <tr>
+          <td>Last Update from Star-Exec:
+          <td>#{getLastUpdate jobInfo}
+    <a href=@{ShowManyJobResultsR NoQuery (JobIds [jid])}>Show Job-Results</a>
+
+$nothing
+  <h1>Sorry, no job with the id #{show _id} found!
+  (try re-loading this page after a while)

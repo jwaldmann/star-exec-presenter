@@ -10,12 +10,18 @@ $newline never
 
         <title>#{pageTitle pc}
         <meta name="description" content="">
-        <meta name="author" content="#{extraCopyright $ appExtra $ settings master}">
+        <meta name="author" content="">
 
         <meta name="viewport" content="width=device-width,initial-scale=1">
 
         ^{pageHead pc}
-        
+
+        \<!--[if lt IE 9]>
+        \<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+        \<![endif]-->
+
+        <script>
+          document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
     <body>
         <div class="container-fluid">
             <header>
@@ -26,4 +32,3 @@ $newline never
                 <a href="http://www.imn.htwk-leipzig.de/~waldmann/">Johannes Waldmann</a> #
                 | <a href="https://portal.imn.htwk-leipzig.de/">F-IMN</a> #
                 | <a href="http://www.htwk-leipzig.de/">HTWK Leipzig</a>
-

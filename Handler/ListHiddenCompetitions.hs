@@ -1,8 +1,7 @@
 module Handler.ListHiddenCompetitions where
 
 import Import
-import StarExec.Persist
-import StarExec.Types
+import Presenter.PersistHelper
 
 getListHiddenCompetitionsR :: Handler Html
 getListHiddenCompetitionsR = do
