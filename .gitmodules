@@ -1,7 +1,3 @@
 [submodule "graphviz"]
 	path = graphviz
-<<<<<<< HEAD
 	url = https://github.com/jwaldmann/graphviz
-=======
-	url = git@github.com:jwaldmann/graphviz.git
->>>>>>> 4c9f147bee48279c48685191bb16002cc998d84c

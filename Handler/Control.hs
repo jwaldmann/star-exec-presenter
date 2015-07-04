@@ -38,19 +38,19 @@ alls bs = do R.All b <- bs ; return b
 hierarchies :: Monad m => m R.Benchmark_Source -> m Int
 hierarchies bs = do R.Hierarchy b <- bs ; return b
 
-getControlR :: Handler Html
-getControlR = do
+getControlR :: Year -> Handler Html
+getControlR year = do
   maid <- maybeAuthId
   (widget, enctype) <- generateFormPost inputForm
-  let comp = R.the_competition
+  let comp = R.the_competition year
   defaultLayout $(widgetFile "control")
 
-postControlR :: Handler Html
-postControlR = do
+postControlR :: Year -> Handler Html
+postControlR year = do
   maid <- maybeAuthId
   ((result, widget), enctype) <- runFormPost inputForm
 
-  let comp = R.the_competition
+  let comp = R.the_competition year
       public = case result of 
                   FormSuccess input-> isPublic input
                   _ -> False
@@ -98,10 +98,10 @@ select input comp = case selection input of
         comp { R.metacategories = map ( \ mc -> mc { R.categories = R.demonstration_categories mc } ) 
                               $ R.metacategories comp }
 
-startCat :: JobControl -> Name -> Handler (Maybe Competition)
-startCat input t = do
+startCat :: Year -> JobControl -> Name -> Handler (Maybe Competition)
+startCat year input t = do
     let cats = do 
-            mc <- R.metacategories $ select input R.the_competition
+            mc <- R.metacategories $ select input $ R.the_competition year
             c <- R.categories mc
             guard $ R.categoryName c == t
             return c
@@ -113,10 +113,10 @@ startCat input t = do
             return $ Just c
         _ -> return Nothing
 
-startMC :: JobControl -> Name -> Handler (Maybe Competition)
-startMC input t = do
+startMC :: Year -> JobControl -> Name -> Handler (Maybe Competition)
+startMC year input t = do
     let mcs = do 
-            mc <- R.metacategories $ select input R.the_competition
+            mc <- R.metacategories $ select input $ R.the_competition year
             guard $ R.metaCategoryName mc == t
             return mc
     case mcs of
@@ -127,9 +127,9 @@ startMC input t = do
             return $ Just c
         _ -> return Nothing
 
-startComp :: JobControl -> Text -> Handler (Maybe Competition)
-startComp input t = do
-    comp_with_jobs <- pushcomp input $ select input R.the_competition
+startComp :: Year -> JobControl -> Text -> Handler (Maybe Competition)
+startComp year input t = do
+    comp_with_jobs <- pushcomp input $ select input $ R.the_competition year
     let Competition name mcs = convertComp comp_with_jobs 
         m = params input t 
         c = Competition m mcs

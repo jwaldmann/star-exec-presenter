@@ -1,8 +1,8 @@
-<h1>Termination Competition 2014 
+<h1>Termination Competitions
 
 <p>The 
-  <a href="http://termination-portal.org/wiki/Termination_Competition_2014">
-     International Termination Competition 2014 
+  <a href="http://termination-portal.org/wiki/Termination_Competition_2015">
+     International Termination Competition 2015
   will be run on 
   <a href="http://www.starexec.org">
      Star-Exec.
@@ -10,7 +10,7 @@
 <p>We provide here these extra features:
   <ul>
     <li>
-      computation and display of results per category, and medalists per meta-category
+      computation and display of results per category
     <li>
       flexible 2-dimensional results tables (x-axis: solver, y-axis: benchmark) (with filters for rows and columns, sorters, etc.)
     <li>
@@ -19,9 +19,9 @@
 
 This site:
 <ul>
-  <li><a href=@{RegisteredR}>registered participants</a>
+  <li><a href=@{RegisteredR Y2015}>registered participants</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
-  <li><a href=@{ControlR}>administration</a> (restricted access)
+  <li><a href=@{ControlR Y2015}>administration</a> (restricted access)
 
 Meta-information for this site:
 <ul>

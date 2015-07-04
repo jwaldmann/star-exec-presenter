@@ -47,8 +47,8 @@
 /competitions/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
 
-/control ControlR GET POST
-/registered RegisteredR GET
+/control/#Year ControlR GET POST
+/registered/#Year RegisteredR GET
 
 /competitions ListCompetitionsR GET
 /test-runs LegacyListCompetitionsR GET

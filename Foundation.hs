@@ -116,7 +116,7 @@ instance Yesod App where
     isAuthorized RobotsR _ = return Authorized
 
     -- requires Authorization
-    isAuthorized ControlR _ = isAdmin
+    isAuthorized (ControlR _) _ = isAdmin
     isAuthorized ListHiddenCompetitionsR _ = isAdmin
     
     -- Default to Authorized for now.

@@ -19,7 +19,7 @@ module Presenter.Registration
        
 where
 
-import Presenter.Model ( Name )
+import Presenter.Model ( Name, Year (..) )
 
 import qualified Data.Text as T
 
@@ -115,7 +115,16 @@ mixed_rel_srs = Hierarchy 56805
 mixed_rel_trs :: Benchmark_Source
 mixed_rel_trs = Hierarchy 56846
 
-the_competition = experiment2015
+the_competition year = case year of
+  E -> experiment2015
+  Y2015 -> tc2015
+  Y2014 -> tc2014
+
+tc2015 :: Registration
+tc2015 = Competition  "Termination Competition 2014"
+   [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+     []
+   ]
 
 experiment2015 :: Registration
 experiment2015 = Competition "Experiments for 2015"
