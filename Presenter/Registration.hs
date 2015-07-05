@@ -6,6 +6,7 @@ module Presenter.Registration
 
 ( the_competition
 , full_categories
+, all_categories
 , demonstration_categories
 , real_participants
 
@@ -52,6 +53,10 @@ data MetaCategory a =
                   }
     deriving ( Generic )
 
+all_categories :: MetaCategory Catinfo -> [Category Catinfo]
+all_categories mc = 
+    filter ( \ c -> length (real_participants c) >= 1 ) $  categories mc
+    
 full_categories :: MetaCategory Catinfo -> [Category Catinfo]
 full_categories mc = 
     filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc

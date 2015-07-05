@@ -27,6 +27,9 @@ import qualified Data.IntMap.Strict as IM
 
 import qualified Data.Map.Strict as M
 
+import Control.Monad.Logger
+import qualified Data.Text as T
+
 type PostProcInfoMap = IM.IntMap PostProcInfo
 type JobInfoMap = M.Map JobID Job
 type JobResultsMap = M.Map JobID [JobResult]
@@ -307,6 +310,8 @@ getJobResults' con = mapM fetchResults
 
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
+  logWarnN $ T.pack $ "getCompetitionResults" <> show comp
+  
   let compMeta = getMetaData comp
       compName = getCompetitionName comp
       metaCats = getMetaCategories comp
@@ -317,7 +322,10 @@ getCompetitionResults comp = do
   persistPostProcs <- mapM getPersistPostProcInfo postProcIds
   let jobsComplete = all maybeJobComplete persistJobInfos
       hasAllPostProcs = all isJust persistPostProcs
-  -- liftIO $ putStrLn $ "jobs complete: " ++ (show jobsComplete)
+
+  logInfoN $ T.pack $ "jobs complete: " ++ (show jobsComplete)
+  logInfoN $ T.pack $ "hasAllPostProcs: " ++ (show hasAllPostProcs)
+
   con <- getConnection
   postProcs <- if hasAllPostProcs
                 then return persistPostProcs

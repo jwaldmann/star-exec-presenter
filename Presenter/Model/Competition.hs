@@ -21,9 +21,8 @@ instance PathPiece Year where
     [(y, "")] -> return y
     _ -> Nothing
 
-{-
-  solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
--}
+
+-- | solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 data Category = Category
   { getCategoryName :: Name
   , getCategoryScoring :: Scoring
@@ -31,9 +30,7 @@ data Category = Category
   , getJobIds :: [JobID]
   } deriving (Show, Read, Eq)
 
-{-
-  solver by rank in the categories
--}
+-- |  solver by rank in the categories
 data MetaCategory = MetaCategory
   { getMetaCategoryName :: Name
   , getCategories :: [Category]

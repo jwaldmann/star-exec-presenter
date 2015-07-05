@@ -15,9 +15,19 @@ import Control.Exception.Base
 import Control.Monad ( when )
 import Control.Monad.Logger
 
+-- | slightly shorter than the display refresh rate
 defaultWorkerDelay :: Int
-defaultWorkerDelay = 10 * 10^6
+defaultWorkerDelay = 9 * 10^6
 
+{- caching mechanism:
+
+run-time (in-memory) cache is a TVar
+that holds a map from competition ids to TVars with results.
+
+-}
+
+-- | if competition is in run-time cache, then read its contents.
+-- else start worker and return empty contents.
 lookupCache :: Competition -> Handler (Maybe CompetitionResults)
 lookupCache comp = do
   app <- getYesod
@@ -32,6 +42,8 @@ lookupCache comp = do
   when start $ startWorker comp
   return mCompResults
 
+-- | starting a worker for a competition that is not yet in the run-time cache.
+-- 
 startWorker :: Competition -> Handler ()
 startWorker comp = do
   app <- getYesod
@@ -55,7 +67,9 @@ startWorker comp = do
           logWarnN $  T.pack $ "restarting worker:"
           forkHandler errHandler runWorker
         runWorker = do
+          logWarnN $  T.pack $ "runWorker: getCompetitionResults."
           compResults <- getCompetitionResults comp
+          logWarnN $  T.pack $ "runWorker: got CompetitionResults."
           lift $ atomically $ writeTVar sink $ Just compResults
           lift $ threadDelay defaultWorkerDelay
           when (not $ competitionComplete compResults) runWorker

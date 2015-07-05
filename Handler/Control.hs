@@ -15,7 +15,11 @@ import Control.Monad ( guard )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
-        <*> areq (radioFieldList [("Competition (at least 2 participants)"::T.Text,SelectionCompetition),("Demonstration (1 participant)",SelectionDemonstration)]) "categories" (Just SelectionCompetition)
+        <*> areq (radioFieldList
+                  [("Competition (at least 2 participants)"::T.Text,SelectionCompetition)
+                  ,("Demonstration (exactly 1 participant)",SelectionDemonstration)
+                  ,("Everything (>= 1 particEipant)",SelectionAll)
+                  ]) "categories" (Just SelectionCompetition)
         <*> areq (radioFieldList
                   [ ("Termination.q"::T.Text,36291)
                   -- , ("TerminationTest.q",30597)
@@ -96,6 +100,9 @@ checkPrefix s con action next =
 
 select :: JobControl -> R.Competition R.Catinfo -> R.Competition R.Catinfo
 select input comp = case selection input of
+    SelectionAll -> 
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.all_categories mc } ) 
+                              $ R.metacategories comp }
     SelectionCompetition -> 
         comp { R.metacategories = map ( \ mc -> mc { R.categories = R.full_categories mc } ) 
                               $ R.metacategories comp }
