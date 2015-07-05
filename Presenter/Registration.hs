@@ -130,7 +130,7 @@ the_competition year = case year of
   Y2014 -> tc2014
 
 tc2015 :: Registration
-tc2015 = Competition  "Termination Competition 2014"
+tc2015 = Competition  "Termination Competition 2015"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ standard "TRS Standard"  trss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))

@@ -110,7 +110,8 @@ getConnection = do
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do
   let req' =  req { cookieJar = Just cookies }
-  logWarnN  $ T.pack  $ "sendRequest: " <> show req
+  logInfoN  $ T.pack  $ "sendRequest: " <> show req
   resp <- httpLbs req' man
-  logInfoN $ T.pack $ "response status: " <> show (responseStatus resp)
+  logInfoN  $ T.pack  $ "done sendRequest: " <> show req
+                       <> "response status: " <> show (responseStatus resp)
   return resp

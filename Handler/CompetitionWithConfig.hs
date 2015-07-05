@@ -6,6 +6,9 @@ import Presenter.Utils.WidgetMetaRefresh
 import Presenter.Prelude
 import Data.Time.Clock
 
+import Control.Monad.Logger
+import qualified Data.Text as T
+
 minute :: Seconds
 minute = 60
 
@@ -34,6 +37,8 @@ getCompletionClass False = "running"
 getCompetitionWithConfigR :: Competition -> Handler Html
 getCompetitionWithConfigR comp = do
 
+  logWarnN $ T.pack $ "getCompetitionWithConfigR" <> show comp
+  
   mCompResults <- lookupCache comp
 
   let need_refresh = case mCompResults of

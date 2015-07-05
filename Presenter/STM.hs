@@ -13,6 +13,7 @@ import Control.Concurrent.STM
 import Control.Concurrent ( threadDelay )
 import Control.Exception.Base
 import Control.Monad ( when )
+import Control.Monad.Logger
 
 defaultWorkerDelay :: Int
 defaultWorkerDelay = 10 * 10^6
@@ -46,12 +47,12 @@ startWorker comp = do
   case mSink of
     Nothing -> return ()
     Just sink -> do
-      lift $ putStrLn $ "start worker for " ++ ( T.unpack $ getCompetitionName comp )
+      logInfoN $ T.pack $ "start worker for " ++ ( T.unpack $ getCompetitionName comp )
       forkHandler errHandler runWorker
       where
         errHandler e = do
           exceptionHandler e
-          lift $ putStrLn "restarting worker:"
+          logWarnN $  T.pack $ "restarting worker:"
           forkHandler errHandler runWorker
         runWorker = do
           compResults <- getCompetitionResults comp
@@ -60,6 +61,5 @@ startWorker comp = do
           when (not $ competitionComplete compResults) runWorker
 
 exceptionHandler :: SomeException -> Handler ()
-exceptionHandler e = lift $ do
-  putStrLn $ "ignoring exception:"
-  putStrLn $ show e
+exceptionHandler e = do
+  logWarnN $ T.pack $ "ignoring exception:" <> show e
