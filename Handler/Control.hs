@@ -16,15 +16,20 @@ import Control.Monad ( guard )
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
         <*> areq (radioFieldList [("Competition (at least 2 participants)"::T.Text,SelectionCompetition),("Demonstration (1 participant)",SelectionDemonstration)]) "categories" (Just SelectionCompetition)
-        <*> areq (radioFieldList [("Termination.q"::T.Text,478),("TerminationTest.q",30597),("all.q",1),("all2.q",4)]) "queue" (Just 478)
-        <*> areq (radioFieldList [("autotest":: T.Text, 52915)]) "space" (Just 52915)
+        <*> areq (radioFieldList
+                  [ ("Termination.q"::T.Text,36291)
+                  -- , ("TerminationTest.q",30597)
+                  , ("all.q",1)
+                  , ("all2.q",4)
+                  ]) "queue" (Just 36291)
+        <*> areq (radioFieldList [("autotest":: T.Text, 99354)]) "space" (Just 99354)
         <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)]) 
-                 "family_lower_bound (selection parameter a)" (Just 10)
+                 "family_lower_bound (selection parameter a)" (Just 1)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)]) 
-                 "family_upper_bound (selection parameter b)" (Just 100)
+                 "family_upper_bound (selection parameter b)" (Just 1)
         <*> areq (radioFieldList [("0.1", 0.1), ("0.3"::T.Text,0.3), ("0.5", 0.5), ("1.0", 1.0)]) 
-                 "family_factor (selection parameter c)" (Just 0.5)
+                 "family_factor (selection parameter c)" (Just 0.1)
         <*> formToAForm ( do 
             e <- askParams 
             return ( FormSuccess $ maybe M.empty id e, [] ) )
@@ -57,7 +62,7 @@ postControlR year = do
   mc <- case result of
           FormSuccess input -> do
             Just [con] <- return $ M.lookup "control" $ env input
-            startjobs input con
+            startjobs year input con
           _ -> return Nothing
   mKey <- case mc of
             Nothing -> return Nothing
@@ -77,11 +82,11 @@ postControlR year = do
     |]
     $(widgetFile "control")
 
-startjobs :: JobControl -> Text -> Handler (Maybe Competition)
-startjobs input con = 
-      checkPrefix "cat:"  con (startCat input)
-    $ checkPrefix "mc:" con (startMC input)
-    $ checkPrefix "comp:" con (startComp input)
+startjobs :: Year -> JobControl -> Text -> Handler (Maybe Competition)
+startjobs year input con = 
+      checkPrefix "cat:"  con (startCat year input)
+    $ checkPrefix "mc:" con (startMC year input)
+    $ checkPrefix "comp:" con (startComp year input)
     $ return Nothing
 
 checkPrefix :: T.Text -> T.Text -> ( T.Text -> a ) -> a ->  a

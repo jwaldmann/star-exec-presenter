@@ -2,7 +2,7 @@
 
 beware: depending on parameter settings below, you can burn a lot of cpu cycles on star-exec.
 
-<form method=post action=@{ControlR} enctype=#{enctype}>
+<form method=post action=@{ControlR year} enctype=#{enctype}>
 
   <p><a href=@{AuthR LogoutR}>Logout</a>
 
