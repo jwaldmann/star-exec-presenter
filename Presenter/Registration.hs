@@ -134,18 +134,20 @@ tc2015 = Competition  "Termination Competition 2014"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ standard "TRS Standard"  trss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" ( Just ( 1225, 2514))
+           , Participant "NaTT" ( Just ( 3430, 22689 ))
            , Participant "AProVE" ( Just ( 3342, 22449 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            , Participant "matchbox" ( Just ( 2536, 17911 ))
+           , Participant "AutoNon"  Nothing -- ( Just ( 3354, 0 ) )
            ]
        , standard "SRS Standard"  srss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "NaTT" ( Just ( 1225, 2514))
+           , Participant "NaTT" ( Just ( 3430, 22691 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            , Participant "matchbox" ( Just ( 2536, 17916 ))
+           , Participant "AutoNon"  Nothing
            ]
        , standard "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
@@ -153,11 +155,13 @@ tc2015 = Competition  "Termination Competition 2014"
            ]
        , standard "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 3342, 2656  ) )
+           , Participant "AProVE" ( Just ( 3342, 22449  ) )
+           , Participant "NaTT" ( Just ( 3430, 22690 ))
            ]
        , standard "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
-           , Participant "AProVE" ( Just ( 3342, 2656  ) )
+           , Participant "AProVE" ( Just ( 3342, 22449  ) )
+           , Participant "NaTT" ( Just ( 3430, 22690 ))
            ]
       , certified "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
@@ -203,13 +207,11 @@ tc2015 = Competition  "Termination Competition 2014"
       , standard "Higher-Order rewriting (union beta)"  
            [ Hierarchy 56698 ]
            [ Participant "Wanda" ( Just (1542, 2390))
-           -- , Participant "THOR" ( Just (1800, 2862))
            ]
      , standard "Integer Transition Systems"  [ Hierarchy 56706 ]
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 3342, 22446 ))
            , Participant "Ctrl" ( Just (1541, 2387))
-           -- , Participant "CppInv" ( Just (1803, 2870))
            ]
      , standard "Integer TRS"  [ Hierarchy 56704  ]
            [ Participant "AProVE" ( Just ( 3342, 22447 ) )
@@ -248,16 +250,14 @@ tc2015 = Competition  "Termination Competition 2014"
      ]
    , MetaCategory "Termination of Programming Languages"
      [ standard "C"  [ Hierarchy 56607 ]
-           [ -- Participant "AProVE" ( Just ( 3342,  2655 ) )
-             -- Participant "T2" ( Just ( 1739, 2751 ))
-             Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
-           -- , Participant "lsi.upc tool" Nothing
+           [ -- Participant "AProVE" ( Just ( 3342,  2655 ) ) -- ?
+             Participant "T2" ( Just ( 1739, 2751 )) -- ?
+           , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
            ]
-     , standard "C Integer Programs" [ ]
+     , standard "C Integer Programs" [ ] -- TODO: need benchmarks
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
            ]
-
      , standard "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 3342, 22450  ) )
            , Participant "Ultimate Buchi Automizer" (Just (3458,22965) )

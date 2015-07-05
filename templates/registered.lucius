@@ -1,8 +1,12 @@
 @colorYes: #80FFB0;
 @colorMaybe: #FFFF99;
+@colorOldconf: #B5CCA9;
 
 span.conf {
     background-color: #{colorYes};
+}
+span.oldconf {
+    background-color: #{colorOldconf};
 }
 
 span.noconf {
