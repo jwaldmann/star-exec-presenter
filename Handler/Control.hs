@@ -152,6 +152,7 @@ params conf t = CompetitionMeta
   { getMetaName = T.append t $ case selection conf of
         SelectionCompetition -> T.empty
         SelectionDemonstration -> " (Demonstration)"
+        SelectionAll -> " (Competition + Demonstration)"
   , getMetaDescription =
       T.unwords [ "wc", "=", T.pack $ show $ wallclock conf
                 , "a", "=", T.pack $ show $ family_lower_bound conf
