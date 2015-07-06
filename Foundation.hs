@@ -48,7 +48,8 @@ data App = App
     , sessionData :: TVar (Maybe SessionData)
     , exclusiveSessionData :: MVar (Maybe SessionData)
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
-    , dbSem :: SSem 
+    , dbSem :: SSem
+    , conSem :: SSem
     }
 
 instance HasHttpManager App where

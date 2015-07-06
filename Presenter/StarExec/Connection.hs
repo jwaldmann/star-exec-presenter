@@ -1,8 +1,8 @@
 module Presenter.StarExec.Connection
-    ( getConnection
-    , sendRequest
+    ( sendRequest
     , index
     , getLoginCredentials
+    , getConnection -- this is used (only) by Presenter.Control.Job (in pushJobXml)
     ) where
 
 import Import
@@ -19,6 +19,8 @@ import Presenter.Prelude (diffTime)
 import Data.Time.Clock
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
+import Control.Concurrent.SSem
+import Control.Monad.Catch (bracket_)
 
 import Control.Monad.Logger
 
@@ -82,11 +84,24 @@ index (sec, man, cookies) = do
   resp <- sendRequest (req, man, cookies)
   return (sec, man, responseCookieJar resp)
 
+runCon_exclusive :: Handler b -> Handler b
+runCon_exclusive action =
+  bracket_ ( do
+               app <- getYesod
+               lift $ Control.Concurrent.SSem.wait   $ conSem app
+               logWarnN $ T.pack $ "connection semaphore: wait ...."
+           )
+           ( do
+                app <- getYesod
+                lift $ Control.Concurrent.SSem.signal $ conSem app
+                logWarnN $ T.pack $ "... connection semaphore: signal"
+           )
+           action
 
 -- | FIXME: this handles connection information in the cookie jar,
--- so it must be single-threaded (access to sessionData must be locked)
+-- so it must be single-threaded (access to sessionData must be locked)?
 getConnection :: Handler StarExecConnection
-getConnection = do
+getConnection = runCon_exclusive $ do
   logWarnN  $ T.pack  $ "getConnection"
   mSession <- getSessionData'
   logWarnN  $ T.pack  $ "getConnection.mSession: " ++ show mSession

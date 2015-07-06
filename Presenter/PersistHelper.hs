@@ -5,10 +5,13 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as TL
+import qualified Data.Text as T
 import Codec.Compression.GZip
 import Data.Time.Clock
 import qualified Data.List as L
 import Control.Concurrent.SSem
+import Control.Monad.Catch (bracket_)
+import Control.Monad.Logger
 
 -- ###### persist getter ######
 
@@ -184,13 +187,17 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
 
--- FIXME: this should use some form of bracketing
 runDB_exclusive :: YesodDB App b -> Handler b
-runDB_exclusive query = do
-    app <- getYesod
-    lift $ Control.Concurrent.SSem.wait   $ dbSem app
-    lift $ putStrLn "Control.Concurrent.SSem.wait ...."
-    out <- runDB query 
-    lift $ Control.Concurrent.SSem.signal $ dbSem app
-    lift $ putStrLn "... Control.Concurrent.SSem.signal"
-    return out
+runDB_exclusive query =
+  bracket_ ( do
+               app <- getYesod
+               lift $ Control.Concurrent.SSem.wait   $ dbSem app
+               logWarnN $ T.pack $ "database semaphore: wait ...."
+           )
+           ( do
+                app <- getYesod
+                lift $ Control.Concurrent.SSem.signal $ dbSem app
+                logWarnN $ T.pack $ "... database semaphore: signal"
+           )
+           $ runDB query
+

@@ -112,9 +112,11 @@ makeFoundation conf = do
     -- Session for Connections to starexec.org
     session <- atomically $ newTVar Nothing
     exclusiveSession <- newMVar Nothing
+    -- Connection semaphore
+    conS <- Control.Concurrent.SSem.new 1
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger session exclusiveSession crCache dbS
+        foundation = App conf s p manager dbconf logger session exclusiveSession crCache dbS conS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT
