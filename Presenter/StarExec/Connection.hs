@@ -18,20 +18,10 @@ import Presenter.Auth ( getLoginCredentials )
 import Presenter.Prelude (diffTime)
 import Data.Time.Clock
 import Control.Concurrent.STM
+import Control.Concurrent.MVar
 
 import Control.Monad.Logger
 
-getSessionData' :: Handler (Maybe SessionData)
-getSessionData' = do
-  app <- getYesod
-  lift $ atomically $ readTVar $ sessionData app
-
-writeSessionData' :: CookieJar -> UTCTime -> Handler ()
-writeSessionData' cj d = do
-  app <- getYesod
-  let session = SessionData cj d
-      appSession = sessionData app
-  lift $ atomically $ writeTVar appSession $ Just session
 
 user :: Login -> Text
 user (Login u _) = u
@@ -92,30 +82,63 @@ index (sec, man, cookies) = do
   resp <- sendRequest (req, man, cookies)
   return (sec, man, responseCookieJar resp)
 
+
+-- | FIXME: this handles connection information in the cookie jar,
+-- so it must be single-threaded (access to sessionData must be locked)
 getConnection :: Handler StarExecConnection
 getConnection = do
-  mSession <- getSessionData'
+  logWarnN  $ T.pack  $ "getConnection"
+  mSession <- getExclusiveSessionData'
+  logWarnN  $ T.pack  $ "getConnection.mSession: " ++ show mSession
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
-  man <- withManager return
+  app <- getYesod ; let man = httpManager app
   con@(_, _, cookies) <- case mSession of
-    Nothing -> do
-      con' <- index (sec, man, createCookieJar [])
-      creds <- getLoginCredentials
-      con'' <- login con' creds
-      return con''
-    Just session -> do
-      let date' = date session
-          since = diffTime currentTime date'
-          cookies = cookieData session
-      if since < 3300.0
-        then index (sec, man, cookies)
-        else do
+      Nothing -> do
+        con' <- index (sec, man, createCookieJar [])
+        creds <- getLoginCredentials
+        con'' <- login con' creds
+        return con''
+      Just session -> do
+        let date' = date session
+            since = diffTime currentTime date'
+            cookies = cookieData session
+        if since < 3300.0
+          then index (sec, man, cookies)
+          else do
           con <- index (sec, man, createCookieJar [])
           creds <- getLoginCredentials
           login con creds
-  writeSessionData' cookies currentTime
+  logWarnN  $ T.pack  $ "getConnection - before writeExclusive"
+  writeExclusiveSessionData' cookies currentTime
+  logWarnN  $ T.pack  $ "getConnection - after  writeExclusive"
   return con
+
+getSessionData' :: Handler (Maybe SessionData)
+getSessionData' = do
+  app <- getYesod
+  lift $ atomically $ readTVar $ sessionData app
+
+writeSessionData' :: CookieJar -> UTCTime -> Handler ()
+writeSessionData' cj d = do
+  app <- getYesod
+  let session = SessionData cj d
+      appSession = sessionData app
+  lift $ atomically $ writeTVar appSession $ Just session
+
+-- | WARNING: this may block
+getExclusiveSessionData' :: Handler (Maybe SessionData)
+getExclusiveSessionData' = do
+  app <- getYesod
+  liftIO $ takeMVar $ exclusiveSessionData app
+
+-- | WARNING: this may block
+writeExclusiveSessionData' :: CookieJar -> UTCTime -> Handler ()
+writeExclusiveSessionData' cj d = do
+  app <- getYesod
+  let session = SessionData cj d
+      appSession = exclusiveSessionData app
+  liftIO $ putMVar appSession $ Just session
 
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do

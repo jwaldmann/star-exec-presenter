@@ -61,6 +61,7 @@ import Handler.LegacyListHiddenCompetitions
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
+import Control.Concurrent.MVar
 import Control.Concurrent.SSem
 
 -- This line actually creates our YesodDispatch instance. It is the second half
@@ -110,9 +111,10 @@ makeFoundation conf = do
     dbS <- Control.Concurrent.SSem.new 1
     -- Session for Connections to starexec.org
     session <- atomically $ newTVar Nothing
+    exclusiveSession <- newMVar Nothing
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger session crCache dbS
+        foundation = App conf s p manager dbconf logger session exclusiveSession crCache dbS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

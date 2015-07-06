@@ -32,6 +32,7 @@ import Data.Text (Text)
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Control.Concurrent.SSem
+import Control.Concurrent.MVar
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -45,6 +46,7 @@ data App = App
     , persistConfig :: Settings.PersistConf
     , appLogger :: Logger
     , sessionData :: TVar (Maybe SessionData)
+    , exclusiveSessionData :: MVar (Maybe SessionData)
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
     , dbSem :: SSem 
     }
