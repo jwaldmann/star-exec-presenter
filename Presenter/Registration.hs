@@ -260,7 +260,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "T2" ( Just ( 1739, 2751 )) -- ?
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
            ]
-     , standard "C Integer Programs" [ ] -- TODO: need benchmarks
+     , standard "C Integer Programs" [ Hierarchy 100138 ] -- for testing
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))

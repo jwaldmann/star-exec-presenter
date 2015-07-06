@@ -88,7 +88,7 @@ index (sec, man, cookies) = do
 getConnection :: Handler StarExecConnection
 getConnection = do
   logWarnN  $ T.pack  $ "getConnection"
-  mSession <- getExclusiveSessionData'
+  mSession <- getSessionData'
   logWarnN  $ T.pack  $ "getConnection.mSession: " ++ show mSession
   currentTime <- liftIO getCurrentTime
   sec <- parseUrl starExecUrl
@@ -109,9 +109,9 @@ getConnection = do
           con <- index (sec, man, createCookieJar [])
           creds <- getLoginCredentials
           login con creds
-  logWarnN  $ T.pack  $ "getConnection - before writeExclusive"
-  writeExclusiveSessionData' cookies currentTime
-  logWarnN  $ T.pack  $ "getConnection - after  writeExclusive"
+  logWarnN  $ T.pack  $ "getConnection - before write"
+  writeSessionData' cookies currentTime
+  logWarnN  $ T.pack  $ "getConnection - after  write"
   return con
 
 getSessionData' :: Handler (Maybe SessionData)
