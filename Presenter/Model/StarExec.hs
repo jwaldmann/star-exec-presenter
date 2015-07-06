@@ -1,3 +1,5 @@
+{-# language StandaloneDeriving #-}
+
 module Presenter.Model.StarExec where
 
 import Presenter.Model.Types
@@ -89,11 +91,17 @@ data StarExecJobPair = SEJobPair
 
 
 data QueryStatus k = Pending (Key k) | Latest
---  deriving (Show, Eq)
+
+instance Show (QueryStatus k) where
+  show qs = case qs of
+    Pending _ -> "Pending _"
+    Latest -> "Latest"
+
 data QueryResult k a = QueryResult
   { queryStatus :: QueryStatus k
   , queryResult :: a
   }
+  deriving (Show)
 
 data SEQuery =
   GetJobInfo Int

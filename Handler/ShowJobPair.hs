@@ -6,6 +6,9 @@ import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.PersistHelper
 
+import Control.Monad.Logger
+import qualified Data.Text as T
+
 int2Text :: Int -> Text
 int2Text = fromString . show
 
@@ -17,8 +20,11 @@ getLog (StarExecPair p) = decompressText $ jobPairInfoLog p
 
 getShowJobPairR :: JobPairID -> Handler Html
 getShowJobPairR pid@(StarExecPairID _id) = do
-  (QueryResult qStatus mPair) <- queryJobPair pid
+  logWarnN $ T.pack $ "getShowJobPairR.pid = " ++ show pid
+  qr @ (QueryResult qStatus mPair) <- queryJobPair pid
+  logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
   mJobResult <- getPersistJobResult pid
+  logWarnN $ T.pack $ "getShowJobPairR.mJobResult =" ++ show mJobResult
   (mj, mb, ms) <- case mJobResult of
                     Just (StarExecResult jr) -> do
                       qmj <- queryJob $ StarExecJobID $ jobResultInfoJobId jr

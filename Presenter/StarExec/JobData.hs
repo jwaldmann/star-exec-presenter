@@ -13,6 +13,9 @@ import Presenter.PersistHelper
 import Presenter.Prelude
 import Data.Time.Clock
 
+import Control.Monad.Logger
+import qualified Data.Text as T
+
 updateThreshold :: Seconds
 updateThreshold = 300
 
@@ -79,13 +82,16 @@ queryBenchmarkInfo _benchmarkId = do
 
 queryJobPair :: JobPairID -> Handler (QueryResult QueryInfo (Maybe Pair))
 queryJobPair _pairId@(StarExecPairID pid) = do
+  logWarnN $ T.pack $ "queryJobPairR._pairId = " ++ show _pairId
   mPersistPairInfo <- getPersistJobPair _pairId
+  logWarnN $ T.pack $ "queryJobPairR.mPersistPairInfo = " ++ show mPersistPairInfo
   case mPersistPairInfo of
     Just (StarExecPair persistPairInfo) -> do
       if jobPairInfoResultStatus persistPairInfo == JobResultComplete
         then return $ QueryResult Latest mPersistPairInfo
         else runQueryJobPair pid >>= wrap (fmap StarExecPair)
     _ -> runQueryJobPair pid >>= wrap (fmap StarExecPair)
+    
 queryJobPair _pairId = do
   mPersistPairInfo <- getPersistJobPair _pairId
   return $ QueryResult Latest mPersistPairInfo

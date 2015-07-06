@@ -17,6 +17,9 @@ import Presenter.StarExec.Connection
 import Presenter.StarExec.Commands
 import Data.Time.Clock
 
+import Control.Monad.Logger
+import qualified Data.Text as T
+
 {-
   FIXME: possible bug, that QueryInfo won't be deleted from DB after an exception or after a query is complete
 -}
@@ -68,12 +71,17 @@ runQueryBase q handler = do
 --  (Int -> SEQuery) -> (Int -> Unique val) -> (Int -> Handler ()) -> Int -> Handler (QueryResult QueryInfo (Maybe a))
 runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
   let q = queryConstructor _id
+  logWarnN $ T.pack $ "runQueryInfo._id = " ++ show _id
   mPersistInfo <- getEntity $ uniqueInfoConstructor _id
-  runQueryBase q $ \mQuery ->
+  logWarnN $ T.pack $ "runQueryInfo.mPersistInfo = " ++ show mPersistInfo
+  runQueryBase q $ \mQuery -> do
+    logWarnN $ T.pack $ "runQueryInfo.mQuery = " ++ show mQuery
     case mQuery of
-      Just eq -> return $ pendingQuery (entityKey eq) mPersistInfo
+      Just eq -> do
+        return $ pendingQuery (entityKey eq) mPersistInfo
       Nothing -> do
         mKey <- insertQuery q
+        logWarnN $ T.pack $ "runQueryInfo.mKey = " ++ show mKey
         case mKey of
           Just queryKey -> do
             runConcurrent (queryExceptionHandler q) $ do
@@ -83,11 +91,13 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
             return $ pendingQuery queryKey mPersistInfo
           Nothing -> do
             mQuery' <- getQuery q
+            logWarnN $ T.pack $ "runQueryInfo.mQuery' = " ++ show mQuery'
             case mQuery' of
               Just eq -> return $ pendingQuery (entityKey eq) mPersistInfo
               -- assuming that the concurrent query is completed
               Nothing -> do
                 mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
+                logWarnN $ T.pack $ "runQueryInfo.mPersistInfo' = " ++ show mPersistInfo'
                 return $ QueryResult Latest mPersistInfo'
 
 runQueryJob :: Int -> Handler (QueryResult QueryInfo (Maybe JobInfo, [JobResultInfo]))
