@@ -255,13 +255,15 @@ tc2015 = Competition  "Termination Competition 2015"
      ]
    , MetaCategory "Termination of Programming Languages"
      [ standard "C"  [ Hierarchy 56607 ]
-           [ -- Participant "AProVE" ( Just ( 3342,  2655 ) ) -- ?
-             Participant "T2" ( Just ( 1739, 2751 )) -- ?
+           [ Participant "AProVE" ( Just ( 3342, 22448 ) ) -- ?
+           , Participant "T2" ( Just ( 1739, 2751 )) -- ?
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
            ]
      , standard "C Integer Programs" [ ] -- TODO: need benchmarks
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
+           , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
+           , Participant "HipTNT+" Nothing -- (Just (3461, 0))
            ]
      , standard "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 3342, 22450  ) )
