@@ -58,21 +58,31 @@ checkLogin (sec, man, cookies) = do
                 , redirectCount = 0
                 , checkStatus = (\_ _ _ -> Nothing)
                 }
+  logWarnN $ T.pack $ "checkLogin ..."
   resp <- sendRequest (req, man, cookies)
-  return $ isLoggedIn $ getLocation resp
+  let answer = isLoggedIn $ getLocation resp
+  logWarnN $ T.pack $ "checkLogin: " ++ show answer
+  return answer
 
 login :: StarExecConnection -> Login -> Handler StarExecConnection
 login con@(sec, man, cookies) creds = do
-  _ <- checkLogin con
-  let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
+  logWarnN $ T.pack $ "login ..."
+  li <- checkLogin con
+  if li
+    then do
+      logWarnN $ T.pack $ "we are alread logged in"
+      return con
+    else do
+      logWarnN $ T.pack $ "we are not logged in"
+      let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds) 
                            , ("cookieexists", "false")
                            ] 
               $ sec { method = "POST"
                     , path = loginPath
                     }
-  resp <- sendRequest (req, man, cookies)
-  return (sec, man, responseCookieJar resp)
+      resp <- sendRequest (req, man, cookies)
+      return (sec, man, responseCookieJar resp)
 
 index :: StarExecConnection -> Handler StarExecConnection
 index (sec, man, cookies) = do
@@ -110,8 +120,8 @@ getConnection = do
 sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
 sendRequest (req, man, cookies) = do
   let req' =  req { cookieJar = Just cookies }
-  logInfoN  $ T.pack  $ "sendRequest: " <> show req
+  logWarnN  $ T.pack  $ "sendRequest: " <> show req
   resp <- httpLbs req' man
-  logInfoN  $ T.pack  $ "done sendRequest: " <> show req
+  logWarnN  $ T.pack  $ "done sendRequest: " <> show req
                        <> "response status: " <> show (responseStatus resp)
   return resp
