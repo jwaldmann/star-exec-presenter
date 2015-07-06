@@ -35,18 +35,83 @@ because of
 ```
 in config/routes
 
-it gets handled (file Handler/ShowJobPair.hs) this function
+it gets handled im module `Handler.ShowJobPair` by
 ```
 getShowJobPairR :: JobPairID -> Handler Html
-
-```
-
-We first check (I don't know why there are two checks that look independent)
-```
+getShowJobPairR pid@(StarExecPairID _id) = do
+  logWarnN $ T.pack $ "getShowJobPairR.pid = " ++ show pid
   qr @ (QueryResult qStatus mPair) <- queryJobPair pid
+  logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
   mJobResult <- getPersistJobResult pid
+  logWarnN $ T.pack $ "getShowJobPairR.mJobResult =" ++ show mJobResult
+  (mj, mb, ms) <- case mJobResult of
+                    Just (StarExecResult jr) -> do
+```
+module `Presenter.StarExec.JobData' :
 
 ```
+queryJobPair :: JobPairID -> Handler (QueryResult QueryInfo (Maybe Pair))
+queryJobPair _pairId@(StarExecPairID pid) = do
+  logWarnN $ T.pack $ "queryJobPairR._pairId = " ++ show _pairId
+  mPersistPairInfo <- getPersistJobPair _pairId
+  logWarnN $ T.pack $ "queryJobPairR.mPersistPairInfo = " ++ show mPersistPairInfo
+  case mPersistPairInfo of
+    Just (StarExecPair persistPairInfo) -> do
+      if jobPairInfoResultStatus persistPairInfo == JobResultComplete
+        then return $ QueryResult Latest mPersistPairInfo
+        else runQueryJobPair pid >>= wrap (fmap StarExecPair)
+    _ -> runQueryJobPair pid >>= wrap (fmap StarExecPair)
+```
+module `Presenter.StarExec.Concurrent`:
+```
+runQueryJobPair :: Int -> Handler (QueryResult QueryInfo (Maybe JobPairInfo))
+runQueryJobPair = runQueryInfo GetJobPair UniqueJobPairInfo queryStarExec
+  where queryStarExec _pairId = do
+          con <- getConnection
+          mJobPair <- getJobPairInfo con _pairId
+          case mJobPair of
+            Nothing -> return ()
+            Just jp -> do
+              _ <- runDB $ do
+                deleteBy $ UniqueJobPairInfo _pairId
+                insertUnique jp
+              return ()
+```
+same module
+```
+runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
+  let q = queryConstructor _id
+  logWarnN $ T.pack $ "runQueryInfo._id = " ++ show _id
+  mPersistInfo <- getEntity $ uniqueInfoConstructor _id
+  logWarnN $ T.pack $ "runQueryInfo.mPersistInfo = " ++ show mPersistInfo
+  runQueryBase q $ \mQuery -> do
+    logWarnN $ T.pack $ "runQueryInfo.mQuery = " ++ show mQuery
+    case mQuery of
+      Just eq -> do
+        return $ pendingQuery (entityKey eq) mPersistInfo
+      Nothing -> do
+        mKey <- insertQuery q
+        logWarnN $ T.pack $ "runQueryInfo.mKey = " ++ show mKey
+        case mKey of
+          Just queryKey -> do
+            runConcurrent (queryExceptionHandler q) $ do
+              _ <- queryAction _id
+              deleteQuery q
+              liftIO $ putStrLn $ "Job done: " ++ (show q)
+            return $ pendingQuery queryKey mPersistInfo
+          Nothing -> do
+            mQuery' <- getQuery q
+            logWarnN $ T.pack $ "runQueryInfo.mQuery' = " ++ show mQuery'
+            case mQuery' of
+              Just eq -> return $ pendingQuery (entityKey eq) mPersistInfo
+              -- assuming that the concurrent query is completed
+              Nothing -> do
+                mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
+                logWarnN $ T.pack $ "runQueryInfo.mPersistInfo' = " ++ show mPersistInfo'
+                return $ QueryResult Latest mPersistInfo'
+```
+
+
 
 Log Data
 --------
