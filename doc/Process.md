@@ -1,8 +1,8 @@
 How Requests are Handled
-------------------------
+========================
 
 Motivation
-==========
+----------
 
 there are two levels of caching and it's a bit hard to follow
 from the source alone.
@@ -24,7 +24,7 @@ credentials, we need to use them from now on).
 
 
 Example
-=======
+-------
 
 A request like this comes in:
 http://nfa.imn.htwk-leipzig.de/termcomp-devel/pairs/116580546
@@ -49,7 +49,8 @@ We first check (I don't know why there are two checks that look independent)
 ```
 
 Log Data
-========
+--------
+
 When handling request http://localhost:3000/pairs/115506327, this happens
 (and it feels way too much)
 
