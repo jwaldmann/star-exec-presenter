@@ -10,9 +10,6 @@
 <table class="table">
   <thead>
     <tr>
-      <th>objects
-      <th>attributes
-    <tr>
       <th>Jobs
       $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
         <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
@@ -29,6 +26,10 @@
               #{score}
             $nothing
               0
+    <tr>
+      <th>objects
+      <th>attributes
+
   <tbody>
     $forall concept <- conceptPairs
         <tr>
