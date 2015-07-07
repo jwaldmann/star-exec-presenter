@@ -225,33 +225,33 @@ tc2015 = Competition  "Termination Competition 2015"
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
-     $ let tct3 = 3471 in
+     $ let { tct2 = 3402 ; tct3 = 3471 ; aprove = 3472 } in
      [ standard2015 "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
-           [ Participant "TCT2" ( Just (3402, 22626))
+           [ Participant "TCT2" ( Just (tct2, 22626))
            , Participant "TCT3" ( Just (tct3, 23011))
            , Participant "matchbox" ( Just ( 2536, 17921 ))
            ]
      , standard2015 "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
-           [ Participant "TCT2" ( Just (3402, 22621))
+           [ Participant "TCT2" ( Just (tct2, 22621))
            , Participant "TCT3" ( Just (tct3, 23005))
-           , Participant "AProVE" ( Just ( 3342, 22440 ) )
+           , Participant "AProVE" ( Just ( aprove, 23013 ) )
            ]
      , standard2015 "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
-           [ Participant "TCT2" ( Just (3402, 22620))
+           [ Participant "TCT2" ( Just (tct2, 22620))
            , Participant "TCT3" ( Just (tct3, 23006))
-           , Participant "AProVE" ( Just ( 3342, 22443 ) )
+           , Participant "AProVE" ( Just ( aprove, 23016 ) )
            ]
      , certified2015 "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
-           [ Participant "TCT2" ( Just (3402, 22626))
+           [ Participant "TCT2" ( Just (tct2, 22626))
            , Participant "TCT3" ( Just (tct3, 23007))
            ]
      , certified2015 "Runtime Complexity - Full Rewriting certified"   [ Hierarchy 56748 ]
-           [ Participant "TCT2" ( Just (3402, 22626))
+           [ Participant "TCT2" ( Just (tct2, 22626))
            , Participant "TCT3" ( Just (tct3, 23009))
            ]
      , certified2015 "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
-           [ Participant "AProVE" ( Just ( 3342, 22444 ) )
-           , Participant "TCT2" ( Just (3402, 22626))
+           [ Participant "AProVE" ( Just ( aprove, 23017 ) )
+           , Participant "TCT2" ( Just (tct2, 22626))
            , Participant "TCT3" ( Just (tct3, 23012))
            ]
      ]
