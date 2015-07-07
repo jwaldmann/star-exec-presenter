@@ -143,7 +143,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "AProVE" ( Just ( 3342, 22449 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
-           , Participant "matchbox" ( Just ( 2536, 17911 ))
+           , Participant "matchbox" ( Just ( 2536, 17916 ))
            , Participant "AutoNon"  Nothing -- ( Just ( 3354, 0 ) )
            ]
        , standard2015 "SRS Standard"  srss
