@@ -137,7 +137,7 @@ the_competition year = case year of
 tc2015 :: Registration
 tc2015 = Competition  "Termination Competition 2015"
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-       [ standard "TRS Standard"  trss
+       [ standard2015 "TRS Standard"  trss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 3430, 22689 ))
            , Participant "AProVE" ( Just ( 3342, 22449 ) )
@@ -146,7 +146,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "matchbox" ( Just ( 2536, 17911 ))
            , Participant "AutoNon"  Nothing -- ( Just ( 3354, 0 ) )
            ]
-       , standard "SRS Standard"  srss
+       , standard2015 "SRS Standard"  srss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "NaTT" ( Just ( 3430, 22691 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
@@ -154,126 +154,126 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "matchbox" ( Just ( 2536, 17916 ))
            , Participant "AutoNon"  Nothing
            ]
-       , standard "Cycles" srss
+       , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
            , Participant "matchbox" Nothing
            ]
-       , standard "TRS Relative"  [ mixed_rel_trs ]
+       , standard2015 "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
            ]
-       , standard "SRS Relative"  [ mixed_rel_srs ]
+       , standard2015 "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
            ]
-      , certified "TRS Standard certified"  trss
+      , certified2015 "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 3342, 22444  ) )
            ]
-      , certified "SRS Standard certified"  srss
+      , certified2015 "SRS Standard certified"  srss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 3342, 22444  ) )
            ]
-      , certified "TRS Relative certified"  [ mixed_rel_trs ]
+      , certified2015 "TRS Relative certified"  [ mixed_rel_trs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 3342, 22444 ) )
            ]
-      , certified "SRS Relative certified"  [ mixed_rel_srs ]
+      , certified2015 "SRS Relative certified"  [ mixed_rel_srs ]
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
            , Participant "AProVE" ( Just ( 3342, 22444  ) )
            ]
-      , standard "TRS Equational"  [ Hierarchy 56831  ]
+      , standard2015 "TRS Equational"  [ Hierarchy 56831  ]
            [ Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Conditional"  [ Hierarchy 56824 ]
+      , standard2015 "TRS Conditional"  [ Hierarchy 56824 ]
            [ Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Context Sensitive"  [ Hierarchy 56827 ]
+      , standard2015 "TRS Context Sensitive"  [ Hierarchy 56827 ]
            [ Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Innermost"  [ Hierarchy 56836 ]
+      , standard2015 "TRS Innermost"  [ Hierarchy 56836 ]
            [ Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            ]
-      , standard "TRS Outermost"  [ Hierarchy 56842 ]
+      , standard2015 "TRS Outermost"  [ Hierarchy 56842 ]
            [ Participant "AProVE" ( Just ( 3342, 22449 ) )
            ]
-      , certified "TRS Innermost certified"  [ Hierarchy 56836 ]
+      , certified2015 "TRS Innermost certified"  [ Hierarchy 56836 ]
            [ Participant "AProVE" ( Just ( 3342, 22444  ) )
            ]
-      , certified "TRS Outermost certified"  [ Hierarchy 56842  ]
+      , certified2015 "TRS Outermost certified"  [ Hierarchy 56842  ]
            [ Participant "AProVE" ( Just ( 3342, 22444  ) )
            ]
-      , standard "Higher-Order rewriting (union beta)"  
+      , standard2015 "Higher-Order rewriting (union beta)"  
            [ Hierarchy 56698 ]
            [ Participant "Wanda" ( Just (1542, 2390))
            ]
-     , standard "Integer Transition Systems"  [ Hierarchy 56706 ]
+     , standard2015 "Integer Transition Systems"  [ Hierarchy 56706 ]
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 3342, 22446 ))
            , Participant "Ctrl" ( Just (1541, 2387))
            , Participant "HipTNT+" (Just (3461, 22970))
            ]
-     , standard "Integer TRS"  [ Hierarchy 56704  ]
+     , standard2015 "Integer TRS"  [ Hierarchy 56704  ]
            [ Participant "AProVE" ( Just ( 3342, 22447 ) )
            , Participant "Ctrl" ( Just (1541, 2388))
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
-     [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
+     [ standard2015 "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (3402, 22626))
            , Participant "TCT3" ( Just (3409, 22635))
            , Participant "matchbox" ( Just ( 2536, 17921 ))
            ]
-     , standard "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
+     , standard2015 "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (3402, 22621))
            , Participant "TCT3" ( Just (3409, 22628))
            , Participant "AProVE" ( Just ( 3342, 22440 ) )
            ]
-     , standard "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
+     , standard2015 "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
            [ Participant "TCT2" ( Just (3402, 22620))
            , Participant "TCT3" ( Just (3409, 22630))
            , Participant "AProVE" ( Just ( 3342, 22443 ) )
            ]
-     , certified "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
+     , certified2015 "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (3402, 22626))
            , Participant "TCT3" ( Just (3409, 22631))
            ]
-     , certified "Runtime Complexity - Full Rewriting certified"   [ Hierarchy 56748 ]
+     , certified2015 "Runtime Complexity - Full Rewriting certified"   [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (3402, 22626))
            , Participant "TCT3" ( Just (3409, 22633))
            ]
-     , certified "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
+     , certified2015 "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
            [ Participant "AProVE" ( Just ( 3342, 22444 ) )
            , Participant "TCT2" ( Just (3402, 22626))
            , Participant "TCT3" ( Just (3409, 22636))
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
-     [ standard "C"  [ Hierarchy 56607 ]
+     [ standard2015 "C"  [ Hierarchy 56607 ]
            [ Participant "AProVE" ( Just ( 3342, 22448 ) ) -- ?
            , Participant "T2" ( Just ( 1739, 2751 )) -- ?
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
            ]
-     , standard "C Integer Programs" [ Hierarchy 100138 ] -- for testing
+     , standard2015 "C Integer Programs" [ Hierarchy 100138 ] -- for testing
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
            , Participant "HipTNT+" (Just (3461, 22970))
            ]
-     , standard "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
+     , standard2015 "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 3342, 22450  ) )
            , Participant "Ultimate Buchi Automizer" (Just (3458,22965) )
            ]
-     , standard "Logic Programming"  [ Hierarchy 56728, Hierarchy 56739, Hierarchy 56744 ]
+     , standard2015 "Logic Programming"  [ Hierarchy 56728, Hierarchy 56739, Hierarchy 56744 ]
            [ Participant "AProVE" ( Just ( 3342, 22445 ) )
            ]
-     , standard "Functional Programming"  [ Hierarchy 56695 ]
+     , standard2015 "Functional Programming"  [ Hierarchy 56695 ]
            [ Participant "AProVE" ( Just ( 3342, 22441  ) )
            ]
      ]
