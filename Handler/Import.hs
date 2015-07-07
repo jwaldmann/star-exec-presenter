@@ -280,7 +280,7 @@ insertLRIResults solversMap benchmarksMap pairs = do
         (getResult <$> LRI.lrirCheckResult r)
         (LRI.lrirCheckCpuTime r)
         (LRI.lrirCheckWallclockTime r)
-    getResult LRI.LRIYES    = YES Nothing
+    getResult LRI.LRIYES    = YES 
     getResult LRI.LRINO     = NO
     getResult LRI.LRIERROR  = ERROR
     getResult LRI.LRIMAYBE  = MAYBE

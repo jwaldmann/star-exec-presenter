@@ -105,17 +105,9 @@ standard :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
 standard n bs ps = Category {  categoryName = n , contents = 
     Catinfo { postproc = 163 , benchmarks = bs , participants = ps } }
 
-standard2015 :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
-standard2015 n bs ps = Category {  categoryName = n , contents = 
-    Catinfo { postproc = 163 , benchmarks = bs , participants = ps } }
-
 certified :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
 certified n bs ps = Category { categoryName = n, contents = 
     Catinfo { postproc = 172 , benchmarks = bs , participants = ps } }
-
-certified2015 :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
-certified2015 n bs ps = Category { categoryName = n, contents = 
-    Catinfo { postproc = 209 , benchmarks = bs , participants = ps } }
 
 trss :: [Benchmark_Source]
 trss = [ Hierarchy 56849 ]
@@ -133,6 +125,14 @@ the_competition year = case year of
   E -> experiment2015
   Y2015 -> tc2015
   Y2014 -> tc2014
+
+standard2015 :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
+standard2015 n bs ps = Category {  categoryName = n , contents = 
+    Catinfo { postproc = 234 , benchmarks = bs , participants = ps } }
+
+certified2015 :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
+certified2015 n bs ps = Category { categoryName = n, contents = 
+    Catinfo { postproc = 235 , benchmarks = bs , participants = ps } }
 
 tc2015 :: Registration
 tc2015 = Competition  "Termination Competition 2015"
@@ -225,33 +225,34 @@ tc2015 = Competition  "Termination Competition 2015"
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
+     $ let tct3 = 3471 in
      [ standard2015 "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (3402, 22626))
-           , Participant "TCT3" ( Just (3409, 22635))
+           , Participant "TCT3" ( Just (tct3, 23011))
            , Participant "matchbox" ( Just ( 2536, 17921 ))
            ]
      , standard2015 "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (3402, 22621))
-           , Participant "TCT3" ( Just (3409, 22628))
+           , Participant "TCT3" ( Just (tct3, 23005))
            , Participant "AProVE" ( Just ( 3342, 22440 ) )
            ]
      , standard2015 "Runtime Complexity - Innermost Rewriting"  [ Hierarchy 56775 ]
            [ Participant "TCT2" ( Just (3402, 22620))
-           , Participant "TCT3" ( Just (3409, 22630))
+           , Participant "TCT3" ( Just (tct3, 23006))
            , Participant "AProVE" ( Just ( 3342, 22443 ) )
            ]
      , certified2015 "Derivational Complexity - Full Rewriting certified" [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (3402, 22626))
-           , Participant "TCT3" ( Just (3409, 22631))
+           , Participant "TCT3" ( Just (tct3, 23007))
            ]
      , certified2015 "Runtime Complexity - Full Rewriting certified"   [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (3402, 22626))
-           , Participant "TCT3" ( Just (3409, 22633))
+           , Participant "TCT3" ( Just (tct3, 23009))
            ]
      , certified2015 "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
            [ Participant "AProVE" ( Just ( 3342, 22444 ) )
            , Participant "TCT2" ( Just (3402, 22626))
-           , Participant "TCT3" ( Just (3409, 22636))
+           , Participant "TCT3" ( Just (tct3, 23012))
            ]
      ]
    , MetaCategory "Termination of Programming Languages"

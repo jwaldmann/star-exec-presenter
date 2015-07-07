@@ -59,6 +59,7 @@ library
                      Presenter.Model.Competition
                      Presenter.Model.CompetitionResults
                      Presenter.Model.Complexity
+                     Presenter.Model.Complexity2015
                      Presenter.Model.Defaults
                      Presenter.Model.Entities
                      Presenter.Model.PersistInstances

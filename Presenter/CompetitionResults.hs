@@ -38,7 +38,7 @@ sortScore :: (a, Score) -> (a, Score) -> Ordering
 sortScore (_,i1) (_,i2) = compare i1 i2
 
 isYes :: SolverResult -> Bool
-isYes (YES _) = True
+isYes (YES {} ) = True
 isYes _       = False
 
 -- | output is decreasing by Score

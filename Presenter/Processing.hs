@@ -18,9 +18,10 @@ type TableHead = [SolverName]
 getClass :: JobResult -> T.Text
 getClass result =
   case getSolverResult result of
-    YES _     -> "solver-yes"
+    YES       -> "solver-yes"
     NO        -> "solver-no"
     MAYBE     -> "solver-maybe"
+    WORST_CASE {} -> "solver-worstcase"
     CERTIFIED -> "solver-certified"
     ERROR     -> "solver-error"
     _         -> "solver-nothing"
@@ -80,12 +81,12 @@ getScoredResults results =
         then jrs
         else
           let hasScore jr = case getSolverResult jr of
-                                YES (Just _) -> True
-                                _            -> False
+                                YES  -> True
+                                _    -> False
               getScoreFromResult jr =
-                case getSolverResult jr of
-                  YES (Just i) -> i
-                  _            -> 0
+                case getSolverResult jr of -- FIXME
+                  YES -> 1
+                  _   -> 0
               insertScore jr set = S.insert (getScoreFromResult jr) set
               scores = S.toList $ L.foldr insertScore S.empty $ filter hasScore jrs
               baseScore = 1 + length jrs
@@ -103,6 +104,7 @@ calcScoresBase :: (JobResult -> Int) -> [JobResult] -> M.Map SolverID Int
 calcScoresBase f = L.foldl' addScore M.empty
   where addScore m jr = M.insertWith (+) (toSolverID jr) (f jr) m
 
+-- | FIXME
 calcComplexityScores :: [JobResult] -> M.Map SolverID Int
 calcComplexityScores = calcScoresBase getScore'
   where
@@ -116,6 +118,6 @@ calcStandardScores = calcScoresBase getScore'
   where
     getScore' jr =
       case getSolverResult jr of
-        YES _ -> 1
+        YES   -> 1
         NO    -> 1
         _     -> 0

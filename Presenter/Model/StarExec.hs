@@ -10,6 +10,8 @@ import Text.Blaze.Internal
 import Data.Text (Text)
 import qualified Data.Text as T
 
+import qualified Presenter.Model.Complexity2015 as C
+
 data JobStatus =
   Complete
   | Incomplete
@@ -22,8 +24,9 @@ instance ToMarkup JobStatus where
   preEscapedToMarkup = preEscapedString . show
 
 data SolverResult =
-  YES (Maybe Int)
+    YES 
   | NO
+  | WORST_CASE C.Bounds
   | CERTIFIED
   | MAYBE
   | ERROR

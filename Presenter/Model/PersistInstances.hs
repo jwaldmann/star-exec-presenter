@@ -7,7 +7,7 @@ import qualified Data.Text as T
 import Data.Text.Encoding
 import Control.Applicative
 import Presenter.Model.StarExec
-import qualified Presenter.Model.Complexity as C
+import qualified Presenter.Model.Complexity2015 as C
 
 instance CSV.FromNamedRecord JobResultInfo where
   parseNamedRecord r =
@@ -33,10 +33,10 @@ instance CSV.FromField SolverResult where
         | r == "maybe"      = pure MAYBE
         | r == "certified"  = pure CERTIFIED
         | r == "error"      = pure ERROR
-        | r == "yes"        = pure $ YES Nothing
+        | r == "yes"        = pure $ YES
         | otherwise = case readsPrec 0 $ T.unpack $ decodeUtf8 result of
-          [ ( C.Bounds { C.upper = C.Poly (Just deg) } , "" ) ]
-            -> pure $ YES $ Just deg
+          [ ( b @ C.Bounds { } , "" ) ]
+            -> pure $ WORST_CASE b
           _ -> pure OTHER
 
 instance CSV.FromField JobResultStatus where
