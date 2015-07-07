@@ -1,6 +1,6 @@
 module Presenter.StarExec.Connection
     ( sendRequest
-    , index
+    -- , index
     , getLoginCredentials
     , getConnection -- this is used (only) by Presenter.Control.Job (in pushJobXml)
     ) where
@@ -8,6 +8,7 @@ module Presenter.StarExec.Connection
 import Import
 import Prelude (head)
 import Network.HTTP.Conduit
+import Network.HTTP.Types.Status (ok200)
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.Text.Encoding as TE
@@ -16,7 +17,7 @@ import qualified Data.Text as T
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
 import Presenter.Prelude (diffTime)
-import Data.Time.Clock
+import Data.Time.Clock (getCurrentTime, UTCTime)
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
 import Control.Concurrent.SSem
@@ -31,11 +32,90 @@ user (Login u _) = u
 password :: Login -> Text
 password (Login _ pass) = pass
 
-isLoggedIn :: Maybe BS.ByteString -> Bool
-isLoggedIn Nothing = False
-isLoggedIn (Just loc) = if loc == starExecSpacesPath
-                          then True
-                          else False
+runCon_exclusive :: Handler b -> Handler b
+runCon_exclusive action =
+  bracket_ ( do
+               app <- getYesod
+               lift $ Control.Concurrent.SSem.wait   $ conSem app
+               logWarnN $ T.pack $ "connection semaphore: wait ...."
+           )
+           ( do
+                app <- getYesod
+                lift $ Control.Concurrent.SSem.signal $ conSem app
+                logWarnN $ T.pack $ "... connection semaphore: signal"
+           )
+           action
+
+getSessionData :: Handler SessionData
+getSessionData = do
+  app <- getYesod
+  lift $ atomically $ readTVar $ sessionData app
+
+setSessionData :: CookieJar -> UTCTime -> Handler ()
+setSessionData cj d = do
+  app <- getYesod
+  lift $ atomically $ writeTVar (sessionData app) $ SessionData cj d
+
+-- | raw request. May return "Login" response if we're not currently logged in.
+-- will silently set cookies to session state.
+sendRequestRaw :: StarExecConnection -> Handler (Response BSL.ByteString)
+sendRequestRaw (req, man, _ ) = do
+  SessionData cj d <- getSessionData
+  let req' =  req { cookieJar = Just cj }
+  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show req
+  resp <- httpLbs req' man
+  logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show req
+                       <> "response status: " <> show (responseStatus resp)
+  now <- liftIO getCurrentTime
+  setSessionData (responseCookieJar resp) now
+  return resp
+
+-- | managed requests: will execute Login if necessary.
+sendRequest (req0, man, _ ) = runCon_exclusive $ do
+  logWarnN  $ T.pack  $ "sendRequest: " <> show req0
+  resp0 <- sendRequestRaw (req0 { checkStatus = \ _ _ _ -> Nothing }, man, undefined )
+  if not $ needs_login resp0
+     then do
+       logWarnN  $ T.pack  $ "sendRequest: OK"
+       return resp0
+    else do    
+       logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
+       creds <- getLoginCredentials
+       sec <- parseUrl starExecUrl
+       let req1 = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
+                           , ("j_password", TE.encodeUtf8 $ password creds) 
+                           , ("cookieexists", "false")
+                           ] 
+                 $ sec { method = "POST"
+                       , path = loginPath
+                       }
+       resp1 <- sendRequestRaw (req1, man, undefined)
+       logWarnN  $ T.pack  $ "sendRequest: try again"
+       sendRequestRaw (req0, man, undefined)
+
+needs_login r =
+     ( responseStatus r /= ok200)
+  || ( BS.isInfixOf "Login - StarExec" $ BSL.toStrict $ responseBody r )
+
+-- | this is under the same semaphore as sendRequest
+getConnection :: Handler StarExecConnection
+getConnection = runCon_exclusive $ do
+  logWarnN  $ T.pack  $ "getConnection"
+  SessionData cj d <- getSessionData
+  sec <- parseUrl starExecUrl
+  app <- getYesod
+  return (sec, httpManager app, cj)
+
+{-
+
+-- | Why?
+index :: StarExecConnection -> Handler StarExecConnection
+index (sec, man, cookies) = do
+  let req = sec { method = "GET"
+                , path = indexPath
+                }
+  resp <- sendRequest (req, man, cookies)
+  return (sec, man, responseCookieJar resp)
 
 getLocation :: Response body -> Maybe BS.ByteString
 getLocation resp = 
@@ -76,37 +156,11 @@ login con@(sec, man, cookies) creds = do
       resp <- sendRequest (req, man, cookies)
       return (sec, man, responseCookieJar resp)
 
-index :: StarExecConnection -> Handler StarExecConnection
-index (sec, man, cookies) = do
-  let req = sec { method = "GET"
-                , path = indexPath
-                }
-  resp <- sendRequest (req, man, cookies)
-  return (sec, man, responseCookieJar resp)
-
-runCon_exclusive :: Handler b -> Handler b
-runCon_exclusive action =
-  bracket_ ( do
-               app <- getYesod
-               lift $ Control.Concurrent.SSem.wait   $ conSem app
-               logWarnN $ T.pack $ "connection semaphore: wait ...."
-           )
-           ( do
-                app <- getYesod
-                lift $ Control.Concurrent.SSem.signal $ conSem app
-                logWarnN $ T.pack $ "... connection semaphore: signal"
-           )
-           action
-
--- | FIXME: this handles connection information in the cookie jar,
--- so it must be single-threaded (access to sessionData must be locked)?
 getConnection :: Handler StarExecConnection
-getConnection = runCon_exclusive $ do
+getConnection = do
   logWarnN  $ T.pack  $ "getConnection"
-  mSession <- getSessionData'
-  logWarnN  $ T.pack  $ "getConnection.mSession: " ++ show mSession
-  currentTime <- liftIO getCurrentTime
-  sec <- parseUrl starExecUrl
+  mSession <- getSessionCookies
+  return (
   app <- getYesod ; let man = httpManager app
   con@(_, _, cookies) <- case mSession of
       Nothing -> do
@@ -129,37 +183,5 @@ getConnection = runCon_exclusive $ do
   logWarnN  $ T.pack  $ "getConnection - after  write"
   return con
 
-getSessionData' :: Handler (Maybe SessionData)
-getSessionData' = do
-  app <- getYesod
-  lift $ atomically $ readTVar $ sessionData app
 
-writeSessionData' :: CookieJar -> UTCTime -> Handler ()
-writeSessionData' cj d = do
-  app <- getYesod
-  let session = SessionData cj d
-      appSession = sessionData app
-  lift $ atomically $ writeTVar appSession $ Just session
-
--- | WARNING: this may block
-getExclusiveSessionData' :: Handler (Maybe SessionData)
-getExclusiveSessionData' = do
-  app <- getYesod
-  liftIO $ takeMVar $ exclusiveSessionData app
-
--- | WARNING: this may block
-writeExclusiveSessionData' :: CookieJar -> UTCTime -> Handler ()
-writeExclusiveSessionData' cj d = do
-  app <- getYesod
-  let session = SessionData cj d
-      appSession = exclusiveSessionData app
-  liftIO $ putMVar appSession $ Just session
-
-sendRequest :: StarExecConnection -> Handler (Response BSL.ByteString)
-sendRequest (req, man, cookies) = do
-  let req' =  req { cookieJar = Just cookies }
-  logWarnN  $ T.pack  $ "sendRequest: " <> show req
-  resp <- httpLbs req' man
-  logWarnN  $ T.pack  $ "done sendRequest: " <> show req
-                       <> "response status: " <> show (responseStatus resp)
-  return resp
+-}

@@ -21,10 +21,6 @@ data SessionData = SessionData
   , date :: UTCTime
   } deriving (Show, Read)
 
-{-
--}
 type Cookies = [Cookie]
 
-{-
--}
 type StarExecConnection = (Request, Manager, CookieJar)

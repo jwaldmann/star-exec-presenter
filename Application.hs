@@ -18,10 +18,12 @@ import qualified Network.Wai.Middleware.RequestLogger as RequestLogger
 import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
 import Network.HTTP.Client.Conduit (newManager)
+import Network.HTTP.Conduit (createCookieJar)
 import Control.Monad.Logger (runLoggingT)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
 import Data.Default (def)
+import Data.Time.Clock (getCurrentTime)
 import Yesod.Core.Types (loggerSet, Logger (Logger))
 
 -- Import all relevant handler modules here.
@@ -109,14 +111,16 @@ makeFoundation conf = do
     crCache <- atomically $ newTVar M.empty
     -- DB-Semaphore
     dbS <- Control.Concurrent.SSem.new 1
+
     -- Session for Connections to starexec.org
-    session <- atomically $ newTVar Nothing
-    exclusiveSession <- newMVar Nothing
+    now <- getCurrentTime
+    session <- atomically $ newTVar $ SessionData (createCookieJar []) now
+
     -- Connection semaphore
     conS <- Control.Concurrent.SSem.new 1
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger session exclusiveSession crCache dbS conS
+        foundation = App conf s p manager dbconf logger session crCache dbS conS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

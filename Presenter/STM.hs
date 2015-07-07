@@ -17,7 +17,7 @@ import Control.Monad.Logger
 
 -- | slightly shorter than the display refresh rate
 defaultWorkerDelay :: Int
-defaultWorkerDelay = 9 * 10^6
+defaultWorkerDelay = 1 * 10^6
 
 {- caching mechanism:
 
