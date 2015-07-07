@@ -1,0 +1,71 @@
+<h1>Overview of job-results
+<a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental) 
+| view original jobs on star-exec:
+  $forall jid <- getIds jids
+    $if isStarExecID jid
+      <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid}</a>,
+
+<h2>Statistics
+#{stat}
+
+<h2>Results
+
+<div class="container">
+  <input type="checkbox" id="legend">
+  <div class="container">
+    <label for="legend" class="a">Legend
+    <div class="checked-container">
+      <h3>Legend
+      <div>
+        <table class="table legend">
+          <tbody>
+            <tr>
+              <td class="solver-yes">YES
+              <td class="solver-no">NO
+              <td class="solver-maybe">MAYBE
+              <td class="solver-certified">CERTIFIED
+              <td class="solver-error">ERROR
+              <td class="solver-nothing">OTHER / Nothing
+        The results are displayed in the following pattern:
+        <code> cpu-time / wallclock-time (complexity-score)
+
+
+<table class="table">
+  <thead>
+    <tr>
+      <th>Jobs
+      $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
+        <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
+    <tr>
+      <th>Solver
+      $forall (_, (sId, sName)) <- jobSolvers
+        <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
+    <tr>
+      <th>Scores
+      $forall (solvers, scores) <- zip groupedSolvers scores
+        $forall (sId,_) <- solvers
+          <th>
+            $maybe score <- M.lookup sId scores
+              #{score}
+            $nothing
+              0
+  <tbody>
+    $forall ((bId,bName), results) <- benchmarkResults
+      <tr>
+        <td><a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+        $forall mResult <- results
+          $maybe result <- mResult
+            <td class="#{getClass result}">
+              $if isResultComplete result
+                <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
+                  #{toFixed 1 $ toCpuTime result} /
+                  #{toFixed 1 $ toWallclockTime result} s
+                  $if complexity
+                    $maybe score <- toScore result
+                      &nbsp;(#{getScore result})
+                    $nothing
+                      &nbsp;(-)
+              $else
+                not finished
+          $nothing
+            <td>

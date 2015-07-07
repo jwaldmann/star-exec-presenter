@@ -74,3 +74,5 @@
 /install-solvers/#Year InstallSolversR GET
 /competition/#CompetitionInfoId/text CompetitionTextR GET POST
 /resolve/#DOI ResolveR GET
+
+/eval/#Query/*JobIds EvalR GET
