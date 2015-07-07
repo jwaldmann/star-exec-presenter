@@ -33,11 +33,10 @@ instance CSV.FromField SolverResult where
         | r == "maybe"      = pure MAYBE
         | r == "certified"  = pure CERTIFIED
         | r == "error"      = pure ERROR
-        | r == "yes"        = pure $ YES
+        | r == "yes"        = pure YES
         | otherwise = case readsPrec 0 $ T.unpack $ decodeUtf8 result of
-          [ ( b @ C.Bounds { } , "" ) ]
-            -> pure $ WORST_CASE b
-          _ -> pure OTHER
+          [ ( res , "" ) ] -> pure $ res
+          _ -> pure $ OTHER s
 
 instance CSV.FromField JobResultStatus where
   parseField result = parseResult s

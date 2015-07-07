@@ -21,6 +21,8 @@ import qualified Codec.Archive.Zip as Zip
 import qualified Codec.Compression.GZip as GZip
 import qualified Codec.Archive.Tar as Tar
 
+import qualified Data.Text as T
+
 import Presenter.Internal.Stringish
 import qualified Importer.LRI as LRI
 import qualified Importer.UIBK as UIBK
@@ -167,6 +169,8 @@ insertCompetition uc = do
   Import.mapM_ insertUnique benchmarks
   Import.mapM_ (insertUnique . snd) $ IM.toList resultsMap
 
+
+-- FIXME
 parseResult :: String -> SolverResult
 parseResult "NO" = NO
 parseResult "CERTIFIED" = CERTIFIED
@@ -174,7 +178,7 @@ parseResult "MAYBE" = MAYBE
 parseResult "ERROR" = ERROR
 parseResult s = case reads s of
                   [(r,_)] -> r
-                  _       -> OTHER
+                  _       -> OTHER $ T.pack s
 
 toUibkBenchmarkInfo :: UIBK.UIBKBenchmark -> UibkBenchmarkInfo
 toUibkBenchmarkInfo b =
@@ -284,7 +288,7 @@ insertLRIResults solversMap benchmarksMap pairs = do
     getResult LRI.LRINO     = NO
     getResult LRI.LRIERROR  = ERROR
     getResult LRI.LRIMAYBE  = MAYBE
-    getResult _             = OTHER
+    getResult r             = OTHER $ T.pack $ show r
 
 insertLRISolvers :: [(Int, LRI.LRISolver)] -> YesodDB App ()
 insertLRISolvers = Import.mapM_ insert

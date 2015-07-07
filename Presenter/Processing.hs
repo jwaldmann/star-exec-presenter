@@ -21,7 +21,7 @@ getClass result =
     YES       -> "solver-yes"
     NO        -> "solver-no"
     MAYBE     -> "solver-maybe"
-    WORST_CASE {} -> "solver-worstcase"
+    BOUNDS {} -> "solver-bounds"
     CERTIFIED -> "solver-certified"
     ERROR     -> "solver-error"
     _         -> "solver-nothing"

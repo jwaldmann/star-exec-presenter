@@ -29,19 +29,25 @@ b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 }
 b6 = Bounds { lower = Finite , upper = Poly $ Nothing }
 
 instance Show Bounds where 
-    show b = 
-        let ( prefix, interesting) = case (lower b, upper b) of
-               ( Infinite , Infinite ) -> ("MAYBE", False)
-               ( l, u ) -> ("WORST_CASE", True ) -- l is at least FINITE here
-        in  prefix ++ if interesting
+    showsPrec p b = 
+        let parens c = ("(" ++) . c . (")" ++)
+            ( par, prefix, interesting) = case (lower b, upper b) of
+               ( Infinite , Infinite ) -> (False, "MAYBE", False)
+               ( l, u ) -> (True, "WORST_CASE", True ) -- l is at least FINITE here
+            maybe_parens c = if par && p > 0 then parens c else c
+            out = prefix ++ if interesting
                       then "(" ++ showLower (lower b) ++ "," ++ showUpper (upper b) ++")"
-                      else ""
+                      else ""   
+        in  maybe_parens (out ++)
 
 instance Read Bounds where
-    readsPrec _ = readP_to_S readP_Bounds
+    readsPrec _ = readP_to_S $ skipSpaces *> readP_Bounds
 
 
-readP_Bounds = do { token "WORST_CASE" ; pair Infinite Infinite }
+readP_Bounds = parens readP_Bounds_bare +++ readP_Bounds_bare
+
+readP_Bounds_bare = 
+        do { token "WORST_CASE" ; pair Infinite Infinite }
     +++ do { token "MAYBE" ; pair Infinite Infinite }
 
 pair lo up = 

@@ -26,11 +26,11 @@ instance ToMarkup JobStatus where
 data SolverResult =
     YES 
   | NO
-  | WORST_CASE C.Bounds
+  | BOUNDS C.Bounds
   | CERTIFIED
   | MAYBE
   | ERROR
-  | OTHER
+  | OTHER Text
   deriving (Show, Read, Eq, Ord)
 derivePersistField "SolverResult"
 
