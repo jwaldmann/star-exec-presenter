@@ -16,8 +16,6 @@ cabal.sandbox.config
 *.swp
 .dir-locals.el
 examples.txt
-config/settings.yml
-config/postgresql.yml
 *.iml
 *.ipr
 *.iws
