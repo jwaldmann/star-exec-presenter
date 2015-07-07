@@ -217,7 +217,7 @@ tc2015 = Competition  "Termination Competition 2015"
            [ Participant "T2" ( Just ( 1739, 2751 ))
            , Participant "AProVE" ( Just ( 3342, 22446 ))
            , Participant "Ctrl" ( Just (1541, 2387))
-           , Participant "HipTNT+" (Just (3461, 22970))
+           , Participant "HipTNT+" (Just (3473, 23024))
            ]
      , standard2015 "Integer TRS"  [ Hierarchy 56704  ]
            [ Participant "AProVE" ( Just ( 3342, 22447 ) )
@@ -260,12 +260,13 @@ tc2015 = Competition  "Termination Competition 2015"
            [ Participant "AProVE" ( Just ( 3342, 22448 ) ) -- ?
            , Participant "T2" ( Just ( 1739, 2751 )) -- ?
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
+           , Participant "HipTNT+" (Just (3473, 23023))
            ]
      , standard2015 "C Integer Programs" [ Hierarchy 100138 ] -- for testing
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
            , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
-           , Participant "HipTNT+" (Just (3461, 22970))
+           , Participant "HipTNT+" (Just (3473, 23024))
            ]
      , standard2015 "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 3342, 22450  ) )
