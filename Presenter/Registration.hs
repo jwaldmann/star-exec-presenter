@@ -144,7 +144,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
            , Participant "matchbox" ( Just ( 2536, 17916 ))
-           , Participant "AutoNon"  Nothing -- ( Just ( 3354, 0 ) )
+           , Participant "AutoNon"  ( Just ( 3354, 22482 ) )
            ]
        , standard2015 "SRS Standard"  srss
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
@@ -152,7 +152,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "muterm" ( Just (1388, 2059))
            , Participant "matchbox" ( Just ( 2536, 17916 ))
-           , Participant "AutoNon"  Nothing
+           , Participant "AutoNon"  ( Just ( 3354, 22482 ) )
            ]
        , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
