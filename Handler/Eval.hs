@@ -5,7 +5,6 @@ module Handler.Eval where
 import Import
 import Data.Map (Map)
 import qualified Data.Map as Map
-
 import Presenter.StarExec.JobData
 import Presenter.Internal.Stringish()
 import Presenter.Processing
@@ -19,6 +18,13 @@ import qualified Data.Map.Strict as M
 import qualified Data.List as L
 import qualified Data.Text as T
 
+toTuples :: (a, [b]) -> [(a,b)]
+toTuples (i, solvers) = map ((,) i) solvers
+
+shorten :: Text -> Text
+shorten t = if T.length t > 50
+              then shorten $ T.tail t
+              else t
 
 -- copied from: http://rosettacode.org/wiki/Power_set#Haskell
 powerset = foldr (\x acc -> acc ++ map (x:) acc) [[]]
@@ -44,13 +50,8 @@ powerset = foldr (\x acc -> acc ++ map (x:) acc) [[]]
   -- return [("even", evenNumbers), ("odd", oddNumbers)]
   --(evenNumbers, oddNumbers)
 
-toTuples :: (a, [b]) -> [(a,b)]
-toTuples (i, solvers) = map ((,) i) solvers
 
-shorten :: Text -> Text
-shorten t = if T.length t > 50
-              then shorten $ T.tail t
-              else t
+--copied from ShowManyJobResults.hs
 
 getEvalR :: Query -> JobIds -> Handler Html
 getEvalR NoQuery  jids@(JobIds ids) = do
@@ -62,7 +63,8 @@ getEvalR NoQuery  jids@(JobIds ids) = do
       jobResults :: [JobResult]
       jobResults = concat $ jobs
 
-      stat = mconcat $ map jobStat jobResults
+      conceptPairs :: [(Text, Text)]
+      conceptPairs = [("o1","a1"),("o2","a2"),("o3","a3")]
 
       benchmarks' = L.sortBy compareBenchmarks $
                       getInfo extractBenchmark $ jobResults
@@ -84,11 +86,12 @@ getEvalR NoQuery  jids@(JobIds ids) = do
       else return ()
     $(widgetFile "eval")
 
+
 getEvalR q@(Query ts) jids @ (JobIds ids) = do
   qJobs <- queryManyJobs ids
   tab <- getManyJobCells $ map (snd . queryResult) qJobs
   defaultLayout $ do
-    setTitle "Flexible Table"
+    setTitle "FCA"
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q' -> queryStatus q' /= Latest) qJobs
       then insertWidgetMetaRefresh
@@ -97,4 +100,19 @@ getEvalR q@(Query ts) jids @ (JobIds ids) = do
             <pre>#{show q}
         |]
     display jids [] ts tab
+
+
+-- alias lookup function to has a FCA context wording
+-- get an attribute to a given object
+getAttribute :: (Eq a) => a -> [(a,b)] -> Maybe b
+getAttribute a b = lookup a b
+
+
+-- http://hackage.haskell.org/package/base-4.8.0.0/docs/src/GHC-List.html#lookup
+-- implementation of lookup to get an object to a given attribute
+getObject              :: (Eq b) => b -> [(a,b)] -> Maybe a
+getObject _key []          =  Nothing
+getObject  key ((x,y):xys)
+    | key == y          =  Just x
+    | otherwise         =  getObject key xys
 
