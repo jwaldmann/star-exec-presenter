@@ -61,6 +61,8 @@ library
                      Handler.InstallSolvers
                      Handler.CompetitionText
                      Handler.Resolve
+                     Handler.Eval
+                     Handler.DbTest
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
