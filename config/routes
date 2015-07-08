@@ -76,4 +76,5 @@
 /resolve/#DOI ResolveR GET
 
 /eval/#Query/*JobIds EvalR GET
-/dbtest DbTestR GET
+-- /dbtest/#JobID DbTestR GET
+/dbtest/#JobID DbTestR GET

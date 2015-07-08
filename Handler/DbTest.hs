@@ -1,14 +1,16 @@
 module Handler.DbTest where
 
 import Import
+import Presenter.PersistHelper
 
-getDbTestR :: Handler Html
-getDbTestR = do 
-  infos <- runDB $ selectList [] [LimitTo 10]
-  let n = length(infos::[Entity JobResultInfo])
+
+getDbTestR :: JobID -> Handler Html
+getDbTestR jid = do
+  jobResults <- getPersistJobResults jid
+  let n = length jobResults
   defaultLayout [whamlet|
     #{show n}
     <ul>
-    $forall i <- infos
+    $forall i <- jobResults
       <li> #{show i}
     |]
