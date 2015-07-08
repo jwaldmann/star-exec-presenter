@@ -5,4 +5,6 @@ $if null competitionInfos
 $else
     <ul>
         $forall ci <- competitionInfos
-            <li><a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}</a>
+            <li>
+               <a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
+               #{show $ competitionInfoDate $ entityVal ci}
