@@ -162,11 +162,13 @@ tc2015 = Competition  "Termination Competition 2015"
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
+           , Participant "matchbox" ( Just ( 3540, 23278 ))
            ]
        , standard2015 "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
            , Participant "AProVE" ( Just ( 3342, 22449  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
+           , Participant "matchbox" ( Just ( 3540, 23278 ))
            ]
       , certified2015 "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( 1342, 1951 ))
