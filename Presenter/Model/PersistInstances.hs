@@ -27,15 +27,15 @@ instance CSV.FromNamedRecord JobResultInfo where
 instance CSV.FromField SolverResult where
   parseField result = parseResult s
     where
-      s = T.toLower $ decodeUtf8 result
+      s = decodeUtf8 result
       parseResult r
-        | r == "no"         = pure NO
-        | r == "maybe"      = pure MAYBE
-        | r == "certified"  = pure CERTIFIED
-        | r == "error"      = pure ERROR
-        | r == "yes"        = pure YES
-        | otherwise = case readsPrec 0 $ T.unpack $ decodeUtf8 result of
-          [ ( res , "" ) ] -> pure $ res
+        | r == "NO"         = pure NO
+        | r == "MAYBE"      = pure MAYBE
+        | r == "CERTIFIED"  = pure CERTIFIED
+        | r == "ERROR"      = pure ERROR
+        | r == "YES"        = pure YES
+        | otherwise = case readsPrec 0 $ T.unpack s of
+          [ ( res , "" ) ] -> pure $ BOUNDS res
           _ -> pure $ OTHER s
 
 instance CSV.FromField JobResultStatus where

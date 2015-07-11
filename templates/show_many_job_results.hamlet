@@ -25,9 +25,10 @@
               <td class="solver-maybe">MAYBE
               <td class="solver-certified">CERTIFIED
               <td class="solver-error">ERROR
-              <td class="solver-nothing">OTHER / Nothing
+              <td class="solver-bounds">BOUNDS
+              <td class="solver-nothing">OTHER
         The results are displayed in the following pattern:
-        <code> cpu-time / wallclock-time (complexity-score)
+        <code>result | cpu-time/wallclock-time in seconds | complexity-score
 
 
 <table class="table">
@@ -58,8 +59,10 @@
             <td class="#{getClass result}">
               $if isResultComplete result
                 <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
-                  #{toFixed 1 $ toCpuTime result} /
-                  #{toFixed 1 $ toWallclockTime result} s
+                  #{short $ getSolverResult result }
+                  <span style="opacity:0.5">
+                    #{toFixed 1 $ toCpuTime result} /
+                    #{toFixed 1 $ toWallclockTime result} 
                   $if complexity
                     $maybe score <- toScore result
                       &nbsp;(#{getScore result})

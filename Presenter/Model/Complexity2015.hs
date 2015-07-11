@@ -7,6 +7,8 @@
 
 module Presenter.Model.Complexity2015 where
 
+import Presenter.Short
+import qualified Data.Text as T
 import Prelude 
 
 import Text.ParserCombinators.ReadP
@@ -39,6 +41,16 @@ instance Show Bounds where
                       then "(" ++ showLower (lower b) ++ "," ++ showUpper (upper b) ++")"
                       else ""   
         in  maybe_parens (out ++)
+
+instance Short Bounds where
+  short b =
+    let sslower f = case f of
+          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d 
+          Finite -> "?" ; Infinite -> "-"
+        ssupper f = case f of
+          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d 
+          Finite -> "-" ; Infinite -> "?"
+    in  T.pack $ sslower (lower b) ++ "/" ++ ssupper (upper b)
 
 instance Read Bounds where
     readsPrec _ = readP_to_S $ skipSpaces *> readP_Bounds

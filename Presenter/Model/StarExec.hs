@@ -3,6 +3,7 @@
 module Presenter.Model.StarExec where
 
 import Presenter.Model.Types
+import Presenter.Short
 import Prelude
 import Yesod
 import Text.Blaze
@@ -33,6 +34,12 @@ data SolverResult =
   | OTHER Text
   deriving (Show, Read, Eq, Ord)
 derivePersistField "SolverResult"
+
+instance Short SolverResult where
+  short r = case r of
+    YES -> "YES" ; NO -> "NO" ; BOUNDS b -> short b
+    CERTIFIED -> "CERT"; MAYBE -> "." ; ERROR -> "ERR"
+    OTHER t -> t
 
 data JobResultStatus =
   JobResultComplete

@@ -70,6 +70,7 @@ library
                      Presenter.Model
                      Presenter.PersistHelper
                      Presenter.Prelude
+                     Presenter.Short
                      Presenter.Processing
                      Presenter.Registration
                      Presenter.StarExec.Commands

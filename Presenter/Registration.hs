@@ -231,7 +231,7 @@ tc2015 = Competition  "Termination Competition 2015"
      [ standard2015 "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (tct2, 23075))
            , Participant "TCT3" ( Just (tct3, 23011))
-           , Participant "matchbox" ( Just ( 2536, 17921 ))
+           , Participant "matchbox" ( Just ( 3547, 23309 ))
            ]
      , standard2015 "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (tct2, 23070))

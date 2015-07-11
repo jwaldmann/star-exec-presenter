@@ -7,6 +7,7 @@ module Handler.ShowManyJobResults
   ) where
 
 import Import
+import Presenter.Short
 import Presenter.StarExec.JobData
 import Presenter.Internal.Stringish()
 import Presenter.Processing

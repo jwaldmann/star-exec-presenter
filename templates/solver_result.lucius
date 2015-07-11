@@ -3,6 +3,7 @@
 @colorMaybe: #FFFF99;
 @colorCertified: #5CB85C;
 @colorError: #FFCC66;
+@colorBounds: #B0EDEA;
 @colorNothing: #FFFFFF;
 
 .table > thead > tr,
@@ -31,6 +32,11 @@
     > td.solver-error,
     > th.solver-error {
         background-color: #{colorError};
+    }
+
+    > td.solver-bounds,
+    > th.solver-bounds {
+        background-color: #{colorBounds};
     }
 
     > td.solver-nothing,

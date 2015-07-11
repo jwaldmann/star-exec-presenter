@@ -3,6 +3,7 @@ module Presenter.Utils.WidgetTable where
 import Import
 import Text.Blaze (ToMarkup)
 
+import Presenter.Short
 import Presenter.Processing ( getClass )
 import Presenter.Model.Additional.Table
 import Presenter.Internal.Stringish
@@ -116,8 +117,10 @@ cell_for_job_pair result =
     Cell { mjr = Just result
          , contents = [whamlet|
             <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
-                #{toFixed 1 $ toCpuTime result} /
-                #{toFixed 1 $ toWallclockTime result}
+               #{short $ getSolverResult result }
+               <span style="opacity:0.5">
+                    #{toFixed 1 $ toCpuTime result} /
+                    #{toFixed 1 $ toWallclockTime result} 
              |]
          , tdclass = getClass result
          , url = fromString "nothing"
