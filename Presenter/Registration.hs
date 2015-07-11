@@ -156,7 +156,7 @@ tc2015 = Competition  "Termination Competition 2015"
            ]
        , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
-           , Participant "matchbox" Nothing
+           , Participant "matchbox" ( Just ( 3540, 23248 ))
            ]
        , standard2015 "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( 1342, 1950 ))
