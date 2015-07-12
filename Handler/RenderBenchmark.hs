@@ -13,7 +13,7 @@ getRenderBenchmarkR (StarExecBenchmarkID bmId) = do
   con <- getConnection
   cont <- getBenchmark con bmId
   let contents = decodeUtf8 $ BSL.toStrict cont
-  return $ toTypedContent (typeHtml, toContent cont)
+  return $ toTypedContent $ repXml cont
 
 getRenderXmlR :: Text -> Handler TypedContent
 getRenderXmlR f = do
