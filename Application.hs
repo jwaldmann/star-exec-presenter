@@ -56,6 +56,7 @@ import Handler.ListJobPairs
 import Handler.ListProofs
 import Handler.ListJobs
 import Handler.ListBenchmarks
+import Handler.RenderBenchmark
 import Handler.ListSolvers
 import Handler.ListPostProcs
 import Handler.LegacyListCompetitions

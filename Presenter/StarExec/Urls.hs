@@ -46,6 +46,9 @@ solverInfoPath = "starexec/secure/details/solver.jsp"
 benchmarkInfoPath :: ByteString
 benchmarkInfoPath = "starexec/secure/details/benchmark.jsp"
 
+benchmarkPath :: ByteString
+benchmarkPath = "starexec/services/benchmarks/{bmId}/contents"
+
 postProcPath :: ByteString
 --postProcPath = "starexec/secure/edit/processor.jsp?type=post&id=164"
 postProcPath = "starexec/secure/edit/processor.jsp"

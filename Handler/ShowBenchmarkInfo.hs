@@ -1,10 +1,16 @@
 module Handler.ShowBenchmarkInfo where
 
 import Import
+import Data.Text.Encoding
 import Presenter.StarExec.JobData
+import Presenter.StarExec.Commands (getBenchmark)
+import Presenter.StarExec.Connection (getConnection)
 import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.PersistHelper
+import qualified Data.ByteString.Lazy as BSL
+
+import qualified Handler.DisplayProof (getFile)
 
 getBenchmarkType :: Benchmark -> Text
 getBenchmarkType (StarExecBenchmark b) = benchmarkInfoType b
@@ -58,6 +64,7 @@ getShowBenchmarkInfoR bid@(StarExecBenchmarkID _id) = do
       Latest -> return ()
       Pending _ -> insertWidgetMetaRefresh
     $(widgetFile "se_show_benchmark_info")
+    
 getShowBenchmarkInfoR bid@(LriBenchmarkID _id) = do
   mBenchmarkInfo <- getPersistBenchmarkInfo bid
   defaultLayout $ do

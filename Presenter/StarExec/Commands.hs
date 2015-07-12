@@ -8,6 +8,7 @@ module Presenter.StarExec.Commands
   , getJobPairInfo
   , getJobInfo
   , getBenchmarkInfo
+  , getBenchmark
   , getSolverInfo
   , getPostProcInfo
   , pushJobXML
@@ -289,7 +290,16 @@ makeSpace bs = do
           liftIO $ putStrLn "====== no space ======"
           return Nothing
     
-
+getBenchmark :: StarExecConnection -> Int -> Handler (BSL.ByteString)
+getBenchmark (sec, man, cookies) bmId = do
+  let req = sec { method = "GET"
+                      , queryString = "limit=-1"
+                      , path = getURL benchmarkPath [("{bmId}", show bmId)]
+                      , checkStatus = (\_ _ _ -> Nothing)
+                      }
+  resp <- sendRequest (req, man, cookies)
+  return $ responseBody resp
+  
 getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
 getBenchmarkInfo (sec, man, cookies) _benchmarkId = do
   let req = sec { method = "GET"

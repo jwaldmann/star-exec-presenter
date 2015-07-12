@@ -25,6 +25,8 @@
 -- displays benchmark-infos
 /benchmarks ListBenchmarksR GET
 /benchmarks/#BenchmarkID ShowBenchmarkInfoR GET
+/render/benchmarks/#BenchmarkID RenderBenchmarkR GET
+/xml/#Text RenderXmlR GET
 /show_benchmark_info/#BenchmarkID LegacyShowBenchmarkInfoR GET
 
 -- displays solver-infos

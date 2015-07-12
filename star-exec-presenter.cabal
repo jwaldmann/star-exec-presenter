@@ -47,6 +47,7 @@ library
                      Handler.ListProofs
                      Handler.ListJobs
                      Handler.ListBenchmarks
+                     Handler.RenderBenchmark
                      Handler.ListSolvers
                      Handler.ListPostProcs
                      Handler.LegacyListCompetitions

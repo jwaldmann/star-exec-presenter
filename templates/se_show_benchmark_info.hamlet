@@ -14,7 +14,9 @@ $maybe benchInfo <- mBenchmarkInfo
         <tr>
           <td>Last Update from Star-Exec:
           <td>#{getLastUpdate benchInfo}
+        <tr>
+          <td><a href=@{RenderBenchmarkR $ StarExecBenchmarkID _id}>show source</a>
 
 $nothing
-  <h1>Sorry, no benchmark with the id #{show _id} found!
+  <h1>Sorry, no benchmark with id #{show _id} found!
   (try re-loading this page after a while)
