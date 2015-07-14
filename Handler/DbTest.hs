@@ -10,6 +10,7 @@ import Presenter.PersistHelper
 import Presenter.Model.Entities()
 
 
+-- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
 slowCpuTimeLimit = 10.0
 
