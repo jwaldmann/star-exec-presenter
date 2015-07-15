@@ -22,6 +22,8 @@
     <xsl:variable name="gege">&#187;</xsl:variable>
     <xsl:variable name="box">&#9744;</xsl:variable>
     <xsl:variable name="implication">&#10233;</xsl:variable>
+    <xsl:variable name="mapsto"> &#8614; </xsl:variable>
+    <xsl:variable name="union"> &#8746; </xsl:variable>
     
     <xsl:template match="/certificationProblem">
         <xsl:variable name="mode">
@@ -39,6 +41,7 @@
                 <xsl:when test="proof/relativeNonterminationProof">Relative Nontermination Proof</xsl:when>
                 <xsl:when test="proof/complexityProof">Complexity Proof</xsl:when>
                 <xsl:when test="proof/quasiReductiveProof">Quasi Reductive Proof</xsl:when>
+                <xsl:when test="proof/conditionalCrProof">Confluence Proof for Conditional TRS</xsl:when>
                 <xsl:when test="proof/unknownInputProof">Proof for unsupported input</xsl:when>
                 <xsl:otherwise><xsl:message terminate="yes">unknown proof type</xsl:message></xsl:otherwise>
             </xsl:choose>
@@ -54,6 +57,24 @@
                   .fun { color: darkblue; }
                   .label { color: gray; }
                   .var { color: red; }
+                  table.matrix { margin: auto; } 
+                  .matrix td {
+                  text-align: center;
+                  line-height: 1.2em;
+                  padding: 0 1ex 0ex 1ex;
+                  }                  
+                  table.matrixbrak { display: inline-table; vertical-align: middle;}
+                  td.lbrak { width: 0.8ex;
+                  font-size: 50%;
+                  border: solid thin black;
+                  border-right: none;
+                  }
+                  td.rbrak { width: 0.8ex; 
+                  font-size: 50%;
+                  border: solid thin black;
+                  border-left: none;
+                  }
+                  .matrixbrak td { line-height: 1.4; }                                                        
                 </style>
             </head>
             <body>
@@ -150,9 +171,19 @@
     
     <xsl:template match="equationalProof">
         <xsl:param name="indent"/>
-        <xsl:apply-templates select="*">
-            <xsl:with-param name="indent" select="$indent"/>
-        </xsl:apply-templates>
+        <xsl:choose>
+            <xsl:when test="subsumptionProof">
+                <xsl:apply-templates select="*" mode="conversion">
+                    <xsl:with-param name="indent" select="$indent"/>
+                </xsl:apply-templates>                
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates select="*">
+                    <xsl:with-param name="indent" select="$indent"/>
+                </xsl:apply-templates>
+                
+            </xsl:otherwise>
+        </xsl:choose>        
     </xsl:template>
 
     <xsl:template match="unknownInputProof">
@@ -190,6 +221,13 @@
         </xsl:apply-templates>
     </xsl:template>    
 
+    <xsl:template match="conditionalCrProof">
+        <xsl:param name="indent"/>
+        <xsl:apply-templates select="*" mode="cr">
+            <xsl:with-param name="indent" select="$indent"/>
+        </xsl:apply-templates>
+    </xsl:template>    
+    
     <xsl:template match="crProof">
         <xsl:param name="indent"/>
         <xsl:apply-templates select="*">
@@ -282,12 +320,31 @@
         <li>We apply the substition <xsl:apply-templates select="substitution"/> on both terms and show that the resulting instances are not joinable.</li>
         <xsl:apply-templates select="*[2]"/>        
     </xsl:template>
+
+    <xsl:template match="subterm">
+        <li>We consider the subterms at position <xsl:apply-templates select="*[1]"/></li>
+        <xsl:apply-templates select="*[2]"/>        
+    </xsl:template>
     
     <xsl:template match="usableRulesNonJoin">
-        <li>We take the usable rules of the first term (wrt. the TRS for the first term)
-        and the usable rules of the second term (wrt. the TRS for the second term).
-        Then the terms are not joinable w.r.t. the resulting TRSs.</li>
-        <xsl:apply-templates/>        
+        <xsl:choose>
+            <xsl:when test="count(*) = 1">
+                <li>We take the usable rules of the first term (wrt. the TRS for the first term)
+                    and the usable rules of the second term (wrt. the TRS for the second term).
+                    Then the terms are not joinable w.r.t. the resulting TRSs.</li>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:variable name="dir"><xsl:choose>
+                    <xsl:when test="left">first</xsl:when>
+                    <xsl:otherwise>second</xsl:otherwise>
+                </xsl:choose></xsl:variable>
+                <li>We take following (instantiated) usable rules of the <xsl:value-of select="$dir"/>
+                    term (wrt. the TRS for the <xsl:value-of select="$dir"/> term).
+                    <xsl:apply-templates select="usableRules"/>
+                    Then the terms are not joinable w.r.t. the resulting TRSs.</li>
+            </xsl:otherwise>
+        </xsl:choose>
+        <xsl:apply-templates select="*[last()]"/>        
     </xsl:template>
     
     <xsl:template match="argumentFilterNonJoin">
@@ -355,7 +412,104 @@
         Confluence is proven since the TRS is strongly closed. 
         The joins can be performed within <xsl:value-of select="./text()"/> step(s).
     </xsl:template>
+
+    <xsl:template match="ruleLabeling">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Rule Labeling</h3>
+      Confluence is proven, because all critical peaks can be joined decreasingly
+      using the following rule labeling function (rules that are not shown have label 0).
+      <xsl:apply-templates select="ruleLabelingFunction" />
+      <xsl:apply-templates select="joinableCriticalPairs" />
+    </xsl:template>
+
+    <xsl:template match="ruleLabelingFunction">
+      <ul>
+        <xsl:for-each select="ruleLabelingFunctionEntry">
+          <li>
+            <xsl:apply-templates select="rule"/>
+            <xsl:value-of select="$mapsto"/>
+            <xsl:apply-templates select="*[2]"/>
+          </li>
+        </xsl:for-each>
+      </ul>
+    </xsl:template>
+
+    <xsl:template match="decreasingDiagrams">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Decreasing Diagrams</h3>
+      <xsl:if test="relativeTerminationProof">
+        <h3><xsl:value-of select="$indent"/>.1 Relative Termination Proof</h3>
+        <p>The duplicating rules (R) terminate relative to the other rules (S).</p>
+        <xsl:apply-templates select="relativeTerminationProof">
+          <xsl:with-param name="indent" select="concat($indent, '.1.1')"/>
+        </xsl:apply-templates>
+      </xsl:if>
+      <xsl:apply-templates select="ruleLabeling">
+        <xsl:with-param name="indent" select="concat(concat($indent, '.'), count(*))"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="redundantRules">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Redundant Rules Transformation</h3>
+      <p>
+      To prove that the TRS is confluent, we show confluence of the following
+      modified system:
+      </p>
+      <xsl:apply-templates select="trs"/>
+      <p>
+      All redundant rules that were added or removed can be
+      simulated in <xsl:value-of select="nrSteps"/> steps
+      <xsl:choose>
+        <xsl:when test="conversions">
+          , or by the following conversions:
+          <ul>
+            <xsl:for-each select="conversions/conversion">
+              <li>
+                <xsl:choose>
+                  <xsl:when test="equationStep">
+                    <xsl:apply-templates select="startTerm"/>
+                    <xsl:for-each select="equationStep">
+                      <xsl:choose>
+                        <xsl:when test="leftRight"><xsl:value-of select="$rewrite"/></xsl:when>
+                        <xsl:when test="rightLeft"><xsl:value-of select="$rewriteRev"/></xsl:when>
+                      </xsl:choose>
+                      <xsl:apply-templates select="*[last()]"/>
+                    </xsl:for-each>
+                  </xsl:when>
+                  <xsl:otherwise>
+                    <xsl:apply-templates select="startTerm"/> = <xsl:apply-templates select="startTerm"/>
+                  </xsl:otherwise>
+                </xsl:choose>
+              </li>
+            </xsl:for-each>
+          </ul>
+        </xsl:when>
+        <xsl:otherwise>.</xsl:otherwise>
+      </xsl:choose>
+      </p>
+      <xsl:apply-templates select="crProof">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+      <xsl:apply-templates select="crDisproof">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+
+    <xsl:template match="subsumptionProof" mode="conversion">
+        <xsl:param name="indent"></xsl:param>
+        <h3><xsl:value-of select="$indent"/> Conversion Proof with History</h3>
+        We provide a series of conversions that follow from the set of equations. Each conversion may be used in upcoming
+        conversions, and the desired equation is contained in the conversions.
+        <ul><li>
+            <xsl:apply-templates select=".">
+                <xsl:with-param name="rules">conversions</xsl:with-param>
+            </xsl:apply-templates>
+        </li></ul>
+    </xsl:template>
     
+
     <xsl:template match="equationalProofTree">
         <xsl:param name="indent"></xsl:param>
         <h3><xsl:value-of select="$indent"/> Equational Proof Tree</h3>
@@ -1474,14 +1628,26 @@
         <xsl:choose>
             <xsl:when test="count(coefficient) = 0">()</xsl:when>
             <xsl:otherwise>
-                <table vertical-align="middle" style="display:inline; border-left-style:solid; border-left-width:thin; border-right-style: solid; border-right-width:thin; border-color:black; border-top-width:0;">
-                    <xsl:for-each select="coefficient">
+                <table class="matrixbrak">
+                    <tbody>
                         <tr>
+                            <td class="lbrak"/>
                             <td>
-                                <xsl:apply-templates select="."/>
+                                <table class="matrix">
+                                    <tbody>
+                                        <xsl:for-each select="coefficient">
+                                            <tr>
+                                                <td>
+                                                    <xsl:apply-templates select="."/>
+                                                </td>
+                                            </tr>
+                                        </xsl:for-each>
+                                    </tbody>
+                                </table>
                             </td>
+                            <td class="rbrak"/>
                         </tr>
-                    </xsl:for-each>
+                    </tbody>
                 </table>
             </xsl:otherwise>
         </xsl:choose>
@@ -1491,12 +1657,22 @@
         <xsl:choose>
             <xsl:when test="count(vector) = 0">()</xsl:when>
             <xsl:otherwise>
-                <table vertical-align="middle" style="display:inline; border-left-style:solid; border-left-width:thin; border-right-style: solid; border-right-width:thin; border-color:black; border-top-width:0;">
-                    <xsl:call-template name="matrix2">
-                        <xsl:with-param name="width" select="count(vector)"/>
-                        <xsl:with-param name="heigth" select="count(vector[1]/coefficient)"/>
-                        <xsl:with-param name="h" select="1"/>
-                    </xsl:call-template>
+                <table class="matrixbrak">
+                    <tbody>
+                        <tr>
+                            <td class="lbrak"/>
+                            <td><table class="matrix">
+                                <tbody>
+                                    <xsl:call-template name="matrix2">
+                                        <xsl:with-param name="width" select="count(vector)"/>
+                                        <xsl:with-param name="heigth" select="count(vector[1]/coefficient)"/>
+                                        <xsl:with-param name="h" select="1"/>
+                                    </xsl:call-template>
+                                </tbody>                                
+                            </table></td>
+                            <td class="rbrak"/>
+                        </tr>
+                    </tbody>
                 </table>
             </xsl:otherwise>
         </xsl:choose>
@@ -1668,6 +1844,14 @@
         </xsl:if>
     </xsl:template>
 
+    <xsl:template match="weightedPathOrder">
+        <xsl:text>Weighted Path Order with the following precedence and status</xsl:text>
+        <xsl:apply-templates select="*[1]"/>
+        <xsl:text>and the following 
+        </xsl:text>
+        <xsl:apply-templates select="*[2]"/>
+    </xsl:template>
+    
     <xsl:template match="knuthBendixOrder">
         <xsl:text>Knuth Bendix order with w0 = </xsl:text>
         <xsl:value-of select="w0/text()"/>
@@ -1678,6 +1862,40 @@
             <xsl:apply-templates select="argumentFilter"/>
         </xsl:if>
     </xsl:template>
+    
+    <xsl:template match="precedenceStatus">        
+            <table align="center" width="100%">
+                <xsl:for-each select="precedenceStatusEntry">
+                    <tr>
+                        <td align="right">
+                            <xsl:text>prec(</xsl:text>
+                            <xsl:apply-templates select="*[1]"/>
+                            <xsl:text>)</xsl:text>
+                        </td>
+                        <td align="center">=</td>
+                        <td align="left">
+                            <xsl:value-of select="precedence/text()"/>
+                        </td>
+                        <td/>
+                        <td align="right">
+                            <xsl:text>status(</xsl:text>
+                            <xsl:apply-templates select="*[1]"/>
+                            <xsl:text>)</xsl:text>
+                        </td>
+                        <td align="center">=</td>
+                        <td align="left">
+                            <xsl:text>[</xsl:text>
+                            <xsl:for-each select="status/*">
+                                <xsl:if test="position() != 1">, </xsl:if>
+                                <xsl:apply-templates select="."/>
+                            </xsl:for-each>
+                            <xsl:text>]</xsl:text>
+                        </td>
+                    </tr>
+                </xsl:for-each>
+            </table>        
+    </xsl:template>
+    
     
     <xsl:template match="precedenceWeight">
         <xsl:if test="count(precedenceWeightEntry) != 0">
@@ -1791,6 +2009,9 @@
             <xsl:when test="scnp">
                 <xsl:apply-templates/>
             </xsl:when>
+            <xsl:when test="weightedPathOrder">
+                <xsl:apply-templates/>
+            </xsl:when>
             <xsl:otherwise>
                 (unknown order)
             </xsl:otherwise>
@@ -1843,15 +2064,12 @@
         </p>
     </xsl:template>
     
-    <xsl:template match="unraveling">
-        <xsl:param name="indent"/>
-        <h3><xsl:value-of select="$indent"/> Unraveling</h3>
-        <p>To prove that the CTRS is quasi reductive, we show termination of the following 
-            unravelled system.
-        </p>
+    <xsl:template match="unravelingInformation">
         <table align="center">
-            <xsl:for-each select="unravelingInformation/unravelingEntry/rule">
-                <tr>
+            <xsl:for-each select="unravelingEntry">
+                <tr><td>For </td><td colspan="3"><xsl:apply-templates select="conditionalRule"/> we get</td></tr>
+                <xsl:for-each select="rule">
+                <tr><td/>
                     <td align="right">
                         <xsl:apply-templates select="lhs"/>
                     </td>
@@ -1862,10 +2080,35 @@
                         <xsl:apply-templates select="rhs"/>
                     </td>                    
                 </tr>
+                </xsl:for-each>
+                
             </xsl:for-each>
-        </table>        
+        </table>                
+    </xsl:template>
+    
+    <xsl:template match="unraveling">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Unraveling</h3>
+        <p>To prove that the CTRS is quasi reductive, we show termination of the following 
+            unravelled system.
+        </p>
+        <xsl:apply-templates select="unravelingInformation"/>
         <p>
             <xsl:apply-templates select="trsTerminationProof">
+                <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+            </xsl:apply-templates>
+        </p>
+    </xsl:template>
+
+    <xsl:template match="unraveling" mode="cr">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Unraveling</h3>
+        <p>To prove that the CTRS is confluent, we show confluence of the following 
+            unraveled system.
+        </p>
+        <xsl:apply-templates select="unravelingInformation"/>
+        <p>
+            <xsl:apply-templates select="crProof">
                 <xsl:with-param name="indent" select="concat($indent, '.1')"/>
             </xsl:apply-templates>
         </p>
@@ -2053,6 +2296,27 @@
             </xsl:apply-templates>
         </p>
     </xsl:template>
+
+    <xsl:template match="split" mode="complexity">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Split</h3>
+        <p>We split S<sub>1</sub> <xsl:value-of select="$union"/> S<sub>2</sub> / W into the problems 
+            S<sub>1</sub> / S<sub>2</sub> <xsl:value-of select="$union"/> W 
+            and S<sub>2</sub> / S<sub>1</sub> <xsl:value-of select="$union"/> W
+            where S<sub>1</sub> is the TRS
+            <xsl:apply-templates select="trs/*"/>
+        </p>
+        <p>
+            <xsl:apply-templates select="complexityProof[1]">
+                <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+            </xsl:apply-templates>
+        </p>
+        <p>
+            <xsl:apply-templates select="complexityProof[2]">
+                <xsl:with-param name="indent" select="concat($indent, '.2')"/>
+            </xsl:apply-templates>
+        </p>
+    </xsl:template>
     
     <xsl:template match="splitProc">
         <xsl:param name="indent"/>
@@ -2145,8 +2409,81 @@
                 <xsl:with-param name="indent" select="concat($indent, '.1')"/>
             </xsl:apply-templates>            
         </p>
-    </xsl:template>        
+    </xsl:template>  
+
+    <xsl:template match="usableRules" mode="complexity">
+        <xsl:param name="indent"/>        
+        <h3><xsl:value-of select="$indent"/> Usable Rules</h3>
+        We remove the following rules since they are not usable.
+        <xsl:apply-templates select="nonUsableRules"/>
+        <xsl:apply-templates select="complexityProof">
+            <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+        </xsl:apply-templates>            
+    </xsl:template>    
     
+    <xsl:template match="dtTransformation" mode="complexity">
+        <xsl:param name="indent"/>        
+        <h3><xsl:value-of select="$indent"/> Dependency Tuples</h3>
+        We get the following set of dependency tuples:
+        <table align="center">
+            <xsl:for-each select="*/ruleWithDT">
+            <tr>
+                <td><xsl:apply-templates select="*[2]"/></td>
+                <td> originates from </td>
+                <td><xsl:apply-templates select="*[1]"/></td>
+            </tr>     
+            </xsl:for-each>            
+        </table> 
+        Moreover, we add the following terms to the innermost strategy.
+        <xsl:apply-templates select="innermostLhss"/>
+        <xsl:apply-templates select="complexityProof">
+            <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+        </xsl:apply-templates>            
+    </xsl:template>    
+
+    <xsl:template match="wdpTransformation" mode="complexity">
+        <xsl:param name="indent"/>        
+        <h3><xsl:value-of select="$indent"/> Weak Dependency Pairs</h3>
+        We get the following set of weak dependency pairs:
+        <table align="center">
+            <xsl:for-each select="*/ruleWithWDP">
+                <tr>
+                    <td><xsl:apply-templates select="*[2]"/></td>
+                    <td> originates from </td>
+                    <td><xsl:apply-templates select="*[1]"/></td>
+                </tr>     
+            </xsl:for-each>            
+        </table> 
+        Moreover, we add the following terms to the innermost strategy.
+        <xsl:apply-templates select="innermostLhss"/>
+        <xsl:apply-templates select="complexityProof">
+            <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+        </xsl:apply-templates>            
+    </xsl:template>    
+    
+    <xsl:template match="relativeBounds" mode="complexity">
+        <xsl:param name="indent"/>        
+        <h3><xsl:value-of select="$indent"/> Relative Match-Bounds</h3>
+        Considering the strict rules 
+        <xsl:apply-templates select="trs"/>
+        the relative termination problem is 
+        match-(raise)-bounded by 
+        <xsl:for-each select="bounds[1]">
+            <xsl:apply-templates select="bound"/>.
+            This is shown by the following automaton.
+            <xsl:call-template name="compatibleTreeAutomaton"/>
+        </xsl:for-each>
+        <xsl:apply-templates select="complexityProof">
+           <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+        </xsl:apply-templates>            
+    </xsl:template>
+
+    <xsl:template match="bounds" mode="complexity">
+        <xsl:param name="indent"/>        
+        <xsl:apply-templates select=".">
+            <xsl:with-param name="indent" select="$indent"/>
+        </xsl:apply-templates>
+    </xsl:template>
     
     <xsl:template match="bounds">
         <xsl:param name="indent"/>
@@ -2201,6 +2538,21 @@
             </xsl:apply-templates>
         </p>
     </xsl:template>
+
+    <xsl:template match="constantToUnary" mode="relative">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Constant to Unary</h3>
+        Every constant is turned into a unary function symbol to obtain the TRSs        
+        <xsl:apply-templates select="trs[1]/*"/>
+        and 
+        <xsl:apply-templates select="trs[2]/*"/>
+        <p>
+            <xsl:apply-templates select="relativeTerminationProof">
+                <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+            </xsl:apply-templates>
+        </p>
+    </xsl:template>
+    
     
     <xsl:template match="constantToUnary" mode="nonterm">
         <xsl:param name="indent"/>
@@ -2746,30 +3098,15 @@
         </p>
     </xsl:template>
     
-    <xsl:template name="ProofStep">
+    <xsl:template name="NegatedProofStep">
       <xsl:param name="indent"/>
       <xsl:param name="name"/>
       <xsl:param name="justification"/>
       <xsl:param name="pairs"/>
-      <xsl:param name="urules">null</xsl:param>
       <xsl:param name="rules">null</xsl:param>
       <xsl:param name="proof"/>
         Using the <xsl:value-of select="$name"/>
       <xsl:apply-templates select="$justification"/>
-      <xsl:if test="string($urules) != 'null'">
-        <xsl:choose>
-          <xsl:when test="count($urules) &gt; 0">
-            together with the usable
-            rule<xsl:if test="count($urules) &gt; 1">s</xsl:if>
-            <xsl:apply-templates select="$urules/.."/>
-            (w.r.t. the implicit argument filter of the reduction pair),
-          </xsl:when>
-          <xsl:otherwise>
-            having no usable rules (w.r.t. the implicit argument filter of the
-            reduction pair),
-          </xsl:otherwise>
-        </xsl:choose>
-      </xsl:if>
       <xsl:choose>
         <xsl:when test="count($pairs) &gt; 0">
           the
@@ -2788,23 +3125,13 @@
               </xsl:otherwise>
             </xsl:choose>
 	  </xsl:if>
-          remain<xsl:if test="count($pairs) = 1 and string($rules) = 'null'">s</xsl:if>.
+          could be deleted.
         </xsl:when>
         <xsl:otherwise>
-	  <xsl:choose>
-	    <xsl:when test="string($rules) != 'null' and count($rules) &gt; 0">
-              all pairs could be removed, but the
+              the
               rule<xsl:if test="count($rules) &gt; 1">s</xsl:if>
               <xsl:apply-templates select="$rules/.."/>
-              remain<xsl:if test="count($rules) &gt; 1">s</xsl:if>.
-	    </xsl:when>
-	    <xsl:when test="string($rules) != 'null'">
-              all pairs and rules could be removed.
-	    </xsl:when>
-	    <xsl:otherwise>
-	      all pairs could be removed.
-	    </xsl:otherwise>
-	  </xsl:choose>
+              could be deleted.	  
         </xsl:otherwise>
       </xsl:choose>
       
@@ -2812,6 +3139,74 @@
           <xsl:with-param name="indent" select="concat($indent,'.1')"/>
         </xsl:apply-templates>
       
+    </xsl:template>
+
+    <xsl:template name="ProofStep">
+        <xsl:param name="indent"/>
+        <xsl:param name="name"/>
+        <xsl:param name="justification"/>
+        <xsl:param name="pairs"/>
+        <xsl:param name="urules">null</xsl:param>
+        <xsl:param name="rules">null</xsl:param>
+        <xsl:param name="proof"/>
+        Using the <xsl:value-of select="$name"/>
+        <xsl:apply-templates select="$justification"/>
+        <xsl:if test="string($urules) != 'null'">
+            <xsl:choose>
+                <xsl:when test="count($urules) &gt; 0">
+                    together with the usable
+                    rule<xsl:if test="count($urules) &gt; 1">s</xsl:if>
+                    <xsl:apply-templates select="$urules/.."/>
+                    (w.r.t. the implicit argument filter of the reduction pair),
+                </xsl:when>
+                <xsl:otherwise>
+                    having no usable rules (w.r.t. the implicit argument filter of the
+                    reduction pair),
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
+        <xsl:choose>
+            <xsl:when test="count($pairs) &gt; 0">
+                the
+                pair<xsl:if test="count($pairs) &gt; 1">s</xsl:if> 
+                <xsl:apply-templates select="$pairs/.."/>
+                <xsl:if test="string($rules) != 'null'">
+                    and
+                    <xsl:choose>
+                        <xsl:when test="count($rules) &gt; 0">
+                            the
+                            rule<xsl:if test="count($rules) &gt; 1">s</xsl:if>
+                            <xsl:apply-templates select="$rules/.."/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            no rules
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:if>
+                remain<xsl:if test="count($pairs) = 1 and string($rules) = 'null'">s</xsl:if>.
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:choose>
+                    <xsl:when test="string($rules) != 'null' and count($rules) &gt; 0">
+                        all pairs could be removed, but the
+                        rule<xsl:if test="count($rules) &gt; 1">s</xsl:if>
+                        <xsl:apply-templates select="$rules/.."/>
+                        remain<xsl:if test="count($rules) &gt; 1">s</xsl:if>.
+                    </xsl:when>
+                    <xsl:when test="string($rules) != 'null'">
+                        all pairs and rules could be removed.
+                    </xsl:when>
+                    <xsl:otherwise>
+                        all pairs could be removed.
+                    </xsl:otherwise>
+                </xsl:choose>
+            </xsl:otherwise>
+        </xsl:choose>
+        
+        <xsl:apply-templates select="$proof">
+            <xsl:with-param name="indent" select="concat($indent,'.1')"/>
+        </xsl:apply-templates>
+        
     </xsl:template>
     
     <xsl:template match="argumentFilter">
@@ -2937,6 +3332,14 @@
             <xsl:with-param name="indent" select="$indent"/>
         </xsl:call-template>
     </xsl:template>
+    
+    <xsl:template match="unknownProof" mode="complexity">
+        <xsl:param name="indent"/>
+        <xsl:call-template name="unknownProof">
+            <xsl:with-param name="indent" select="$indent"/>
+        </xsl:call-template>
+    </xsl:template>
+    
 
     <xsl:template match="unknownProof" mode="relative">
         <xsl:param name="indent"/>
@@ -2985,7 +3388,12 @@
         </ul>
     </xsl:template>
     
-
+    <xsl:template match="complexityAssumption" mode="complexity">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Complexity Assumption</h3>
+        <xsl:apply-templates select="complexityInput"/>
+    </xsl:template>
+    
     <xsl:template match="infinitenessAssumption">
       <xsl:param name="indent"/>
       <h3><xsl:value-of select="$indent"/> Infiniteness Assumption</h3>
@@ -3246,6 +3654,18 @@
       </xsl:call-template>
   </xsl:template>
 
+    <xsl:template match="innermostMonoRedPairProc">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Innermost Monotonic Reduction Pair Processor</h3>
+        <xsl:call-template name="NegatedProofStep">
+            <xsl:with-param name="indent" select="$indent"/>
+            <xsl:with-param name="justification" select="orderingConstraintProof"/>
+            <xsl:with-param name="pairs" select="deleted/dps/rules/*"/>
+            <xsl:with-param name="rules" select="deleted/trs/rules/*"/>
+            <xsl:with-param name="proof" select="dpProof"/>
+        </xsl:call-template>
+    </xsl:template>
+    
     <xsl:template match="monoRedPairUrProc">
       <xsl:param name="indent"/>
       <h3><xsl:value-of select="$indent"/> Monotonic Reduction Pair Processor with Usable Rules</h3>
@@ -3319,6 +3739,10 @@
         are strictly oriented by the following 
         <xsl:apply-templates select="orderingConstraintProof"/>
         which has the intended complexity.
+        <xsl:if test="usableRules">
+            Here, only the following usable rules have been considered:
+            <xsl:apply-templates select="usableRules"/>
+        </xsl:if>
         <p>
             <xsl:apply-templates select="complexityProof">
                 <xsl:with-param name="indent" select="concat($indent, '.1')"/>
