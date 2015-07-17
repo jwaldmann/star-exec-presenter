@@ -1,6 +1,7 @@
 module Handler.DbTest where
 
 import Import
+import Data.Maybe
 import Data.List
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -33,18 +34,22 @@ getDbTestR jid = do
   jobResults <- getPersistJobResults jid
   let objAttrRel = createObjectAttributeRelation $ getStarExecResults jobResults
   let attrObjRel = createAttributeObjectReleation objAttrRel
-  -- let concepts = createConcepts objAttrRel attrObjRel
+  let concepts = createConcepts objAttrRel attrObjRel
 
   -- let x = Map.toList objAttrRel
   -- let xn = length $ x
   -- #{show xn}
   -- #{show $ length concepts}
-  -- #{show concepts}
   defaultLayout [whamlet|
+    <ul>
+    $forall obj <- concepts
+      <li> #{show obj}
+
     <h1>Objects an its attributes
     <ul>
     $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
       <li> #{show jobPairId}: #{show jobPairAttributes}
+    
     <h1>Attributes with its objects
     <ul>
     $forall (attr, objects) <- Map.toList attrObjRel
@@ -55,20 +60,23 @@ getDbTestR jid = do
     --   <li> #{show jobResult}
 
 
-createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [[JobPairId]]--[([JobPairId], [JobPairAttributes])]
+createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [JobPairAttributes])]
 createConcepts objAttrRel attrObjRel = do
-  take 20 $ subsequences $ Map.keys objAttrRel
-  --let objectSubsets = (take 20 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  -- take 20 $ subsequences $ Map.keys objAttrRel
+  let objectSubsets = (take 20 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
   -- nice would be:
   --map 
   --  ((\(objs, attrs, attrsObj) -> (objs, attrs))
   -- . (getCommonObjects attrObjRel)
   -- . (getCommonAttributes objAttrRel))
   -- objectSubsets
+  -- let jobsWithAttrs = getCommonAttributes objectSubsets objAttrRel
+  getCommonAttributes objectSubsets objAttrRel
 
 
-getCommonAttributes :: [JobPairId] -> Map JobPairId JobPairAttributes -> ([JobPairId], [JobPairAttributes])
-getCommonAttributes = undefined
+getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId], [JobPairAttributes])]
+getCommonAttributes jobPairIds objAttrRel = do
+  map (\jobPairId -> (jobPairId, map (\job -> fromJust $ Map.lookup job objAttrRel) jobPairId)) jobPairIds
 
 
 getCommonObjects :: ([JobPairId], [JobPairAttributes]) -> Map Attribute [JobPairId] -> ([JobPairId], [JobPairAttributes], [JobPairId])
