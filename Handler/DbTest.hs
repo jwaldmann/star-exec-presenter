@@ -9,6 +9,8 @@ import qualified Data.Map.Strict as Map
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
 
+type JobPairId = Int
+
 data Attribute = ASolverName Text | ASlowCpuTime Bool | ASolverResult SolverResult
  deriving (Eq, Ord, Show)
 
@@ -25,19 +27,20 @@ data JobPairAttributes = JobPairAttributes
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
 slowCpuTimeLimit = 10.0
 
+
 getDbTestR :: JobID -> Handler Html
 getDbTestR jid = do
   jobResults <- getPersistJobResults jid
   let objAttrRel = createObjectAttributeRelation $ getStarExecResults jobResults
   let attrObjRel = createAttributeObjectReleation objAttrRel
-  let concepts = createConcepts objAttrRel attrObjRel
+  -- let concepts = createConcepts objAttrRel attrObjRel
 
-  let x = Map.toList objAttrRel
-  let xn = length $ x
+  -- let x = Map.toList objAttrRel
+  -- let xn = length $ x
+  -- #{show xn}
+  -- #{show $ length concepts}
+  -- #{show concepts}
   defaultLayout [whamlet|
-    #{show xn}
-    #{show $ length concepts}
-    #{show concepts}
     <h1>Objects an its attributes
     <ul>
     $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
@@ -52,12 +55,27 @@ getDbTestR jid = do
     --   <li> #{show jobResult}
 
 
-createConcepts :: Map Int JobPairAttributes -> Map Attribute [Int] -> [[Int]]
-createConcepts objAttrRel attrsObjRel = do
+createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [[JobPairId]]--[([JobPairId], [JobPairAttributes])]
+createConcepts objAttrRel attrObjRel = do
   take 20 $ subsequences $ Map.keys objAttrRel
+  --let objectSubsets = (take 20 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  -- nice would be:
+  --map 
+  --  ((\(objs, attrs, attrsObj) -> (objs, attrs))
+  -- . (getCommonObjects attrObjRel)
+  -- . (getCommonAttributes objAttrRel))
+  -- objectSubsets
 
 
-createObjectAttributeRelation :: [JobResultInfo] -> Map Int JobPairAttributes
+getCommonAttributes :: [JobPairId] -> Map JobPairId JobPairAttributes -> ([JobPairId], [JobPairAttributes])
+getCommonAttributes = undefined
+
+
+getCommonObjects :: ([JobPairId], [JobPairAttributes]) -> Map Attribute [JobPairId] -> ([JobPairId], [JobPairAttributes], [JobPairId])
+getCommonObjects = undefined
+
+
+createObjectAttributeRelation :: [JobResultInfo] -> Map JobPairId JobPairAttributes
 createObjectAttributeRelation jobResults = do
   let jobResultInfoPairIds = map (jobResultInfoPairId) jobResults
   let attrs = getAttributeCollection jobResults
@@ -65,7 +83,7 @@ createObjectAttributeRelation jobResults = do
   Map.fromList objAttrRel
 
 
-createAttributeObjectReleation :: Map Int JobPairAttributes -> Map Attribute [Int]
+createAttributeObjectReleation :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId]
 createAttributeObjectReleation objAttrRel = do
   let objAttrs = Map.toList objAttrRel
   -- very ugly and to explicit!
@@ -93,5 +111,4 @@ getAttributeCollection jobResults = do
   map (\(a,b,c,d)-> JobPairAttributes {benchmarkId = a, solverName = b, slowCpuTime = c, solverResult = d}) attrs
 
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
-evaluateCpuTime = map ((\t -> t > slowCpuTimeLimit ). jobResultInfoCpuTime)
-
+evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
