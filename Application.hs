@@ -65,7 +65,9 @@ import Handler.LegacyListHiddenCompetitions
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
-import Control.Concurrent.SSem
+
+-- import Control.Concurrent.SSem
+import qualified Control.Concurrent.FairRWLock as Lock
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -111,14 +113,14 @@ makeFoundation conf = do
     -- CompetitonResults-Cache
     crCache <- atomically $ newTVar M.empty
     -- DB-Semaphore
-    dbS <- Control.Concurrent.SSem.new 1
+    dbS <- Lock.new
 
     -- Session for Connections to starexec.org
     now <- getCurrentTime
     session <- atomically $ newTVar $ SessionData (createCookieJar []) now
 
     -- Connection semaphore
-    conS <- Control.Concurrent.SSem.new 1
+    conS <- Lock.new
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
         foundation = App conf s p manager dbconf logger session crCache dbS conS

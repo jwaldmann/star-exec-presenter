@@ -20,9 +20,11 @@ import Presenter.Prelude (diffTime)
 import Data.Time.Clock (getCurrentTime, UTCTime)
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
-import Control.Concurrent.SSem
+-- import Control.Concurrent.SSem
+import qualified Control.Concurrent.FairRWLock as Lock
+import Control.Exception (throw)
 import Control.Monad.Catch (bracket_)
-
+import Control.Monad ((>=>))
 import Control.Monad.Logger
 
 
@@ -33,18 +35,13 @@ password :: Login -> Text
 password (Login _ pass) = pass
 
 runCon_exclusive :: Handler b -> Handler b
-runCon_exclusive action =
-  bracket_ ( do
-               app <- getYesod
-               lift $ Control.Concurrent.SSem.wait   $ conSem app
-               logWarnN $ T.pack $ "connection semaphore: wait ...."
-           )
-           ( do
-                app <- getYesod
-                lift $ Control.Concurrent.SSem.signal $ conSem app
-                logWarnN $ T.pack $ "... connection semaphore: signal"
-           )
-           action
+runCon_exclusive action = do
+  lock <- conSem <$> getYesod 
+  -- Lock.withWrite lock action
+  bracket_
+    ( lift $ Lock.acquireWrite lock )
+    ( lift $ (Lock.releaseWrite >=> either throw return) lock)
+    action
 
 getSessionData :: Handler SessionData
 getSessionData = do
@@ -58,7 +55,8 @@ setSessionData cj d = do
 
 -- | raw request. May return "Login" response if we're not currently logged in.
 -- will silently set cookies to session state.
-sendRequestRaw :: StarExecConnection -> Handler (Response BSL.ByteString)
+sendRequestRaw :: StarExecConnection
+               -> Handler (Response BSL.ByteString)
 sendRequestRaw (req, man, _ ) = do
   SessionData cj d <- getSessionData
   let req' =  req { cookieJar = Just cj }

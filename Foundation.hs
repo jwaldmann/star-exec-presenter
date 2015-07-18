@@ -31,7 +31,8 @@ import Data.Text (Text)
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
-import Control.Concurrent.SSem
+-- import Control.Concurrent.SSem
+import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Concurrent.MVar
 
 -- | The site argument for your application. This can be a good place to
@@ -47,8 +48,8 @@ data App = App
     , appLogger :: Logger
     , sessionData :: TVar SessionData
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
-    , dbSem :: SSem
-    , conSem :: SSem
+    , dbSem :: Lock.RWLock
+    , conSem :: Lock.RWLock
     }
 
 instance HasHttpManager App where

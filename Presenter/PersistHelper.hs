@@ -9,8 +9,11 @@ import qualified Data.Text as T
 import Codec.Compression.GZip
 import Data.Time.Clock
 import qualified Data.List as L
-import Control.Concurrent.SSem
+-- import Control.Concurrent.SSem
+import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Monad.Catch (bracket_)
+import Control.Exception (throw)
+import Control.Monad ((>=>))
 import Control.Monad.Logger
 
 -- ###### persist getter ######
@@ -188,16 +191,11 @@ compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
 
 runDB_exclusive :: YesodDB App b -> Handler b
-runDB_exclusive query =
-  bracket_ ( do
-               app <- getYesod
-               lift $ Control.Concurrent.SSem.wait   $ dbSem app
-               logWarnN $ T.pack $ "database semaphore: wait ...."
-           )
-           ( do
-                app <- getYesod
-                lift $ Control.Concurrent.SSem.signal $ dbSem app
-                logWarnN $ T.pack $ "... database semaphore: signal"
-           )
-           $ runDB query
+runDB_exclusive query = do
+  lock <- dbSem <$> getYesod 
+  -- Lock.withWrite lock action
+  bracket_
+    ( lift $ Lock.acquireWrite lock )
+    ( lift $ (Lock.releaseWrite >=> either throw return) lock)
+    $ runDB query
 
