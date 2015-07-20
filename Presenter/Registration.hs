@@ -158,6 +158,7 @@ tc2015 = Competition  "Termination Competition 2015"
        , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
            , Participant "matchbox" ( Just ( 3540, 23248 ))
+           , Participant "naysayer" ( Just ( 3725, 23773 ))
            ]
        , standard2015 "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
@@ -219,12 +220,12 @@ tc2015 = Competition  "Termination Competition 2015"
      , standard2015 "Integer Transition Systems"  [ Hierarchy 56706 ]
            [ Participant "T2" ( Just ( 3509, 23138 ))
            , Participant "AProVE" ( Just ( 3342, 22446 ))
-           , Participant "Ctrl" ( Just (1541, 2387))
+           , Participant "Ctrl" ( Just (3723, 23757))
            , Participant "HipTNT+" (Just (3473, 23024))
            ]
      , standard2015 "Integer TRS"  [ Hierarchy 56704  ]
            [ Participant "AProVE" ( Just ( 3342, 22447 ) )
-           , Participant "Ctrl" ( Just (1541, 2388))
+           , Participant "Ctrl" ( Just (3723, 23758))
            ]
      ]
    , MetaCategory "Complexity Analysis of Term Rewriting"
