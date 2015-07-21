@@ -7,12 +7,17 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 -- import           Data.Set (Set)
 -- import qualified Data.Set as Set
+import qualified Data.Set as Set
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
 
 type JobPairId = Int
 
-data Attribute = ASolverName Text | ASlowCpuTime Bool | ASolverResult SolverResult
+data Attribute = 
+  ASolverName Text
+   | ASlowCpuTime Bool
+   | ASolverResult SolverResult
+   | ASlowCpuTimeSolverResult Bool SolverResult
  deriving (Eq, Ord, Show)
 
 
@@ -41,6 +46,7 @@ getDbTestR jid = do
   -- #{show xn}
   -- #{show $ length concepts}
   defaultLayout [whamlet|
+    <h1>Concepts
     <ul>
     $forall obj <- concepts
       <li> #{show obj}
@@ -60,26 +66,22 @@ getDbTestR jid = do
     --   <li> #{show jobResult}
 
 
-createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
+--createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
+createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
 createConcepts objAttrRel attrObjRel = do
   -- take 20 $ subsequences $ Map.keys objAttrRel
-  let objectSubsets = (take 20 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
-  -- nice would be:
-  --map 
-  --  ((\(objs, attrs, attrsObj) -> (objs, attrs))
-  -- . (getCommonObjects attrObjRel)
-  -- . (getCommonAttributes objAttrRel))
-  -- objectSubsets
-  -- let jobsWithAttrs = getCommonAttributes objectSubsets objAttrRel
-  --let attributes = getCommonAttributes objectSubsets objAttrRel
-  --getCommonObjects attributes
-  getCommonAttributes objectSubsets objAttrRel
+  let objects = (take 2000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  -- getCommonAttributes objects objAttrRel
+  let attributes = getCommonAttributes objects objAttrRel
+  getCommonObjects attributes attrObjRel
 
 
-getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId], [Attribute])]
+getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [[Attribute]]
+--getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId],[Attribute])]
 getCommonAttributes jobPairIds objAttrRel = do
     map (\jobs ->
-      (jobs, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs))
+      -- (jobs, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs))
+      getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs)
       jobPairIds
 
 
@@ -91,7 +93,14 @@ getCommonObjects attributes attrObjRel = do
 
 getCommonAttribute :: [JobPairAttributes] -> [Attribute]
 getCommonAttribute attributes = do
-    (getSlowCpuTimeAttribute attributes) ++ (getSolverResultAttribute attributes)
+    let commonAttr = (getSlowCpuTimeAttribute attributes) ++ (getSolverResultAttribute attributes)
+    if elem (ASlowCpuTime True) commonAttr && elem (ASolverResult MAYBE) commonAttr
+      then [ASlowCpuTimeSolverResult True MAYBE]
+      else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult MAYBE) commonAttr
+        then [ASlowCpuTimeSolverResult False MAYBE]
+        else commonAttr
+
+
 
 
 getSlowCpuTimeAttribute :: [JobPairAttributes] -> [Attribute]
@@ -128,10 +137,13 @@ createAttributeObjectReleation objAttrRel = do
   let solverResults = map (\(a,b) -> (a, solverResult b)) objAttrs
   let maybeSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == MAYBE) solverResults
   -- let otherSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == OTHER) solverResults
-
   let attrsObjRel = Map.insert (ASlowCpuTime True) slowCpuTimes Map.empty
-  let attrsObjRels = Map.insert (ASlowCpuTime False) fastCpuTimes attrsObjRel
-  Map.insert (ASolverResult MAYBE) maybeSolverResults attrsObjRels
+  let attrsObjRel' = Map.insert (ASlowCpuTime False) fastCpuTimes attrsObjRel
+
+  -- only helper keys so the union does not have to be calculated again and again
+  let attrsObjRel'' = Map.insert (ASlowCpuTimeSolverResult False MAYBE) (listUnion slowCpuTimes maybeSolverResults) attrsObjRel'
+  let attrsObjRel''' = Map.insert (ASlowCpuTimeSolverResult True MAYBE) (listUnion fastCpuTimes maybeSolverResults) attrsObjRel''
+  Map.insert (ASolverResult MAYBE) maybeSolverResults attrsObjRel'''
 
 
 getAttributeCollection :: [JobResultInfo] -> [JobPairAttributes]
@@ -146,3 +158,20 @@ getAttributeCollection jobResults = do
 
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
+
+
+-- https://github.com/nh2/haskell-ordnub
+ordNub :: (Ord a) => [a] -> [a]
+ordNub l = go Set.empty l
+  where
+    go _ [] = []
+    go s (x:xs) = if x `Set.member` s then go s xs
+                                      else x : go (Set.insert x s) xs
+-- https://github.com/nh2/haskell-ordnub
+listUnion :: (Ord a) => [a] -> [a] -> [a]
+listUnion a b = a ++ ordNub (filter (`Set.notMember` aSet) b)
+  where
+    aSet = Set.fromList a
+
+updateMap :: (Ord k, Num a) => k -> a -> Map k a -> Map k a
+updateMap = Map.insertWith (+)
