@@ -60,7 +60,7 @@ getDbTestR jid = do
     --   <li> #{show jobResult}
 
 
-createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [JobPairAttributes])]
+createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
 createConcepts objAttrRel attrObjRel = do
   -- take 20 $ subsequences $ Map.keys objAttrRel
   let objectSubsets = (take 20 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
@@ -74,13 +74,35 @@ createConcepts objAttrRel attrObjRel = do
   getCommonAttributes objectSubsets objAttrRel
 
 
-getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId], [JobPairAttributes])]
+getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId], [Attribute])]
 getCommonAttributes jobPairIds objAttrRel = do
-  map (\jobPairId -> (jobPairId, map (\job -> fromJust $ Map.lookup job objAttrRel) jobPairId)) jobPairIds
+    map (\jobPairId ->
+      (jobPairId, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobPairId))
+      jobPairIds
 
 
-getCommonObjects :: ([JobPairId], [JobPairAttributes]) -> Map Attribute [JobPairId] -> ([JobPairId], [JobPairAttributes], [JobPairId])
+getCommonObjects :: ([JobPairId], [Attribute]) -> Map Attribute [JobPairId] -> ([JobPairId], [JobPairAttributes], [JobPairId])
 getCommonObjects = undefined
+
+
+getCommonAttribute :: [JobPairAttributes] -> [Attribute]
+getCommonAttribute attributes = do
+    (getSlowCpuTimeAttribute attributes) ++ (getSolverResultAttribute attributes)
+
+
+getSlowCpuTimeAttribute :: [JobPairAttributes] -> [Attribute]
+getSlowCpuTimeAttribute attributes = do
+  if all (\a -> slowCpuTime a == True) attributes
+    then [ASlowCpuTime True]
+    else if all (\a -> slowCpuTime a == False) attributes
+      then [ASlowCpuTime False]
+      else []
+
+getSolverResultAttribute :: [JobPairAttributes] -> [Attribute]
+getSolverResultAttribute attributes = do
+  if all (\a -> solverResult a == MAYBE) attributes
+    then [ASolverResult MAYBE]
+    else []
 
 
 createObjectAttributeRelation :: [JobResultInfo] -> Map JobPairId JobPairAttributes
