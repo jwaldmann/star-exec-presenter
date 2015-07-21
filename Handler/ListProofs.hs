@@ -25,7 +25,7 @@ getJob_ mResult = case mResult of
   Nothing -> return Nothing
 
 getAll :: Handler [(Pair, Maybe JobResult, Maybe Job)]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   starExecPairs <- do
     pairs <- getEntityList' [ JobPairInfoHtmlProof !=. Nothing ] []
     return $ StarExecPair <$> pairs -- (filter (isJust . jobPairInfoHtmlProof) pairs)

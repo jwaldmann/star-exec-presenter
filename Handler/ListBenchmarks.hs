@@ -6,7 +6,7 @@ import Presenter.PersistHelper
 -- Pagination is probably needed!
 
 getAll :: Handler [Benchmark]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   starExecBenchmarks <- do
     benchmarks <- getEntityList' ([] :: [Filter BenchmarkInfo]) []
     return $ StarExecBenchmark <$> benchmarks

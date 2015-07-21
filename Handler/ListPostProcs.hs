@@ -4,7 +4,7 @@ import Import
 import Presenter.PersistHelper
 
 getAll :: Handler [PostProcInfo]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   getEntityList' ([] :: [Filter PostProcInfo]) []
 
 getListPostProcsR :: Handler Html

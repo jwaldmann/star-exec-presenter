@@ -4,7 +4,7 @@ import Import
 import Presenter.PersistHelper
 
 getAll :: Handler [Job]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   starExecJobs <- do
     jobs <- getEntityList' ([] :: [Filter JobInfo]) []
     return $ StarExecJob <$> jobs

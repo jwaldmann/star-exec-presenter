@@ -163,6 +163,7 @@ library
                  , xml-hamlet
                  , case-insensitive
                  , http-client
+                 , http-client-tls
                  , random
                  , tagsoup
                  -- , esqueleto

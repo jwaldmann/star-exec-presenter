@@ -59,9 +59,8 @@ pushcat config cat = do
   sm <- getSpaceMap default_space
   --let ci = R.contents cat
   now <- liftIO getCurrentTime
-  con <- getConnection
   jobs <- mkJobs sm config cat now
-  js <- pushJobXML con (space config) jobs
+  js <- pushJobXML (space config) jobs
   return $ cat { R.contents = (R.contents cat, catMaybes $ map jobid js) }
 
 pushmetacat :: JobControl -> R.MetaCategory R.Catinfo -> Handler (R.MetaCategory (R.Catinfo, [Int]))
@@ -70,8 +69,7 @@ pushmetacat config mc = do
   now <- liftIO getCurrentTime
   jobs <- forM (R.categories mc) $ \ cat ->  do 
           mkJobs sm config cat now
-  con <- getConnection
-  js <- pushJobXML con (space config) $ concat jobs
+  js <- pushJobXML (space config) $ concat jobs
   let m = M.fromList $ do
           SEJob { description = d, jobid = Just i } <- js
           return ( d, [i] ) 
@@ -88,8 +86,7 @@ pushcomp config c = do
     now <- liftIO getCurrentTime
     jobs <- forM ( R.metacategories c >>= R.categories ) $ \ cat -> do 
             mkJobs sm config cat now
-    con <- getConnection
-    js <- pushJobXML con (space config) $ concat jobs
+    js <- pushJobXML (space config) $ concat jobs
     let m = M.fromList $ do
             SEJob { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -117,8 +114,7 @@ getSpaceXMLquick sm sId =
     case M.lookup sId sm of
         Just s -> return $ Just s
         Nothing -> do
-            con <- getConnection
-            getSpaceXML con sId
+            getSpaceXML sId
 
 convertC :: R.Category (R.Catinfo, [Int]) -> Category
 convertC c = 

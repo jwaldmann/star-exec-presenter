@@ -21,6 +21,7 @@ getLog (StarExecPair p) = decompressText $ jobPairInfoLog p
 getShowJobPairR :: JobPairID -> Handler Html
 getShowJobPairR pid@(StarExecPairID _id) = do
   logWarnN $ T.pack $ "getShowJobPairR.pid = " ++ show pid
+  -- ?? why are there two queries?
   qr @ (QueryResult qStatus mPair) <- queryJobPair pid
   logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
   mJobResult <- getPersistJobResult pid

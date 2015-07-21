@@ -17,7 +17,8 @@ import Network.Wai.Middleware.RequestLogger
 import qualified Network.Wai.Middleware.RequestLogger as RequestLogger
 import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
-import Network.HTTP.Client.Conduit (newManager)
+import Network.HTTP.Client.Conduit 
+import Network.HTTP.Client.TLS (tlsManagerSettings)
 import Network.HTTP.Conduit (createCookieJar)
 import Control.Monad.Logger (runLoggingT)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
@@ -65,6 +66,7 @@ import Handler.LegacyListHiddenCompetitions
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
+import Presenter.StarExec.Connection (killmenothing)
 
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
@@ -100,7 +102,12 @@ makeApplication conf = do
 -- performs some initialization.
 makeFoundation :: AppConfig DefaultEnv Extra -> IO App
 makeFoundation conf = do
-    manager <- newManager
+    manager <- newManagerSettings
+      $ tlsManagerSettings
+      { managerResponseTimeout = Just $ 60 * 10^6
+      , managerConnCount = 1
+      } 
+    
     s <- staticSite
     dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
               Database.Persist.loadConfig >>=
@@ -117,7 +124,7 @@ makeFoundation conf = do
 
     -- Session for Connections to starexec.org
     now <- getCurrentTime
-    session <- atomically $ newTVar $ SessionData (createCookieJar []) now
+    session <- atomically $ newTVar $ SessionData (createCookieJar [ killmenothing ]) now
 
     -- Connection semaphore
     conS <- Lock.new

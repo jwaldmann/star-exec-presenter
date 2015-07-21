@@ -325,8 +325,7 @@ getCompetitionResults comp = do
 
   logInfoN $ T.pack $ "jobs complete: " ++ (show jobsComplete)
   logInfoN $ T.pack $ "hasAllPostProcs: " ++ (show hasAllPostProcs)
-
-  con <- getConnection
+  let con = error "con.11"
   postProcs <- if hasAllPostProcs
                 then return persistPostProcs
                 else mapM (getPostProcInfo con) postProcIds
@@ -343,7 +342,7 @@ getCompetitionResults comp = do
       jobs = zip jobInfos jobResults
       processedResults = map getProcessedResults jobs
 
-  runDB_exclusive $ do
+  runDB_writelocked $ do
     if not hasAllPostProcs
       then mapM_ updatePostProcInfo $ catMaybes postProcs
       else return ()

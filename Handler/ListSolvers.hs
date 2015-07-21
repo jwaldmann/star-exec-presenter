@@ -4,7 +4,7 @@ import Import
 import Presenter.PersistHelper
 
 getAll :: Handler [Solver]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   starExecSolvers <- do
     solvers <- getEntityList' ([] :: [Filter SolverInfo]) []
     return $ StarExecSolver <$> solvers

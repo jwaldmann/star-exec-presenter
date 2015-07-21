@@ -1,6 +1,8 @@
 module Presenter.PersistHelper where
 
-import Import
+import Import hiding (runDB)
+import qualified Import
+
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import Data.Text.Lazy.Encoding
@@ -18,13 +20,13 @@ import Control.Monad.Logger
 
 -- ###### persist getter ######
 
-getEntityList _filter _opts = runDB $ getEntityList' _filter _opts
+getEntityList _filter _opts = runDB_readlocked $ getEntityList' _filter _opts
 
 getEntityList' _filter _opts = do
   results <- selectList _filter _opts
   return $ map entityVal results
 
-getEntity uniqueVal = runDB $ getEntity' uniqueVal
+getEntity uniqueVal = runDB_readlocked $ getEntity' uniqueVal
 
 getEntity' uniqueVal = do
   mVal <- getBy uniqueVal
@@ -41,7 +43,7 @@ getPersistStarExecJobInfo' :: Int -> YesodDB App (Maybe JobInfo)
 getPersistStarExecJobInfo' = getEntity' . UniqueJobInfo
 
 getPersistJobInfo :: JobID -> Handler (Maybe Job)
-getPersistJobInfo = runDB . getPersistJobInfo'
+getPersistJobInfo = runDB_readlocked . getPersistJobInfo'
 
 getPersistJobInfo' :: JobID -> YesodDB App (Maybe Job)
 getPersistJobInfo' (StarExecJobID _id) = getEntityVal' (UniqueJobInfo _id) StarExecJob
@@ -55,7 +57,7 @@ getPersistPostProcInfo' :: Int -> YesodDB App (Maybe PostProcInfo)
 getPersistPostProcInfo' = getEntity' . UniquePostProcInfo
 
 getPersistJobResults :: JobID -> Handler [JobResult]
-getPersistJobResults = runDB . getPersistJobResults'
+getPersistJobResults = runDB_readlocked . getPersistJobResults'
 
 getPersistJobResults' :: JobID -> YesodDB App [JobResult]
 getPersistJobResults' (StarExecJobID _id) = do
@@ -69,7 +71,7 @@ getPersistJobResults' (UibkJobID _id) = do
   return $ UibkResult <$> results
 
 getPersistJobResult :: JobPairID -> Handler (Maybe JobResult)
-getPersistJobResult = runDB . getPersistJobResult'
+getPersistJobResult = runDB_readlocked . getPersistJobResult'
 
 getPersistJobResult' :: JobPairID -> YesodDB App (Maybe JobResult)
 getPersistJobResult' (StarExecPairID _id) = getEntityVal' (UniqueJobResultInfo _id) StarExecResult
@@ -82,26 +84,26 @@ getPersistStarExecJobResults' :: Int -> YesodDB App [JobResultInfo]
 getPersistStarExecJobResults' _jobId = getEntityList' [ JobResultInfoJobId ==. _jobId ] []
 
 getPersistCompetitions :: Handler [Entity CompetitionInfo]
-getPersistCompetitions = runDB $ getPersistCompetitions'
+getPersistCompetitions = runDB_readlocked $ getPersistCompetitions'
 
 getPersistCompetitions' :: YesodDB App [Entity CompetitionInfo]
 getPersistCompetitions' = selectList [] [ Desc CompetitionInfoDate ]
 
 getPersistPublicCompetitions :: Handler [Entity CompetitionInfo]
-getPersistPublicCompetitions = runDB $ getPersistPublicCompetitions'
+getPersistPublicCompetitions = runDB_readlocked $ getPersistPublicCompetitions'
 
 getPersistPublicCompetitions' :: YesodDB App [Entity CompetitionInfo]
 getPersistPublicCompetitions' = selectList [ CompetitionInfoPublic ==. True ] [ Desc CompetitionInfoDate ]
 
 getPersistJobPair :: JobPairID -> Handler (Maybe Pair)
-getPersistJobPair = runDB . getPersistJobPair'
+getPersistJobPair = runDB_readlocked . getPersistJobPair'
 
 getPersistJobPair' :: JobPairID -> YesodDB App (Maybe Pair)
 getPersistJobPair' (StarExecPairID _id) = getEntityVal' (UniqueJobPairInfo _id) StarExecPair
 getPersistJobPair' _ = error "getPersistJobPair': not yet implemented"
 
 getPersistSolverInfo :: SolverID -> Handler (Maybe Solver)
-getPersistSolverInfo = runDB . getPersistSolverInfo'
+getPersistSolverInfo = runDB_readlocked . getPersistSolverInfo'
 
 getPersistSolverInfo' :: SolverID -> YesodDB App (Maybe Solver)
 getPersistSolverInfo' (StarExecSolverID _id) = getEntityVal' (UniqueSolverInfo _id) StarExecSolver
@@ -109,7 +111,7 @@ getPersistSolverInfo' (LriSolverID _id) = getEntityVal' (UniqueLriSolverInfo _id
 getPersistSolverInfo' (UibkSolverID _id) = getEntityVal' (UniqueUibkSolverInfo _id) UibkSolver
 
 getPersistBenchmarkInfo :: BenchmarkID -> Handler (Maybe Benchmark)
-getPersistBenchmarkInfo = runDB . getPersistBenchmarkInfo'
+getPersistBenchmarkInfo = runDB_readlocked . getPersistBenchmarkInfo'
 
 getPersistBenchmarkInfo' :: BenchmarkID -> YesodDB App (Maybe Benchmark)
 getPersistBenchmarkInfo' (StarExecBenchmarkID _id) = getEntityVal' (UniqueBenchmarkInfo _id) StarExecBenchmark
@@ -119,10 +121,10 @@ getPersistBenchmarkInfo' (UibkBenchmarkID _id) = getEntityVal' (UniqueUibkBenchm
 -- ###### persist setter (inserts) ######
 
 insertJobInfo :: JobInfo -> Handler ()
-insertJobInfo jobInfo = runDB $ insert_ jobInfo
+insertJobInfo jobInfo = runDB_writelocked $ insert_ jobInfo
 
 insertJobResultInfo :: JobResultInfo -> Handler ()
-insertJobResultInfo resultInfo = runDB $ do
+insertJobResultInfo resultInfo = runDB_writelocked $ do
   _ <- insertUnique $ resultInfo
   return ()
 
@@ -131,7 +133,7 @@ registerJobs ids = do
   now <- lift getCurrentTime
   mapM_ (insertJob now) ids
   where
-    insertJob now _id = runDB $ insertUnique $ defaultJobInfo
+    insertJob now _id = runDB_writelocked $ insertUnique $ defaultJobInfo
       { jobInfoStarExecId = _id
       , jobInfoStartDate = now
       , jobInfoLastUpdate = now
@@ -190,12 +192,19 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
 
-runDB_exclusive :: YesodDB App b -> Handler b
-runDB_exclusive query = do
+runDB_writelocked :: YesodDB App b -> Handler b
+runDB_writelocked query = do
   lock <- dbSem <$> getYesod 
-  -- Lock.withWrite lock action
   bracket_
     ( lift $ Lock.acquireWrite lock )
     ( lift $ (Lock.releaseWrite >=> either throw return) lock)
-    $ runDB query
+    $ Import.runDB query
+
+runDB_readlocked :: YesodDB App b -> Handler b
+runDB_readlocked query = do
+  lock <- dbSem <$> getYesod 
+  bracket_
+    ( lift $ Lock.acquireRead lock )
+    ( lift $ (Lock.releaseRead >=> either throw return) lock)
+    $ Import.runDB query
 

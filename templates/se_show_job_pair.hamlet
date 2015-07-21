@@ -17,5 +17,5 @@ $maybe pair <- mPair
   <h3>Log:
   <pre>#{getLog pair}
 $nothing
-  <h1>Sorry, no pair with the id #{int2Text _id} found!
+  <h1>No pair with id #{int2Text _id} found!
   (try re-loading this page after a while)

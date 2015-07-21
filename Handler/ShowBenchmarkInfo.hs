@@ -4,7 +4,6 @@ import Import
 import Data.Text.Encoding
 import Presenter.StarExec.JobData
 import Presenter.StarExec.Commands (getBenchmark)
-import Presenter.StarExec.Connection (getConnection)
 import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.PersistHelper

@@ -226,12 +226,13 @@ jobs_to_archive js =
 -- * API
 
 getJobInfo :: StarExecConnection -> Int -> Handler (Maybe JobInfo)
-getJobInfo (sec, man, cookies) _jobId = do
+getJobInfo _ _jobId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = jobInfoPath
                 , queryString = "id=" +> (BSC.pack $ show _jobId)
                 }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   let cursor = cursorFromDOM $ responseBody resp
       jobTitle = getFirstTitle cursor
   if "http" == T.take 4 jobTitle
@@ -247,8 +248,9 @@ getDefaultSpaceXML fp = do
     s <- lift $ BSL.readFile fp
     makeSpace s
 
-getSpaceXML :: StarExecConnection -> Int -> Handler (Maybe Space)
-getSpaceXML (sec, man, cookies) _spaceId = do
+getSpaceXML :: Int -> Handler (Maybe Space)
+getSpaceXML _spaceId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = downloadPath
                 , queryString = "id=" +> (BSC.pack $ show _spaceId)
@@ -257,7 +259,7 @@ getSpaceXML (sec, man, cookies) _spaceId = do
                 }
   --liftIO $ putStrLn "### getSpaceXML -> ###"
   --liftIO $ print req
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   --liftIO $ putStrLn "### <- getSpaceXML ###"
 
   makeSpace $ responseBody resp
@@ -291,22 +293,24 @@ makeSpace bs = do
           return Nothing
     
 getBenchmark :: StarExecConnection -> Int -> Handler (BSL.ByteString)
-getBenchmark (sec, man, cookies) bmId = do
+getBenchmark _ bmId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                       , queryString = "limit=-1"
                       , path = getURL benchmarkPath [("{bmId}", show bmId)]
                       , checkStatus = (\_ _ _ -> Nothing)
                       }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   return $ responseBody resp
   
 getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
-getBenchmarkInfo (sec, man, cookies) _benchmarkId = do
+getBenchmarkInfo _ _benchmarkId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = benchmarkInfoPath
                 , queryString = "id=" +> (BSC.pack $ show _benchmarkId)
                 }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   let cursor = cursorFromDOM $ responseBody resp
       benchmarkTitle = getFirstTitle cursor
   if "http" == T.take 4 benchmarkTitle
@@ -320,12 +324,13 @@ getBenchmarkInfo (sec, man, cookies) _benchmarkId = do
         _benchmarkId benchmarkTitle $ detailTds ++ typeTds
 
 getSolverInfo :: StarExecConnection -> Int -> Handler (Maybe SolverInfo)
-getSolverInfo (sec, man, cookies) _solverId = do
+getSolverInfo _ _solverId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = solverInfoPath
                 , queryString = "id=" +> (BSC.pack $ show _solverId)
                 }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   let cursor = cursorFromDOM $ responseBody resp
       solverTitle = getFirstTitle cursor
   if "http" == T.take 4 solverTitle
@@ -337,12 +342,13 @@ getSolverInfo (sec, man, cookies) _solverId = do
         _solverId solverTitle tds
 
 getPostProcInfo :: StarExecConnection -> Int -> Handler (Maybe PostProcInfo)
-getPostProcInfo (sec, man, cookies) _procId = do
+getPostProcInfo _ _procId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = postProcPath
                 , queryString = "type=post&id=" +> (BSC.pack $ show _procId)
                 }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   let cursor = cursorFromDOM $ responseBody resp
       procTitle :: Text
       procTitle = getFirstTitle cursor
@@ -358,13 +364,14 @@ getPostProcInfo (sec, man, cookies) _procId = do
         _procId procName tds
 
 getJobResults :: StarExecConnection -> Int -> Handler [JobResultInfo]
-getJobResults (sec, man, cookies) _jobId = do
+getJobResults _ _jobId = do
+  sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
                 , path = downloadPath
                 , queryString = "id=" +> (BSC.pack $ show _jobId)
                                 +> "&type=job&returnids=true"
                 }
-  resp <- sendRequest (req, man, cookies)
+  resp <- sendRequest req
   let archive = Zip.toArchive $ responseBody resp
       insertId ji = ji { jobResultInfoJobId = _jobId }
   jobs <- case Zip.zEntries archive of
@@ -381,7 +388,8 @@ getJobResults (sec, man, cookies) _jobId = do
   return jobs
 
 getJobPairInfo :: StarExecConnection -> Int -> Handler (Maybe JobPairInfo)
-getJobPairInfo (sec, man, cookies) _pairId = do
+getJobPairInfo _ _pairId = do
+  sec <- parseUrl starExecUrl
   let reqStdout = sec { method = "GET"
                       , queryString = "limit=-1"
                       , path = getURL pairStdoutPath [("{pairId}", show _pairId)]
@@ -391,11 +399,11 @@ getJobPairInfo (sec, man, cookies) _pairId = do
                    , path = getURL pairLogPath [("{pairId}", show _pairId)]
                    , checkStatus = (\_ _ _ -> Nothing)
                    }
-  respStdout <- sendRequest (reqStdout, man, cookies)
+  respStdout <- sendRequest reqStdout
   if 200 /= (statusCode $ responseStatus respStdout)
     then return Nothing
     else do
-      respLog <- sendRequest (reqLog, man, responseCookieJar respStdout)
+      respLog <- sendRequest reqLog
       mPersistJobResult <- getPersistJobResult $ StarExecPairID _pairId
       let resultStatus = case mPersistJobResult of
                             Nothing -> JobResultUndetermined
@@ -423,17 +431,18 @@ getJobPairInfo (sec, man, cookies) _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
-pushJobXML :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
-pushJobXML con sId jobs = do
-  js <- pushJobXMLStarExec con sId jobs
+pushJobXML :: Int -> [StarExecJob] -> Handler [StarExecJob]
+pushJobXML sId jobs = do
+  js <- pushJobXMLStarExec sId jobs
   registerJobs $ catMaybes $ map jobid js
   return js
 
 
-pushJobXMLStarExec :: StarExecConnection -> Int -> [StarExecJob] -> Handler [StarExecJob]
-pushJobXMLStarExec (sec, man, cookies) sId jobs = case jobs_to_archive jobs of
+pushJobXMLStarExec :: Int -> [StarExecJob] -> Handler [StarExecJob]
+pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just (bs, remap) -> do
+    sec <- parseUrl starExecUrl
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId ) 
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { path = pushjobxmlPath, responseTimeout = Nothing }
@@ -445,7 +454,7 @@ pushJobXMLStarExec (sec, man, cookies) sId jobs = case jobs_to_archive jobs of
 
     -- liftIO $ print req
     
-    resp <- sendRequest (req, man, cookies)
+    resp <- sendRequest req
     -- the job ids are in the returned cookie.
     -- if there are more, then it's a comma-separated list
     -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }

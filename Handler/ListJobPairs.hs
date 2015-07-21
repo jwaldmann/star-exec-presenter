@@ -6,7 +6,7 @@ import Presenter.PersistHelper
 -- Pagination is definitly needed!
 
 getAll :: Handler [JobResult]
-getAll = runDB $ do
+getAll = runDB_readlocked $ do
   starExecResults <- do
     results <- getEntityList' ([] :: [Filter JobResultInfo]) []
     return $ StarExecResult <$> results

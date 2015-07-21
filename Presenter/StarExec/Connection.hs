@@ -2,7 +2,7 @@ module Presenter.StarExec.Connection
     ( sendRequest
     -- , index
     , getLoginCredentials
-    , getConnection -- this is used (only) by Presenter.Control.Job (in pushJobXml)
+    , killmenothing
     ) where
 
 import Import
@@ -17,7 +17,8 @@ import qualified Data.Text as T
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
 import Presenter.Prelude (diffTime)
-import Data.Time.Clock (getCurrentTime, UTCTime)
+import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime(..), secondsToDiffTime)
+import Data.Time.Calendar
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
 -- import Control.Concurrent.SSem
@@ -55,23 +56,34 @@ setSessionData cj d = do
 
 -- | raw request. May return "Login" response if we're not currently logged in.
 -- will silently set cookies to session state.
-sendRequestRaw :: StarExecConnection
+sendRequestRaw :: Request
                -> Handler (Response BSL.ByteString)
-sendRequestRaw (req, man, _ ) = do
+sendRequestRaw req = do
+  man <- httpManager <$> getYesod
   SessionData cj d <- getSessionData
-  let req' =  req { cookieJar = Just cj }
-  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show req
+  let req' =  req { cookieJar = Just cj
+                  , checkStatus = \ _ _ _ -> Nothing
+                  }
+  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req) 
+                         <> "?" <> show (queryString req)
+                     <> "with cookieJar: " <> show cj
+  start <- liftIO getCurrentTime
   resp <- httpLbs req' man
-  logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show req
+  end <- liftIO getCurrentTime
+  logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show (path req)
+                       <> "?" <> show  (queryString req)
                        <> "response status: " <> show (responseStatus resp)
-  now <- liftIO getCurrentTime
-  setSessionData (responseCookieJar resp) now
+                      <> "responseCookieJar: " <> show (responseCookieJar resp)
+         <> "time: " <> show (diffUTCTime end start)
+  setSessionData (responseCookieJar resp) end
   return resp
 
+
+
 -- | managed requests: will execute Login if necessary.
-sendRequest (req0, man, _ ) = runCon_exclusive $ do
-  logWarnN  $ T.pack  $ "sendRequest: " <> show req0
-  resp0 <- sendRequestRaw (req0 { checkStatus = \ _ _ _ -> Nothing }, man, undefined )
+sendRequest req0 = runCon_exclusive $ do
+  logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
+  resp0 <- sendRequestRaw $ req0 
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
@@ -87,22 +99,48 @@ sendRequest (req0, man, _ ) = runCon_exclusive $ do
                  $ sec { method = "POST"
                        , path = loginPath
                        }
-       resp1 <- sendRequestRaw (req1, man, undefined)
+       resp1 <- sendRequestRaw req1
        logWarnN  $ T.pack  $ "sendRequest: try again"
-       sendRequestRaw (req0, man, undefined)
+       sendRequestRaw req0
 
 needs_login r =
      ( responseStatus r /= ok200)
   || ( BS.isInfixOf "Login - StarExec" $ BSL.toStrict $ responseBody r )
 
--- | this is under the same semaphore as sendRequest
-getConnection :: Handler StarExecConnection
+-- this is terrible.
+-- http://www.4guysfromrolla.com/webtech/082400-1.shtml
+
+killmenothing :: Cookie
+killmenothing = Cookie { cookie_name = "killmenothing"
+                , cookie_value = ""
+                , cookie_expiry_time = future
+                , cookie_domain = "www.starexec.org"
+                , cookie_path = "/starexec/"
+                , cookie_creation_time = past
+                , cookie_last_access_time = past
+                , cookie_persistent = False
+                , cookie_host_only = True
+                , cookie_secure_only = True
+                , cookie_http_only = True
+                }
+
+past :: UTCTime
+past = UTCTime (ModifiedJulianDay 56200) (secondsToDiffTime 0)
+
+future :: UTCTime
+future = UTCTime (ModifiedJulianDay 562000) (secondsToDiffTime 0)
+
+
+  
+{-
 getConnection = runCon_exclusive $ do
   logWarnN  $ T.pack  $ "getConnection"
   SessionData cj d <- getSessionData
   sec <- parseUrl starExecUrl
   app <- getYesod
   return (sec, httpManager app, cj)
+-}
+
 
 {-
 
