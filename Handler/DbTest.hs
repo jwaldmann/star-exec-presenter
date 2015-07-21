@@ -71,19 +71,23 @@ createConcepts objAttrRel attrObjRel = do
   -- . (getCommonAttributes objAttrRel))
   -- objectSubsets
   -- let jobsWithAttrs = getCommonAttributes objectSubsets objAttrRel
+  --let attributes = getCommonAttributes objectSubsets objAttrRel
+  --getCommonObjects attributes
   getCommonAttributes objectSubsets objAttrRel
 
 
 getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId], [Attribute])]
 getCommonAttributes jobPairIds objAttrRel = do
-    map (\jobPairId ->
-      (jobPairId, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobPairId))
+    map (\jobs ->
+      (jobs, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs))
       jobPairIds
 
 
-getCommonObjects :: ([JobPairId], [Attribute]) -> Map Attribute [JobPairId] -> ([JobPairId], [JobPairAttributes], [JobPairId])
-getCommonObjects = undefined
-
+getCommonObjects :: [[Attribute]] -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
+getCommonObjects attributes attrObjRel = do
+    map (\attrs ->
+      (attrs, map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs))
+      attributes
 
 getCommonAttribute :: [JobPairAttributes] -> [Attribute]
 getCommonAttribute attributes = do
