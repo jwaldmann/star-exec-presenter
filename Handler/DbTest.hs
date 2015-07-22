@@ -45,35 +45,44 @@ getDbTestR jid = do
   -- let xn = length $ x
   -- #{show xn}
   -- #{show $ length concepts}
+    -- <h1>Objects an its attributes
+    -- <ul>
+    -- $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
+    --   <li> #{show jobPairId}: #{show jobPairAttributes}
+    -- 
+    -- <h1>Attributes with its objects
+    -- <ul>
+    -- $forall (attr, objects) <- Map.toList attrObjRel
+    --   <li> #{show attr}: #{show objects}
   defaultLayout [whamlet|
     <h1>Concepts
     <ul>
     $forall obj <- concepts
       <li> #{show obj}
-
-    <h1>Objects an its attributes
-    <ul>
-    $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
-      <li> #{show jobPairId}: #{show jobPairAttributes}
-    
-    <h1>Attributes with its objects
-    <ul>
-    $forall (attr, objects) <- Map.toList attrObjRel
-      <li> #{show attr}: #{show objects}
     |]
     -- <ul>
     -- $forall jobResult <- getStarExecResults jobResults
     --   <li> #{show jobResult}
 
 
---createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
-createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
+createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
+-- createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
 createConcepts objAttrRel attrObjRel = do
-  -- take 20 $ subsequences $ Map.keys objAttrRel
-  let objects = (take 2000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  -- let objects = (take 2000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
   -- getCommonAttributes objects objAttrRel
   let attributes = getCommonAttributes objects objAttrRel
-  getCommonObjects attributes attrObjRel
+  let calculatedObjects = getCommonObjects attributes attrObjRel
+  getEqualObjects objects calculatedObjects attributes
+
+
+getEqualObjects :: [[JobPairId]] -> [[JobPairId]] -> [[Attribute]] -> [([JobPairId],[Attribute])]
+getEqualObjects [] _ _ = []
+getEqualObjects _ [] _ = []
+getEqualObjects _ _ [] = []
+getEqualObjects (o:objs) (d:derivedObjs) (a:attrs)
+  | o == d = (o,a) : getEqualObjects objs derivedObjs attrs
+  | otherwise = getEqualObjects objs derivedObjs attrs
 
 
 getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [[Attribute]]
@@ -85,10 +94,11 @@ getCommonAttributes jobPairIds objAttrRel = do
       jobPairIds
 
 
-getCommonObjects :: [[Attribute]] -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
+getCommonObjects :: [[Attribute]] -> Map Attribute [JobPairId] -> [[JobPairId]]
 getCommonObjects attributes attrObjRel = do
     map (\attrs ->
-      (attrs, map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs))
+      -- (attrs, map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs))
+      concat $ map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs)
       attributes
 
 getCommonAttribute :: [JobPairAttributes] -> [Attribute]
