@@ -31,7 +31,7 @@ data JobPairAttributes = JobPairAttributes
 
 -- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
-slowCpuTimeLimit = 10.0
+slowCpuTimeLimit = 30
 
 
 getDbTestR :: JobID -> Handler Html
@@ -45,31 +45,31 @@ getDbTestR jid = do
   -- let xn = length $ x
   -- #{show xn}
   -- #{show $ length concepts}
-    -- <h1>Objects an its attributes
-    -- <ul>
-    -- $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
-    --   <li> #{show jobPairId}: #{show jobPairAttributes}
-    -- 
-    -- <h1>Attributes with its objects
-    -- <ul>
-    -- $forall (attr, objects) <- Map.toList attrObjRel
-    --   <li> #{show attr}: #{show objects}
   defaultLayout [whamlet|
     <h1>Concepts
     <ul>
     $forall obj <- concepts
       <li> #{show obj}
+    <h1>Objects an its attributes
+    <ul>
+    $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
+      <li> #{show jobPairId}: #{show jobPairAttributes}
+    
+    <h1>Attributes with its objects
+    <ul>
+    $forall (attr, objects) <- Map.toList attrObjRel
+      <li> #{show attr}: #{show objects}
+    <ul>
+    $forall jobResult <- getStarExecResults jobResults
+      <li> #{show jobResult}
     |]
-    -- <ul>
-    -- $forall jobResult <- getStarExecResults jobResults
-    --   <li> #{show jobResult}
 
 
 createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
 -- createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
 createConcepts objAttrRel attrObjRel = do
-  -- let objects = (take 2000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
-  let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  let objects = (take 20000000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  --let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
   -- getCommonAttributes objects objAttrRel
   let attributes = getCommonAttributes objects objAttrRel
   let calculatedObjects = getCommonObjects attributes attrObjRel
@@ -108,9 +108,15 @@ getCommonAttribute attributes = do
       then [ASlowCpuTimeSolverResult True MAYBE]
       else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult MAYBE) commonAttr
         then [ASlowCpuTimeSolverResult False MAYBE]
-        else commonAttr
-
-
+        else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult YES) commonAttr
+          then [ASlowCpuTimeSolverResult False YES]
+          else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult YES) commonAttr
+            then [ASlowCpuTimeSolverResult False YES]
+            else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult NO) commonAttr
+              then [ASlowCpuTimeSolverResult False NO]
+              else if elem (ASlowCpuTime False) commonAttr && elem (ASolverResult NO) commonAttr
+                then [ASlowCpuTimeSolverResult False NO]
+                  else commonAttr
 
 
 getSlowCpuTimeAttribute :: [JobPairAttributes] -> [Attribute]
@@ -125,7 +131,11 @@ getSolverResultAttribute :: [JobPairAttributes] -> [Attribute]
 getSolverResultAttribute attributes = do
   if all (\a -> solverResult a == MAYBE) attributes
     then [ASolverResult MAYBE]
-    else []
+    else if all (\a -> solverResult a == YES) attributes
+      then [ASolverResult YES]
+      else if all (\a -> solverResult a == NO) attributes
+        then [ASolverResult NO]
+        else []
 
 
 createObjectAttributeRelation :: [JobResultInfo] -> Map JobPairId JobPairAttributes
@@ -146,14 +156,25 @@ createAttributeObjectReleation objAttrRel = do
   
   let solverResults = map (\(a,b) -> (a, solverResult b)) objAttrs
   let maybeSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == MAYBE) solverResults
+  let yesSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == YES) solverResults
+  let noSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == NO) solverResults
   -- let otherSolverResults = map (\(a,_) -> a) $ filter (\(_,b) -> b == OTHER) solverResults
-  let attrsObjRel = Map.insert (ASlowCpuTime True) slowCpuTimes Map.empty
-  let attrsObjRel' = Map.insert (ASlowCpuTime False) fastCpuTimes attrsObjRel
+  let attrsObjRel = Map.insert (ASlowCpuTime False) slowCpuTimes Map.empty
+  let attrsObjRel' = Map.insert (ASlowCpuTime True) fastCpuTimes attrsObjRel
 
   -- only helper keys so the union does not have to be calculated again and again
-  let attrsObjRel'' = Map.insert (ASlowCpuTimeSolverResult False MAYBE) (listUnion slowCpuTimes maybeSolverResults) attrsObjRel'
-  let attrsObjRel''' = Map.insert (ASlowCpuTimeSolverResult True MAYBE) (listUnion fastCpuTimes maybeSolverResults) attrsObjRel''
-  Map.insert (ASolverResult MAYBE) maybeSolverResults attrsObjRel'''
+  let attrsObjRel'' = Map.insert (ASlowCpuTimeSolverResult True MAYBE) (listIntersect slowCpuTimes maybeSolverResults) attrsObjRel'
+  let attrsObjRel''' = Map.insert (ASlowCpuTimeSolverResult False MAYBE) (listIntersect fastCpuTimes maybeSolverResults) attrsObjRel''
+
+  let attrsObjRel4 = Map.insert (ASlowCpuTimeSolverResult True YES) (listIntersect slowCpuTimes yesSolverResults) attrsObjRel'''
+  let attrsObjRel5 = Map.insert (ASlowCpuTimeSolverResult False YES) (listIntersect fastCpuTimes yesSolverResults) attrsObjRel4
+
+  let attrsObjRel6 = Map.insert (ASlowCpuTimeSolverResult True NO) (listIntersect slowCpuTimes noSolverResults) attrsObjRel5
+  let attrsObjRel7 = Map.insert (ASlowCpuTimeSolverResult False NO) (listIntersect fastCpuTimes noSolverResults) attrsObjRel6
+
+  let attrsObjRel8 = Map.insert (ASolverResult YES) yesSolverResults attrsObjRel7
+  let attrsObjRel9 = Map.insert (ASolverResult NO) noSolverResults attrsObjRel8
+  Map.insert (ASolverResult MAYBE) maybeSolverResults attrsObjRel9
 
 
 getAttributeCollection :: [JobResultInfo] -> [JobPairAttributes]
@@ -178,10 +199,10 @@ ordNub l = go Set.empty l
     go s (x:xs) = if x `Set.member` s then go s xs
                                       else x : go (Set.insert x s) xs
 -- https://github.com/nh2/haskell-ordnub
-listUnion :: (Ord a) => [a] -> [a] -> [a]
-listUnion a b = a ++ ordNub (filter (`Set.notMember` aSet) b)
+listIntersect :: (Ord a) => [a] -> [a] -> [a]
+listIntersect a b = filter (`Set.member` bSet) a
   where
-    aSet = Set.fromList a
+    bSet = Set.fromList b
 
 updateMap :: (Ord k, Num a) => k -> a -> Map k a -> Map k a
 updateMap = Map.insertWith (+)
