@@ -44,27 +44,18 @@ getDbTestR jid = do
   -- let attrObjRel = createAttributeObjectReleation objAttrRel
   -- let concepts = createConcepts objAttrRel attrObjRel
 
-  -- let x = Map.toList objAttrRel
-  -- let xn = length $ x
-  -- #{show xn}
-  -- #{show $ length concepts}
-  -- <h1>Concepts
-  -- <ul>
-  -- $forall obj <- concepts
-  --   <li> #{show obj}
-  -- <h1>Attributes with its objects
-  -- <ul>
-  -- $forall (attr, objects) <- Map.toList attrObjRel
-  --   <li> #{show attr}: #{show objects}
-  -- -<h1>Objects an its attributes
-  -- <ul>
-  -- $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
-  --   <li> #{show jobPairId}: #{show jobPairAttributes}
-  --   <h1>Objec
-  --   <ul>
-  --   $forall k <- Set.toList $ getObjects context $ attributes context
-  --     <li> #{show k}
   defaultLayout [whamlet|
+    <h1>Objects
+    <ul>
+    $forall k <- objects context
+      <li> #{show k}
+      #{show $ getAttributes context $ Set.fromList [k]}
+
+    <h1>Attributes
+    <ul>
+    $forall k <- attributes context
+      <li> #{show k}
+      #{show $ getObjects context $ Set.fromList [k]}
 
     <h1>ContextData
     <ul>
