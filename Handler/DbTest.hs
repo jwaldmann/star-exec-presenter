@@ -50,15 +50,18 @@ getDbTestR jid = do
     <ul>
     $forall obj <- concepts
       <li> #{show obj}
-    <h1>Objects an its attributes
-    <ul>
-    $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
-      <li> #{show jobPairId}: #{show jobPairAttributes}
-    
+
     <h1>Attributes with its objects
     <ul>
     $forall (attr, objects) <- Map.toList attrObjRel
       <li> #{show attr}: #{show objects}
+
+    <h1>Objects an its attributes
+    <ul>
+    $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
+      <li> #{show jobPairId}: #{show jobPairAttributes}
+
+    <h1>Original records
     <ul>
     $forall jobResult <- getStarExecResults jobResults
       <li> #{show jobResult}
@@ -68,9 +71,8 @@ getDbTestR jid = do
 createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
 -- createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
 createConcepts objAttrRel attrObjRel = do
-  let objects = (take 20000000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
-  --let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
-  -- getCommonAttributes objects objAttrRel
+  -- let objects = (take 2000000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
   let attributes = getCommonAttributes objects objAttrRel
   let calculatedObjects = getCommonObjects attributes attrObjRel
   getEqualObjects objects calculatedObjects attributes
