@@ -43,8 +43,14 @@ getDbTestR jid = do
   -- let objAttrRel = createObjectAttributeRelation $ getStarExecResults jobResults
   -- let attrObjRel = createAttributeObjectReleation objAttrRel
   -- let concepts = createConcepts objAttrRel attrObjRel
+  let concepts' = concepts context
 
   defaultLayout [whamlet|
+    <h1>Concepts
+    <ul>
+    $forall (o,a) <- concepts'
+      <li> #{show o} : #{show a}
+
     <h1>Objects
     <ul>
     $forall k <- objects context
