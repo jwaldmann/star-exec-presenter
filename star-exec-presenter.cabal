@@ -19,6 +19,7 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
+                     ConceptAnalysis.FCA
                      Handler.Home
                      Handler.Control
                      Handler.ListHiddenCompetitions
