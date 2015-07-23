@@ -15,7 +15,8 @@ import ConceptAnalysis.FCA
 type JobPairId = Int
 
 data Attribute = 
-  ASolverName Text
+  AJobResultInfoSolver Text
+   | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
    | ASlowCpuTimeSolverResult Bool SolverResult
@@ -29,43 +30,70 @@ data JobPairAttributes = JobPairAttributes
   } deriving (Show)
 
 
--- all job pairs with a response time greater 30 seconds is slow
+-- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
-slowCpuTimeLimit = 30
+slowCpuTimeLimit = 10
 
 
 getDbTestR :: JobID -> Handler Html
 getDbTestR jid = do
   jobResults <- getPersistJobResults jid
-  let objAttrRel = createObjectAttributeRelation $ getStarExecResults jobResults
-  let attrObjRel = createAttributeObjectReleation objAttrRel
-  let concepts = createConcepts objAttrRel attrObjRel
+  let contextData = collectData $ getStarExecResults jobResults
+  let context = contextFromList contextData
+  -- let objAttrRel = createObjectAttributeRelation $ getStarExecResults jobResults
+  -- let attrObjRel = createAttributeObjectReleation objAttrRel
+  -- let concepts = createConcepts objAttrRel attrObjRel
 
   -- let x = Map.toList objAttrRel
   -- let xn = length $ x
   -- #{show xn}
   -- #{show $ length concepts}
+  -- <h1>Concepts
+  -- <ul>
+  -- $forall obj <- concepts
+  --   <li> #{show obj}
+  -- <h1>Attributes with its objects
+  -- <ul>
+  -- $forall (attr, objects) <- Map.toList attrObjRel
+  --   <li> #{show attr}: #{show objects}
+  -- -<h1>Objects an its attributes
+  -- <ul>
+  -- $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
+  --   <li> #{show jobPairId}: #{show jobPairAttributes}
+  --   <h1>Objec
+  --   <ul>
+  --   $forall k <- Set.toList $ getObjects context $ attributes context
+  --     <li> #{show k}
   defaultLayout [whamlet|
-    <h1>Concepts
+
+    <h1>ContextData
     <ul>
-    $forall obj <- concepts
+    $forall obj <- contextData
       <li> #{show obj}
-
-    <h1>Attributes with its objects
-    <ul>
-    $forall (attr, objects) <- Map.toList attrObjRel
-      <li> #{show attr}: #{show objects}
-
-    <h1>Objects an its attributes
-    <ul>
-    $forall (jobPairId, jobPairAttributes) <- Map.toList objAttrRel
-      <li> #{show jobPairId}: #{show jobPairAttributes}
 
     <h1>Original records
     <ul>
     $forall jobResult <- getStarExecResults jobResults
       <li> #{show jobResult}
     |]
+
+collectData :: [JobResultInfo] -> [(JobPairId, [Attribute])]
+collectData results = do
+  let jobResultInfoPairIds = map jobResultInfoPairId results
+  let attrs = getAttributeCollection results
+  zip jobResultInfoPairIds attrs
+
+
+getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
+getAttributeCollection jobResults = do
+  let jobResultInfoSolvers = map (jobResultInfoSolver) jobResults
+  let jobResultInfoConfigurations = map jobResultInfoConfiguration jobResults
+  -- let jobResultInfoBenchmarkIds = map (jobResultInfoBenchmarkId) jobResults
+  let cpuTimeEvaluations = evaluateCpuTime jobResults
+  let jobResultInfoResults = map (jobResultInfoResult) jobResults
+  zipWith4 (\a b c d -> [AJobResultInfoSolver a, AJobResultInfoConfiguration b, ASlowCpuTime c, ASolverResult d])
+    jobResultInfoSolvers jobResultInfoConfigurations cpuTimeEvaluations jobResultInfoResults
+
 
 
 createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
@@ -136,14 +164,6 @@ getSolverResultAttribute attributes = do
         else []
 
 
-createObjectAttributeRelation :: [JobResultInfo] -> Map JobPairId JobPairAttributes
-createObjectAttributeRelation jobResults = do
-  let jobResultInfoPairIds = map (jobResultInfoPairId) jobResults
-  let attrs = getAttributeCollection jobResults
-  let objAttrRel = zip jobResultInfoPairIds attrs
-  Map.fromList objAttrRel
-
-
 createAttributeObjectReleation :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId]
 createAttributeObjectReleation objAttrRel = do
   let objAttrs = Map.toList objAttrRel
@@ -174,16 +194,6 @@ createAttributeObjectReleation objAttrRel = do
   let attrsObjRel9 = Map.insert (ASolverResult NO) noSolverResults attrsObjRel8
   Map.insert (ASolverResult MAYBE) maybeSolverResults attrsObjRel9
 
-
-getAttributeCollection :: [JobResultInfo] -> [JobPairAttributes]
-getAttributeCollection jobResults = do
-  -- would it be better to remove some attributes of the existing record?
-  let jobResultInfoBenchmarkIds = map (jobResultInfoBenchmarkId) jobResults
-  let jobResultInfoSolvers = map (jobResultInfoSolver) jobResults
-  let cpuTimeEvaluations = evaluateCpuTime jobResults
-  let jobResultInfoResults = map (jobResultInfoResult) jobResults
-  let attrs = zip4 jobResultInfoBenchmarkIds jobResultInfoSolvers cpuTimeEvaluations jobResultInfoResults
-  map (\(a,b,c,d)-> JobPairAttributes {benchmarkId = a, solverName = b, slowCpuTime = c, solverResult = d}) attrs
 
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)

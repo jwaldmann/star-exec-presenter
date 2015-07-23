@@ -6,15 +6,16 @@ import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
 
--- contextFromList [(1,["foo", "bar"]), (2, ["foo","baz"])]
+-- example: let c = contextFromList [(1,["foo", "bar"]), (2, ["foo","baz"])]
 -- getAttributes c $ Set.fromList [1,2]
 -- getObjects c $ Set.fromList ["foo"]
 
 
 data Context ob at = Context
   { fore :: Map ob (Set at)
-    ,back :: Map at (Set ob)
+  , back :: Map at (Set ob)
   } deriving (Show)
+
 
 contextFromList :: (Ord ob, Ord at) => [(ob, [at])] -> Context ob at
 contextFromList l = Context 
