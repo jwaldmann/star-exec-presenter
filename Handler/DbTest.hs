@@ -10,9 +10,9 @@ import qualified Data.Set as Set
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
 
--- example contextFromList [(1,["foo", "bar"]), (2, ["foo"])]
 -- let c = contextFromList [(1,["foo", "bar"]), (2, ["foo"])]
--- getAttr c $ Set.fromList ["foo"]
+-- getAttributes c $ Set.fromList [1,2]
+-- getObjects c $ Set.fromList ["foo"]
 
 type JobPairId = Int
 
@@ -23,12 +23,6 @@ data Attribute =
    | ASlowCpuTimeSolverResult Bool SolverResult
  deriving (Eq, Ord, Show)
 
-
-data Context ob at = Context
-  { fore :: Map ob (Set at)
-    ,back :: Map at (Set ob)
-  } deriving (Show)
-
 data JobPairAttributes = JobPairAttributes
   { benchmarkId :: Int
   , solverName  :: Text
@@ -36,25 +30,33 @@ data JobPairAttributes = JobPairAttributes
   , solverResult :: SolverResult
   } deriving (Show)
 
+data Context ob at = Context
+  { fore :: Map ob (Set at)
+    ,back :: Map at (Set ob)
+  } deriving (Show)
 
-getAttr :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
-getAttr c attrs = foldr Set.intersection (objects c)
-  $ map (\a -> back c Map.! a) $ Set.toList attrs
-
-objects :: (Ord ob, Ord at) => Context ob at -> Set ob
-objects c = Map.keysSet (fore c)
+contextFromList :: (Ord ob, Ord at) => [(ob, [at])] -> Context ob at
+contextFromList l = Context 
+  { fore=Map.fromListWith Set.union $ map (\(ob, ats) -> (ob, Set.fromList ats)) l
+  , back=Map.fromListWith Set.union $ do (ob, ats) <- l; at <- ats; return (at,Set.singleton ob)
+  }
 
 attributes :: (Ord ob, Ord at) => Context ob at -> Set at
 attributes c = Map.keysSet (back c)
 
-contextFromList :: (Ord ob, Ord at) => [(ob, [at])] -> Context ob at
-contextFromList l = Context 
-  { fore=Map.fromListWith Set.union $ map (\(ob, attrs) -> (ob, Set.fromList attrs)) l 
-  , back=Map.fromListWith Set.union $ do (ob, attrs) <- l; at <- attrs; return (at,Set.singleton ob)
-  }
+getAttributes :: (Ord ob, Ord at) => Context ob at -> Set ob -> Set at
+getAttributes c obs = foldr Set.intersection (attributes c)
+  $ map (\o -> fore c Map.! o) $ Set.toList obs
+
+objects :: (Ord ob, Ord at) => Context ob at -> Set ob
+objects c = Map.keysSet (fore c)
+
+getObjects :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
+getObjects c ats = foldr Set.intersection (objects c)
+  $ map (\a -> back c Map.! a) $ Set.toList ats
 
 
--- all job pairs with a response time greater 10 seconds is slow
+-- all job pairs with a response time greater 30 seconds is slow
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
 slowCpuTimeLimit = 30
 
@@ -94,10 +96,9 @@ getDbTestR jid = do
 
 
 createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([JobPairId], [Attribute])]
--- createConcepts :: Map JobPairId JobPairAttributes -> Map Attribute [JobPairId] -> [([Attribute], [[JobPairId]])]
 createConcepts objAttrRel attrObjRel = do
-  -- let objects = (take 2000000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
-  let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  let objects = (take 2000000 $ subsequences $ Map.keys objAttrRel :: [[JobPairId]])
+  -- let objects = (subsequences $ Map.keys objAttrRel :: [[JobPairId]])
   let attributes = getCommonAttributes objects objAttrRel
   let calculatedObjects = getCommonObjects attributes attrObjRel
   getEqualObjects objects calculatedObjects attributes
@@ -113,10 +114,8 @@ getEqualObjects (o:objs) (d:derivedObjs) (a:attrs)
 
 
 getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [[Attribute]]
---getCommonAttributes :: [[JobPairId]] -> Map JobPairId JobPairAttributes -> [([JobPairId],[Attribute])]
 getCommonAttributes jobPairIds objAttrRel = do
     map (\jobs ->
-      -- (jobs, getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs))
       getCommonAttribute $ map (\job -> fromJust $ Map.lookup job objAttrRel) jobs)
       jobPairIds
 
@@ -124,7 +123,6 @@ getCommonAttributes jobPairIds objAttrRel = do
 getCommonObjects :: [[Attribute]] -> Map Attribute [JobPairId] -> [[JobPairId]]
 getCommonObjects attributes attrObjRel = do
     map (\attrs ->
-      -- (attrs, map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs))
       concat $ map (\attr -> fromJust $ Map.lookup attr attrObjRel) attrs)
       attributes
 
