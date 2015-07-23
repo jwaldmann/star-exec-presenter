@@ -5,11 +5,14 @@ import Data.Maybe
 import Data.List
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
--- import           Data.Set (Set)
--- import qualified Data.Set as Set
+import           Data.Set (Set)
 import qualified Data.Set as Set
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
+
+-- example contextFromList [(1,["foo", "bar"]), (2, ["foo"])]
+-- let c = contextFromList [(1,["foo", "bar"]), (2, ["foo"])]
+-- getAttr c $ Set.fromList ["foo"]
 
 type JobPairId = Int
 
@@ -21,12 +24,34 @@ data Attribute =
  deriving (Eq, Ord, Show)
 
 
+data Context ob at = Context
+  { fore :: Map ob (Set at)
+    ,back :: Map at (Set ob)
+  } deriving (Show)
+
 data JobPairAttributes = JobPairAttributes
   { benchmarkId :: Int
   , solverName  :: Text
   , slowCpuTime :: Bool
   , solverResult :: SolverResult
   } deriving (Show)
+
+
+getAttr :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
+getAttr c attrs = foldr Set.intersection (objects c)
+  $ map (\a -> back c Map.! a) $ Set.toList attrs
+
+objects :: (Ord ob, Ord at) => Context ob at -> Set ob
+objects c = Map.keysSet (fore c)
+
+attributes :: (Ord ob, Ord at) => Context ob at -> Set at
+attributes c = Map.keysSet (back c)
+
+contextFromList :: (Ord ob, Ord at) => [(ob, [at])] -> Context ob at
+contextFromList l = Context 
+  { fore=Map.fromListWith Set.union $ map (\(ob, attrs) -> (ob, Set.fromList attrs)) l 
+  , back=Map.fromListWith Set.union $ do (ob, attrs) <- l; at <- attrs; return (at,Set.singleton ob)
+  }
 
 
 -- all job pairs with a response time greater 10 seconds is slow
