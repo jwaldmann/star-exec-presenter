@@ -24,7 +24,8 @@ Installation
 ------------
     cabal sandbox init
     cabal sandbox add-source graphviz
-    cabal install --enable-tests . yesod-platform yesod-bin
+    cabal install alex happy yesod-bin
+    cabal install --enable-tests .
 
 Usage
 -----
