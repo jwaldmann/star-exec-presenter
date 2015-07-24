@@ -157,8 +157,7 @@ tc2015 = Competition  "Termination Competition 2015"
            ]
        , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
-           , Participant "matchbox" ( Just ( 3540, 23248 ))
-           , Participant "naysayer" ( Just ( 3725, 23773 ))
+           , Participant "matchbox" ( Just ( 3786, 24034 ))
            ]
        , standard2015 "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
@@ -269,12 +268,12 @@ tc2015 = Competition  "Termination Competition 2015"
      , standard2015 "C Integer Programs" [ Hierarchy 100138 ] -- for testing
            [ Participant "AProVE" ( Just ( 3342, 22448 ) )
            , Participant "Termite" Nothing
-           , Participant "Ultimate Buchi Automizer" (Just (3458, 22965))
+           , Participant "UltimateBuchiAutomizer+Joogie" (Just (3458, 22965))
            , Participant "HipTNT+" (Just (3473, 23024))
            ]
      , standard2015 "Java Bytecode"  [ Hierarchy 56709, Hierarchy 56721 ]
            [ Participant "AProVE" ( Just ( 3342, 22450  ) )
-           , Participant "Ultimate Buchi Automizer" (Just (3458,22965) )
+           , Participant "UltimateBuchiAutomizer+Joogie" (Just (3458,22965) )
            ]
      , standard2015 "Logic Programming"  [ Hierarchy 56728, Hierarchy 56739, Hierarchy 56744 ]
            [ Participant "AProVE" ( Just ( 3342, 22445 ) )
