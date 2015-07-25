@@ -58,9 +58,12 @@ instance Read Bounds where
 
 readP_Bounds = parens readP_Bounds_bare +++ readP_Bounds_bare
 
+-- | NOTE: the parser assumes the trivial lower bound (Finite)
+-- and the trivial upper bound (Infinite) and refines this
+-- if it reads a statement other than "?" for the respective bound.
 readP_Bounds_bare = 
-        do { token "WORST_CASE" ; pair Infinite Infinite }
-    +++ do { token "MAYBE" ; pair Infinite Infinite }
+        do { token "WORST_CASE" ; pair Finite Infinite }
+    +++ do { token "MAYBE" ; pair Finite Infinite }
 
 pair lo up = 
     parens ( do l <- quest lo readP_FunctionL 
@@ -79,21 +82,24 @@ data Function = Poly { degree :: Maybe Int } -- ^ nothing: unknown degree
      deriving (Eq, Ord)
 
 -- * comparison of functions for bounds.
--- need to know the context (is it for upper or lower bounds)
--- since we need to treat polynomials with unknown degree accordingly:
--- for an upper bound, an unknown polyomial is considered larger than any known,
--- while for lower bounds, it is considerer smaller than any known polynomial.
+-- need to know the context (is it for upper or lower bounds).
+-- lower bounds, from bad to good:
+-- Finite = Poly Nothing = Poly (Just 0) < Poly (Just 1) < .. < Infinite
+-- where Infinite means nontermination.
+-- upper bounds, from good to bad (NOTE the order)
+-- Poly (Just 0) < Poly (Just 1) < .. < Poly Nothing < Finite < Infinite
+-- these orders are computed by the following comparison functions.
 
 compare_for_lower_bounds :: Function -> Function -> Ordering
 compare_for_lower_bounds f g = case (f,g) of
   ( _ , _ ) | f == g -> EQ
   ( Infinite, _ ) -> GT
   ( _ , Infinite ) -> LT
-  ( Finite, _ ) -> GT
-  ( _ , Finite ) -> LT
-  ( Poly (Just _), Poly Nothing ) -> GT
-  ( Poly Nothing, Poly (Just _) ) -> LT
   ( Poly (Just p), Poly (Just q)) -> compare p q
+  ( Poly (Just p), _ ) | p > 0 -> GT
+  ( _, Poly (Just q) ) | q > 0 -> LT
+  -- here, we have Finite or Poly Nothing or Poly (Just 0)
+  ( _, _ ) -> EQ
 
 compare_for_upper_bounds :: Function -> Function -> Ordering
 compare_for_upper_bounds f g = case (f,g) of

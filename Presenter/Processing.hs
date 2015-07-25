@@ -6,6 +6,7 @@ import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
+import Control.Monad ( guard )
 
 type BenchmarkName = Name
 type UniqueBenchmark = (BenchmarkID, BenchmarkName)
@@ -69,56 +70,58 @@ getScore jr = case toScore jr of
                   _      -> 0
 
 
-getScoredResults :: [JobResult] -> [JobResult]
-getScoredResults results =
-  let insertResult m r = M.insertWith (++) (getBenchmark r) [r] m
-      benchmarkMap = M.toList $ L.foldl' (insertResult) M.empty results
-      result = L.foldl' (++) [] $ map (calcScores . snd) benchmarkMap
-  in result
-  where
-    calcScores :: [JobResult] -> [JobResult]
-    calcScores jrs =
-      if any (\r -> getResultStatus r /= JobResultComplete) jrs
-        then jrs
-        else
-          let hasScore jr = case getSolverResult jr of
-                                YES  -> True
-                                _    -> False
-              getScoreFromResult jr =
-                case getSolverResult jr of -- FIXME
-                  YES -> 1
-                  _   -> 0
-              insertScore jr set = S.insert (getScoreFromResult jr) set
-              scores = S.toList $ L.foldr insertScore S.empty $ filter hasScore jrs
-              baseScore = 1 + length jrs
-              scoreIndex jr =
-                case L.elemIndex (getScoreFromResult jr) scores of
-                  Nothing -> negate baseScore
-                  Just i  -> i
-              setScore jri = updateScore jri $ Just $
-                                if hasScore jri
-                                  then baseScore - scoreIndex jri
-                                  else 0
-          in map setScore jrs
+-- | this is called to compute the total score (for a solver, in a category).
+-- it is applied to results that are already scored (see scoredResults function)
+calculateScores :: Scoring -> [JobResult] -> M.Map SolverID Int
+calculateScores sc jps = M.fromListWith (+) $ do
+  jp <- jps ; return ( toSolverID jp, getScore jp )
 
-calcScoresBase :: (JobResult -> Int) -> [JobResult] -> M.Map SolverID Int
-calcScoresBase f = L.foldl' addScore M.empty
-  where addScore m jr = M.insertWith (+) (toSolverID jr) (f jr) m
+-- | this is called to compute the scores per jobpair (a cell in the table).
+scoredResults :: Scoring -> [ JobResult ] -> [ JobResult ]
+scoredResults sc jps = do
+  let bybench = M.fromListWith (++) $ do
+        jp <- jps ; return ( getBenchmark jp, [ jp ] )
+      points = M.fromListWith (+)  $ do
+        (bench,jps) <- M.toList bybench
+        (solver,points) <- M.toList $ M.unionsWith (+) $ case sc of
+              Complexity -> [ upperpoints jps, lowerpoints jps ]
+              Standard ->  [ standardpoints jps ]
+        return ((bench,solver),points)
+  jp <- jps
+  return $ updateScore jp $ M.lookup (getBenchmark jp,toSolverID jp) points
 
--- | FIXME
-calcComplexityScores :: [JobResult] -> M.Map SolverID Int
-calcComplexityScores = calcScoresBase getScore'
-  where
-    getScore' jr =
-      case toScore jr of
-        Nothing -> 0
-        Just i  -> i
 
-calcStandardScores :: [JobResult] -> M.Map SolverID Int
-calcStandardScores = calcScoresBase getScore'
-  where
-    getScore' jr =
-      case getSolverResult jr of
-        YES   -> 1
-        NO    -> 1
-        _     -> 0
+standardpoints jps = M.fromList $ do
+  me <- jps
+  let points = case getSolverResult me of
+        YES -> 1 ; NO -> 1 ; _ -> 0
+  return ( toSolverID me, points )
+
+uppertrivial = Infinite
+getupperbound jp = case getSolverResult jp of
+              BOUNDS bounds -> upper bounds
+              YES -> Finite
+              _ -> uppertrivial
+upperpoints jps = M.fromListWith (+) $ do
+              me <- jps
+              let greaterequals = length $ do
+                    you <- jps 
+                    guard $ compare_for_upper_bounds
+                      (getupperbound me) (getupperbound you) <= EQ
+                  points = if getupperbound me == uppertrivial then 0 else greaterequals
+              return ( toSolverID me , points )
+
+lowertrivial = Finite
+getlowerbound jp = case getSolverResult jp of
+              BOUNDS bounds -> lower bounds
+              NO -> Infinite
+              _ -> lowertrivial
+lowerpoints jps = M.fromListWith (+) $ do
+              me <- jps
+              let greaterequals = length $ do
+                    you <- jps 
+                    guard $ compare_for_lower_bounds
+                      (getlowerbound me) (getlowerbound you) >= EQ
+                  points = if getlowerbound me == lowertrivial then 0 else greaterequals
+              return ( toSolverID me , points )
+              

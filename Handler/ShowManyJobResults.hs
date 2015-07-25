@@ -40,8 +40,9 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
       jobs = map (snd . queryResult) qJobs
 
       jobResults :: [JobResult]
-      jobResults = concat $ jobs
+      jobResults = scoredResults sc $ concat $ jobs
 
+  
       stat = mconcat $ map jobStat jobResults
 
       benchmarks' = L.sortBy compareBenchmarks $
@@ -52,9 +53,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
                           jobSolvers
                           jobResults
                           benchmarks'                          
-      scores = for jobs $  \ results -> case sc of
-            Complexity -> calcComplexityScores results
-            Standard   -> calcStandardScores results
+      scores = for jobs $  \ results -> calculateScores sc results
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs

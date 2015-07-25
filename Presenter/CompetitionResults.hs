@@ -47,10 +47,7 @@ getScores :: [UniqueSolver] -> Scoring -> [JobResult] -> [(UniqueSolver,Score)]
 getScores solver scoring results =
   reverse $ L.sortBy sortScore scores
   where
-    scoreMap =
-      case scoring of
-        Standard -> calcStandardScores results
-        Complexity -> calcComplexityScores results
+    scoreMap = calculateScores scoring results
     scores = flip map solver $ \s@(sId,_) ->
               case M.lookup sId scoreMap of
                 Nothing -> (s,0)
@@ -248,8 +245,8 @@ updateJobInfo' ji = do
 getProcessedResults :: (Maybe Job,[JobResult]) -> [JobResult]
 getProcessedResults (mJobInfo, results) =
   case mJobInfo of
-    Just ji -> if isComplexity ji
-                then getScoredResults results
+    Just ji ->  if isComplexity ji
+                then scoredResults Complexity results
                 else results
     Nothing -> results
 
