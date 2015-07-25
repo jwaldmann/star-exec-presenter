@@ -110,7 +110,8 @@ getCategoriesResult cat = do
       catJobIds = getJobIds cat
   qResults <- queryManyJobs catJobIds
   qPostProc <- queryPostProc catPostProcId
-  let results = concat $ map (snd . queryResult) qResults
+  let results = scoredResults catScoring
+              $ concat $ map (snd . queryResult) qResults
       solver = getInfo extractSolver results
       scores = getScores solver catScoring results
       rankedSolver = getRanking scores
@@ -148,7 +149,7 @@ getCategoriesResult_ procs infos results cat =
       catResults = catMaybes $ map (lookupMap results) catJobIds
       catInfos = catMaybes $ map (lookupMap infos) catJobIds
       catPostProc = IM.lookup catPostProcId procs
-      jobResults = concat $ catResults
+      jobResults = scoredResults catScoring $ concat $ catResults
       solver = getInfo extractSolver jobResults
       scores = getScores solver catScoring jobResults
       rankedSolver = getRanking scores
@@ -247,7 +248,7 @@ getProcessedResults (mJobInfo, results) =
   case mJobInfo of
     Just ji ->  if isComplexity ji
                 then scoredResults Complexity results
-                else results
+                else scoredResults Standard results
     Nothing -> results
 
 updateJob :: UTCTime -> (Maybe JobInfo, Maybe JobInfo) -> Maybe JobInfo

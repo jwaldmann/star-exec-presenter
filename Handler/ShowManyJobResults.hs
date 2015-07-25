@@ -37,10 +37,10 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       -- complexity = all isComplexity jobInfos
       complexity = (sc == Complexity)
-      jobs = map (snd . queryResult) qJobs
+      jobs = map (scoredResults sc . snd . queryResult) qJobs
 
       jobResults :: [JobResult]
-      jobResults = scoredResults sc $ concat $ jobs
+      jobResults = concat $ jobs
 
   
       stat = mconcat $ map jobStat jobResults
