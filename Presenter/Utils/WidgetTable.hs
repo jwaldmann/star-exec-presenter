@@ -65,9 +65,6 @@ getManyJobCells iss = do
                        Just c -> c
            }
 
-for :: [a] -> (a -> b) -> [b]
-for = flip map
-
 empty_cell :: Cell
 empty_cell = 
     Cell { contents = [whamlet| |]
@@ -127,11 +124,11 @@ cell_for_job_pair result =
          , tag = getClass result
          }
 
-display :: JobIds -> [Transform] -> [Transform] -> Table -> Widget
-display jids previous ts tab  = do
-  summary jids previous tab
+display :: Scoring -> JobIds -> [Transform] -> [Transform] -> Table -> Widget
+display sc jids previous ts tab  = do
+  summary sc jids previous tab
   [whamlet| 
-      <a href=@{ShowManyJobResultsR (Query []) jids}>remove following #{show (length ts)} transformations
+      <a href=@{ShowManyJobResultsR sc (Query []) jids}>remove following #{show (length ts)} transformations
   |]
   case ts of
     (t:later) -> do
@@ -141,7 +138,7 @@ display jids previous ts tab  = do
                <pre>#{show t}
         |]
 
-        display jids (previous ++ [t]) later $ apply t tab
+        display sc jids (previous ++ [t]) later $ apply t tab
         
     [] -> do
     -- no more transformers, display actual data
@@ -178,8 +175,8 @@ remove_units g =
        $ G.delNode (G.node' c) g
     _ -> g
 
-summary :: JobIds -> [Transform] -> Table -> Widget
-summary jids previous tab = do
+summary :: Scoring -> JobIds -> [Transform] -> Table -> Widget
+summary sc jids previous tab = do
     render <- getUrlRender
     let total = length $ rows tab
         column_stats = M.fromListWith (+) $ do
@@ -288,8 +285,8 @@ summary jids previous tab = do
                     $if positive n
                         <td class="#{t}"> 
                           #{t} #{show n}
-                          <a href=@{ShowManyJobResultsR these jids}>these
-                          | <a href=@{ShowManyJobResultsR others jids}>others
+                          <a href=@{ShowManyJobResultsR sc these jids}>these
+                          | <a href=@{ShowManyJobResultsR sc others jids}>others
                     $else 
                         <td>
         <h3>row types
@@ -305,9 +302,9 @@ summary jids previous tab = do
                     <td class="#{t}"> #{t}
                 <td> #{show n}
                 <td> 
-                   <a href=@{ShowManyJobResultsR these jids}>these
+                   <a href=@{ShowManyJobResultsR sc these jids}>these
                 <td>
-                   <a href=@{ShowManyJobResultsR others jids}>others
+                   <a href=@{ShowManyJobResultsR sc others jids}>others
     |]
 
 {-

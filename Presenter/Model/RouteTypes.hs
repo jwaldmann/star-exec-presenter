@@ -244,3 +244,4 @@ instance PathPiece Query where
     _ -> Nothing
   toPathPiece NoQuery = "noquery"
   toPathPiece q = T.pack $ show q
+

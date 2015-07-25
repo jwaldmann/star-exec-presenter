@@ -59,3 +59,10 @@ instance PathPiece Competition where
   fromPathPiece t = case reads (T.unpack t) of
     [(c, "")] -> return c
     _ -> Nothing
+
+instance PathPiece Scoring where
+  fromPathPiece "standard" = return Standard
+  fromPathPiece "complexity" = return Complexity
+  fromPathPiece _ = Nothing
+  toPathPiece s = T.toLower $ T.pack $ show s
+    

@@ -20,6 +20,8 @@ import Data.Maybe
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
 import qualified Data.Text as T
+import Control.Monad ( forM_ )
+import Control.Monad.Logger
 
 toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
@@ -29,11 +31,12 @@ shorten t = if T.length t > 50
               then shorten $ T.tail t
               else t
 
-getShowManyJobResultsR :: Query -> JobIds -> Handler Html
-getShowManyJobResultsR NoQuery  jids@(JobIds ids) = do
+getShowManyJobResultsR :: Scoring -> Query -> JobIds -> Handler Html
+getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
-      complexity = all isComplexity jobInfos
+      -- complexity = all isComplexity jobInfos
+      complexity = (sc == Complexity)
       jobs = map (snd . queryResult) qJobs
 
       jobResults :: [JobResult]
@@ -48,12 +51,10 @@ getShowManyJobResultsR NoQuery  jids@(JobIds ids) = do
       benchmarkResults = getBenchmarkResults
                           jobSolvers
                           jobResults
-                          benchmarks'
-      scores = flip map jobs $
-        \results ->
-          if complexity
-            then calcComplexityScores results
-            else calcStandardScores results
+                          benchmarks'                          
+      scores = for jobs $  \ results -> case sc of
+            Complexity -> calcComplexityScores results
+            Standard   -> calcStandardScores results
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs
@@ -61,7 +62,7 @@ getShowManyJobResultsR NoQuery  jids@(JobIds ids) = do
       else return ()
     $(widgetFile "show_many_job_results")
 
-getShowManyJobResultsR q@(Query ts) jids @ (JobIds ids) = do
+getShowManyJobResultsR sc q@(Query ts) jids @ (JobIds ids) = do
   qJobs <- queryManyJobs ids
   tab <- getManyJobCells $ map (snd . queryResult) qJobs
   defaultLayout $ do
@@ -73,7 +74,7 @@ getShowManyJobResultsR q@(Query ts) jids @ (JobIds ids) = do
     [whamlet|
             <pre>#{show q}
         |]
-    display jids [] ts tab
+    display sc jids [] ts tab
 
 
 

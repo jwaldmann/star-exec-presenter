@@ -4,4 +4,6 @@ import Import
 import Network.HTTP.Types.Status
 
 getLegacyShowManyJobResultsR :: JobIds -> Handler Html
-getLegacyShowManyJobResultsR = (redirectWith movedPermanently301) . ShowManyJobResultsR NoQuery
+getLegacyShowManyJobResultsR
+  = (redirectWith movedPermanently301)
+  . ShowManyJobResultsR Standard NoQuery

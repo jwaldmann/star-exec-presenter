@@ -32,7 +32,7 @@
           <tbody>
             $forall compCatResult <- categoryResults compMetaResults
               <tr class=#{ getCompletionClass $ categoryComplete compCatResult }>
-                <td><a href=@{ShowManyJobResultsR NoQuery $ JobIds $ map toJobID $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
+                <td><a href=@{ShowManyJobResultsR (categoryScoring compCatResult) NoQuery $ JobIds $ map toJobID $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
                 <td>
                   $maybe postProc <- categoryPostProc compCatResult
                     <a href=@{ShowPostProcInfoR $ StarExecPostProcID $ postProcInfoStarExecId postProc}>#{postProcInfoName postProc}

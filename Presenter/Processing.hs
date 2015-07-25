@@ -68,11 +68,12 @@ getScore jr = case toScore jr of
                   Just i -> i
                   _      -> 0
 
+
 getScoredResults :: [JobResult] -> [JobResult]
 getScoredResults results =
   let insertResult m r = M.insertWith (++) (getBenchmark r) [r] m
       benchmarkMap = M.toList $ L.foldl' (insertResult) M.empty results
-      result = L.foldl' (++) [] $ map (calcScores . snd) benchmarkMap
+      result = L.foldl' (++) [] $ map (calcScores . snd) benchmarkMap
   in result
   where
     calcScores :: [JobResult] -> [JobResult]

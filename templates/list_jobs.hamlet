@@ -12,4 +12,4 @@
         <tr>
           <td><a href=@{ShowJobInfoR $ toJobID job}>#{toJobName job}</a>
           <td>#{toJobStatus job}
-          <td><a href=@{ShowManyJobResultsR NoQuery $ JobIds [toJobID job]}>view results</a>
+          <td><a href=@{ShowManyJobResultsR Standard NoQuery $ JobIds [toJobID job]}>view results</a>

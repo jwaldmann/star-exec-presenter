@@ -41,7 +41,8 @@ isYes :: SolverResult -> Bool
 isYes (YES {} ) = True
 isYes _       = False
 
--- | output is decreasing by Score
+-- | output is decreasing by Score.
+
 getScores :: [UniqueSolver] -> Scoring -> [JobResult] -> [(UniqueSolver,Score)]
 getScores solver scoring results =
   reverse $ L.sortBy sortScore scores

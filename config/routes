@@ -40,7 +40,7 @@
 /show_post_proc_info/#PostProcID LegacyShowPostProcInfoR GET
 
 -- displays multiple job-results
-/results/#Query/*JobIds ShowManyJobResultsR GET
+/results/#Scoring/#Query/*JobIds ShowManyJobResultsR GET
 /show_job_results/*JobIds LegacyShowJobResultsR GET
 /show_many_job_results/*JobIds LegacyShowManyJobResultsR GET
 /flexible-table/#Query/*JobIds FlexibleTableR GET

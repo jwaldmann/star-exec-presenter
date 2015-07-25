@@ -36,8 +36,8 @@ $maybe jobInfo <- mJobInfo
         <tr>
           <td>Last Update from Star-Exec:
           <td>#{getLastUpdate jobInfo}
-    <a href=@{ShowManyJobResultsR NoQuery (JobIds [jid])}>Show Job-Results</a>
+    <a href=@{ShowManyJobResultsR Standard NoQuery (JobIds [jid])}>Show Job-Results</a>
 
 $nothing
-  <h1>Sorry, no job with the id #{show _id} found!
+  <h1>Sorry, no job with id #{show _id} found!
   (try re-loading this page after a while)

@@ -3,7 +3,7 @@ $maybe pair <- mPair
   view original pair-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/pair.jsp?id=#{show _id}">#{show _id}</a>
   $maybe jobInfo <- mJobInfo
     <p>This job-pair is a result of the job "<a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>"<br/>
-      <a href=@{ShowManyJobResultsR NoQuery $ JobIds [toJobID jobInfo]}>View Job-Results</a>
+      <a href=@{ShowManyJobResultsR Standard NoQuery $ JobIds [toJobID jobInfo]}>View Job-Results</a>
     $maybe solverInfo <- mSolverInfo
       <p>The Solver was "<a href=@{ShowSolverInfoR $ toSolverID solverInfo}>#{toSolverName solverInfo}</a>"
     $maybe benchInfo <- mBenchmarkInfo

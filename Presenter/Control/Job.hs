@@ -106,9 +106,6 @@ repair = T.map ( \ c -> if isAlphaNum c then c else ' ' )
 compact :: Text -> Text
 compact = T.unwords . map (T.take 5) . T.words
 
-for :: [a] -> (a -> b) -> [b]
-for = flip map
-
 getSpaceXMLquick :: M.Map Int Space -> Int -> Handler (Maybe Space)
 getSpaceXMLquick sm sId = 
     case M.lookup sId sm of

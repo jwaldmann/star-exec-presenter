@@ -27,3 +27,6 @@ infixr 5 <>
 (<>) :: Monoid m => m -> m -> m
 (<>) = mappend
 #endif
+
+for :: Functor f =>  f a -> (a -> b) -> f b
+for = flip fmap

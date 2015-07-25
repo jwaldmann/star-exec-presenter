@@ -73,10 +73,39 @@ quest q p = do { token "?" ; return q } +++ p
 
 -- | NOTE: Ord instance is required for keys in maps (?)
 -- but otherwise useless
-data Function = Poly { degree :: Maybe Int } 
-              | Finite 
-              | Infinite 
+data Function = Poly { degree :: Maybe Int } -- ^ nothing: unknown degree
+              | Finite -- ^ some unspecified function (each value is finite)
+              | Infinite -- ^ some function that has infinite values somewhere
      deriving (Eq, Ord)
+
+-- * comparison of functions for bounds.
+-- need to know the context (is it for upper or lower bounds)
+-- since we need to treat polynomials with unknown degree accordingly:
+-- for an upper bound, an unknown polyomial is considered larger than any known,
+-- while for lower bounds, it is considerer smaller than any known polynomial.
+
+compare_for_lower_bounds :: Function -> Function -> Ordering
+compare_for_lower_bounds f g = case (f,g) of
+  ( _ , _ ) | f == g -> EQ
+  ( Infinite, _ ) -> GT
+  ( _ , Infinite ) -> LT
+  ( Finite, _ ) -> GT
+  ( _ , Finite ) -> LT
+  ( Poly (Just _), Poly Nothing ) -> GT
+  ( Poly Nothing, Poly (Just _) ) -> LT
+  ( Poly (Just p), Poly (Just q)) -> compare p q
+
+compare_for_upper_bounds :: Function -> Function -> Ordering
+compare_for_upper_bounds f g = case (f,g) of
+  ( _ , _ ) | f == g -> EQ
+  ( Infinite, _ ) -> GT
+  ( _ , Infinite ) -> LT
+  ( Finite, _ ) -> GT
+  ( _ , Finite ) -> LT
+  ( Poly Nothing, Poly (Just _) ) -> GT
+  ( Poly (Just _), Poly Nothing ) -> LT
+  ( Poly (Just p), Poly (Just q)) -> compare p q
+
 
 isPoly f = case f of Poly {} -> True ; _ -> False
 
