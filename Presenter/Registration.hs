@@ -138,7 +138,7 @@ tc2015 :: Registration
 tc2015 = Competition  "Termination Competition 2015"
    $ let { ttt2 = 3558 ; ttt2plain = 23357 ; ttt2cert = 23358 
          ; tct2 = 3797 ; tct3 = 3708
-         ; aprove = 3771 ; matchbox = 3803
+         ; aprove = 3771 ; matchbox = 3804
          } in
    [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [ standard2015 "TRS Standard"  trss
@@ -147,7 +147,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "AProVE" ( Just ( aprove, 24001 ) )
            , Participant "Wanda" ( Just (1542, 2389))
            , Participant "muterm" ( Just (1388, 2059))
-           , Participant "matchbox" ( Just ( matchbox, 24098 ))
+           , Participant "matchbox" ( Just ( matchbox, 24112 ))
            , Participant "AutoNon"  ( Just ( 3354, 22482 ) )
            ]
        , standard2015 "SRS Standard"  srss
@@ -155,24 +155,24 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "NaTT" ( Just ( 3430, 22691 ))
            , Participant "AProVE" ( Just ( aprove, 24001  ) )
            , Participant "muterm" ( Just (1388, 2059))
-           , Participant "matchbox" ( Just ( matchbox, 24098 ))
+           , Participant "matchbox" ( Just ( matchbox, 24112 ))
            , Participant "AutoNon"  ( Just ( 3354, 22482 ) )
            ]
        , standard2015 "Cycles" srss
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
-           , Participant "matchbox" ( Just ( 3803, 24095 ))
+           , Participant "matchbox" ( Just ( matchbox, 24110 ))
            ]
        , standard2015 "TRS Relative"  [ mixed_rel_trs ]
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
            , Participant "AProVE" ( Just ( aprove, 24001  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
-           , Participant "matchbox" ( Just ( matchbox, 24096 ))
+           , Participant "matchbox" ( Just ( matchbox, 24105 ))
            ]
        , standard2015 "SRS Relative"  [ mixed_rel_srs ]
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
            , Participant "AProVE" ( Just ( aprove, 24001  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
-           , Participant "matchbox" ( Just ( matchbox, 24096 ))
+           , Participant "matchbox" ( Just ( matchbox, 24105 ))
            ]
       , certified2015 "TRS Standard certified"  trss
            [ Participant "TTT2"  ( Just ( ttt2, ttt2cert ))
@@ -234,7 +234,7 @@ tc2015 = Competition  "Termination Competition 2015"
      [ standard2015 "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ Participant "TCT2" ( Just (tct2, 24076))
            , Participant "TCT3" ( Just (tct3, 23735))
-           , Participant "matchbox" ( Just ( matchbox, 24103 ))
+           , Participant "matchbox" ( Just ( matchbox, 24117 ))
            ]
      , standard2015 "Runtime Complexity - Full Rewriting"  [ Hierarchy 56748 ]
            [ Participant "TCT2" ( Just (tct2, 24071))
