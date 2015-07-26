@@ -37,8 +37,11 @@ num_cores = 4
 tpdb_9_0_1 :: FilePath
 tpdb_9_0_1 = "TPDB-65df8a308dd6_XML.zip"
 
+tpdb_10_2 :: FilePath
+tpdb_10_2 = "TPDB-10.2_XML.zip"
+
 default_space :: FilePath
-default_space = tpdb_9_0_1
+default_space = tpdb_10_2
 
 type SpaceMap = M.Map Int Space
 

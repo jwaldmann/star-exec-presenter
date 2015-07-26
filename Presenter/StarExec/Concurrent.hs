@@ -7,6 +7,8 @@ module Presenter.StarExec.Concurrent
   , runQueryJobPair
   , runQueryJob
   , runQueryPostProcInfo
+    -- exports for debugging
+  , runQueryInfo
   ) where
 
 import Import
@@ -78,6 +80,7 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
     logWarnN $ T.pack $ "runQueryInfo.mQuery = " ++ show mQuery
     case mQuery of
       Just eq -> do
+        logWarnN $ T.pack $ "runQueryInfo.eq = " ++ show eq
         return $ pendingQuery (entityKey eq) mPersistInfo
       Nothing -> do
         mKey <- insertQuery q
@@ -85,15 +88,18 @@ runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
         case mKey of
           Just queryKey -> do
             runConcurrent (queryExceptionHandler q) $ do
+              logWarnN $ T.pack $ "inside runConcurrent, (_id,q) = " ++ show (_id,q )
               _ <- queryAction _id
               deleteQuery q
-              liftIO $ putStrLn $ "Job done: " ++ (show q)
+              liftIO $ putStrLn $ "Job done: (_id,q) " ++ show (_id, q)
             return $ pendingQuery queryKey mPersistInfo
           Nothing -> do
             mQuery' <- getQuery q
             logWarnN $ T.pack $ "runQueryInfo.mQuery' = " ++ show mQuery'
             case mQuery' of
-              Just eq -> return $ pendingQuery (entityKey eq) mPersistInfo
+              Just eq -> do
+                logWarnN $ T.pack $ "runQueryInfo.mQuery'.eq = " ++ show eq
+                return $ pendingQuery (entityKey eq) mPersistInfo
               -- assuming that the concurrent query is completed
               Nothing -> do
                 mPersistInfo' <- getEntity $ uniqueInfoConstructor _id

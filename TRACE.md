@@ -77,3 +77,34 @@ runQueryJobPair = runQueryInfo GetJobPair UniqueJobPairInfo queryStarExec
                 insertUnique jp
               return ()
 ```
+so we look at `Presenter.StarExec.Concurrent.runQueryInfo`
+```
+runQueryInfo queryConstructor uniqueInfoConstructor queryAction _id = do
+  let q = queryConstructor _id
+  mPersistInfo <- getEntity $ uniqueInfoConstructor _id
+  runQueryBase q $ \mQuery -> do
+    case mQuery of
+      Just eq -> do
+        return $ pendingQuery (entityKey eq) mPersistInfo
+      Nothing -> do
+        mKey <- insertQuery q
+        case mKey of
+          Just queryKey -> do
+            runConcurrent (queryExceptionHandler q) $ do
+              _ <- queryAction _id
+              deleteQuery q
+              liftIO $ putStrLn $ "Job done: " ++ (show q)
+            return $ pendingQuery queryKey mPersistInfo
+          Nothing -> do
+            mQuery' <- getQuery q
+            case mQuery' of
+              Just eq -> return $ pendingQuery (entityKey eq) mPersistInfo
+              Nothing -> do
+                mPersistInfo' <- getEntity $ uniqueInfoConstructor _id
+                logWarnN $ T.pack $ "runQueryInfo.mPersistInfo' = " ++ show mPersistInfo'
+                return $ QueryResult Latest mPersistInfo'
+
+runQueryBase q handler = do
+  mQuery <- getQuery q
+  handler mQuery
+```
