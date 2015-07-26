@@ -38,7 +38,7 @@ getObjects :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
 getObjects c ats = foldr Set.intersection (objects c)
   $ map (\a -> back c Map.! a) $ Set.toList ats
 
-concepts :: (Ord ob, Ord at) => Context ob at-> [([ob], [at])]
+concepts :: (Ord ob, Ord at) => Context ob at -> [([ob], [at])]
 concepts c = do
   let atsPs = map (\ats -> Set.fromList ats) $ subsequences $ Set.toList $ attributes c
   [(Set.toList $ getObjects c ats, Set.toList ats) | ats <- atsPs, ats == (getAttributes c $ getObjects c ats)]
