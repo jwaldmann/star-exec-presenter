@@ -102,7 +102,7 @@ sendRequestRaw dropold req0 = do
 -- | managed requests: will execute Login if necessary.
 sendRequest req0 = do
   logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- sendRequestRaw False $ req0 { redirectCount = 0 }
+  resp0 <- runCon_exclusive $ sendRequestRaw False $ req0 { redirectCount = 0 }
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
@@ -112,8 +112,7 @@ sendRequest req0 = do
 
        runCon_exclusive $ do        
          base <- parseUrl starExecUrl
-         resp1 <- sendRequestRaw True
-                  $ base { method = "GET", path = indexPath, redirectCount = 0 }
+         -- resp1 <- sendRequestRaw True $ base { method = "GET", path = indexPath, redirectCount = 0 }
          creds <- getLoginCredentials
          resp2 <- sendRequestRaw False
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
@@ -123,8 +122,7 @@ sendRequest req0 = do
                  $ base { method = "POST" , path = loginPath
                         , redirectCount = 0
                         }      
-         resp3 <- sendRequestRaw False
-                 $ base { method = "GET", path = indexPath, redirectCount = 0 }
+         -- resp3 <- sendRequestRaw False $ base { method = "GET", path = indexPath, redirectCount = 0 }
          return ()
 
        logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
