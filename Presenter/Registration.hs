@@ -164,7 +164,7 @@ tc2015 = Competition  "Termination Competition 2015"
            , Participant "AutoNon"  ( Just ( 3354, 22482 ) )
            ]
        , standard2015 "Cycles" srs
-           [ Participant "cycsrs" ( Just ( 3338, 22415) )
+           [ Participant "cycsrs" ( Just ( 3774, 24014) )
            , Participant "matchbox" ( Just ( matchbox, 24110 ))
            ]
        , standard2015 "TRS Relative"  trs_rel 
