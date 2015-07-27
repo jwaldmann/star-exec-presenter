@@ -45,7 +45,7 @@ import Text.Hamlet.XML
 import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
-import Control.Monad ( guard, when )
+import Control.Monad ( guard, when, forM )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
@@ -433,6 +433,14 @@ getJobPairInfo _ _pairId = do
 
 pushJobXML :: Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXML sId jobs = do
+  jss <- forM jobs $ \ job -> pushJobXML_bulk sId [job]
+  return $ concat jss
+
+-- FIXME: for large jobs, this is risky (it will no return, but time-out)
+-- so we should send jobs one-by-one
+
+pushJobXML_bulk :: Int -> [StarExecJob] -> Handler [StarExecJob]
+pushJobXML_bulk sId jobs = do
   js <- pushJobXMLStarExec sId jobs
   registerJobs $ catMaybes $ map jobid js
   return js
