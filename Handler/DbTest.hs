@@ -32,8 +32,25 @@ getDbTestR jid = do
   let contextData = collectData $ getStarExecResults jobResults
   let context = contextFromList contextData
   let concepts' = concepts context
-
   defaultLayout [whamlet|
+    <table class="table table-bordered table-striped">
+      <thead>
+        <th> concepts
+        $forall at <- attributes context
+          <th> #{show at}
+        <th> count
+      <tbody>
+
+      $forall (_,currAts) <- concepts'
+        <tr>
+          <td> Z
+          $forall at <- attributes context
+            $if elem at currAts
+              <td>X
+            $else
+              <td>
+          <td> #{length currAts}
+
     <h1>Concepts
     <ul>
     $forall (o,a) <- concepts'
