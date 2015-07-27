@@ -1,4 +1,4 @@
-module Handler.DbTest where
+module Handler.Concepts where
 
 import Import
 import Data.Maybe
@@ -26,8 +26,8 @@ data Attribute =
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
 slowCpuTimeLimit = 10
 
-getDbTestR :: JobID -> Handler Html
-getDbTestR jid = do
+getConceptsR :: JobID -> Handler Html
+getConceptsR jid = do
   jobResults <- getPersistJobResults jid
   let contextData = collectData $ getStarExecResults jobResults
   let context = contextFromList contextData

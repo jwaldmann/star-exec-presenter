@@ -63,7 +63,7 @@ library
                      Handler.CompetitionText
                      Handler.Resolve
                      Handler.Eval
-                     Handler.DbTest
+                     Handler.Concepts
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job

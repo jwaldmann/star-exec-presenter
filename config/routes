@@ -77,4 +77,4 @@
 
 /eval/#Query/*JobIds EvalR GET
 -- /dbtest/#JobID DbTestR GET
-/dbtest/#JobID DbTestR GET
+/concepts/#JobID ConceptsR GET
