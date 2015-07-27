@@ -1,6 +1,7 @@
 module ConceptAnalysis.FCA where
 
 import Import
+import Control.Monad (guard)
 import Data.List
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
@@ -38,7 +39,8 @@ getObjects :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
 getObjects c ats = foldr Set.intersection (objects c)
   $ map (\a -> back c Map.! a) $ Set.toList ats
 
-concepts :: (Ord ob, Ord at) => Context ob at -> [([ob], [at])]
+concepts :: (Ord ob, Ord at) => Context ob at -> [(Set ob, Set at)]
 concepts c = do
-  let atsPs = map (\ats -> Set.fromList ats) $ subsequences $ Set.toList $ attributes c
-  [(Set.toList $ getObjects c ats, Set.toList ats) | ats <- atsPs, ats == (getAttributes c $ getObjects c ats)]
+  ats <- map (\ats -> Set.fromList ats) $ subsequences $ Set.toList $ attributes c
+  guard $ ats == (getAttributes c $ getObjects c ats)
+  return (getObjects c ats, ats)
