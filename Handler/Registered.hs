@@ -2,6 +2,7 @@ module Handler.Registered where
 
 import Import hiding (competitionName, metaCategoryName, categoryName)
 import Presenter.Registration
+import Presenter.StarExec.Urls
 --import Text.Lucius (luciusFile)
 --import Text.Hamlet (hamletFile)
 

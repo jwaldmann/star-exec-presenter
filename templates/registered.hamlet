@@ -20,6 +20,8 @@
         $forall cat <- full_categories mecat
           <li>
             #{categoryName cat}:
+            $forall Hierarchy h <- Presenter.Registration.benchmarks (contents cat)
+                <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{h}">#{show h}
             $forall part <- participants (contents cat)
                   $maybe conf <- solver_config part
                      <span class="#{partclass conf}">
@@ -34,6 +36,8 @@
         $forall cat <- demonstration_categories mecat
           <li>
             #{categoryName cat}:
+            $forall Hierarchy h <- Presenter.Registration.benchmarks (contents cat)
+                 <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{h}">#{show h}
             $forall part <- participants (contents cat)
                   $maybe conf <- solver_config part
                        <span class="conf"> #{participantName part}

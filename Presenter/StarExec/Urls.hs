@@ -43,6 +43,9 @@ jobInfoPath = "starexec/secure/details/job.jsp"
 solverInfoPath :: ByteString
 solverInfoPath = "starexec/secure/details/solver.jsp"
 
+configPath :: ByteString
+configPath = "starexec/secure/details/configuration.jsp"
+
 benchmarkInfoPath :: ByteString
 benchmarkInfoPath = "starexec/secure/details/benchmark.jsp"
 
@@ -50,7 +53,6 @@ benchmarkPath :: ByteString
 benchmarkPath = "starexec/services/benchmarks/{bmId}/contents"
 
 postProcPath :: ByteString
---postProcPath = "starexec/secure/edit/processor.jsp?type=post&id=164"
 postProcPath = "starexec/secure/edit/processor.jsp"
 
 getURL :: ByteString -> [(String, String)] -> ByteString

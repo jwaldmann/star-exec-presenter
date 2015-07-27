@@ -166,13 +166,13 @@ tc2015 = Competition  "Termination Competition 2015"
            [ Participant "cycsrs" ( Just ( 3338, 22415) )
            , Participant "matchbox" ( Just ( matchbox, 24110 ))
            ]
-       , standard2015 "TRS Relative"  [ trs_rel ]
+       , standard2015 "TRS Relative"  trs_rel 
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
            , Participant "AProVE" ( Just ( aprove, 24001  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
            , Participant "matchbox" ( Just ( matchbox, 24105 ))
            ]
-       , standard2015 "SRS Relative"  [ srs_rel ]
+       , standard2015 "SRS Relative"  srs_rel
            [ Participant "TTT2" ( Just ( ttt2, ttt2plain ))
            , Participant "AProVE" ( Just ( aprove, 24001  ) )
            , Participant "NaTT" ( Just ( 3430, 22690 ))
@@ -186,11 +186,11 @@ tc2015 = Competition  "Termination Competition 2015"
            [ Participant "TTT2"  ( Just ( ttt2, ttt2cert ))
            , Participant "AProVE" ( Just ( aprove, 23997  ) )
            ]
-      , certified2015 "TRS Relative certified"  [ trs_rel ]
+      , certified2015 "TRS Relative certified"  trs_rel
            [ Participant "TTT2"  ( Just ( ttt2, ttt2cert ))
            , Participant "AProVE" ( Just ( aprove, 23997 ) )
            ]
-      , certified2015 "SRS Relative certified"  [ srs_rel ]
+      , certified2015 "SRS Relative certified"  srs_rel
            [ Participant "TTT2"  ( Just ( ttt2, ttt2cert ))
            , Participant "AProVE" ( Just ( aprove, 23997  ) )
            ]
