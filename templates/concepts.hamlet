@@ -1,0 +1,44 @@
+<table class="table table-bordered table-striped">
+      <thead>
+        <th> concepts
+        $forall at <- attributes context
+          <th> #{show at}
+        <th> count
+      <tbody>
+
+      $forall (_,currAts) <- concepts'
+        <tr>
+          <td> Z
+          $forall at <- attributes context
+            $if elem at currAts
+              <td>X
+            $else
+              <td>
+          <td> #{length currAts}
+
+<h1>Concepts
+<ul>
+$forall (o,a) <- concepts'
+  <li> #{show o} : #{show a}
+
+<h1>Objects
+<ul>
+$forall k <- objects context
+  <li> #{show k}
+  #{show $ getAttributes context $ Set.fromList [k]}
+
+<h1>Attributes
+<ul>
+$forall k <- attributes context
+  <li> #{show k}
+  #{show $ getObjects context $ Set.fromList [k]}
+
+<h1>ContextData
+<ul>
+$forall obj <- contextData
+  <li> #{show obj}
+
+<h1>Original records
+<ul>
+$forall jobResult <- getStarExecResults jobResults
+  <li> #{show jobResult}
