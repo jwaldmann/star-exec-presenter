@@ -28,6 +28,7 @@ import Control.Monad.Catch (bracket_)
 import Control.Monad ((>=>))
 import Control.Monad.Logger
 
+import qualified Network.HTTP.Types.Header as H
 
 user :: Login -> Text
 user (Login u _) = u
@@ -58,22 +59,23 @@ setSessionData cj d = do
 -- will silently set cookies to session state.
 sendRequestRaw :: Request
                -> Handler (Response BSL.ByteString)
-sendRequestRaw req = do
+sendRequestRaw req0 = do
   man <- httpManager <$> getYesod
   SessionData cj d <- getSessionData
-  let req' =  req { cookieJar = Just cj
+  -- https://github.com/snoyberg/http-client/issues/117
+  let req =  req0 { cookieJar = Just cj
                   , checkStatus = \ _ _ _ -> Nothing
+                  , requestHeaders =
+                       [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
                   }
   logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req) 
-                         <> "?" <> show (queryString req)
-                     <> "with cookieJar: " <> show cj
+  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show req 
   start <- liftIO getCurrentTime
-  resp <- httpLbs req' man
+  resp <- httpLbs req man
   end <- liftIO getCurrentTime
   logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show (path req)
-                       <> "?" <> show  (queryString req)
                        <> "response status: " <> show (responseStatus resp)
-                      <> "responseCookieJar: " <> show (responseCookieJar resp)
+                       <> "response cookiejar: " <> show (responseCookieJar resp)
          <> "time: " <> show (diffUTCTime end start)
   setSessionData (responseCookieJar resp) end
   return resp

@@ -22,7 +22,6 @@ inputForm = renderTable $ JobControl
                   ]) "categories" (Just SelectionCompetition)
         <*> areq (radioFieldList
                   [ ("Termination.q"::T.Text,36291)
-                  -- , ("TerminationTest.q",30597)
                   , ("all.q",1)
                   , ("all2.q",4)
                   ]) "queue" (Just 36291)
