@@ -138,7 +138,8 @@ tc2015 :: Registration
 tc2015 = Competition  "Termination Competition 2015"
    $ let { ttt2 = 3558 ; ttt2plain = 23357 ; ttt2cert = 23358 
          ; tct2 = 3797 ; tct3 = 3708
-         ; aprove = 3771 ; matchbox = 3804
+         ; aprove = 3771 ; aprove' = 3823
+         ; matchbox = 3804
          ; trs = [ Hierarchy 101455 ]
          ; srs = [ Hierarchy 101494 ]
          ; trs_rel = [ Hierarchy 101490 ]
@@ -246,13 +247,13 @@ tc2015 = Competition  "Termination Competition 2015"
        [ Hierarchy 101424 ]
            [ Participant "TCT2" ( Just (tct2, 24071))
            , Participant "TCT3" ( Just (tct3, 23729))
-           , Participant "AProVE" ( Just ( aprove, 23993 ) )
+           , Participant "AProVE" ( Just ( aprove', 24154 ) )
            ]
      , standard2015 "Runtime Complexity - Innermost Rewriting"
        [ Hierarchy 101556 ]
            [ Participant "TCT2" ( Just (tct2, 24070))
            , Participant "TCT3" ( Just (tct3, 23730))
-           , Participant "AProVE" ( Just ( aprove, 23996 ) )
+           , Participant "AProVE" ( Just ( aprove', 24157 ) )
            ]
      , certified2015 "Derivational Complexity - Full Rewriting certified"
        [ Hierarchy 101513 ]
