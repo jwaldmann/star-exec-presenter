@@ -11,6 +11,8 @@ import Network.HTTP.Conduit
 import Network.HTTP.Types.Status (ok200)
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
+import qualified Data.ByteString.Char8 as BSC
+import Data.Char (isHexDigit)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 --import qualified Data.Text.IO as TIO
@@ -25,8 +27,9 @@ import Control.Concurrent.MVar
 import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Exception (throw)
 import Control.Monad.Catch (bracket_)
-import Control.Monad ((>=>))
+import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
+import Data.Maybe (listToMaybe)
 
 import qualified Network.HTTP.Types.Header as H
 
@@ -50,64 +53,100 @@ getSessionData = do
   app <- getYesod
   lift $ atomically $ readTVar $ sessionData app
 
-setSessionData :: CookieJar -> UTCTime -> Handler ()
-setSessionData cj d = do
+setSessionData :: CookieJar -> Maybe BS.ByteString -> UTCTime -> Handler ()
+setSessionData cj sid d = do
   app <- getYesod
-  lift $ atomically $ writeTVar (sessionData app) $ SessionData cj d
+  lift $ atomically $ writeTVar (sessionData app) $ SessionData cj sid d
 
--- | raw request. May return "Login" response if we're not currently logged in.
--- will silently set cookies to session state.
-sendRequestRaw :: Request
+-- | raw request. 
+--  will silently set cookies to session state.
+sendRequestRaw :: Bool -- ^ drop old session data
+               -> Request
                -> Handler (Response BSL.ByteString)
-sendRequestRaw req0 = do
+sendRequestRaw dropold req0 = do
   man <- httpManager <$> getYesod
-  SessionData cj d <- getSessionData
+  SessionData cj sid d <- getSessionData
   -- https://github.com/snoyberg/http-client/issues/117
-  let req =  req0 { cookieJar = Just cj
+  let req =  req0 { cookieJar = Just
+                      $ if dropold then createCookieJar [killmenothing] else cj 
                   , checkStatus = \ _ _ _ -> Nothing
                   , requestHeaders =
-                       [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
+                    [ ( H.hAcceptLanguage, "en-US,en;q=0.5" )
+                    -- , ( H.hConnection, "keep-alive" )
+                    -- , ( H.hCookie , "killmenothing"
+                    --   <> case sid of Nothing -> mempty ; Just i -> "; JSESSIONID=" <> i )
+                    ]
                   }
-  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req) 
-  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show req 
+  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req)
+  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (cookieJar req)
+  when False $ case requestBody req of
+    RequestBodyLBS s ->
+      logWarnN  $ T.pack  $ "sendRequestRaw: " <> show s
   start <- liftIO getCurrentTime
   resp <- httpLbs req man
   end <- liftIO getCurrentTime
   logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show (path req)
                        <> "response status: " <> show (responseStatus resp)
-                       <> "response cookiejar: " <> show (responseCookieJar resp)
+                           <> "response cookies: " <> show (responseCookieJar resp)
          <> "time: " <> show (diffUTCTime end start)
-  setSessionData (responseCookieJar resp) end
+  when False $ logWarnN $ T.pack $ show resp
+  logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
+  let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
+             getJsessionidFromCJ $ responseCookieJar resp
+  logWarnN $ T.pack $ "current sid': " <> show sid'
+  setSessionData (responseCookieJar resp) (case sid' of Nothing -> sid ; _ -> sid' ) end
   return resp
 
 
 
 -- | managed requests: will execute Login if necessary.
-sendRequest req0 = runCon_exclusive $ do
+sendRequest req0 = do
   logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- sendRequestRaw $ req0 
+  resp0 <- sendRequestRaw False $ req0 { redirectCount = 0 }
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
        return resp0
     else do    
        logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
-       creds <- getLoginCredentials
-       sec <- parseUrl starExecUrl
-       let req1 = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
+
+       runCon_exclusive $ do        
+         base <- parseUrl starExecUrl
+         resp1 <- sendRequestRaw True
+                  $ base { method = "GET", path = indexPath, redirectCount = 0 }
+         creds <- getLoginCredentials
+         resp2 <- sendRequestRaw False
+           $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds) 
                            , ("cookieexists", "false")
                            ] 
-                 $ sec { method = "POST"
-                       , path = loginPath
-                       }
-       resp1 <- sendRequestRaw req1
-       logWarnN  $ T.pack  $ "sendRequest: try again"
-       sendRequestRaw req0
+                 $ base { method = "POST" , path = loginPath
+                        , redirectCount = 0
+                        }      
+         resp3 <- sendRequestRaw False
+                 $ base { method = "GET", path = indexPath, redirectCount = 0 }
+         return ()
+
+       logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
+       sendRequest req0
+
+getJsessionidFromCJ cj = listToMaybe $ do
+  c <- destroyCookieJar cj
+  guard $ cookie_name c == "JSESSIONID"
+  return $ cookie_value c
+      
+getJsessionidFromHeaders hs = listToMaybe $ do
+        (k,v) <- hs
+        guard $ k == "Set-Cookie"
+        let js = "JSESSIONID=" 
+        let (pre,post) = BS.splitAt (BS.length js) v
+        guard $ pre == js
+        return $ BSC.takeWhile isHexDigit post
 
 needs_login r =
-     ( responseStatus r /= ok200)
-  || ( BS.isInfixOf "Login - StarExec" $ BSL.toStrict $ responseBody r )
+   ( responseStatus r /= ok200)
+  ||   ( BS.isInfixOf "<title>Login - StarExec</title>" $ BSL.toStrict $ responseBody r )
+--  || ( BS.isInfixOf "Invalid username or password" $ BSL.toStrict $ responseBody r )
 
 -- this is terrible.
 -- http://www.4guysfromrolla.com/webtech/082400-1.shtml

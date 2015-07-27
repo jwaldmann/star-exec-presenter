@@ -124,7 +124,8 @@ makeFoundation conf = do
 
     -- Session for Connections to starexec.org
     now <- getCurrentTime
-    session <- atomically $ newTVar $ SessionData (createCookieJar [ killmenothing ]) now
+    session <- atomically $ newTVar
+        $ SessionData (createCookieJar [ killmenothing ]) Nothing now
 
     -- Connection semaphore
     conS <- Lock.new

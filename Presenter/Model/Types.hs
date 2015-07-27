@@ -4,6 +4,7 @@ import Prelude
 import Data.Text (Text)
 import Network.HTTP.Conduit (Request, Manager, CookieJar, Cookie)
 import Data.Time.Clock (UTCTime)
+import Data.ByteString as BS
 
 type Email = Text
 type Password = Text
@@ -18,6 +19,7 @@ data Login = Login Email Password deriving (Show, Read, Eq)
 
 data SessionData = SessionData
   { cookieData :: CookieJar
+  , jsessionid :: Maybe BS.ByteString
   , date :: UTCTime
   } deriving (Show, Read)
 
