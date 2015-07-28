@@ -3,18 +3,18 @@
         <th> concepts
         $forall at <- attributes context
           <th> #{show at}
-        <th> count
+        <th> count pairs (of #{length $ objects context})
       <tbody>
 
-      $forall (_,currAts) <- concepts'
+      $forall (currObs,currAts) <- concepts'
         <tr>
-          <td> Z
+          <td> #{show $ fromJust $ elemIndex (currObs,currAts) concepts'}
           $forall at <- attributes context
             $if elem at currAts
               <td>X
             $else
               <td>
-          <td> #{length currAts}
+          <td> #{length currObs}
 
 <h1>Concepts
 <ul>
