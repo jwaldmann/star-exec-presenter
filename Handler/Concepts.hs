@@ -7,6 +7,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
+-- import Data.Text (append)
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
 import ConceptAnalysis.FCA
@@ -19,7 +20,6 @@ data Attribute =
    | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
-   | ASlowCpuTimeSolverResult Bool SolverResult
  deriving (Eq, Ord, Show)
 
 -- all job pairs with a response time greater 10 seconds is slow
@@ -54,3 +54,13 @@ getAttributeCollection jobResults = do
 
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
+
+-- properName :: Attribute -> Text
+-- properName (AJobResultInfoSolver name) = append "solver name " name
+-- properName (AJobResultInfoConfiguration config) = append "solver configuration " config
+-- properName (ASlowCpuTime False) = "cpuTime < 10s"
+-- properName (ASlowCpuTime True) = "cpuTime > 10s"
+-- properName (ASolverResult YES) = "result YES"
+-- properName (ASolverResult NO) = "result NO"
+-- properName (ASolverResult MAYBE) = "result MAYBE"
+-- properName (ASolverResult (OTHER text)) = append "result OTHER" text
