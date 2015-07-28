@@ -17,9 +17,11 @@ import Network.Wai.Middleware.RequestLogger
 import qualified Network.Wai.Middleware.RequestLogger as RequestLogger
 import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
+import Network.Connection
 import Network.HTTP.Client.Conduit 
 import Network.HTTP.Client.TLS (tlsManagerSettings)
-import Network.HTTP.Conduit (createCookieJar)
+import Network.HTTP.Conduit (createCookieJar,mkManagerSettings)
+import qualified Network.HTTP.Client.Conduit as NHCC
 import Control.Monad.Logger (runLoggingT)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
 import Network.Wai.Logger (clockDateCacher)
@@ -66,7 +68,7 @@ import Handler.LegacyListHiddenCompetitions
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
-import Presenter.StarExec.Connection (killmenothing)
+import Presenter.StarExec.Connection (killmenothing, initial_login)
 
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
@@ -102,12 +104,20 @@ makeApplication conf = do
 -- performs some initialization.
 makeFoundation :: AppConfig DefaultEnv Extra -> IO App
 makeFoundation conf = do
-    manager <- newManagerSettings
-      $ tlsManagerSettings
-      { managerResponseTimeout = Just $ 60 * 10^6
-      , managerConnCount = 1
-      } 
-    
+    manager <- NHCC.newManagerSettings $
+      let -- disableCertificateValidation, see
+          -- http://hackage.haskell.org/package/connection-0.2.3/docs/Network-Connection.html#t:TLSSettings
+          tlsset = TLSSettingsSimple True False False
+      in  ( mkManagerSettings tlsset Nothing )
+          { managerResponseTimeout = Just $ 60 * 10^6
+          , managerConnCount = 10
+          }
+    cj <- initial_login manager
+    -- Session for Connections to starexec.org
+    now <- getCurrentTime
+    session <- atomically $ newTVar
+        $ SessionData cj Nothing now
+          
     s <- staticSite
     dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
               Database.Persist.loadConfig >>=
@@ -121,11 +131,6 @@ makeFoundation conf = do
     crCache <- atomically $ newTVar M.empty
     -- DB-Semaphore
     dbS <- Lock.new
-
-    -- Session for Connections to starexec.org
-    now <- getCurrentTime
-    session <- atomically $ newTVar
-        $ SessionData (createCookieJar [ killmenothing ]) Nothing now
 
     -- Connection semaphore
     conS <- Lock.new

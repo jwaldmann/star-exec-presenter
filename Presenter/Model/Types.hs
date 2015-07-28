@@ -17,6 +17,9 @@ type PostProcId = Int
 
 data Login = Login Email Password deriving (Show, Read, Eq)
 
+user (Login u p) = u
+password (Login u p) = p
+
 data SessionData = SessionData
   { cookieData :: CookieJar
   , jsessionid :: Maybe BS.ByteString

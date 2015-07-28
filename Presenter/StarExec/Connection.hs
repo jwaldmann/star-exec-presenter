@@ -3,6 +3,7 @@ module Presenter.StarExec.Connection
     -- , index
     , getLoginCredentials
     , killmenothing
+    , initial_login
     ) where
 
 import Import
@@ -33,11 +34,37 @@ import Data.Maybe (listToMaybe)
 
 import qualified Network.HTTP.Types.Header as H
 
-user :: Login -> Text
-user (Login u _) = u
+-- | we're doing this at the very beginning (not inside a Handler)
+initial_login :: Manager -> IO CookieJar
+initial_login man = do
+  let cj0 = createCookieJar [ killmenothing ]
+      Just base = parseUrl starExecUrl
+  let send req = do
+        print req
+        resp <- httpLbs req man 
+        print resp
+        return resp
+  
+  resp1 <- send
+      $ base { method = "GET", path = indexPath , cookieJar = Just cj0 }
+  let cj1 = responseCookieJar resp1
 
-password :: Login -> Text
-password (Login _ pass) = pass
+  creds <- getLoginCredentials
+  resp2 <- send
+           $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
+                           , ("j_password", TE.encodeUtf8 $ password creds) 
+                           , ("cookieexists", "false")
+                           ] 
+                 $ base { method = "POST" , path = loginPath
+                        , cookieJar = Just cj1
+                        }
+
+  let cj2 = responseCookieJar resp2
+  resp3 <- send $ base { method = "GET", path = indexPath, redirectCount = 1
+                       , cookieJar = Just cj2
+                       }
+  return $ responseCookieJar resp3
+
 
 runCon_exclusive :: Handler b -> Handler b
 runCon_exclusive action = do
@@ -67,18 +94,14 @@ sendRequestRaw dropold req0 = do
   man <- httpManager <$> getYesod
   SessionData cj sid d <- getSessionData
   -- https://github.com/snoyberg/http-client/issues/117
-  let req =  req0 { cookieJar = Just
-                      $ if dropold then createCookieJar [killmenothing] else cj 
-                  , checkStatus = \ _ _ _ -> Nothing
+  let req =  req0 { cookieJar = Just cj
+                  -- , checkStatus = \ _ _ _ -> Nothing
                   , requestHeaders =
-                    [ ( H.hAcceptLanguage, "en-US,en;q=0.5" )
-                    -- , ( H.hConnection, "keep-alive" )
-                    -- , ( H.hCookie , "killmenothing"
-                    --   <> case sid of Nothing -> mempty ; Just i -> "; JSESSIONID=" <> i )
-                    ]
+                    [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
                   }
   logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req)
-  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (cookieJar req)
+                      <> "?" <> queryString req
+  logWarnN  $ T.pack  $ "using sid: " <> show (getJsessionidFromCJ cj)
   when False $ case requestBody req of
     RequestBodyLBS s ->
       logWarnN  $ T.pack  $ "sendRequestRaw: " <> show s
@@ -86,14 +109,15 @@ sendRequestRaw dropold req0 = do
   resp <- httpLbs req man
   end <- liftIO getCurrentTime
   logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show (path req)
+                        <> "?" <> queryString req
                        <> "response status: " <> show (responseStatus resp)
-                           <> "response cookies: " <> show (responseCookieJar resp)
+                       --    <> "response cookies: " <> show (responseCookieJar resp)
          <> "time: " <> show (diffUTCTime end start)
   when False $ logWarnN $ T.pack $ show resp
-  logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
+  when False $ logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
   let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
              getJsessionidFromCJ $ responseCookieJar resp
-  logWarnN $ T.pack $ "current sid': " <> show sid'
+  logWarnN $ T.pack $ "current sid: " <> show sid'
   setSessionData (responseCookieJar resp) (case sid' of Nothing -> sid ; _ -> sid' ) end
   return resp
 
@@ -102,7 +126,7 @@ sendRequestRaw dropold req0 = do
 -- | managed requests: will execute Login if necessary.
 sendRequest req0 = do
   logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- runCon_exclusive $ sendRequestRaw False $ req0 { redirectCount = 0 }
+  resp0 <- runCon_exclusive $ sendRequestRaw False $ req0 
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
@@ -112,17 +136,15 @@ sendRequest req0 = do
 
        runCon_exclusive $ do        
          base <- parseUrl starExecUrl
-         -- resp1 <- sendRequestRaw True $ base { method = "GET", path = indexPath, redirectCount = 0 }
+         resp1 <- sendRequestRaw True $ base { method = "GET", path = indexPath }
          creds <- getLoginCredentials
          resp2 <- sendRequestRaw False
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds) 
                            , ("cookieexists", "false")
                            ] 
-                 $ base { method = "POST" , path = loginPath
-                        , redirectCount = 0
-                        }      
-         -- resp3 <- sendRequestRaw False $ base { method = "GET", path = indexPath, redirectCount = 0 }
+                 $ base { method = "POST" , path = loginPath }      
+         resp3 <- sendRequestRaw False $ base { method = "GET", path = indexPath }
          return ()
 
        logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"

@@ -164,6 +164,7 @@ library
                  , case-insensitive
                  , http-client
                  , http-client-tls
+                 , connection
                  , random
                  , tagsoup
                  -- , esqueleto
