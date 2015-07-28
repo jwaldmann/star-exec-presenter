@@ -58,7 +58,7 @@ evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 -- properName :: Attribute -> Text
 -- properName (AJobResultInfoSolver name) = append "solver name " name
 -- properName (AJobResultInfoConfiguration config) = append "solver configuration " config
--- properName (ASlowCpuTime False) = "cpuTime < 10s"
+-- properName (ASlowCpuTime False) = "cpuTime <= 10s"
 -- properName (ASlowCpuTime True) = "cpuTime > 10s"
 -- properName (ASolverResult YES) = "result YES"
 -- properName (ASolverResult NO) = "result NO"
