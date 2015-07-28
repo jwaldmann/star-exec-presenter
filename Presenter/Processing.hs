@@ -25,7 +25,7 @@ getClass result =
     BOUNDS {} -> "solver-bounds"
     CERTIFIED -> "solver-certified"
     ERROR     -> "solver-error"
-    _         -> "solver-nothing"
+    OTHER {}    -> "solver-other"
 
 getInfo :: (JobResult -> S.Set a -> S.Set a) -> [JobResult] -> [a]
 getInfo f = S.toList . L.foldr f S.empty

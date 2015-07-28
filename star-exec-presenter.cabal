@@ -52,6 +52,7 @@ library
                      Handler.ListPostProcs
                      Handler.LegacyListCompetitions
                      Handler.LegacyListHiddenCompetitions
+                     Handler.Problems
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job

@@ -45,6 +45,8 @@
 /show_many_job_results/*JobIds LegacyShowManyJobResultsR GET
 /flexible-table/#Query/*JobIds FlexibleTableR GET
 
+/problems/*JobIds ProblemsR GET
+
 -- displays competitions
 /competitions/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET

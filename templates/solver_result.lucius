@@ -4,6 +4,7 @@
 @colorCertified: #5CB85C;
 @colorError: #FFCC66;
 @colorBounds: #B0EDEA;
+@colorOther: #F2CDAC;
 @colorNothing: #FFFFFF;
 
 .table > thead > tr,
@@ -39,6 +40,11 @@
         background-color: #{colorBounds};
     }
 
+    > td.solver-other,
+    > th.solver-other {
+        background-color: #{colorOther};
+    }
+
     > td.solver-nothing,
     > th.solver-nothing {
         background-color: #{colorNothing};
@@ -71,6 +77,11 @@
     > tr.solver-error > td,
     > tr.solver-error > th {
         background-color: #{colorError};
+    }
+
+    > tr.solver-other,
+    > tr.solver-other {
+        background-color: #{colorOther};
     }
 
     > tr.solver-nothing > td,

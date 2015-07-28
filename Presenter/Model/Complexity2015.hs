@@ -90,6 +90,10 @@ data Function = Poly { degree :: Maybe Int } -- ^ nothing: unknown degree
 -- Poly (Just 0) < Poly (Just 1) < .. < Poly Nothing < Finite < Infinite
 -- these orders are computed by the following comparison functions.
 
+
+-- | @compare_for_lower_bounds f g@ says GT iff f is larger than g
+-- in the sense that  Omega(f) is a subset of Omega (g).
+-- The type is actually wrong (it assumes that the order is total).
 compare_for_lower_bounds :: Function -> Function -> Ordering
 compare_for_lower_bounds f g = case (f,g) of
   ( _ , _ ) | f == g -> EQ
@@ -101,6 +105,9 @@ compare_for_lower_bounds f g = case (f,g) of
   -- here, we have Finite or Poly Nothing or Poly (Just 0)
   ( _, _ ) -> EQ
 
+-- | @compare_for_upper_bounds f g@ says GT iff f is larger than g
+-- in the sense that  Oh(f) is a superset of Oh (g).
+-- The type is actually wrong (it assumes that the order is total).
 compare_for_upper_bounds :: Function -> Function -> Ordering
 compare_for_upper_bounds f g = case (f,g) of
   ( _ , _ ) | f == g -> EQ

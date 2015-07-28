@@ -4,6 +4,8 @@ static/combined/
 config/client_session_key.aes
 *.hi
 *.o
+*.dyn_hi
+*.dyn_o
 *.sqlite3
 .hsenv*
 cabal-dev/
@@ -15,6 +17,7 @@ cabal.sandbox.config
 .dir-locals.el
 examples.txt
 config/settings.yml
+config/postgresql.yml
 *.iml
 *.ipr
 *.iws

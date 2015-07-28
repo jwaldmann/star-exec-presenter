@@ -64,6 +64,7 @@ import Handler.ListSolvers
 import Handler.ListPostProcs
 import Handler.LegacyListCompetitions
 import Handler.LegacyListHiddenCompetitions
+import Handler.Problems
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

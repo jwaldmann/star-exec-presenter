@@ -4,6 +4,7 @@
 module Handler.ShowManyJobResults
   ( getShowManyJobResultsR
   -- , getShowManyJobResultsLegacyR
+  , shorten
   ) where
 
 import Import
