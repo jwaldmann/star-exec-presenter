@@ -87,20 +87,19 @@ setSessionData cj sid d = do
 
 -- | raw request. 
 --  will silently set cookies to session state.
-sendRequestRaw :: Bool -- ^ drop old session data
-               -> Request
+sendRequestRaw :: Request
                -> Handler (Response BSL.ByteString)
-sendRequestRaw dropold req0 = do
+sendRequestRaw req0 = do
   man <- httpManager <$> getYesod
   SessionData cj sid d <- getSessionData
   -- https://github.com/snoyberg/http-client/issues/117
   let req =  req0 { cookieJar = Just cj
                   -- , checkStatus = \ _ _ _ -> Nothing
-                  , requestHeaders =
-                    [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
+                  -- , requestHeaders = [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
                   }
-  logWarnN  $ T.pack  $ "sendRequestRaw: " <> show (path req)
-                      <> "?" <> queryString req
+      reqInfo = T.pack $ BSC.unpack
+                $ method req <> " " <> path req <> "?" <> queryString req 
+  logWarnN  $ "sendRequestRaw: " <> reqInfo
   logWarnN  $ T.pack  $ "using sid: " <> show (getJsessionidFromCJ cj)
   when False $ case requestBody req of
     RequestBodyLBS s ->
@@ -108,11 +107,10 @@ sendRequestRaw dropold req0 = do
   start <- liftIO getCurrentTime
   resp <- httpLbs req man
   end <- liftIO getCurrentTime
-  logWarnN  $ T.pack  $ "done sendRequestRaw: " <> show (path req)
-                        <> "?" <> queryString req
-                       <> "response status: " <> show (responseStatus resp)
+  logWarnN  $  "done sendRequestRaw: " <> reqInfo
+                       <> "response status: " <> T.pack (show $ responseStatus resp)
                        --    <> "response cookies: " <> show (responseCookieJar resp)
-         <> "time: " <> show (diffUTCTime end start)
+         <> "time: " <> T.pack (show $ diffUTCTime end start)
   when False $ logWarnN $ T.pack $ show resp
   when False $ logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
   let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
@@ -126,7 +124,7 @@ sendRequestRaw dropold req0 = do
 -- | managed requests: will execute Login if necessary.
 sendRequest req0 = do
   logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- runCon_exclusive $ sendRequestRaw False $ req0 
+  resp0 <- runCon_exclusive $ sendRequestRaw  $ req0 
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
@@ -136,15 +134,15 @@ sendRequest req0 = do
 
        runCon_exclusive $ do        
          base <- parseUrl starExecUrl
-         resp1 <- sendRequestRaw True $ base { method = "GET", path = indexPath }
+         resp1 <- sendRequestRaw  $ base { method = "GET", path = indexPath }
          creds <- getLoginCredentials
-         resp2 <- sendRequestRaw False
+         resp2 <- sendRequestRaw 
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds) 
                            , ("cookieexists", "false")
                            ] 
                  $ base { method = "POST" , path = loginPath }      
-         resp3 <- sendRequestRaw False $ base { method = "GET", path = indexPath }
+         resp3 <- sendRequestRaw $ base { method = "GET", path = indexPath }
          return ()
 
        logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
