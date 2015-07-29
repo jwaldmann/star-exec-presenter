@@ -137,7 +137,7 @@ certified2015 n bs ps = Category { categoryName = n, contents =
 tc2015 :: Registration
 tc2015 = Competition  "Termination Competition 2015"
    $ let { ttt2 = 3558 ; ttt2plain = 23357 ; ttt2cert = 23358 
-         ; tct2 = 3797 ; tct3 = 3708
+         ; tct2 = 3797 ; tct3 = 3866
          ; aprove = 3771 ; aprove' = 3823
          ; matchbox = 3804
          ; trs = [ Hierarchy 101455 ]
@@ -240,36 +240,36 @@ tc2015 = Competition  "Termination Competition 2015"
      [ standard2015 "Derivational Complexity - Full Rewriting"
        [ Hierarchy 101513 ]
            [ Participant "TCT2" ( Just (tct2, 24076))
-           , Participant "TCT3" ( Just (tct3, 23735))
+           , Participant "TCT3" ( Just (tct3, 24249))
            , Participant "matchbox" ( Just ( matchbox, 24117 ))
            ]
      , standard2015 "Runtime Complexity - Full Rewriting"
        [ Hierarchy 101424 ]
            [ Participant "TCT2" ( Just (tct2, 24071))
-           , Participant "TCT3" ( Just (tct3, 23729))
+           , Participant "TCT3" ( Just (tct3, 24243))
            , Participant "AProVE" ( Just ( aprove', 24154 ) )
            ]
      , standard2015 "Runtime Complexity - Innermost Rewriting"
        [ Hierarchy 101556 ]
            [ Participant "TCT2" ( Just (tct2, 24070))
-           , Participant "TCT3" ( Just (tct3, 23730))
+           , Participant "TCT3" ( Just (tct3, 24244))
            , Participant "AProVE" ( Just ( aprove', 24157 ) )
            ]
      , certified2015 "Derivational Complexity - Full Rewriting certified"
        [ Hierarchy 101513 ]
            [ Participant "TCT2" ( Just (tct2, 24074))
-           , Participant "TCT3" ( Just (tct3, 23731))
+           , Participant "TCT3" ( Just (tct3, 24245))
            ]
      , certified2015 "Runtime Complexity - Full Rewriting certified"
        [ Hierarchy 101424 ]
            [ Participant "TCT2" ( Just (tct2, 24069))
-           , Participant "TCT3" ( Just (tct3, 23733))
+           , Participant "TCT3" ( Just (tct3, 24247))
            ]
      , certified2015 "Runtime Complexity - Innermost Rewriting certified"
        [ Hierarchy 101556 ]
            [ Participant "AProVE" ( Just ( aprove, 23997 ) )
            , Participant "TCT2" ( Just (tct2, 24072))
-           , Participant "TCT3" ( Just (tct3, 23736))
+           , Participant "TCT3" ( Just (tct3, 24250))
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
