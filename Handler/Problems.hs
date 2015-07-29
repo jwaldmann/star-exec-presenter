@@ -9,6 +9,7 @@ import Presenter.Processing (getupperbound, getlowerbound,getClass)
 import Handler.ShowManyJobResults (shorten)
 import Presenter.Utils.WidgetMetaRefresh
 import Text.Lucius (luciusFile)
+import Text.Blaze.Html.Renderer.String (renderHtml)
 import Presenter.Short
 
 import qualified Data.Map.Strict as M
@@ -47,6 +48,25 @@ getProblemsR jids @ (JobIds ids) = do
               OTHER {} -> False; ERROR -> False
         guard $ not good
         return jr
+      problematic = S.fromList $ do
+         StarExecResult p <- others ++ do (bench,(me,lo),(you,hi)) <- yesno ; [ me,you]
+         return $ StarExecJobID $ jobResultInfoJobId p
+  let solver_result_cell me = [whamlet|
+               <td>
+                 <a href=@{ShowSolverInfoR (toSolverID me)}>
+                   #{toSolverName me}
+               <td>
+                 <a href=@{ShowConfigInfoR (toConfigID me)}>
+                   #{toConfigName me}
+               <td class="#{getClass me}"> 
+                 <a class="pair-link" href=@{ShowJobPairR (getPairID me)}>
+                   #{short $ getSolverResult me} 
+           |]
+      benchmark_cell me = [whamlet|
+               <td>
+                 <a href=@{ShowBenchmarkInfoR (toBenchmarkID me)}>
+                   #{shorten (toBenchmarkName me)}
+           |]
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     when ( any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs ) $ do
@@ -55,53 +75,55 @@ getProblemsR jids @ (JobIds ids) = do
        <h1>Consistency Check for Jobs
        $forall j <- jobInfos
            <a href=@{ShowJobInfoR $ toJobID j}>#{toJobName j}</a>,
-       <h2>Incompatible lower and upper bounds
+       <p>the subset of these jobs that actually have problems:
+          <a href=@{ProblemsR $ JobIds $ S.toList problematic}>#{show problematic}
+       <h2>Incompatible Lower and Upper Bounds
        <table class="table">
          <thead>
            <tr>
              <th>Benchmark
-             <th>Job Pair A
-             <th>lower bound
-             <th>Job Pair B
-             <th>upper bound
+             <th>Solver A
+             <th>Config A
+             <th>Lower Bound A
+             <th>Solver B
+             <th>Config B
+             <th>Upper Bound B
          <tbody>
            $forall ((bId,bName),(me,lo),(you,hi)) <- yesno
              <tr>
-               <td>
-                 <a href=@{ShowBenchmarkInfoR bId}>
-                   #{shorten bName}
-               <td>
-                 <a href=@{ShowSolverInfoR (toSolverID me)}>
-                   #{toSolverName me}
-               <td class="#{getClass me}"> 
-                 <a class="pair-link" href=@{ShowJobPairR (getPairID me)}>
-                   #{short $ getSolverResult me} 
-               <td>
-                 <a href=@{ShowSolverInfoR (toSolverID you)}>
-                   #{toSolverName you}
-               <td  class="#{getClass you}">
-                 <a class="pair-link" href=@{ShowJobPairR (getPairID you)}>
-                   #{short $ getSolverResult you}
-       <h2>Certification Problems
-       in fact OTHER or ERROR from postprocessor (instead of YES NO MAYBE BOUNDS CERTIFIED)
+               ^{benchmark_cell me}
+               ^{solver_result_cell me}
+               ^{solver_result_cell you}
+       <h2>Strange Results
+       <p>
+         Normal results are
+         <span class="solver-yes">YES,
+         <span class="solver-no">NO,
+         <span class="solver-maybe">MAYBE,
+         <span class="solver-certified">CERTIFIED,
+         <span class="solver-bounds">BOUNDS.
+
+       <p>
+         Strange results are
+         <ul>
+           <li>
+             <span class="solver-other">OTHER
+             (indicating an error in the solver, e.g., a reject from the certifier)
+           <li>
+             <span class="solver-error">ERROR
+             (indicating an error in the postprocessor).
        <table class="table">
          <thead>
            <tr>
              <th>Benchmark
-             <th>Job Pair
+             <th>Solver
+             <th>Config
              <th>Result
          <tbody>
            $forall me <- others
              <tr>
-               <td>
-                 <a href=@{ShowBenchmarkInfoR (toBenchmarkID me)}>
-                   #{shorten (toBenchmarkName me)}
-               <td>
-                 <a href=@{ShowSolverInfoR (toSolverID me)}>
-                   #{toSolverName me}
-               <td class="#{getClass me}"> 
-                 <a class="pair-link" href=@{ShowJobPairR (getPairID me)}>
-                   #{short $ getSolverResult me} 
+               ^{benchmark_cell me}
+               ^{solver_result_cell me}
     |]
 
 

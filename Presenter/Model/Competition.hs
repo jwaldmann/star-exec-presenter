@@ -5,6 +5,7 @@ import Presenter.Model.Types
 import Presenter.Model.RouteTypes
 import Prelude (Show, Read, Eq, Ord, ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
+import Control.Monad ((>=>))
 
 data Scoring =
   Standard
@@ -66,3 +67,8 @@ instance PathPiece Scoring where
   fromPathPiece _ = Nothing
   toPathPiece s = T.toLower $ T.pack $ show s
     
+class AllJobIDs c where allJobIDs :: c -> [JobID]
+
+instance AllJobIDs Category where allJobIDs = getJobIds
+instance AllJobIDs MetaCategory where allJobIDs = getCategories >=> allJobIDs
+instance AllJobIDs Competition where allJobIDs = getMetaCategories >=> allJobIDs

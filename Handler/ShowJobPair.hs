@@ -36,6 +36,7 @@ getShowJobPairR pid@(StarExecPairID _id) = do
   let mJobInfo = fst $ queryResult mj
       mBenchmarkInfo = queryResult mb
       mSolverInfo = queryResult ms
+      mConfigInfo = mJobResult -- we take toConfigID, toConfigName
       hasHtmlProof = case mPair of
         Nothing -> False
         Just (StarExecPair p) -> Nothing /= (jobPairInfoHtmlProof p)

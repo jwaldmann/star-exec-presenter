@@ -1,6 +1,7 @@
 module Presenter.StarExec.JobData
   ( queryJob
   , querySolverInfo
+  , queryConfigInfo
   , queryBenchmarkInfo
   , queryJobPair
   , queryManyJobs
@@ -64,6 +65,21 @@ querySolverInfo _solverId@(StarExecSolverID sid) = do
 querySolverInfo _solverId = do
   mPersistSolverInfo <- getPersistSolverInfo _solverId
   return $ QueryResult Latest mPersistSolverInfo
+
+queryConfigInfo :: ConfigID -> Handler (QueryResult QueryInfo (Maybe Config))
+queryConfigInfo _configId@(StarExecConfigID sid) = do
+  error "not implemented"
+{-
+  mPersistConfigInfo <- getPersistConfigInfo _configId
+  currentTime <- getTime
+  case mPersistConfigInfo of
+    Just (StarExecConfig persistConfigInfo) -> do
+      let since = diffTime currentTime $ configInfoLastUpdate persistConfigInfo
+      if since > updateThreshold
+        then runQueryConfigInfo sid >>= wrap (fmap StarExecConfig)
+        else return $ QueryResult Latest mPersistConfigInfo
+    _ -> runQueryConfigInfo sid >>= wrap (fmap StarExecConfig)
+-}
 
 queryBenchmarkInfo :: BenchmarkID -> Handler (QueryResult QueryInfo (Maybe Benchmark))
 queryBenchmarkInfo _benchmarkId@(StarExecBenchmarkID bid) = do

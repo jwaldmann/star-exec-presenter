@@ -102,10 +102,10 @@ newtype Solvers = Solvers
   { getSolvers :: [Solver]
   }
 
-data ConfigID = 
-  StarExecConfigID Int
-  | LriConfigID
+data Config =
+  StarExecConfig StarExecConfigInfo
   deriving (Eq, Ord, Read, Show)
+           
 
 lriConfigName :: Name
 lriConfigName = "lri_config"
@@ -352,6 +352,10 @@ instance ConfigEntity LriResultInfo where
   toConfigID _ = LriConfigID
 
   toConfigName _ = lriConfigName
+
+instance ConfigEntity Config where
+  toConfigID (StarExecConfig s ) = StarExecConfigID $ starExecConfigInfoStarExecId s
+  toConfigName (StarExecConfig s ) = starExecConfigInfoName s
 
 -- #### JobEntity ####
 

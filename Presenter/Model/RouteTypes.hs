@@ -100,6 +100,11 @@ data PostProcID =
   StarExecPostProcID Int
   deriving (Show, Read, Eq, Ord)
 
+data ConfigID =
+  StarExecConfigID Int
+  | LriConfigID
+  deriving (Eq, Ord, Read, Show)
+
 data JobPairID =
   StarExecPairID Int
   | LriPairID Int
@@ -225,6 +230,15 @@ instance PathPiece PostProcID where
     | otherwise =
         case readInt t of
           Just i  -> return $ StarExecPostProcID i
+          _       -> Nothing
+
+
+instance PathPiece ConfigID where
+  toPathPiece (StarExecConfigID i) = fromInt i
+  fromPathPiece t
+    | otherwise =
+        case readInt t of
+          Just i  -> return $ StarExecConfigID i
           _       -> Nothing
 
 instance PathMultiPiece JobIds where

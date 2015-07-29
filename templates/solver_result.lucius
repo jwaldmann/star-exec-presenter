@@ -7,88 +7,15 @@
 @colorOther: #F2CDAC;
 @colorNothing: #FFFFFF;
 
-.table > thead > tr,
-.table > tbody > tr,
-.table > tfoot > tr {
-    > td.solver-yes,
-    > th.solver-yes {
-        background-color: #{colorYes};
-    }
+.solver-yes { background-color: #{colorYes}; }
+.solver-no { background-color: #{colorNo}; }
+.solver-maybe { background-color: #{colorMaybe}; }
+.solver-certified { background-color: #{colorCertified}; }
+.solver-error { background-color: #{colorError}; }
+.solver-bounds { background-color: #{colorBounds}; }
+.solver-other { background-color: #{colorOther}; }
+.solver-nothing { background-color: #{colorNothing}; }
 
-    > td.solver-no,
-    > th.solver-no {
-        background-color: #{colorNo}
-    }
-
-    > td.solver-maybe,
-    > th.solver-maybe {
-        background-color: #{colorMaybe};
-    }
-
-    > td.solver-certified,
-    > th.solver-certified {
-        background-color: #{colorCertified};
-    }
-
-    > td.solver-error,
-    > th.solver-error {
-        background-color: #{colorError};
-    }
-
-    > td.solver-bounds,
-    > th.solver-bounds {
-        background-color: #{colorBounds};
-    }
-
-    > td.solver-other,
-    > th.solver-other {
-        background-color: #{colorOther};
-    }
-
-    > td.solver-nothing,
-    > th.solver-nothing {
-        background-color: #{colorNothing};
-    }
-}
-
-.table > thead,
-.table > tbody,
-.table > tfoot {
-    > tr.solver-yes > td,
-    > tr.solver-yes > th {
-        background-color: #{colorYes};
-    }
-
-    > tr.solver-no > td,
-    > tr.solver-no > th {
-        background-color: #{colorNo};
-    }
-
-    > tr.solver-maybe > td,
-    > tr.solver-maybe > th {
-        background-color: #{colorMaybe};
-    }
-
-    > tr.solver-certified > td,
-    > tr.solver-certified > th {
-        background-color: #{colorCertified};
-    }
-
-    > tr.solver-error > td,
-    > tr.solver-error > th {
-        background-color: #{colorError};
-    }
-
-    > tr.solver-other,
-    > tr.solver-other {
-        background-color: #{colorOther};
-    }
-
-    > tr.solver-nothing > td,
-    > tr.solver-nothing > th {
-        background-color: #{colorNothing};
-    }
-}
 
 .legend {
   width: auto;

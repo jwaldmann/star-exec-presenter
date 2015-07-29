@@ -106,6 +106,14 @@ SolverInfo
     description Text
     lastUpdate UTCTime default=now()
     deriving Eq Ord Read Show
+    
+StarExecConfigInfo
+    starExecId Int
+    UniqueStarExecConfigInfo starExecId
+    name Text
+    description Text
+    lastUpdate UTCTime default=now()
+    deriving Eq Ord Read Show
 
 LriSolverInfo
     solverId Int

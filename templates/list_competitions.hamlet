@@ -8,3 +8,5 @@ $else
             <li>
                <a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
                #{show $ competitionInfoDate $ entityVal ci}
+               <a href=@{ProblemsR $ JobIds $ allJobIDs $ competitionInfoCompetition $ entityVal ci}>errors
+               

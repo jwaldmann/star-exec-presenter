@@ -26,7 +26,8 @@
               <td class="solver-certified">CERTIFIED
               <td class="solver-error">ERROR
               <td class="solver-bounds">BOUNDS
-              <td class="solver-nothing">OTHER
+              <td class="solver-other">OTHER
+              <td class="solver-nothing">NOTHING
         The results are displayed in the following pattern:
         <code>result | cpu-time/wallclock-time in seconds | complexity-score
 
