@@ -56,11 +56,13 @@
 
 /control/#Year ControlR GET POST
 /registered/#Year RegisteredR GET
+/participant/#Year/#Text ParticipantR GET
 
 /competitions ListCompetitionsR GET
 /test-runs LegacyListCompetitionsR GET
 /hidden_competitions ListHiddenCompetitionsR GET
 /hidden-test-runs LegacyListHiddenCompetitionsR GET
+
 
 -- Import route
 /import ImportR GET POST

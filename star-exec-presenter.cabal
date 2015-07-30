@@ -54,6 +54,7 @@ library
                      Handler.LegacyListHiddenCompetitions
                      Handler.Problems
                      Handler.ShowConfigInfo
+                     Handler.Participant		     
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
@@ -76,6 +77,9 @@ library
                      Presenter.Short
                      Presenter.Processing
                      Presenter.Registration
+                     Presenter.Registration.Data
+                     Presenter.Registration.Code
+                     Presenter.Registration.Form
                      Presenter.StarExec.Commands
                      Presenter.StarExec.Concurrent
                      Presenter.StarExec.Connection
