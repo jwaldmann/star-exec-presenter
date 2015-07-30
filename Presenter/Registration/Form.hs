@@ -235,14 +235,14 @@ tc_Y2015_TTT2 = Competition "Termination Competition 2015"
 tc_Y2015_UltimateBuchiAutomizer = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3458,22965)}]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3911,24365)}]
      ,Category "C Integer Programs"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3458,22965)}]]]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3911,24365)}]]]
 --
 tc_Y2015_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "Java Bytecode"
-     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (3458,22965)}]]]
+     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (3911,24366)}]]]
 --
 tc_Y2015_Wanda = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
