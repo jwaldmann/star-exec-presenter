@@ -51,6 +51,7 @@ import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
 import Data.Maybe
 import Data.Char ( isAlphaNum )
+import Control.Monad.Logger
 
 defaultDate :: UTCTime
 defaultDate = UTCTime
@@ -455,24 +456,33 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { method = "POST", path = pushjobxmlPath, responseTimeout = Nothing }
 
-    -- replace False with True to write the job file to disk (and not submit it)
+    let info = mconcat $ do
+          job <- jobs
+          return $ "Job " <> description job
+              <> " num. pairs: " <> T.pack (show $ length $ jobpairs job) <> ","
+    logWarnN $ "sending JobXML for " <> info          
+    -- replace False with True to write the job file to disk 
     when (False) $ do
         liftIO $ BSL.writeFile "command.zip" bs
-        error "huh"
 
     -- liftIO $ print req
     
     resp <- sendRequest req
+
     -- the job ids are in the returned cookie.
     -- if there are more, then it's a comma-separated list
     -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
     
     let cs = destroyCookieJar $ responseCookieJar resp
-    -- liftIO $ print cs
+
     let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
         cut' c s = if null s then []
                   else let (pre,post) = span (/= c) s
                        in  pre : cut' c ( drop 1 post)
+
+
+    logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show vs)
+
     return $ case vs of
          [] ->  jobs
          [s] -> do
