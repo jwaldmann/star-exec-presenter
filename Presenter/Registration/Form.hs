@@ -161,14 +161,11 @@ tc_Y2015_Ctrl = Competition "Termination Competition 2015"
           [Participant {participantName = "Ctrl" , solver_config = Just (3723,23758)}]]]
 --
 tc_Y2015_HipTNT = Competition "Termination Competition 2015"
-     [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-          [Category "Integer Transition Systems"
-          [Participant {participantName = "HipTNT+" , solver_config = Just (3473,23024)}]]
-     ,MetaCategory "Termination of Programming Languages"
+     [MetaCategory "Termination of Programming Languages"
           [Category "C"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (3473,23023)}]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (3902,24352)}]
           ,Category "C Integer Programs"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (3473,23024)}]]]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (3902,24352)}]]]
 --
 tc_Y2015_NaTT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
@@ -278,14 +275,14 @@ tc_Y2015_matchbox = Competition "Termination Competition 2015"
 tc_Y2015_muterm = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
      ,Category "TRS Equational"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
      ,Category "TRS Conditional"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
      ,Category "TRS Context Sensitive"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
      ,Category "TRS Innermost"
-          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]]]
+          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]]]
