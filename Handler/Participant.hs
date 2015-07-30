@@ -8,5 +8,6 @@ getParticipantR year name = do
   defaultLayout $ do
     [whamlet|
      <h1>Registration Template in #{show year} for #{name} 
+     if you want to update your submission, send email in exactly this form:
      <pre>#{show $ extract year name}
     |]

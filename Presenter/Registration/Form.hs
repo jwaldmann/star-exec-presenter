@@ -278,14 +278,14 @@ tc_Y2015_matchbox = Competition "Termination Competition 2015"
 tc_Y2015_muterm = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
      ,Category "TRS Equational"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
      ,Category "TRS Conditional"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
      ,Category "TRS Context Sensitive"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]
      ,Category "TRS Innermost"
-          [Participant {participantName = "muterm" , solver_config = Just (1388,2059)}]]]
+          [Participant {participantName = "muterm" , solver_config = Just (3894,24299)}]]]
