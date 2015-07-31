@@ -11,6 +11,7 @@ import qualified Data.Set as Set
 -- example: let c = contextFromList [(1,["foo", "bar"]), (2, ["foo","baz"])]
 -- getAttributes c $ Set.fromList [1,2]
 -- getObjects c $ Set.fromList ["foo"]
+-- concepts c
 
 
 data Context ob at = Context

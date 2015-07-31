@@ -55,6 +55,7 @@ getAttributeCollection jobResults = do
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
+-- proper name for template table columns
 -- properName :: Attribute -> Text
 -- properName (AJobResultInfoSolver name) = append "solver name " name
 -- properName (AJobResultInfoConfiguration config) = append "solver configuration " config
