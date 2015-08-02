@@ -101,14 +101,16 @@ tc_Y2015_AProVE = Competition "Termination Competition 2015"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
           ,Category "SRS Relative"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+
           ,Category "TRS Standard certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
           ,Category "SRS Standard certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
           ,Category "TRS Relative certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
           ,Category "SRS Relative certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+                                                                                                        
           ,Category "TRS Equational"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
           ,Category "TRS Conditional"
@@ -119,10 +121,12 @@ tc_Y2015_AProVE = Competition "Termination Competition 2015"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
           ,Category "TRS Outermost"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+
           ,Category "TRS Innermost certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
           ,Category "TRS Outermost certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+
           ,Category "Integer Transition Systems"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24266)}]
           ,Category "Integer TRS"
@@ -133,7 +137,7 @@ tc_Y2015_AProVE = Competition "Termination Competition 2015"
           ,Category "Runtime Complexity - Innermost Rewriting"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24267)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24268)}]]
+           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"
                [Participant {participantName = "AProVE" , solver_config = Just (3870,24271)}]
