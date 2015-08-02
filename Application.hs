@@ -67,6 +67,8 @@ import Handler.LegacyListHiddenCompetitions
 import Handler.Problems
 import Handler.ShowConfigInfo
 import Handler.Participant
+import Handler.Pause
+import Handler.Resume
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

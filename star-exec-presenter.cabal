@@ -55,6 +55,8 @@ library
                      Handler.Problems
                      Handler.ShowConfigInfo
                      Handler.Participant		     
+                     Handler.Pause
+                     Handler.Resume
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job

@@ -19,7 +19,7 @@
 
 -- displays job-infos
 /jobs ListJobsR GET
-/jobs/#JobID ShowJobInfoR GET
+/job/info/#JobID ShowJobInfoR GET
 /show_job_info/#JobID LegacyShowJobInfoR GET
 
 -- displays benchmark-infos
@@ -66,3 +66,6 @@
 
 -- Import route
 /import ImportR GET POST
+
+/job/pause/*JobIds PauseR POST
+/job/resume/*JobIds ResumeR POST
