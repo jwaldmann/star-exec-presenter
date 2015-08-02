@@ -21,6 +21,7 @@ data Selection = SelectionCompetition | SelectionDemonstration | SelectionAll
 
 data JobControl = JobControl
    { isPublic :: Bool
+   , startPaused :: Bool
    , selection :: Selection
    , queue :: Int
    , space :: Int
@@ -39,6 +40,9 @@ tpdb_9_0_1 = "TPDB-65df8a308dd6_XML.zip"
 
 tpdb_10_2 :: FilePath
 tpdb_10_2 = "TPDB-10.2_XML.zip"
+
+tpdb_10_3 :: FilePath
+tpdb_10_3 = "TPDB-10.3_XML.zip"
 
 default_space :: FilePath
 default_space = tpdb_10_2
@@ -150,7 +154,7 @@ mkJobs sm config cat now = do
          , mem_limit = 128.0
          , wallclock_timeout = wallclock config
          , cpu_timeout = num_cores * wallclock config
-         , start_paused = False
+         , start_paused = startPaused config
          , jobpairs = do 
                (jobspace, bs) <- bss  
                b <- sort bs

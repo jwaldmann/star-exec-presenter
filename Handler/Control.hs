@@ -15,10 +15,11 @@ import Control.Monad ( guard )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
+        <*> areq checkBoxField "start paused" (Just False)
         <*> areq (radioFieldList
                   [("Competition (at least 2 participants)"::T.Text,SelectionCompetition)
                   ,("Demonstration (exactly 1 participant)",SelectionDemonstration)
-                  ,("Everything (>= 1 particEipant)",SelectionAll)
+                  ,("Everything (>= 1 participant)",SelectionAll)
                   ]) "categories" (Just SelectionCompetition)
         <*> areq (radioFieldList
                   [ ("Termination.q"::T.Text,36291)
