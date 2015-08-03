@@ -7,8 +7,8 @@ import Yesod.Auth
 import Data.Maybe
 import Presenter.StarExec.Commands
 
-postPauseR :: JobIds -> Handler Html
-postPauseR jobIds = do
+getPauseR :: JobIds -> Handler Html
+getPauseR jobIds = do
   maid <- maybeAuthId
   if isJust maid then do
     pauseJobs $ getIds jobIds

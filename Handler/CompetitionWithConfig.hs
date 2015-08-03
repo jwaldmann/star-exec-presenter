@@ -50,12 +50,15 @@ getCompetitionWithConfigR comp = do
   maid <- maybeAuthId
   let authorized = isJust maid
 
-  let jobcontrol js = [whamlet|
+  
+  let jobcontrol js = do
+        [whamlet|
         $if authorized
-            job control:
-              <a href=@{PauseR $ JobIds js}>pause jobs
+              <a href=@{PauseR $ JobIds js}>pause
             |
-              <a href=@{ResumeR $ JobIds js}>resume jobs
+              <a href=@{ResumeR $ JobIds js}>resume
+            |
+              <a href=@{RerunR $ JobIds js}>rerun
         |]
   
   defaultLayout $ do

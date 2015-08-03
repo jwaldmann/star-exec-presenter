@@ -5,7 +5,7 @@
   $if competitionComplete compResults
     finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
 
-<p>^{jobcontrol $ allJobIDs compResults}
+<p>jobs: ^{jobcontrol $ allJobIDs compResults}
 
 <div class="container-fluid">
   $forall compMetaResults <- metaCategoryResults compResults
@@ -15,7 +15,7 @@
         $if metaCategoryComplete compMetaResults
           finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)},&nbsp;
         #{metaCategoryStatistics compMetaResults}
-      <p>^{jobcontrol $ allJobIDs compMetaResults}
+      <p>jobs: ^{jobcontrol $ allJobIDs compMetaResults}
       <div class="container-fluid">
         <!-- Ranks -->
         Combined Ranking (<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014#Competition_Categories_and_Awards">Rules</a>):

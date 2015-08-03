@@ -7,8 +7,8 @@ import Yesod.Auth
 import Data.Maybe
 import Presenter.StarExec.Commands
 
-postResumeR :: JobIds -> Handler Html
-postResumeR jobIds = do
+getResumeR :: JobIds -> Handler Html
+getResumeR jobIds = do
   maid <- maybeAuthId
   if isJust maid then do
     resumeJobs $ getIds jobIds

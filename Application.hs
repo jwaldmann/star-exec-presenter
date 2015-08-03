@@ -69,6 +69,7 @@ import Handler.ShowConfigInfo
 import Handler.Participant
 import Handler.Pause
 import Handler.Resume
+import Handler.Rerun
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

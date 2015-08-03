@@ -67,5 +67,7 @@
 -- Import route
 /import ImportR GET POST
 
-/job/pause/*JobIds PauseR POST
-/job/resume/*JobIds ResumeR POST
+-- should be POST but forms are too complicated right now
+/job/pause/*JobIds PauseR GET
+/job/resume/*JobIds ResumeR GET
+/job/rerun/*JobIds RerunR GET

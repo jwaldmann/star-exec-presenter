@@ -14,8 +14,7 @@ module Presenter.StarExec.Commands
   , pushJobXML
   , getSpaceXML
   , getDefaultSpaceXML
-  , pauseJobs
-  , resumeJobs
+  , pauseJobs , resumeJobs, rerunJobs
   ) where
 
 import Import
@@ -511,7 +510,7 @@ pauseJobs ids = do
   forM ids $ pauseJob
   logWarnN $ "done pausing jobs " <> T.pack (show ids)
 
-pauseJob id = do  
+pauseJob (StarExecJobID id) = do  
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
                 , path = getURL pausePath [("{id}", show id)]
@@ -526,7 +525,7 @@ resumeJobs ids = do
   forM ids $ resumeJob
   logWarnN $ "done resuming jobs " <> T.pack (show ids)
 
-resumeJob id = do  
+resumeJob (StarExecJobID id) = do  
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
                 , path = getURL resumePath [("{id}", show id)]
@@ -534,3 +533,19 @@ resumeJob id = do
   resp <- sendRequest req
   logWarnN $ T.pack $ show resp
   return ()
+
+rerunJobs :: [JobID] -> Handler ()
+rerunJobs ids = do
+  logWarnN $ "re-running jobs " <> T.pack (show ids)
+  forM ids $ rerunJob
+  logWarnN $ "done re-running jobs " <> T.pack (show ids)
+
+rerunJob (StarExecJobID id) = do  
+  sec <- parseUrl starExecUrl
+  let req = sec { method = "POST"
+                , path = getURL rerunPath [("{id}", show id)]
+                }
+  resp <- sendRequest req
+  logWarnN $ T.pack $ show resp
+  return ()
+

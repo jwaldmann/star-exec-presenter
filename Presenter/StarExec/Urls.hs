@@ -75,3 +75,5 @@ pausePath = "starexec/services/pause/job/{id}"
 resumePath :: ByteString
 resumePath = "starexec/services/resume/job/{id}"
 
+rerunPath :: ByteString
+rerunPath = "starexec/services/jobs/rerunallpairs/{id}"

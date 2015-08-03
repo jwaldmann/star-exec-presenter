@@ -57,6 +57,7 @@ library
                      Handler.Participant		     
                      Handler.Pause
                      Handler.Resume
+                     Handler.Rerun
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
