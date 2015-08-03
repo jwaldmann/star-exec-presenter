@@ -68,3 +68,10 @@ downloadPath = "starexec/secure/download"
 
 pushjobxmlPath :: ByteString
 pushjobxmlPath = "starexec/secure/upload/jobXML"               
+
+pausePath :: ByteString
+pausePath = "starexec/services/pause/job/{id}"
+
+resumePath :: ByteString
+resumePath = "starexec/services/resume/job/{id}"
+

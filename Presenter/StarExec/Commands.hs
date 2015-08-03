@@ -14,6 +14,8 @@ module Presenter.StarExec.Commands
   , pushJobXML
   , getSpaceXML
   , getDefaultSpaceXML
+  , pauseJobs
+  , resumeJobs
   ) where
 
 import Import
@@ -502,3 +504,33 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
                      Just pos -> let i = ids !! pos in
                                  if i > 0 then Just i else Nothing
              return $ j { jobid = ji }
+
+pauseJobs :: [JobID] -> Handler ()
+pauseJobs ids = do
+  logWarnN $ "pausing jobs " <> T.pack (show ids)
+  forM ids $ pauseJob
+  logWarnN $ "done pausing jobs " <> T.pack (show ids)
+
+pauseJob id = do  
+  sec <- parseUrl starExecUrl
+  let req = sec { method = "POST"
+                , path = getURL pausePath [("{id}", show id)]
+                }
+  resp <- sendRequest req
+  logWarnN $ T.pack $ show resp
+  return ()
+
+resumeJobs :: [JobID] -> Handler ()
+resumeJobs ids = do
+  logWarnN $ "resuming jobs " <> T.pack (show ids)
+  forM ids $ resumeJob
+  logWarnN $ "done resuming jobs " <> T.pack (show ids)
+
+resumeJob id = do  
+  sec <- parseUrl starExecUrl
+  let req = sec { method = "POST"
+                , path = getURL resumePath [("{id}", show id)]
+                }
+  resp <- sendRequest req
+  logWarnN $ T.pack $ show resp
+  return ()
