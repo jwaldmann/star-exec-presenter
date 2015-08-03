@@ -246,7 +246,7 @@ tc_Y2015_UltimateBuchiAutomizer = Competition "Termination Competition 2015"
 tc_Y2015_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "Java Bytecode"
-     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (3911,24366)}]]]
+     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (3942,24758)}]]]
 --
 tc_Y2015_Wanda = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
