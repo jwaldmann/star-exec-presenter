@@ -5,7 +5,78 @@ import Presenter.Registration.Data
 
 import Data.Maybe
 
-tc_Y2015_skeleton = Competition "Termination Competition 2015"
+tc_Y2015_skeleton = tc_Y2015_skeleton_10_3
+
+tc_Y2015_skeleton_10_3 = Competition "Termination Competition 2015"
+     [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+          [Category "TRS Standard"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102127] , participants = []}
+          ,Category "SRS Standard"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102166] , participants = []}
+          ,Category "Cycles"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102166] , participants = []}
+          ,Category "TRS Relative"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102162] , participants = []}
+          ,Category "SRS Relative"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102223] , participants = []}
+          ,Category "TRS Standard certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102127] , participants = []}
+          ,Category "SRS Standard certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102166] , participants = []}
+          ,Category "TRS Relative certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102162] , participants = []}
+          ,Category "SRS Relative certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102223] , participants = []}
+          ,Category "TRS Equational"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102180] , participants = []}
+          ,Category "TRS Conditional"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102081] , participants = []}
+          ,Category "TRS Context Sensitive"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102123] , participants = []}
+          ,Category "TRS Innermost"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102090] , participants = []}
+          ,Category "TRS Outermost"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102057] , participants = []}
+          ,Category "TRS Innermost certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102090] , participants = []}
+          ,Category "TRS Outermost certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102057] , participants = []}
+          ,Category "Higher-Order rewriting (union beta)"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102049] , participants = []}
+          ,Category "Integer Transition Systems"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 101982] , participants = []}
+          ,Category "Integer TRS"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102055] , participants = []}]
+     ,MetaCategory "Complexity Analysis of Term Rewriting"
+          [Category "Derivational Complexity - Full Rewriting"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102185] , participants = []}
+          ,Category "Runtime Complexity - Full Rewriting"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102096] , participants = []}
+          ,Category "Runtime Complexity - Innermost Rewriting"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102228] , participants = []}
+          ,Category "Derivational Complexity - Full Rewriting certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102185] , participants = []}
+          ,Category "Runtime Complexity - Full Rewriting certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102096] , participants = []}
+          ,Category "Runtime Complexity - Innermost Rewriting certified"
+               Catinfo {postproc = 235 , benchmarks = [Hierarchy 102228] , participants = []}]
+     ,MetaCategory "Termination of Programming Languages"
+          [Category "C"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102073] , participants = []}
+          ,Category "C Integer Programs"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 101979] , participants = []}
+          ,Category "Java Bytecode"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 102061
+                                                      ,Hierarchy 101972] , participants = []}
+          ,Category "Logic Programming"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 101985
+                                                      ,Hierarchy 102085
+                                                      ,Hierarchy 101996] , participants = []}
+          ,Category "Functional Programming"
+               Catinfo {postproc = 234 , benchmarks = [Hierarchy 101968] , participants = []}]]
+
+
+tc_Y2015_skeleton_10_2 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
                Catinfo {postproc = 234 , benchmarks = [Hierarchy 101455] , participants = []}

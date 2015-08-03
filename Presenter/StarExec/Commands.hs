@@ -245,9 +245,9 @@ getJobInfo _ _jobId = do
       return $ Just $ constructJobInfo _jobId jobTitle tds
 
 
-getDefaultSpaceXML :: FilePath -> Handler (Maybe Space)
+getDefaultSpaceXML :: MonadIO m => FilePath -> m (Maybe Space)
 getDefaultSpaceXML fp = do
-    s <- lift $ BSL.readFile fp
+    s <- liftIO $ BSL.readFile fp
     makeSpace s
 
 getSpaceXML :: Int -> Handler (Maybe Space)
@@ -266,7 +266,7 @@ getSpaceXML _spaceId = do
 
   makeSpace $ responseBody resp
 
-makeSpace :: BSL.ByteString -> Handler (Maybe Space)
+makeSpace :: MonadIO m => BSL.ByteString -> m (Maybe Space)
 makeSpace bs = do
   let archive = Zip.toArchive bs
       xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 

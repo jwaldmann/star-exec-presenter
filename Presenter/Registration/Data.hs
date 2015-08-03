@@ -9,15 +9,20 @@ module Presenter.Registration.Data
 ( -- extract, bare, code, skeleton,
   collect
 , experiment2015, tc2014
+, newskel
 )
        
 where
 
+import Presenter.StarExec.Commands (getDefaultSpaceXML)
+import Presenter.Model.StarExec ( Space (spName,children,spId) )
+  
 import Presenter.Model ( Name, Year (..) )
 import Presenter.Registration.Code
 
 import qualified Data.Text as T
 import qualified Data.Set as S
+import qualified Data.Map.Strict as M
 
 import Prelude 
 
@@ -33,6 +38,25 @@ import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
 import Control.Monad ( foldM )
 import Data.Maybe ( isJust )
+
+-- | we need this when uploading a fresh TPDB version on starexec:
+-- the skeleton contains old space Ids, we want to replace them with the new ones.
+newskel skel old new = do
+  Just o <- getDefaultSpaceXML old
+  Just n <- getDefaultSpaceXML new
+  print $ tops o
+  let omap = M.fromListWith (error "omap") $ tops o
+  let nmap = M.fromListWith (error "nmap") $ map (\(x,y)->(y,x)) $ tops n
+  print $ omap
+  print $ nmap
+  let translate (Hierarchy i) = Hierarchy $ (nmap M.! ) $  (omap M.!) $ i
+      nskel = fmap ( \ ci -> ci { benchmarks = map translate $ benchmarks ci } ) skel
+  print nskel
+  
+tops sp = do
+  s <- children sp
+  return (spId s, spName s)
+  
 
 {-
 
