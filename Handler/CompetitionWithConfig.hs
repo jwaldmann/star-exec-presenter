@@ -6,6 +6,9 @@ import Presenter.Utils.WidgetMetaRefresh
 import Presenter.Prelude
 import Data.Time.Clock
 
+import Yesod.Auth
+import Data.Maybe
+
 import Control.Monad.Logger
 import qualified Data.Text as T
 
@@ -44,6 +47,16 @@ getCompetitionWithConfigR comp = do
   let need_refresh = case mCompResults of
           Nothing -> True
           Just cr -> not $ competitionComplete cr
+  maid <- maybeAuthId
+  let authorized = isJust maid
+
+  let jobcontrol js = [whamlet|
+        $if authorized
+            job control:
+              <a href=@{PauseR $ JobIds js}>pause jobs
+            |
+              <a href=@{ResumeR $ JobIds js}>resume jobs
+        |]
   
   defaultLayout $ do
     if need_refresh

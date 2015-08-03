@@ -1,6 +1,7 @@
 module Presenter.Model.CompetitionResults where
 
-import Prelude (Eq, Show, Bool, Maybe, (.))
+import Prelude (Eq, Show, Bool, Maybe, (.), map)
+import Control.Monad ((>=>))
 import Model
 import Presenter.Model.Types
 import Presenter.Model.Competition
@@ -27,6 +28,8 @@ data CompetitionResults = CompetitionResults
   , competitionStatistics :: Statistics
   } deriving (Show)
 
+instance AllJobIDs CompetitionResults where allJobIDs = metaCategoryResults >=> allJobIDs
+
 competitionName :: CompetitionResults -> Name
 competitionName = getMetaName . competitionMeta
 
@@ -43,6 +46,8 @@ data MetaCategoryResult = MetaCategoryResult
   , metaCategoryStatistics :: Statistics
   } deriving (Show)
 
+instance AllJobIDs MetaCategoryResult where allJobIDs = categoryResults >=> allJobIDs
+
 data CategoryResult = CategoryResult
   { categoryName :: Name
   , categoryScoring :: Scoring
@@ -54,3 +59,5 @@ data CategoryResult = CategoryResult
   , categoryFinishTime :: Maybe UTCTime
   , categoryStatistics :: Statistics
   } deriving (Show)
+
+instance AllJobIDs CategoryResult where allJobIDs = map toJobID . categoryJobs

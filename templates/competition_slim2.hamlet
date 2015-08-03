@@ -4,6 +4,9 @@
   #{competitionDescription compResults} #{competitionStatistics compResults} #
   $if competitionComplete compResults
     finished in #{getDuration (competitionStartTime compResults) (competitionFinishTime compResults)}
+
+<p>^{jobcontrol $ allJobIDs compResults}
+
 <div class="container-fluid">
   $forall compMetaResults <- metaCategoryResults compResults
     <div class="container-fluid">
@@ -12,6 +15,7 @@
         $if metaCategoryComplete compMetaResults
           finished in #{getDuration (metaCategoryStarTime compMetaResults) (metaCategoryFinishTime compMetaResults)},&nbsp;
         #{metaCategoryStatistics compMetaResults}
+      <p>^{jobcontrol $ allJobIDs compMetaResults}
       <div class="container-fluid">
         <!-- Ranks -->
         Combined Ranking (<a href="http://www.termination-portal.org/wiki/Termination_Competition_2014#Competition_Categories_and_Awards">Rules</a>):
@@ -25,6 +29,8 @@
         <table class="table table-condensed categories">
           <thead>
             <tr>
+              $if authorized
+                <th>jobs
               <th>category
               <th>post-proc
               <th>rankings
@@ -32,6 +38,8 @@
           <tbody>
             $forall compCatResult <- categoryResults compMetaResults
               <tr class=#{ getCompletionClass $ categoryComplete compCatResult }>
+                $if authorized
+                  <td>^{jobcontrol $ allJobIDs compCatResult}
                 <td><a href=@{ShowManyJobResultsR (categoryScoring compCatResult) NoQuery $ JobIds $ map toJobID $ categoryJobs compCatResult}>#{categoryName compCatResult}</a>
                 <td>
                   $maybe postProc <- categoryPostProc compCatResult
