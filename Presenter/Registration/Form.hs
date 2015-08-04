@@ -310,9 +310,9 @@ tc_Y2015_TTT2 = Competition "Termination Competition 2015"
 tc_Y2015_UltimateBuchiAutomizer = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Nothing {- Just (3911,24365) -} }]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3942,24757)}]
      ,Category "C Integer Programs"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Nothing {- Just (3911,24365) -} }]]]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3942,24757)}]]]
 --
 tc_Y2015_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
