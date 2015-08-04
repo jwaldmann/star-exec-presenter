@@ -55,4 +55,3 @@ $if authorized
                     <a href=@{ShowSolverInfoR $ fst $ solver entry}>#{snd $ solver entry}
                     (#{show $ score entry}), 
                 <td>#{categoryStatistics compCatResult}
-<p><a href="http://www.termination-portal.org/wiki/Termination_Competition_2015">General Information</a>

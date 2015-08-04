@@ -10,7 +10,7 @@ import Presenter.Registration.Code
 import Presenter.Registration.Data
 import Presenter.Registration.Form
 import Presenter.Model ( Name, Year (..) )
-import Prelude (($), fmap, (==))
+import Prelude (($), fmap, (==), (/=))
 
 the_competition year = case year of
   Y2015 -> Presenter.Registration.Form.tc_Y2015
@@ -21,3 +21,5 @@ extract year name = prune
            $ fmap participants
            $ filterP ( \p -> name == participantName p )
            $ the_competition year
+
+

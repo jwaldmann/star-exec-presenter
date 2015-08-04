@@ -2,6 +2,7 @@ module Presenter.Processing where
 
 import Prelude
 import Presenter.Model
+import Presenter.Registration (hors_concours)
 import qualified Data.Text as T
 import qualified Data.List as L
 import qualified Data.Set as S
@@ -77,10 +78,13 @@ calculateScores sc jps = M.fromListWith (+) $ do
   jp <- jps ; return ( toSolverID jp, getScore jp )
 
 -- | this is called to compute the scores per jobpair (a cell in the table).
+-- TODO: this must handle hors_concours solvers specially.
 scoredResults :: Scoring -> [ JobResult ] -> [ JobResult ]
 scoredResults sc jps = do
   let bybench = M.fromListWith (++) $ do
-        jp <- jps ; return ( getBenchmark jp, [ jp ] )
+        jp <- jps
+        guard $ not $ hors_concours $ toSolverID jp
+        return ( getBenchmark jp, [ jp ] )
       points = M.fromListWith (+)  $ do
         (bench,jps) <- M.toList bybench
         (solver,points) <- M.toList $ M.unionsWith (+) $ case sc of

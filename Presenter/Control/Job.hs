@@ -162,7 +162,7 @@ mkJobs sm config cat now = do
          , jobpairs = do 
                (jobspace, bs) <- bss  
                b <- sort bs
-               R.Participant { R.solver_config = Just (_,c) } <- R.participants ci
+               R.Participant { R.solver_config = Just (_,_,c) } <- R.participants ci
                return $ SEJobPair
                           { jobPairSpace = jobspace
                           , jobPairBench = b

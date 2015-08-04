@@ -13,6 +13,7 @@ import Data.Maybe
 import Control.Monad ( forM_ )
 import qualified Data.Text as T
 import Control.Monad.Logger
+import Data.List ( nub )
 
 -- | link registered solvers to each space 
 -- that contains benchmarks for category
@@ -27,16 +28,16 @@ getInstallSolversR year = do
       logWarnN $ "installSolver.mc: " <> T.pack (show mc)
       forM_ (C.categories mc) $ \ cat -> do
         logWarnN $ "installSolver.cat " <> T.pack ( show cat)
-        let solvers = do
+        let solvers = nub $ do
               part <- C.participants $ C.contents cat
-              (so,co) <- maybeToList $ C.solver_config part
-              return so
+              solver@(sp,so,co) <- maybeToList $ C.solver_config part
+              return (sp,so)
         let spaces = do
               C.Hierarchy sp <- C.benchmarks $ C.contents cat
               return sp
         forM_ (take 1 spaces) $ \ toSpace -> do
           forM_ (take 1 solvers) $ \ solver -> do
-            addSolver toSpace [solver] True True Nothing
+            addSolver toSpace [solver] True True 
             
     defaultLayout [whamlet|
                    <h1>Solvers copied for #{show year}

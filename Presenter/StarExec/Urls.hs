@@ -79,11 +79,11 @@ rerunPath :: ByteString
 rerunPath = "starexec/services/jobs/rerunallpairs/{id}"
 
 addSolverPath :: ByteString
-addSolverPath = "services/spaces/{spaceId}/add/solver"
+addSolverPath = "starexec/services/spaces/{spaceId}/add/solver"
 
 removeSolverPath :: ByteString
-removeSolverPath = "services/remove/solver/{spaceId}"
+removeSolverPath = "starexec/services/remove/solver/{spaceId}"
 
 addJobPath :: ByteString
-addJobPath = "add/job"
+addJobPath = "starexec/add/job"
 

@@ -16,10 +16,6 @@ $newline never
 
         ^{pageHead pc}
 
-        \<!--[if lt IE 9]>
-        \<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-        \<![endif]-->
-
         <script>
           document.documentElement.className = document.documentElement.className.replace(/\bno-js\b/,'js');
     <body>
@@ -28,7 +24,7 @@ $newline never
             <div id="main" role="main">
               ^{pageBody pc}
             <footer>
-                copyright: Stefan von der Krone, #
-                <a href="http://www.imn.htwk-leipzig.de/~waldmann/">Johannes Waldmann</a> #
+                <a href="http://www.termination-portal.org/wiki/Termination_Competition_2015">Termination Competition 2015 #
+                | <a href="https://www.starexec.org/starexec/public/about.jsp">StarExec</A> #
                 | <a href="https://portal.imn.htwk-leipzig.de/">F-IMN</a> #
                 | <a href="http://www.htwk-leipzig.de/">HTWK Leipzig</a>

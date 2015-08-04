@@ -11,7 +11,7 @@ getRegisteredR year = do
     let comp = Presenter.Registration.the_competition year
         -- configs build in 2014 have low numbers
         oldconfig c = c < 10000
-        partclass :: (Int,Int) -> Text
-        partclass (s,c) = if oldconfig c then "oldconf" else "conf"
+        partclass :: (Int,Int,Int) -> Text
+        partclass (p,s,c) = if oldconfig c then "oldconf" else "conf"
     defaultLayout $ do
         $(widgetFile "registered")

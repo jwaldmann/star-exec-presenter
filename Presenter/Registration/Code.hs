@@ -18,6 +18,7 @@ module Presenter.Registration.Code
 , all_categories
 , demonstration_categories
 , real_participants
+, hors_concours
 , participant_names
 
 , parts, filterP, prune, insert, fill
@@ -35,6 +36,8 @@ import qualified Data.Set as S
 import Prelude 
 
 import GHC.Generics
+
+import Presenter.Model.RouteTypes 
 
 import Text.PrettyPrint.Leijen as P hiding ((<$>), fill) 
 import Data.String
@@ -77,8 +80,16 @@ demonstration_categories mc =
     filter ( \ c -> length (real_participants c) == 1 ) $  categories mc
 
 real_participants :: Category Catinfo -> [Participant]
-real_participants c = 
-    filter ( isJust . solver_config ) $ participants $ contents c
+real_participants c
+  = filter ( \ p -> case solver_config p of
+                Just (sp,so,co) -> not $ hoco so
+                Nothing -> False )
+  $ participants
+  $ contents c
+
+-- HACK, FIXME (must be configurable)
+hors_concours (StarExecSolverID id) = hoco id
+hoco id = id == 3797
 
 instance Functor MetaCategory where 
     fmap f c = c { categories = map (fmap f) $ categories c }
@@ -109,7 +120,7 @@ type Registration = Competition Catinfo
 
 data Participant = 
      Participant { participantName :: Name
-                 , solver_config :: Maybe (Int,Int) 
+                 , solver_config :: Maybe (Int,Int,Int) -- ^ space,solver,config
                  }
     deriving ( Eq, Ord, Generic )
 
@@ -266,6 +277,8 @@ instance Output t => Output (Maybe t) where
         Just a -> "Just" <+> align (output a)
 instance (Output a, Output b) => Output (a,b) where
     output (x,y) = "(" <> output x <> "," <> output y <> ")"
+instance (Output a, Output b,Output c) => Output (a,b,c) where
+    output (x,y,z) = "(" <> output x <> "," <> output y <> "," <> output z <> ")"
 instance Output a => Output (Competition a) where
     output (Competition n mcs) = 
         ("Competition" <+> text (show n)) <#> output mcs

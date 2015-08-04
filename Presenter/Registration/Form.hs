@@ -165,199 +165,199 @@ tc_Y2015 = collect tc_Y2015_skeleton
 tc_Y2015_AProVE = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
 
           ,Category "TRS Standard certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
           ,Category "SRS Standard certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
           ,Category "TRS Relative certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
           ,Category "SRS Relative certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
                                                                                                         
           ,Category "TRS Equational"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "TRS Conditional"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "TRS Context Sensitive"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "TRS Innermost"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
           ,Category "TRS Outermost"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24272)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24272)}]
 
           ,Category "TRS Innermost certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
           ,Category "TRS Outermost certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]
 
           ,Category "Integer Transition Systems"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24266)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24266)}]
           ,Category "Integer TRS"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24270)}]]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24270)}]]
      ,MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Runtime Complexity - Full Rewriting"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24264)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24264)}]
           ,Category "Runtime Complexity - Innermost Rewriting"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24267)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24267)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-           [Participant {participantName = "AProVE" , solver_config = Just (3931,24733)}]]
+           [Participant {participantName = "AProVE" , solver_config = Just (0, 3931,24733)}]]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24271)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24271)}]
           ,Category "C Integer Programs"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24271)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24271)}]
           ,Category "Java Bytecode"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24273)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24273)}]
           ,Category "Logic Programming"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24269)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24269)}]
           ,Category "Functional Programming"
-               [Participant {participantName = "AProVE" , solver_config = Just (3870,24265)}]]]
+               [Participant {participantName = "AProVE" , solver_config = Just (0, 3870,24265)}]]]
 --
 tc_Y2015_AutoNon = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "AutoNon" , solver_config = Just (3865,24242)}]
+          [Participant {participantName = "AutoNon" , solver_config = Just (99108,3865,24242)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "AutoNon" , solver_config = Just (3865,24242)}]]]
+          [Participant {participantName = "AutoNon" , solver_config = Just (99108,3865,24242)}]]]
 --
 tc_Y2015_Ctrl = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Integer Transition Systems"
-          [Participant {participantName = "Ctrl" , solver_config = Just (3723,23757)}]
+          [Participant {participantName = "Ctrl" , solver_config = Just (0, 3723,23757)}]
      ,Category "Integer TRS"
-          [Participant {participantName = "Ctrl" , solver_config = Just (3723,23758)}]]]
+          [Participant {participantName = "Ctrl" , solver_config = Just (0, 3723,23758)}]]]
 --
 tc_Y2015_HipTNT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
           [Category "C"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (3902,24352)}]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (0, 3902,24352)}]
           ,Category "C Integer Programs"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (3902,24352)}]]]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (0, 3902,24352)}]]]
 --
 tc_Y2015_NaTT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "NaTT" , solver_config = Just (3430,22689)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (0, 3430,22689)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "NaTT" , solver_config = Just (3430,22691)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (0, 3430,22691)}]
      ,Category "TRS Relative"
-          [Participant {participantName = "NaTT" , solver_config = Just (3430,22690)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (0, 3430,22690)}]
      ,Category "SRS Relative"
-          [Participant {participantName = "NaTT" , solver_config = Just (3430,22690)}]]]
+          [Participant {participantName = "NaTT" , solver_config = Just (0, 3430,22690)}]]]
 --
 tc_Y2015_T2 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Integer Transition Systems"
-     [Participant {participantName = "T2" , solver_config = Just (3509,23138)}]]]
+     [Participant {participantName = "T2" , solver_config = Just (0, 3509,23138)}]]]
 --
 tc_Y2015_TCT2 = Competition "Termination Competition 2015"
      [MetaCategory "Complexity Analysis of Term Rewriting"
      [Category "Derivational Complexity - Full Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24076)}]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24076)}]
      ,Category "Runtime Complexity - Full Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24071)}]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24071)}]
      ,Category "Runtime Complexity - Innermost Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24070)}]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24070)}]
      ,Category "Derivational Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24074)}]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24074)}]
      ,Category "Runtime Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24069)}]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24069)}]
      ,Category "Runtime Complexity - Innermost Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (3797,24072)}]]]
+          [Participant {participantName = "TCT2" , solver_config = Just (0, 3797,24072)}]]]
 --
 tc_Y2015_TCT3 = Competition "Termination Competition 2015"
      [MetaCategory "Complexity Analysis of Term Rewriting"
      [Category "Derivational Complexity - Full Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24249)}]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24249)}]
      ,Category "Runtime Complexity - Full Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24243)}]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24243)}]
      ,Category "Runtime Complexity - Innermost Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24244)}]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24244)}]
      ,Category "Derivational Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24245)}]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24245)}]
      ,Category "Runtime Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24247)}]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24247)}]
      ,Category "Runtime Complexity - Innermost Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (3866,24250)}]]]
+          [Participant {participantName = "TCT3" , solver_config = Just (0, 3866,24250)}]]]
 --
 tc_Y2015_TTT2 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23357)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23357)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23357)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23357)}]
      ,Category "TRS Relative"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23357)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23357)}]
      ,Category "SRS Relative"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23357)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23357)}]
      ,Category "TRS Standard certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23358)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23358)}]
      ,Category "SRS Standard certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23358)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23358)}]
      ,Category "TRS Relative certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23358)}]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23358)}]
      ,Category "SRS Relative certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (3558,23358)}]]]
+          [Participant {participantName = "TTT2" , solver_config = Just (0, 3558,23358)}]]]
 --
 tc_Y2015_UltimateBuchiAutomizer = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3942,24757)}]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (0, 3942,24757)}]
      ,Category "C Integer Programs"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (3942,24757)}]]]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (0, 3942,24757)}]]]
 --
 tc_Y2015_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "Java Bytecode"
-     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (3942,24758)}]]]
+     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (0, 3942,24758)}]]]
 --
 tc_Y2015_Wanda = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "Wanda" , solver_config = Just (1542,2389)}]
+          [Participant {participantName = "Wanda" , solver_config = Just (55489, 1542,2389)}]
      ,Category "Higher-Order rewriting (union beta)"
-          [Participant {participantName = "Wanda" , solver_config = Just (1542,2390)}]]]
+          [Participant {participantName = "Wanda" , solver_config = Just (55489, 1542,2390)}]]]
 --
 tc_Y2015_cycsrs = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Cycles"
-     [Participant {participantName = "cycsrs" , solver_config = Just (3869,24259)}]]]
+     [Participant {participantName = "cycsrs" , solver_config = Just (98142,3869,24259)}]]]
 --
 tc_Y2015_matchbox = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "matchbox" , solver_config = Just (3804,24112)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24112)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "matchbox" , solver_config = Just (3804,24112)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24112)}]
           ,Category "Cycles"
-               [Participant {participantName = "matchbox" , solver_config = Just (3804,24110)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24110)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "matchbox" , solver_config = Just (3804,24105)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24105)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "matchbox" , solver_config = Just (3804,24105)}]]
+               [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24105)}]]
      ,MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Derivational Complexity - Full Rewriting"
-          [Participant {participantName = "matchbox" , solver_config = Just (3804,24117)}]]]
+          [Participant {participantName = "matchbox" , solver_config = Just (0, 3804,24117)}]]]
 --
 tc_Y2015_muterm = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]
      ,Category "TRS Equational"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]
      ,Category "TRS Conditional"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]
      ,Category "TRS Context Sensitive"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]
      ,Category "TRS Innermost"
-          [Participant {participantName = "muterm" , solver_config = Just (3897,24307)}]]]
+          [Participant {participantName = "muterm" , solver_config = Just (0, 3897,24307)}]]]

@@ -58,13 +58,19 @@ data StarExecSpace = StarExecSpace
   } deriving (Show, Eq)
 
 -- | this is (some of) the data in the xml file returned by download-space-XML
--- (for the moment, only benchmarks, ignoring permissions and solvers)
+-- (for the moment, only benchmarks and solvers, ignoring permissions)
 data Space = Space 
   { spId :: Int
   , spName :: Name
-  , children :: [Space]
   , benchmarks :: [ Int ]
+  , solvers :: [SolverInSpace ]
+  , children :: [Space]
   } deriving ( Show, Eq )
+
+data SolverInSpace = SolverInSpace
+  { soId :: Int
+  , soName :: Name
+  } deriving (Eq,Show)  
 
 families :: Space -> [ (Name, [Int]) ]
 families s = 

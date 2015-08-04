@@ -32,10 +32,10 @@ beware: depending on parameter settings below, you can burn a lot of cpu cycles 
                     Hier #{s},
                 <li>Solvers:
                   $forall part <- R.participants (R.contents cat)
-                    $maybe conf <- R.solver_config part
+                    $maybe conf@(sp,so,co) <- R.solver_config part
                       <span class="conf">
-                         <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{fst conf}">#{R.participantName part}</a>
-                         (<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{snd conf}">#{snd conf}</a>)
+                         <a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{so}">#{R.participantName part}</a>
+                         (<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{co}">#{co}</a>)
                     $nothing
                       <span class="noconf">#{R.participantName part}
                     | 

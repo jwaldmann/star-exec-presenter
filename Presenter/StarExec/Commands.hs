@@ -572,26 +572,21 @@ Returns: A jSON string containing a status object.
 type SpaceID = Int
 
 addSolver :: SpaceID -- ^ toSpace
-          -> [Int] -- ^ starexec-solverid
+          -> [(Int,Int)] -- ^ starexec-spaceid, solverid
           -> Bool -- ^ copy
           -> Bool -- ^ copyToSubspaces
-          -> Maybe SpaceID -- ^ fromSpace
           -> Handler ()
-addSolver toSpace sids copy copyToSubspaces fromSpace = do
+addSolver toSpace sids@[(fromSpace,solver)] copy copyToSubspaces = do
   base <- parseUrl starExecUrl
 
   logWarnN $ T.pack $ unwords [ "addSolver", show toSpace, show sids, show copy, show copyToSubspaces, show fromSpace ]
 
   let req = urlEncodedBody
-            ( [ ("selectedIds", listify sids)
-              , ("copy", boolean copy)
+            ( encodeArrayInt "selectedIds" (map snd sids) ++
+              [ ("copy", boolean copy)
               , ("copyToSubspaces", boolean copyToSubspaces)
-              ] ++
-      -- guessing here, cf.
-      -- http://starexec.lefora.com/topic/59/doc-request-explain-null-parameter-type-Integer
-              case fromSpace of
-                Just fsp -> [ ( "fromSpace", BSC.pack $ show fsp) ]
-                Nothing -> []
+              , ("fromSpace", BSC.pack $ show fromSpace)
+              ]
             )
             $ base
             { method = "POST"
@@ -604,6 +599,11 @@ addSolver toSpace sids copy copyToSubspaces fromSpace = do
     _ -> return ()
   resp <- sendRequest req
   logWarnN $ T.pack $ show resp
+
+encodeArrayInt :: BSC.ByteString -> [Int ] -> [(BSC.ByteString,BSC.ByteString)]
+encodeArrayInt name xs = do
+  x <- xs
+  return (name <> "[]" , BSC.pack $ show x)
 
 boolean :: Bool -> BSC.ByteString
 boolean flag = BSC.pack $ map toLower $ show flag
