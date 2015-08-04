@@ -18,7 +18,7 @@ module Presenter.StarExec.Commands
   , addJob, addSolver
   ) where
 
-import Import
+import Import hiding (spaceId)
 import Prelude (head)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
@@ -617,45 +617,96 @@ listify [x] = BSC.pack $ show x
 listify xs = BSC.pack $ show $ tail $ init $ show xs
 
 
+data AddJob = AddJob
+   { name :: String 
+   , desc :: String
+   , preProcess :: Maybe Int
+   , seed :: Int
+   , postProcess :: Maybe Int
+   , queue :: Int
+   , spaceId :: Int
+   , cpuTimeout :: Int -- ^ seconds
+   , wallclockTimeout :: Int -- ^ seconds
+   , maxMem :: Float -- ^ gigabytes
+   , pause :: Bool
+   , runChoice :: RunChoice
+   , configs :: [ Int ] -- ^ Only applies if runChoice is “choose”
+   , benchChoice :: BenchChoice -- ^ Only applies if runChoice is “choose”.
+   , bench :: [Int] -- ^  The list of benchmarks to use in the job. Only applies if benchChoice is "runChosenFromSpace".
+   , traversal :: Traversal
+   }
+   deriving Show
+
 {-
-
-addJob:
-
-name : String – The name to give the job
-desc : String – The description to give the job.
-preProcess : Integer – The ID of the pre processor to use. Can be excluded.
-seed : Integer – A number that will be passed into the pre processor for every pair.
-postProcess : Integer – The ID of the post processor to use. Can be excluded.
-queue : Integer – The ID of the queue to run the job on.
-spaceId : Integer – The ID of the space to put the job in.
-cpuTimeout : Integer – The CPU timeout, in seconds, to enforce.
-wallclockTimeout : Integer – The wallclock timeout, in seconds, to enforce.
-maxMem : Float – The maximum memory limit, in gigabytes.
-pause : Boolean – If true, job will start out paused. If false, job will start upon creation.
-runChoice : String – Controls how job pairs are created, and can be either “keepHierarchy” or “choose”. In
+Controls how job pairs are created, and can be either “keepHierarchy” or “choose”. In
 “keepHierarchy”, a job is run using all benchmarks that are in the space hierarchy rooted at the spot that the job
 was created, and every benchmark is executed by every solver configuration of every solver in the same space.
 In “quickJob,” a single job pair is created, using the given solver and the given text to use as a new benchmark.
 In “choose”, a list of configurations is provided to use in the job.
-configs : [Integer] – The list of configurations to use in the job. Only applies if runChoice is “choose”
+-}
 
-benchChoice : String – Only applies if runChoice is “choose”. Describes how to select benchmarks for the job.
+data RunChoice = KeepHierarchy | Choose   
+  deriving (Eq, Show)
+
+{- Describes how to select benchmarks for the job.
 Must be one of “runAllBenchInSpace”, “runAllBenchInHierarchy”, “runChosenFromSpace”. If
 “runAllBenchInSpace”, all benchmarks in the space the job is being uploaded to will be used. If
 "runAllBenchInHierarchy", all benchmarks in the entire hierarchy will be used. If "runChosenFromSpace", then
 benchmarks must be provided.
-bench : [Integer] – The list of benchmarks to use in the job. Only applies if benchChoice is
-"runChosenFromSpace".
-traversal : String – Controls the order in which job pairs are executed. Can be either “depth” or “robin.” With
+-}
+
+data BenchChoice = RunAllBenchInSpace
+                 | RunAllBenchInHierarchy
+                 | RunChosenFromSpace
+  deriving (Eq, Show)
+           
+{-
+Controls the order in which job pairs are executed. Can be either “depth” or “robin.” With
 “depth,” all the job pairs in a single space will be executed before moving onto another space. With “robin,”
 each space in the job will have a single pair executed before any space has a second pair executed, and so on.
+-}
+
+data Traversal = Depth | Robin
+  deriving (Eq, Show)
+           
+{-
 Description: Creates a new job with the given parameters.
 Returns: An HTTP redirect to the spaces page on success, and an HTTP message with an error code and error
 message on failure.
 Return Cookies
 New_ID : Integer – On success, contains the ID of the new job.
-
-
 -}
 
-addJob = error "addJob"
+addJob :: AddJob -> Handler Int
+addJob c = do
+  logWarnN $ "addJob " <> T.pack (show c)
+
+  base <- parseUrl starExecUrl
+  req <- MP.formDataBody (
+        [ MP.partBS "name" $ BSC.pack $ name c
+        , MP.partBS "desc" $ BSC.pack $ desc c
+        ] ++
+        [ MP.partBS "preProcess" $ BSC.pack $ show p | p <- maybeToList $ preProcess c ] ++
+        [ MP.partBS "seed" $ BSC.pack $ show $ seed c ] ++ 
+        [ MP.partBS "postProcess" $ BSC.pack $ show p | p <- maybeToList $ postProcess c ] ++
+        [ MP.partBS "queue" $ BSC.pack $ show $ queue c 
+        , MP.partBS "spaceId" $ BSC.pack $ show $ spaceId c
+        , MP.partBS "cpuTimeout" $ BSC.pack $ show $ cpuTimeout c
+        , MP.partBS "wallclockTimeout" $ BSC.pack $ show $ wallclockTimeout c
+        , MP.partBS "maxMem" $ BSC.pack $ show $ maxMem c
+        , MP.partBS "pause" $ BSC.pack $ if pause c then "true" else "false"
+        , MP.partBS "runChoice" $ BSC.pack $ toLowerHead $ show $ runChoice c ] ++
+        [ MP.partBS "configs" $ listify $ configs c | runChoice c == Choose ] ++
+        [ MP.partBS "benchChoice" $ BSC.pack $ toLowerHead $ show $ benchChoice c | runChoice c == Choose ] ++
+        [ MP.partBS "bench" $ listify $ bench c | benchChoice c == RunChosenFromSpace ] ++
+        [ MP.partBS "traversal" $ BSC.pack $ toLowerHead $ show $ traversal c | benchChoice c == RunChosenFromSpace ]
+
+        ) $ base { method = "POST" , path = addJobPath }
+
+  when False $ do
+    resp <- sendRequest req
+    logWarnN $ T.pack $ show resp
+  error "addJob: not implemented"
+  
+toLowerHead "" = ""
+toLowerHead (c:cs) = toLower c : cs

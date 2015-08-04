@@ -16,7 +16,9 @@ import qualified Presenter.Registration as R
 import Presenter.StarExec.Commands
 import Presenter.StarExec.Connection
 
-data Selection = SelectionCompetition | SelectionDemonstration | SelectionAll
+data Selection = SelectionCompetition
+               | SelectionDemonstration
+               | SelectionAll
     deriving (Eq, Ord, Read, Show)
 
 data JobControl = JobControl
