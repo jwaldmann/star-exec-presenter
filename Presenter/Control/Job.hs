@@ -138,6 +138,8 @@ convertComp :: R.Competition (R.Catinfo,  [Int]) -> Competition
 convertComp c = Competition ( CompetitionMeta (R.competitionName c ) "(missing description)" )
           $ map convertMC (R.metacategories c)
 
+
+
 mkJobs :: SpaceMap -> JobControl -> R.Category R.Catinfo -> UTCTime -> Handler [ StarExecJob ]
 mkJobs sm config cat now = do
     let ci = R.contents cat 

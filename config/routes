@@ -71,3 +71,4 @@
 /job/pause/*JobIds PauseR GET
 /job/resume/*JobIds ResumeR GET
 /job/rerun/*JobIds RerunR GET
+/install-solvers/#Year InstallSolversR GET

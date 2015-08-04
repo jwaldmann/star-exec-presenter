@@ -77,3 +77,13 @@ resumePath = "starexec/services/resume/job/{id}"
 
 rerunPath :: ByteString
 rerunPath = "starexec/services/jobs/rerunallpairs/{id}"
+
+addSolverPath :: ByteString
+addSolverPath = "services/spaces/{spaceId}/add/solver"
+
+removeSolverPath :: ByteString
+removeSolverPath = "services/remove/solver/{spaceId}"
+
+addJobPath :: ByteString
+addJobPath = "add/job"
+

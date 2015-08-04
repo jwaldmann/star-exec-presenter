@@ -70,6 +70,7 @@ import Handler.Participant
 import Handler.Pause
 import Handler.Resume
 import Handler.Rerun
+import Handler.InstallSolvers
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

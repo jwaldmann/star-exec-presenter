@@ -15,6 +15,7 @@ module Presenter.StarExec.Commands
   , getSpaceXML
   , getDefaultSpaceXML
   , pauseJobs , resumeJobs, rerunJobs
+  , addJob, addSolver
   ) where
 
 import Import
@@ -28,6 +29,7 @@ import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
+import qualified Network.HTTP.Client.MultipartFormData as MP
 import Presenter.StarExec.Urls
 import Presenter.PersistHelper
 import Presenter.StarExec.Connection
@@ -46,6 +48,7 @@ import Text.Hamlet.XML
 import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
+import Data.Char (toLower)
 import Control.Monad ( guard, when, forM )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
@@ -53,6 +56,7 @@ import Data.List ( isSuffixOf, mapAccumL )
 import Data.Maybe
 import Data.Char ( isAlphaNum )
 import Control.Monad.Logger
+import Prelude (init,tail)
 
 defaultDate :: UTCTime
 defaultDate = UTCTime
@@ -300,7 +304,6 @@ getBenchmark _ bmId = do
   let req = sec { method = "GET"
                       , queryString = "limit=-1"
                       , path = getURL benchmarkPath [("{bmId}", show bmId)]
-                      , checkStatus = (\_ _ _ -> Nothing)
                       }
   resp <- sendRequest req
   return $ responseBody resp
@@ -395,11 +398,9 @@ getJobPairInfo _ _pairId = do
   let reqStdout = sec { method = "GET"
                       , queryString = "limit=-1"
                       , path = getURL pairStdoutPath [("{pairId}", show _pairId)]
-                      , checkStatus = (\_ _ _ -> Nothing)
                       }
       reqLog = sec { method = "GET"
                    , path = getURL pairLogPath [("{pairId}", show _pairId)]
-                   , checkStatus = (\_ _ _ -> Nothing)
                    }
   respStdout <- sendRequest reqStdout
   if 200 /= (statusCode $ responseStatus respStdout)
@@ -549,3 +550,112 @@ rerunJob (StarExecJobID id) = do
   logWarnN $ T.pack $ show resp
   return ()
 
+{-
+
+copy : Boolean – If true, deep copies of all the given solvers are made first, and then the new solvers are
+referenced in the given space. If false, solvers are simply referenced in the new space without being copied.
+
+copyToSubspaces : Boolean – If true, solvers will be associated with every space in the hierarchy rooted at the
+given space. Otherwise, they will be associated only with the given space.
+
+fromSpace : integer – If not null, then this is the ID of a space containing all the solvers in selectedIds[] that you
+have permission to copy solvers out of. If null, so such space is used, and you must be the owner of the solvers to
+have permission to use them.
+
+Description: Given a list of solvers, places the benchmarks into the given space. If copy is true, the
+benchmarks are first copied. Otherwise, the benchmarks are just linked into the new space.
+
+Returns: A jSON string containing a status object.
+
+-}
+
+type SpaceID = Int
+
+addSolver :: SpaceID -- ^ toSpace
+          -> [Int] -- ^ starexec-solverid
+          -> Bool -- ^ copy
+          -> Bool -- ^ copyToSubspaces
+          -> Maybe SpaceID -- ^ fromSpace
+          -> Handler ()
+addSolver toSpace sids copy copyToSubspaces fromSpace = do
+  base <- parseUrl starExecUrl
+
+  logWarnN $ T.pack $ unwords [ "addSolver", show toSpace, show sids, show copy, show copyToSubspaces, show fromSpace ]
+
+  let req = urlEncodedBody
+            ( [ ("selectedIds", listify sids)
+              , ("copy", boolean copy)
+              , ("copyToSubspaces", boolean copyToSubspaces)
+              ] ++
+      -- guessing here, cf.
+      -- http://starexec.lefora.com/topic/59/doc-request-explain-null-parameter-type-Integer
+              case fromSpace of
+                Just fsp -> [ ( "fromSpace", BSC.pack $ show fsp) ]
+                Nothing -> []
+            )
+            $ base
+            { method = "POST"
+            , path = getURL addSolverPath [("{spaceId}", show toSpace)]
+            }
+
+  logWarnN $ T.pack $ show req
+  case requestBody req of
+    RequestBodyLBS bs -> logWarnN $ T.pack $ show bs
+    _ -> return ()
+  resp <- sendRequest req
+  logWarnN $ T.pack $ show resp
+
+boolean :: Bool -> BSC.ByteString
+boolean flag = BSC.pack $ map toLower $ show flag
+
+-- | wild guess here, cf.
+-- http://starexec.lefora.com/topic/58/doc-request-exact-syntax-Integer-urlencoded-parameter
+-- assuming the syntax is "1,2,3"
+-- (comma-sep, in string quotes)
+listify :: [ Int ] -> BSC.ByteString
+listify [x] = BSC.pack $ show x
+listify xs = BSC.pack $ show $ tail $ init $ show xs
+
+
+{-
+
+addJob:
+
+name : String – The name to give the job
+desc : String – The description to give the job.
+preProcess : Integer – The ID of the pre processor to use. Can be excluded.
+seed : Integer – A number that will be passed into the pre processor for every pair.
+postProcess : Integer – The ID of the post processor to use. Can be excluded.
+queue : Integer – The ID of the queue to run the job on.
+spaceId : Integer – The ID of the space to put the job in.
+cpuTimeout : Integer – The CPU timeout, in seconds, to enforce.
+wallclockTimeout : Integer – The wallclock timeout, in seconds, to enforce.
+maxMem : Float – The maximum memory limit, in gigabytes.
+pause : Boolean – If true, job will start out paused. If false, job will start upon creation.
+runChoice : String – Controls how job pairs are created, and can be either “keepHierarchy” or “choose”. In
+“keepHierarchy”, a job is run using all benchmarks that are in the space hierarchy rooted at the spot that the job
+was created, and every benchmark is executed by every solver configuration of every solver in the same space.
+In “quickJob,” a single job pair is created, using the given solver and the given text to use as a new benchmark.
+In “choose”, a list of configurations is provided to use in the job.
+configs : [Integer] – The list of configurations to use in the job. Only applies if runChoice is “choose”
+
+benchChoice : String – Only applies if runChoice is “choose”. Describes how to select benchmarks for the job.
+Must be one of “runAllBenchInSpace”, “runAllBenchInHierarchy”, “runChosenFromSpace”. If
+“runAllBenchInSpace”, all benchmarks in the space the job is being uploaded to will be used. If
+"runAllBenchInHierarchy", all benchmarks in the entire hierarchy will be used. If "runChosenFromSpace", then
+benchmarks must be provided.
+bench : [Integer] – The list of benchmarks to use in the job. Only applies if benchChoice is
+"runChosenFromSpace".
+traversal : String – Controls the order in which job pairs are executed. Can be either “depth” or “robin.” With
+“depth,” all the job pairs in a single space will be executed before moving onto another space. With “robin,”
+each space in the job will have a single pair executed before any space has a second pair executed, and so on.
+Description: Creates a new job with the given parameters.
+Returns: An HTTP redirect to the spaces page on success, and an HTTP message with an error code and error
+message on failure.
+Return Cookies
+New_ID : Integer – On success, contains the ID of the new job.
+
+
+-}
+
+addJob = error "addJob"

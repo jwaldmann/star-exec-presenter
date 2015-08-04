@@ -21,7 +21,14 @@ This site:
 <ul>
   <li><a href=@{RegisteredR Y2015}>registered participants</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
-  <li><a href=@{ControlR Y2015}>administration</a> (restricted access)
+
+$if authorized
+  only for authorized users:
+  <ul>
+    <li><a href=@{InstallSolversR Y2015}>install solvers</a>
+    <li><a href=@{ControlR Y2015}>start jobs</a>
+    <li><a href=@{ListHiddenCompetitionsR}>hidden test runs</a>
+    
 
 Meta-information for this site:
 <ul>

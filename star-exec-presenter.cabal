@@ -58,6 +58,7 @@ library
                      Handler.Pause
                      Handler.Resume
                      Handler.Rerun
+                     Handler.InstallSolvers
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
