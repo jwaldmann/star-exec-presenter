@@ -270,6 +270,12 @@ getSpaceXML _spaceId = do
 
   makeSpace $ responseBody resp
 
+
+
+
+
+-- | this is applied to the contents of a zipped XML space description file
+-- as downloaded from starexec.
 makeSpace :: MonadIO m => BSL.ByteString -> m (Maybe Space)
 makeSpace bs = do
   let archive = Zip.toArchive bs
@@ -279,6 +285,12 @@ makeSpace bs = do
         [ e ] -> do
           let cursor = cursorFromDOM $ Zip.fromEntry e
               root = laxElement "tns:Spaces" cursor >>= child
+              solver r = r >>= laxElement "Solver" >>= \ s -> return $ SolverInSpace
+                  { soId = case attribute "id" s of
+                       [i] -> read $ T.unpack i ; _ -> -1
+                  , soName = case attribute "name" s of
+                                 [ n ] -> n ; _ -> "noname"
+                  }
               walk :: [ Cursor ] -> [ Space ]
               walk r = r >>= laxElement "Space" >>= \ s -> return
                      Space { spId = case attribute "id" s of
@@ -286,7 +298,8 @@ makeSpace bs = do
                            , spName = case attribute "name" s of
                                  [ n ] -> n ; _ -> "noname"
                            , benchmarks = map ( read . T.unpack )
-                             $ child s >>= laxElement "benchmark" >>= attribute "id" 
+                             $ child s >>= laxElement "benchmark" >>= attribute "id"
+                           , solvers = child s >>= \ c -> solver [c]
                            , children = child s >>= \ c ->  walk [c]
                            }
           walk root
@@ -567,6 +580,8 @@ benchmarks are first copied. Otherwise, the benchmarks are just linked into the 
 
 Returns: A jSON string containing a status object.
 
+see also http://starexec.lefora.com/topic/58/doc-request-exact-syntax-Integer-urlencoded-parameter
+
 -}
 
 type SpaceID = Int
@@ -607,14 +622,6 @@ encodeArrayInt name xs = do
 
 boolean :: Bool -> BSC.ByteString
 boolean flag = BSC.pack $ map toLower $ show flag
-
--- | wild guess here, cf.
--- http://starexec.lefora.com/topic/58/doc-request-exact-syntax-Integer-urlencoded-parameter
--- assuming the syntax is "1,2,3"
--- (comma-sep, in string quotes)
-listify :: [ Int ] -> BSC.ByteString
-listify [x] = BSC.pack $ show x
-listify xs = BSC.pack $ show $ tail $ init $ show xs
 
 
 data AddJob = AddJob
@@ -696,9 +703,13 @@ addJob c = do
         , MP.partBS "maxMem" $ BSC.pack $ show $ maxMem c
         , MP.partBS "pause" $ BSC.pack $ if pause c then "true" else "false"
         , MP.partBS "runChoice" $ BSC.pack $ toLowerHead $ show $ runChoice c ] ++
-        [ MP.partBS "configs" $ listify $ configs c | runChoice c == Choose ] ++
+        ( if runChoice c == Choose
+          then mpEncodeArrayInt "configs" $ configs c
+          else [] ) ++
         [ MP.partBS "benchChoice" $ BSC.pack $ toLowerHead $ show $ benchChoice c | runChoice c == Choose ] ++
-        [ MP.partBS "bench" $ listify $ bench c | benchChoice c == RunChosenFromSpace ] ++
+        ( if benchChoice c == RunChosenFromSpace
+          then mpEncodeArrayInt "bench" $ bench c
+          else [] ) ++
         [ MP.partBS "traversal" $ BSC.pack $ toLowerHead $ show $ traversal c | benchChoice c == RunChosenFromSpace ]
 
         ) $ base { method = "POST" , path = addJobPath }
@@ -707,6 +718,10 @@ addJob c = do
     resp <- sendRequest req
     logWarnN $ T.pack $ show resp
   error "addJob: not implemented"
+
+mpEncodeArrayInt name xs = do
+  (k,v) <- encodeArrayInt name xs
+  return $ MP.partBS (T.pack $ BSC.unpack k) v
   
 toLowerHead "" = ""
 toLowerHead (c:cs) = toLower c : cs

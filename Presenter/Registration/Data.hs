@@ -10,12 +10,13 @@ module Presenter.Registration.Data
   collect
 , experiment2015, tc2014
 , newskel
+, findspaces
 )
        
 where
 
 import Presenter.StarExec.Commands (getDefaultSpaceXML)
-import Presenter.Model.StarExec ( Space (spName,children,spId) )
+import Presenter.Model.StarExec ( Space (spName,children,spId,solvers), SolverInSpace(..) )
   
 import Presenter.Model ( Name, Year (..) )
 import Presenter.Registration.Code
@@ -56,7 +57,16 @@ newskel skel old new = do
 tops sp = do
   s <- children sp
   return (spId s, spName s)
-  
+
+findspaces comp = do
+  Just space <- getDefaultSpaceXML "Termination_XML.zip"
+  let smap = M.fromListWith (++) $ do
+        sp <- subspaces space
+        so <- solvers sp
+        return (soId so, [spId sp])
+  print smap
+
+subspaces sp = sp : ( children sp >>= subspaces )
 
 {-
 
