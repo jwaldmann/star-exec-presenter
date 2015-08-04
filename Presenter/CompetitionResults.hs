@@ -111,6 +111,10 @@ getCategoriesResult cat = do
   qResults <- queryManyJobs catJobIds
   qPostProc <- queryPostProc catPostProcId
   let results = scoredResults catScoring
+              -- HACK and FIXME: exclude TCT2 from scoring (issue #85)
+              $ filter ( \ jr ->
+                          toSolverID jr /= StarExecSolverID 3797 
+                          )
               $ concat $ map (snd . queryResult) qResults
       solver = getInfo extractSolver results
       scores = getScores solver catScoring results
