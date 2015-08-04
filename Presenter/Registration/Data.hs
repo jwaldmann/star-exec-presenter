@@ -3,6 +3,7 @@
 {-# language DisambiguateRecordFields #-}
 {-# language FlexibleInstances #-}
 {-# language StandaloneDeriving #-}
+{-# language LambdaCase #-}
 
 module Presenter.Registration.Data
 
@@ -37,7 +38,7 @@ import Text.Parsec.String
 import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
 import Control.Applicative ( (<$> ))
-import Control.Monad ( foldM )
+import Control.Monad ( foldM, forM_ )
 import Data.Maybe ( isJust )
 
 -- | we need this when uploading a fresh TPDB version on starexec:
@@ -58,13 +59,24 @@ tops sp = do
   s <- children sp
   return (spId s, spName s)
 
+
+-- | find the containing spaces for solvers
 findspaces comp = do
   Just space <- getDefaultSpaceXML "Termination_XML.zip"
   let smap = M.fromListWith (++) $ do
         sp <- subspaces space
         so <- solvers sp
         return (soId so, [spId sp])
-  print smap
+      find (sp,so,co) = case M.lookup so smap of
+        Just [sp] -> (sp,so,co)
+        _ -> (0,so,co)
+      ps = M.fromList $ do
+        p <- S.toList $ parts comp
+        let Just (sp,so,co) = solver_config p
+        return (so, p)
+  forM_ (M.toList ps) $ \ (so, p) -> do
+    print p
+    print $ M.lookup so smap
 
 subspaces sp = sp : ( children sp >>= subspaces )
 
