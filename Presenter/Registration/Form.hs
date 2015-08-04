@@ -169,9 +169,9 @@ tc_Y2015_Ctrl = Competition "Termination Competition 2015"
 tc_Y2015_HipTNT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
           [Category "C"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (99352, 3902,24352)}]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (100354, 3902,24352)}]
           ,Category "C Integer Programs"
-               [Participant {participantName = "HipTNT+" , solver_config = Just (99352, 3902,24352)}]]]
+               [Participant {participantName = "HipTNT+" , solver_config = Just (100354, 3902,24352)}]]]
 --
 tc_Y2015_NaTT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"

@@ -24,9 +24,10 @@ getInstallSolversR year = do
   maid <- maybeAuthId
   if isJust maid then do
     let comp = the_competition year
-    forM_ (C.metacategories comp) $ \ mc -> do
+    let restrict = id -- take 1
+    forM_ (restrict $ C.metacategories comp) $ \ mc -> do
       logWarnN $ "installSolver.mc: " <> T.pack (show mc)
-      forM_ (C.categories mc) $ \ cat -> do
+      forM_ (restrict $ C.categories mc) $ \ cat -> do
         logWarnN $ "installSolver.cat " <> T.pack ( show cat)
         let solvers = nub $ do
               part <- C.participants $ C.contents cat
@@ -35,9 +36,9 @@ getInstallSolversR year = do
         let spaces = do
               C.Hierarchy sp <- C.benchmarks $ C.contents cat
               return sp
-        forM_ (take 1 spaces) $ \ toSpace -> do
-          forM_ (take 1 solvers) $ \ solver -> do
-            addSolver toSpace [solver] True True 
+        forM_ (restrict spaces) $ \ toSpace -> do
+          forM_ (restrict solvers) $ \ solver -> do
+            addSolver toSpace [solver] False True 
             
     defaultLayout [whamlet|
                    <h1>Solvers copied for #{show year}
