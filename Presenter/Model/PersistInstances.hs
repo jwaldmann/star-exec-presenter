@@ -8,6 +8,7 @@ import Data.Text.Encoding
 import Control.Applicative
 import Presenter.Model.StarExec
 import qualified Presenter.Model.Complexity2015 as C
+import Presenter.Output
 
 instance CSV.FromNamedRecord JobResultInfo where
   parseNamedRecord r =
@@ -47,3 +48,12 @@ instance CSV.FromField JobResultStatus where
         | r == "enqueued"            = pure JobResultEnqueued
         | "pending" `T.isPrefixOf` r = pure JobResultPending
         | otherwise                  = pure JobResultComplete
+
+
+instance Output CompetitionInfo where
+    output c = "CompetitionInfo" <#> dutch_record
+             [ "competitionInfoCompetition" <+> equals <#> output (competitionInfoCompetition c)
+             , "competitionInfoDate" <+> equals <#> output (competitionInfoDate c)
+             , "competitionInfoPublic" <+> equals <#> output (competitionInfoPublic c)
+             ] 
+

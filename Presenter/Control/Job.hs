@@ -71,7 +71,7 @@ pushcat config cat = do
   now <- liftIO getCurrentTime
   jobs <- mkJobs sm config cat now
   js <- pushJobXML (jobCreationMethod config) (space config) jobs
-  return $ cat { R.contents = (R.contents cat, catMaybes $ map jobid js) }
+  return $ cat { R.contents = (R.contents cat, concat $ catMaybes $ map jobids js) }
 
 pushmetacat :: JobControl -> R.MetaCategory R.Catinfo -> Handler (R.MetaCategory (R.Catinfo, [Int]))
 pushmetacat config mc = do
@@ -81,8 +81,8 @@ pushmetacat config mc = do
           mkJobs sm config cat now
   js <- pushJobXML (jobCreationMethod config)  (space config) $ concat jobs
   let m = M.fromList $ do
-          SEJob { description = d, jobid = Just i } <- js
-          return ( d, [i] ) 
+          SEJob { description = d, jobids = Just ids } <- js
+          return ( d, ids ) 
   return $ mc {
               R.categories = for (R.categories mc) $ \ cat -> 
                 cat {
@@ -99,8 +99,8 @@ pushcomp config c = do
             mkJobs sm config cat now
     js <- pushJobXML  (jobCreationMethod config) (space config) $ concat jobs
     let m = M.fromList $ do
-            SEJob { description = d, jobid = Just i } <- js
-            return ( d, [i] ) 
+            SEJob { description = d, jobids = Just ids } <- js
+            return ( d, ids ) 
     return $ c {
                 R.metacategories = for (R.metacategories c) $ \ mc -> 
                   mc {
@@ -185,7 +185,7 @@ mkJobs sm config cat now = do
                        return co
                   }
               
-         , jobid = Nothing
+         , jobids = Nothing
          }
 
 select_benchmarks :: SpaceMap

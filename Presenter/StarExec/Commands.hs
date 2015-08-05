@@ -464,7 +464,7 @@ pushJobXML meth sId jobs = case meth of
 pushJobXML_bulk :: Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXML_bulk sId jobs = do
   js <- pushJobXMLStarExec sId jobs
-  registerJobs $ catMaybes $ map jobid js
+  registerJobs $ concat $ catMaybes $ map jobids js
   return js
 
 
@@ -499,8 +499,8 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
             Nothing -> Nothing
             Just pos ->
               let i = ids !! pos in
-              if i > 0 then Just i else Nothing
-      return $ j { jobid = ji }
+              if i > 0 then Just [i] else Nothing
+      return $ j { jobids = ji }
 
 
 find_job_numbers resp = 
@@ -738,7 +738,7 @@ addJob c = do
 
   resp <- sendRequest req
 
-  logWarnN $ T.pack $ show resp
+  when False $ logWarnN $ T.pack $ show resp
   let cs = destroyCookieJar $ responseCookieJar resp
       vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
   return $ case vs of
@@ -766,8 +766,8 @@ toLowerHead (c:cs) = toLower c : cs
 -- containing one SEJobGroup
 createJob :: Int -> [StarExecJob ] -> Handler [StarExecJob]
 createJob spId js = forM js $ \ j -> do
-    case jobpairs j of
-      [ g@SEJobGroup{} ] -> do
+    ids <- forM (jobpairs j) $ \ g -> case g of
+      SEJobGroup{} -> do
         mc <- addJob $ AddJob
          { name = T.unpack $ job_name j
          , desc = T.unpack $ description j
@@ -792,9 +792,9 @@ createJob spId js = forM js $ \ j -> do
          -- error in API doc: following is required parameter
          , suppressTimestamp = False
          }
-        logWarnN $ "createJob " <> T.pack (show j) <> " result: " <> T.pack (show mc) 
-        return $ j { jobid = mc } 
-      jps -> do
-        error $ "Presenter.StarExec.Command.createJob.jps: " ++ show jps
-
+        logWarnN $ "createJob " <> T.pack (show j) <> " result: " <> T.pack (show mc)
+        return mc
+      _ -> do
+        error $ "Presenter.StarExec.Command.createJob.g: " ++ show g
+    return $ j { jobids = Just $ catMaybes ids }
   

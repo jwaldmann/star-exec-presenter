@@ -96,7 +96,7 @@ data StarExecJob = SEJob
   , cpu_timeout :: Int
   , start_paused :: Bool
   , jobpairs :: [ StarExecJobPair ] -- ^ jobspace, benchmark, config
-  , jobid :: Maybe Int
+  , jobids :: Maybe [Int]
   } deriving ( Show )
 
 data StarExecJobPair
