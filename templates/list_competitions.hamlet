@@ -1,7 +1,7 @@
 <h2>Test runs for preparing the Termination Competition
 
 $if null competitionInfos
-    <h1>Sorry, currently no test runs to be listed
+    <h1>there are no test runs to be listed
 $else
     <ul>
         $forall ci <- competitionInfos
@@ -9,4 +9,6 @@ $else
                <a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
                #{show $ competitionInfoDate $ entityVal ci}
                <a href=@{ProblemsR $ JobIds $ allJobIDs $ competitionInfoCompetition $ entityVal ci}>errors
+               $if authorized 
+                 <a href=@{CompetitionTextR $ entityKey ci}>edit
                

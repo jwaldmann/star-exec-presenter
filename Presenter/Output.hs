@@ -10,12 +10,26 @@ where
 
 import Prelude
 import Data.String
+
+import Data.Time.Clock
+import Data.Time.Format
+
 import Text.PrettyPrint.Leijen as P hiding ((<$>), fill) 
 import qualified Data.Text as T
 
 class Output t where output :: t -> Doc
 instance IsString Doc where fromString = text
 
+instance Output () where 
+    output = text . show
+
+-- erstaunlich, daß das mit der Read-Instanz zusammen paßt.
+-- wird in Presenter.Handler.CompetitionText benutzt
+instance Output UTCTime where 
+    output = text . formatTime defaultTimeLocale rfc822DateFormat 
+
+instance Output Bool where 
+    output = text . show
 instance Output Int where 
     output = text . show
 instance Output T.Text where
