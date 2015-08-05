@@ -483,7 +483,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
               <> " num. pairs: " <> T.pack (show $ length $ jobpairs job) <> ","
     logWarnN $ "sending JobXML for " <> info          
     -- replace False with True to write the job file to disk 
-    when (True) $ do
+    when (False) $ do
         liftIO $ BSL.writeFile "command.zip" bs
 
     -- liftIO $ print req
@@ -709,7 +709,7 @@ addJob c = do
         , ( "cpuTimeout",  show $ cpuTimeout c )
         , ( "wallclockTimeout", show $ wallclockTimeout c)
         , ( "maxMem" , show $ maxMem c )
-        , ( "pause" , if pause c then "true" else "false" )
+        , ( "pause" , if pause c then "yes" else "no" )
         , ( "runChoice" , toLowerHead $ show $ runChoice c ) ] ++
         ( if runChoice c == Choose
           then encodeArrayIntS "configs" $ configs c
@@ -762,27 +762,39 @@ mpEncodeArrayInt name xs = do
 toLowerHead "" = ""
 toLowerHead (c:cs) = toLower c : cs
 
+-- | each job in this list must have a singleton list of jobpairs,
+-- containing one SEJobGroup
 createJob :: Int -> [StarExecJob ] -> Handler [StarExecJob]
-createJob spId js = (concat <$>) $ 
-  forM js $ \ j -> forM (jobpairs j) $ \ g @ SEJobGroup{} -> do
-    addJob $ AddJob
-      { name = T.unpack $ job_name j
-      , desc = T.unpack $ description j
-      , preProcess = Nothing
-      , seed = 0
-      , postProcess = Just $ postproc_id j
-      , queue = queue_id j
-      , cpuTimeout = cpu_timeout j
-      , wallclockTimeout = wallclock_timeout j
-      , maxMem = mem_limit j
-      , pause = start_paused j
-      , spaceId = jobGroupBench g
-      , benchChoice = RunAllBenchInHierarchy
-      , runChoice = Choose
-      , configs = jobGroupConfigs g
-      , bench = [] 
-      , traversal = Robin
-      , suppressTimestamp = False
-      }
-    error "huh"
+createJob spId js = forM js $ \ j -> do
+    case jobpairs j of
+      [ g@SEJobGroup{} ] -> do
+        mc <- addJob $ AddJob
+         { name = T.unpack $ job_name j
+         , desc = T.unpack $ description j
+                  
+         -- error in API doc: cannot omit this, need dummy value
+         , preProcess = Just (-1) -- Nothing
+
+         , seed = 0
+         , postProcess = Just $ postproc_id j
+         , queue = queue_id j
+         , cpuTimeout = cpu_timeout j
+         , wallclockTimeout = wallclock_timeout j
+         , maxMem = mem_limit j
+         , pause = start_paused j
+         , spaceId = jobGroupBench g
+         , benchChoice = RunAllBenchInHierarchy
+         , runChoice = Choose
+         , configs = jobGroupConfigs g
+         , bench = [] 
+         , traversal = Robin
+
+         -- error in API doc: following is required parameter
+         , suppressTimestamp = False
+         }
+        logWarnN $ "createJob " <> T.pack (show j) <> " result: " <> T.pack (show mc) 
+        return $ j { jobid = mc } 
+      jps -> do
+        error $ "Presenter.StarExec.Command.createJob.jps: " ++ show jps
+
   

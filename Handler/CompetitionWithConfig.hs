@@ -54,11 +54,11 @@ getCompetitionWithConfigR comp = do
   let jobcontrol js = do
         [whamlet|
         $if authorized
-              <a href=@{PauseR $ JobIds js}>pause
+              <a href=@{PauseR $ JobIds js}>Pa
             |
-              <a href=@{ResumeR $ JobIds js}>resume
+              <a href=@{ResumeR $ JobIds js}>Re
             |
-              <a href=@{RerunR $ JobIds js}>rerun
+              <a href=@{ProblemsR $ JobIds js}>Ch
         |]
   
   defaultLayout $ do
