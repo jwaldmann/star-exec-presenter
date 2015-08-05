@@ -80,6 +80,7 @@ library
                      Presenter.PersistHelper
                      Presenter.Prelude
                      Presenter.Short
+                     Presenter.Output
                      Presenter.Processing
                      Presenter.Registration
                      Presenter.Registration.Data
