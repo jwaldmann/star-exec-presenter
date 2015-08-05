@@ -24,7 +24,10 @@ $newline never
             <div id="main" role="main">
               ^{pageBody pc}
             <footer>
+
                 <a href="http://www.termination-portal.org/wiki/Termination_Competition_2015">Termination Competition 2015 #
-                | <a href="https://www.starexec.org/starexec/public/about.jsp">StarExec</A> #
-                | <a href="https://portal.imn.htwk-leipzig.de/">F-IMN</a> #
-                | <a href="http://www.htwk-leipzig.de/">HTWK Leipzig</a>
+                data is produced at
+                <a href="https://www.starexec.org/starexec/public/about.jsp">StarExec #
+                and aggregated at 
+                <a href="https://portal.imn.htwk-leipzig.de/">F-IMN,
+                <a href="http://www.htwk-leipzig.de/">HTWK Leipzig

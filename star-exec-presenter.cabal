@@ -162,7 +162,7 @@ library
                  , vector
                  , cassava
                  , double-conversion
-                 , blaze-markup
+                 , blaze-markup, blaze-builder
                  , containers
                  , html-conduit
                  , time

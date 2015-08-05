@@ -16,7 +16,6 @@ module Presenter.StarExec.Commands
   , getDefaultSpaceXML
   , pauseJobs , resumeJobs, rerunJobs
   , addJob, addSolver
-  , createJob
   ) where
 
 import Import hiding (spaceId)
@@ -50,7 +49,7 @@ import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
 import Data.Char (toLower)
-import Control.Monad ( guard, when, forM )
+import Control.Monad ( guard, when, forM, forM_ )
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List ( isSuffixOf, mapAccumL )
@@ -58,6 +57,7 @@ import Data.Maybe
 import Data.Char ( isAlphaNum )
 import Control.Monad.Logger
 import Prelude (init,tail)
+import Blaze.ByteString.Builder
 
 defaultDate :: UTCTime
 defaultDate = UTCTime
@@ -208,8 +208,13 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                <mem-limit value="#{t $ mem_limit j}">
                <postproc-id value="#{t $ postproc_id j}">
              $forall p <- jobpairs j
+               $if isSEJobPair p
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
+
+isSEJobPair p = case p of
+  SEJobPair{} -> True
+  _ -> False
 
 -- | need to take care of Issue #34.
 -- if jobpairs are like this:
@@ -448,10 +453,10 @@ getJobPairInfo _ _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
-pushJobXML :: Int -> [StarExecJob] -> Handler [StarExecJob]
-pushJobXML sId jobs = do
-  jss <- forM jobs $ \ job -> pushJobXML_bulk sId [job]
-  return $ concat jss
+pushJobXML :: JobCreationMethod -> Int -> [StarExecJob] -> Handler [StarExecJob]
+pushJobXML meth sId jobs = case meth of
+  PushJobXML -> concat <$> (forM jobs $ \ job -> pushJobXML_bulk sId [job] )
+  CreateJob ->   createJob sId jobs
 
 -- FIXME: for large jobs, this is risky (it will no return, but time-out)
 -- so we should send jobs one-by-one
@@ -478,7 +483,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
               <> " num. pairs: " <> T.pack (show $ length $ jobpairs job) <> ","
     logWarnN $ "sending JobXML for " <> info          
     -- replace False with True to write the job file to disk 
-    when (False) $ do
+    when (True) $ do
         liftIO $ BSL.writeFile "command.zip" bs
 
     -- liftIO $ print req
@@ -627,7 +632,7 @@ boolean flag = BSC.pack $ map toLower $ show flag
 
 
 data AddJob = AddJob
-   { name :: String 
+   { name :: String
    , desc :: String
    , preProcess :: Maybe Int
    , seed :: Int
@@ -636,7 +641,7 @@ data AddJob = AddJob
    , spaceId :: Int
    , cpuTimeout :: Int -- ^ seconds
    , wallclockTimeout :: Int -- ^ seconds
-   , maxMem :: Float -- ^ gigabytes
+   , maxMem :: Double -- ^ gigabytes
    , pause :: Bool
    , runChoice :: RunChoice
    , configs :: [ Int ] -- ^ Only applies if runChoice is “choose”
@@ -686,40 +691,65 @@ Return Cookies
 New_ID : Integer – On success, contains the ID of the new job.
 -}
 
-addJob :: AddJob -> Handler Int
+addJob :: AddJob -> Handler (Maybe Int)
 addJob c = do
   logWarnN $ "addJob " <> T.pack (show c)
 
   base <- parseUrl starExecUrl
-  req <- MP.formDataBody (
-        [ MP.partBS "name" $ BSC.pack $ name c
-        , MP.partBS "desc" $ BSC.pack $ desc c
+  req <- encodeParams ( 
+        [ ( "name" , name c )
+        , ( "desc",  desc c )
         ] ++
-        [ MP.partBS "preProcess" $ BSC.pack $ show p | p <- maybeToList $ preProcess c ] ++
-        [ MP.partBS "seed" $ BSC.pack $ show $ seed c ] ++ 
-        [ MP.partBS "postProcess" $ BSC.pack $ show p | p <- maybeToList $ postProcess c ] ++
-        [ MP.partBS "queue" $ BSC.pack $ show $ queue c 
-        , MP.partBS "spaceId" $ BSC.pack $ show $ spaceId c
-        , MP.partBS "cpuTimeout" $ BSC.pack $ show $ cpuTimeout c
-        , MP.partBS "wallclockTimeout" $ BSC.pack $ show $ wallclockTimeout c
-        , MP.partBS "maxMem" $ BSC.pack $ show $ maxMem c
-        , MP.partBS "pause" $ BSC.pack $ if pause c then "true" else "false"
-        , MP.partBS "runChoice" $ BSC.pack $ toLowerHead $ show $ runChoice c ] ++
+        [ ( "preProcess" , show p ) | p <- maybeToList $ preProcess c ] ++
+        [ ( "seed" , show $ seed c ) ] ++ 
+        [ ( "postProcess",  show p ) | p <- maybeToList $ postProcess c ] ++
+        [ ( "queue", show $ queue c )
+        , ( "sid" , show $ spaceId c )
+        , ( "cpuTimeout",  show $ cpuTimeout c )
+        , ( "wallclockTimeout", show $ wallclockTimeout c)
+        , ( "maxMem" , show $ maxMem c )
+        , ( "pause" , if pause c then "true" else "false" )
+        , ( "runChoice" , toLowerHead $ show $ runChoice c ) ] ++
         ( if runChoice c == Choose
-          then mpEncodeArrayInt "configs" $ configs c
+          then encodeArrayIntS "configs" $ configs c
           else [] ) ++
-        [ MP.partBS "benchChoice" $ BSC.pack $ toLowerHead $ show $ benchChoice c | runChoice c == Choose ] ++
+        [ ( "benchChoice" , toLowerHead $ show $ benchChoice c) | runChoice c == Choose ] ++
         ( if benchChoice c == RunChosenFromSpace
-          then mpEncodeArrayInt "bench" $ bench c
+          then encodeArrayIntS "bench" $ bench c
           else [] ) ++
-        [ MP.partBS "traversal" $ BSC.pack $ toLowerHead $ show $ traversal c | benchChoice c == RunChosenFromSpace ]
+        [ ( "traversal", toLowerHead $ show $ traversal c ) ]
+        ) $ base { method = "POST" , path = addJobPath
+                 -- , queryString = "sid=" <> BSC.pack (show $ spaceId c)
+                 }
 
-        ) $ base { method = "POST" , path = addJobPath }
+  logWarnN $ T.pack $ show req
+  case requestBody req of
+    RequestBodyLBS bs -> logWarnN $ T.pack $ show bs
+    RequestBodyBS bs -> logWarnN $ T.pack $ show bs
+    RequestBodyBuilder i b -> do
+      logWarnN "RequestBodyBuilder"
+      -- logWarnN $ T.pack $ BSC.unpack $ toByteString b
+    RequestBodyStream {} -> logWarnN "RequestBodyStream"
+    RequestBodyStreamChunked {} -> logWarnN "RequestBodyStreamChunked"
 
-  when False $ do
-    resp <- sendRequest req
-    logWarnN $ T.pack $ show resp
-  error "addJob: not implemented"
+  resp <- sendRequest req
+
+  logWarnN $ T.pack $ show resp
+  let cs = destroyCookieJar $ responseCookieJar resp
+      vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+  return $ case vs of
+          [ s ] -> Just $ read $ BSC.unpack s
+          _ -> Nothing
+
+encodeArrayIntS :: BSC.ByteString -> [Int ] -> [(BSC.ByteString,String)]
+encodeArrayIntS name xs = do
+  x <- xs
+  return (name , show x)
+
+
+encodeParams kvs req = return
+  $ urlEncodedBody ( do (k,v) <- kvs; return (k, BSC.pack v) )
+  $ req
 
 mpEncodeArrayInt name xs = do
   (k,v) <- encodeArrayInt name xs
@@ -729,6 +759,25 @@ toLowerHead "" = ""
 toLowerHead (c:cs) = toLower c : cs
 
 createJob :: Int -> [StarExecJob ] -> Handler [StarExecJob]
-createJob spId js = do
-  error "huh"
+createJob spId js = (concat <$>) $ 
+  forM js $ \ j -> forM (jobpairs j) $ \ g @ SEJobGroup{} -> do
+    addJob $ AddJob
+      { name = T.unpack $ job_name j
+      , desc = T.unpack $ description j
+      , preProcess = Nothing
+      , seed = 0
+      , postProcess = Just $ postproc_id j
+      , queue = queue_id j
+      , cpuTimeout = cpu_timeout j
+      , wallclockTimeout = wallclock_timeout j
+      , maxMem = mem_limit j
+      , pause = start_paused j
+      , spaceId = jobGroupBench g
+      , benchChoice = RunAllBenchInHierarchy
+      , runChoice = Choose
+      , configs = jobGroupConfigs g
+      , bench = [] 
+      , traversal = Robin
+      }
+    error "huh"
   

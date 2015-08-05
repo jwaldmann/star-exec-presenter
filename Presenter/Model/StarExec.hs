@@ -101,16 +101,18 @@ data StarExecJob = SEJob
 
 data StarExecJobPair
   = SEJobPair
-    { jobPairSpace :: Text   
-    , jobPairBench :: Int
-    , jobPairConfig :: Int 
+    { jobPairSpace :: ! Text   
+    , jobPairBench :: ! Int
+    , jobPairConfig :: ! Int 
     }
   | SEJobGroup
-    { jobGroupBench :: Int
-    , jobGroupConfigs :: [Int]
+    { jobGroupBench :: ! Int
+    , jobGroupConfigs :: ! [Int]
     }  
                      deriving ( Show )
 
+data JobCreationMethod = PushJobXML | CreateJob
+    deriving (Eq, Ord, Read, Show)
 
 data QueryStatus k = Pending (Key k) | Latest
 
