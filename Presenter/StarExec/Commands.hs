@@ -648,6 +648,7 @@ data AddJob = AddJob
    , benchChoice :: BenchChoice -- ^ Only applies if runChoice is “choose”.
    , bench :: [Int] -- ^  The list of benchmarks to use in the job. Only applies if benchChoice is "runChosenFromSpace".
    , traversal :: Traversal
+   , suppressTimestamp :: Bool 
    }
    deriving Show
 
@@ -717,7 +718,10 @@ addJob c = do
         ( if benchChoice c == RunChosenFromSpace
           then encodeArrayIntS "bench" $ bench c
           else [] ) ++
-        [ ( "traversal", toLowerHead $ show $ traversal c ) ]
+        [ ( "traversal", toLowerHead $ show $ traversal c )
+          -- NOTE: source code says they check for "yes" (not "true"!)
+        , ( "suppressTimestamp", if suppressTimestamp c then "yes" else "no" )
+        ]
         ) $ base { method = "POST" , path = addJobPath
                  -- , queryString = "sid=" <> BSC.pack (show $ spaceId c)
                  }
@@ -778,6 +782,7 @@ createJob spId js = (concat <$>) $
       , configs = jobGroupConfigs g
       , bench = [] 
       , traversal = Robin
+      , suppressTimestamp = False
       }
     error "huh"
   
