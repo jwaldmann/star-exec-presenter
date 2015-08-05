@@ -36,12 +36,12 @@ data Category = Category
   } deriving (Show, Read, Eq)
 
 instance Output Category where
-    output c = "Category" <+> braces ( hsep $ intersperse "," 
-             [ "getCategoryName" <+> equals <+> output (getCategoryName c)
-             , "getCategoryScoring" <+> equals <+> output (getCategoryScoring c)
-             , "getPostProcId" <+> equals <+> output (getPostProcId c)
-             , "getJobIds" <+> equals <+> output (getJobIds c)
-             ] )
+    output c = "Category" <#> dutch_record
+             [ "getCategoryName" <+> equals <#> output (getCategoryName c)
+             , "getCategoryScoring" <+> equals <#> output (getCategoryScoring c)
+             , "getPostProcId" <+> equals <#> output (getPostProcId c)
+             , "getJobIds" <+> equals <#> output (getJobIds c)
+             ] 
 
 -- |  solver by rank in the categories
 data MetaCategory = MetaCategory
@@ -51,13 +51,21 @@ data MetaCategory = MetaCategory
 derivePersistField "MetaCategory"
 
 instance Output MetaCategory where
-    output (MetaCategory mn cs) = 
-        ("Competition" <+> text (show mn)) <#> output cs
-
+    output c = "MetaCategory" <#> dutch_record
+             [ "getMetaCategoryName" <+> equals <#> output (getMetaCategoryName c)
+             , "getCategories" <+> equals <#> output (getCategories c)
+             ] 
+             
 data CompetitionMeta = CompetitionMeta
   { getMetaName :: Name
   , getMetaDescription :: Description
   } deriving (Eq, Ord, Read, Show)
+
+instance Output CompetitionMeta where
+    output c = "CompetitionMeta" <#> dutch_record
+             [ "getMetaName" <+> equals <#> output (getMetaName c)
+             , "getMetaDescription" <+> equals <#> output (getMetaDescription c)
+             ] 
 
 data Competition = Competition
   { getMetaData :: CompetitionMeta
@@ -73,9 +81,10 @@ getCompetitionDescription :: Competition -> Description
 getCompetitionDescription = getMetaDescription . getMetaData
 
 instance Output Competition where
-    output (Competition md mcs) = 
-        ("Competition" <+> text (show md)) <#> output mcs
-
+    output c = "Competition" <#> dutch_record
+             [ "getMetaData" <+> equals <#> output (getMetaData c)
+             , "getMetaCategories" <+> equals <#> output (getMetaCategories c)
+             ] 
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp

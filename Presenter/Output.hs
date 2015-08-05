@@ -3,6 +3,7 @@ module Presenter.Output
 ( Output (..), showp
 , (<+>), (<#>)
 , text, braces, hsep, equals
+, dutch_record
 )
        
 where
@@ -31,8 +32,11 @@ instance (Output a, Output b,Output c) => Output (a,b,c) where
     output (x,y,z) = "(" <> output x <> "," <> output y <> "," <> output z <> ")"
 
 (<#>) :: Doc -> Doc -> Doc
-p <#> q = fillBreak 4 p <+> q
+p <#> q = fillBreak 4 p <+> align q
 
 showp :: Output a => a -> String
 showp = ( \ d -> displayS d "" ) . renderPretty 1.0 80 . output
 
+dutch_record :: [Doc] -> Doc
+dutch_record [] = braces empty
+dutch_record xs = vcat $ zipWith (<+>) ( "{" : repeat "," ) xs ++ [ "}" ]
