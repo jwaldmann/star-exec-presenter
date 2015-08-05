@@ -3,14 +3,18 @@ module Presenter.Model.Competition where
 import Yesod
 import Presenter.Model.Types
 import Presenter.Model.RouteTypes
+import Presenter.Output
 import Prelude (Show, Read, Eq, Ord, ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
+import Data.List (intersperse)
 import Control.Monad ((>=>))
 
 data Scoring =
   Standard
   | Complexity
   deriving (Show, Read, Eq)
+
+instance Output Scoring where output = text . show
 
 -- | this is for managing registrations (which are in the source) FIXME
 data Year = Y2014 | Y2015 | E
@@ -31,12 +35,24 @@ data Category = Category
   , getJobIds :: [JobID]
   } deriving (Show, Read, Eq)
 
+instance Output Category where
+    output c = "Category" <+> braces ( hsep $ intersperse "," 
+             [ "getCategoryName" <+> equals <+> output (getCategoryName c)
+             , "getCategoryScoring" <+> equals <+> output (getCategoryScoring c)
+             , "getPostProcId" <+> equals <+> output (getPostProcId c)
+             , "getJobIds" <+> equals <+> output (getJobIds c)
+             ] )
+
 -- |  solver by rank in the categories
 data MetaCategory = MetaCategory
   { getMetaCategoryName :: Name
   , getCategories :: [Category]
   } deriving (Show, Read, Eq)
 derivePersistField "MetaCategory"
+
+instance Output MetaCategory where
+    output (MetaCategory mn cs) = 
+        ("Competition" <+> text (show mn)) <#> output cs
 
 data CompetitionMeta = CompetitionMeta
   { getMetaName :: Name
@@ -49,11 +65,17 @@ data Competition = Competition
   } deriving (Show, Read, Eq)
 derivePersistField "Competition"
 
+
 getCompetitionName :: Competition -> Name
 getCompetitionName = getMetaName . getMetaData
 
 getCompetitionDescription :: Competition -> Description
 getCompetitionDescription = getMetaDescription . getMetaData
+
+instance Output Competition where
+    output (Competition md mcs) = 
+        ("Competition" <+> text (show md)) <#> output mcs
+
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp

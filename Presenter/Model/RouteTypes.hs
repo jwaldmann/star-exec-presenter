@@ -8,6 +8,8 @@ import Presenter.Internal.Stringish
 import Presenter.Model.Query
 import Presenter.Internal.Stringish
 
+import Presenter.Output
+
 type Prefix = T.Text
 
 lriResultPrefix :: Prefix
@@ -54,6 +56,8 @@ data JobID =
   | LriJobID Int
   | UibkJobID Int
   deriving (Show, Read, Eq, Ord)
+
+instance Output JobID where output = text . show
 
 getStarExecId :: JobID -> Int
 getStarExecId (StarExecJobID i) = i

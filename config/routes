@@ -72,3 +72,4 @@
 /job/resume/*JobIds ResumeR GET
 /job/rerun/*JobIds RerunR GET
 /install-solvers/#Year InstallSolversR GET
+/competition/#CompetitionInfoId/text CompetitionTextR GET
