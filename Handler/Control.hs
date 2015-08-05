@@ -15,6 +15,10 @@ import Control.Monad ( guard )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
+        <*> areq (radioFieldList
+                  [("pushJobXML - sllooowwww" :: T.Text , PushJobXML)
+                  ,("createJob (on ALL benchmarks - ignores parameters a,b,c" , CreateJob)
+                  ]) "job creation method" (Just CreateJob)
         <*> areq checkBoxField "start paused" (Just False)
         <*> areq (radioFieldList
                   [("Competition (at least 2 participants)"::T.Text,SelectionCompetition)

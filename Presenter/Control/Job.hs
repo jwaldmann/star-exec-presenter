@@ -21,13 +21,17 @@ data Selection = SelectionCompetition
                | SelectionAll
     deriving (Eq, Ord, Read, Show)
 
+data JobCreationMethod = PushJobXML | CreateJob
+    deriving (Eq, Ord, Read, Show)
+
 data JobControl = JobControl
    { isPublic :: Bool
+   , jobCreationMethod :: JobCreationMethod
    , startPaused :: Bool
    , selection :: Selection
    , queue :: Int
    , space :: Int
-   , wallclock :: Int
+   , wallclock :: Int     
    , family_lower_bound :: Int
    , family_upper_bound :: Int
    , family_factor :: Double
@@ -89,13 +93,16 @@ pushmetacat config mc = do
                 }
               }
 
-pushcomp :: JobControl -> R.Competition R.Catinfo -> Handler (R.Competition (R.Catinfo, [Int]))
+pushcomp :: JobControl -> R.Competition R.Catinfo
+         -> Handler (R.Competition (R.Catinfo, [Int]))
 pushcomp config c = do
     sm <- getSpaceMap default_space
     now <- liftIO getCurrentTime
     jobs <- forM ( R.metacategories c >>= R.categories ) $ \ cat -> do 
             mkJobs sm config cat now
-    js <- pushJobXML (space config) $ concat jobs
+    js <- case jobCreationMethod config of
+      PushJobXML -> pushJobXML (space config) $ concat jobs
+      CreateJob  -> createJob (space config) $ concat jobs
     let m = M.fromList $ do
             SEJob { description = d, jobid = Just i } <- js
             return ( d, [i] ) 
@@ -142,7 +149,12 @@ convertComp c = Competition ( CompetitionMeta (R.competitionName c ) "(missing d
 
 
 
-mkJobs :: SpaceMap -> JobControl -> R.Category R.Catinfo -> UTCTime -> Handler [ StarExecJob ]
+-- | make job(s) for one category
+mkJobs :: SpaceMap
+       -> JobControl
+       -> R.Category R.Catinfo
+       -> UTCTime
+       -> Handler [ StarExecJob ]
 mkJobs sm config cat now = do
     let ci = R.contents cat 
         (+>) = T.append
@@ -159,7 +171,8 @@ mkJobs sm config cat now = do
          , wallclock_timeout = wallclock config
          , cpu_timeout = num_cores * wallclock config
          , start_paused = startPaused config
-         , jobpairs = do 
+         , jobpairs = case jobCreationMethod config of
+            PushJobXML -> do 
                (jobspace, bs) <- bss  
                b <- sort bs
                R.Participant { R.solver_config = Just (_,_,c) } <- R.participants ci
@@ -168,10 +181,22 @@ mkJobs sm config cat now = do
                           , jobPairBench = b
                           , jobPairConfig = c
                           }
+            CreateJob -> do
+               R.Hierarchy root <- R.benchmarks ci
+               return $ SEJobGroup
+                  { jobGroupBench = root
+                  , jobGroupConfigs = do
+                       R.Participant { R.solver_config = Just (_,_,co)} <- R.participants ci
+                       return co
+                  }
+              
          , jobid = Nothing
          }
 
-select_benchmarks :: SpaceMap -> JobControl -> [R.Benchmark_Source] -> Handler [(Text,[Int])]
+select_benchmarks :: SpaceMap
+                  -> JobControl
+                  -> [R.Benchmark_Source]
+                  -> Handler [(Text,[Int])]
 select_benchmarks sm config bs = do
     bmss <- forM bs $ \ b -> case b of
         R.Bench { R.bench = sId } -> do

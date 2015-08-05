@@ -16,6 +16,7 @@ module Presenter.StarExec.Commands
   , getDefaultSpaceXML
   , pauseJobs , resumeJobs, rerunJobs
   , addJob, addSolver
+  , createJob
   ) where
 
 import Import hiding (spaceId)
@@ -483,40 +484,41 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
     -- liftIO $ print req
     
     resp <- sendRequest req
+    let ids = find_job_numbers resp
 
+    logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show ids)
+
+    return $ do
+      (j, mpos) <- zip jobs remap
+      let ji = case mpos of 
+            Nothing -> Nothing
+            Just pos ->
+              let i = ids !! pos in
+              if i > 0 then Just i else Nothing
+      return $ j { jobid = ji }
+
+
+find_job_numbers resp = 
     -- the job ids are in the returned cookie.
     -- if there are more, then it's a comma-separated list
     -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
     
     let cs = destroyCookieJar $ responseCookieJar resp
 
-    let vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+        vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
         cut' c s = if null s then []
                   else let (pre,post) = span (/= c) s
                        in  pre : cut' c ( drop 1 post)
-
-
-    logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show vs)
-
-    return $ case vs of
-         [] ->  jobs
-         [s] -> do
-             let ids = map read $ cut' ',' 
-
+    in  case vs of
+      [] -> []
+      [s] -> map read $ cut' ',' 
 -- FIXME, actually EXPLAINME:
 -- single job: 
 -- Cookie {cookie_name = "New_ID", cookie_value = "3048"
 -- multiple jobs: 
 -- Cookie {cookie_name = "New_ID", cookie_value = "\"3049,3050,3051,3052,3053\""
                      $ filter ( /= '"' ) 
-
                      $ BSC.unpack s
-             (j, mpos) <- zip jobs remap
-             let ji = case mpos of 
-                     Nothing -> Nothing
-                     Just pos -> let i = ids !! pos in
-                                 if i > 0 then Just i else Nothing
-             return $ j { jobid = ji }
 
 pauseJobs :: [JobID] -> Handler ()
 pauseJobs ids = do
@@ -725,3 +727,8 @@ mpEncodeArrayInt name xs = do
   
 toLowerHead "" = ""
 toLowerHead (c:cs) = toLower c : cs
+
+createJob :: Int -> [StarExecJob ] -> Handler [StarExecJob]
+createJob spId js = do
+  error "huh"
+  

@@ -32,5 +32,8 @@ $if authorized
 
 Meta-information for this site:
 <ul>
-  <li>built with <a href="http://www.yesodweb.com/">Yesod</a> (Haskell web framework)
+  <li>programmers: Stefan von der Krone and Johannes Waldmann
+  <li>using the <a href="http://www.yesodweb.com/">Yesod</a> web framework,
+    implementation language: <a href="http://haskell.org/">Haskell</a>,
+    compiler: <a href="http://haskell.org/ghc">ghc-7.10.2</a>.
   <li><a href="https://github.com/stefanvonderkrone/star-exec-presenter">source code, issue tracker</a>

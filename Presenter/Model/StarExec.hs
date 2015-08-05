@@ -99,11 +99,17 @@ data StarExecJob = SEJob
   , jobid :: Maybe Int
   } deriving ( Show )
 
-data StarExecJobPair = SEJobPair
-  { jobPairSpace :: Text   
-  , jobPairBench :: Int
-  , jobPairConfig :: Int 
-  } deriving ( Show )
+data StarExecJobPair
+  = SEJobPair
+    { jobPairSpace :: Text   
+    , jobPairBench :: Int
+    , jobPairConfig :: Int 
+    }
+  | SEJobGroup
+    { jobGroupBench :: Int
+    , jobGroupConfigs :: [Int]
+    }  
+                     deriving ( Show )
 
 
 data QueryStatus k = Pending (Key k) | Latest
