@@ -31,7 +31,7 @@ $newline never
                 at #
                 <a href="http://www.cs.uiowa.edu/">U Iowa, #
                 and aggregated on #
-                <a href=@HomeR>star-exec-presenter #
+                <a href=@{HomeR}>star-exec-presenter #
                 at #
                 <a href="https://portal.imn.htwk-leipzig.de/">F-IMN, #
                 <a href="http://www.htwk-leipzig.de/">HTWK Leipzig.
