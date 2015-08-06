@@ -96,6 +96,8 @@ library
                      Presenter.Utils.Colors
                      Presenter.Utils.WidgetMetaRefresh
                      Presenter.Utils.WidgetTable
+                     Presenter.DOI
+                     Presenter.DOI.Type
                      Importer.Parser.LRI
                      Importer.Interpreter.LRI
                      Importer.Internal
