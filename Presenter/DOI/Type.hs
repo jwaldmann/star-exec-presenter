@@ -11,6 +11,8 @@ module Presenter.DOI.Type
 where
   
 import Prelude
+import Yesod
+import qualified Data.Text as T
 
 data DOI = TPI Int
   deriving (Eq, Ord)
@@ -24,3 +26,11 @@ instance Read DOI where
     return (TPI n, rest)
 
 makeTPI = TPI
+
+instance PathPiece DOI where
+  toPathPiece = T.pack . show
+  fromPathPiece t =
+    case readsPrec 0 $ T.unpack t of
+      [(d,"")] -> return d
+      _ -> Nothing
+      

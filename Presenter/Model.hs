@@ -12,6 +12,7 @@ module Presenter.Model
   , module Presenter.Model.RouteTypes
   , module Presenter.Model.StarExec
   , module Presenter.Model.Types
+  , module Presenter.DOI.Type
   , module Model
   ) where
 
@@ -25,6 +26,7 @@ import Presenter.Model.Query
 import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
 import Presenter.Model.Types
+import Presenter.DOI.Type
 import Model
 import Prelude
 

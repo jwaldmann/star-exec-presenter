@@ -73,3 +73,4 @@
 /job/rerun/*JobIds RerunR GET
 /install-solvers/#Year InstallSolversR GET
 /competition/#CompetitionInfoId/text CompetitionTextR GET POST
+/resolve/#DOI ResolveR GET

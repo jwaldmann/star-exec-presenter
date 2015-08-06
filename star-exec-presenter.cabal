@@ -60,6 +60,7 @@ library
                      Handler.Rerun
                      Handler.InstallSolvers
                      Handler.CompetitionText
+                     Handler.Resolve
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job

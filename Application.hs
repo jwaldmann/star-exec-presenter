@@ -72,6 +72,7 @@ import Handler.Resume
 import Handler.Rerun
 import Handler.InstallSolvers
 import Handler.CompetitionText
+import Handler.Resolve
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
