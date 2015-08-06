@@ -91,6 +91,7 @@ library
                      Presenter.StarExec.Connection
                      Presenter.StarExec.JobData
                      Presenter.StarExec.Urls
+                     Presenter.StarExec.Space
                      Presenter.Statistics
                      Presenter.STM
                      Presenter.Utils.Colors
