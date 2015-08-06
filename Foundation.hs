@@ -21,6 +21,7 @@ import Presenter.Model
 --import Presenter.Model.RouteTypes
 --import Presenter.Model.Query
 --import Model
+import Presenter.DOI
 import Text.Jasmine (minifym)
 import Text.Hamlet (hamletFile)
 import Yesod.Core.Types (Logger)
@@ -50,6 +51,7 @@ data App = App
     , compResultsCache :: TVar (M.Map CompetitionMeta (TVar (Maybe CompetitionResults)))
     , dbSem :: Lock.RWLock
     , conSem :: Lock.RWLock
+    , doiService :: DOIService
     }
 
 instance HasHttpManager App where

@@ -77,6 +77,7 @@ import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Control.Concurrent.MVar
 import Presenter.StarExec.Connection (killmenothing, initial_login)
+import Presenter.DOI
 
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
@@ -143,8 +144,11 @@ makeFoundation conf = do
     -- Connection semaphore
     conS <- Lock.new
 
+    -- resolver
+    doiS <- makeDOI_for_2014_2015
+    
     let logger = Yesod.Core.Types.Logger loggerSet' getter
-        foundation = App conf s p manager dbconf logger session crCache dbS conS
+        foundation = App conf s p manager dbconf logger session crCache dbS conS doiS
 
     -- Perform database migration using our application's logging settings.
     runLoggingT

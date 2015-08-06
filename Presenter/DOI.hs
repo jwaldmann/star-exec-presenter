@@ -4,16 +4,21 @@
 
 module Presenter.DOI where
 
-import Import
+import Prelude
 import Presenter.DOI.Type as DOI
 import Presenter.Model.StarExec
-import Presenter.StarExec.Commands (getDefaultSpaceXML)
+import Presenter.StarExec.Space (getDefaultSpaceXML)
+import Presenter.Model.RouteTypes
 
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
 import qualified Data.Text as T
 import System.IO
 import Control.Monad ( forM )
+import Control.Applicative
+import Data.Monoid ((<>))
+
+type DOIService =  ( M.Map BenchmarkID DOI, M.Map DOI T.Text)
 
 -- | reads a space build from a file like "TPDB-10.3_XML.zip"
 -- returns a map with entries like
@@ -33,8 +38,8 @@ spaceToNames sp =
 -- handle duplicates in the correct way.
 -- watch out: assigned numbers depend on file contents and order.
 makeDOI :: [ FilePath ]
-        -> IO ( M.Map BenchmarkID DOI, M.Map DOI T.Text)
-makeDOI fs = do
+        -> IO DOIService
+makeDOI fs = do 
   ms <- forM fs $ \ f -> do
     hPutStrLn stderr $ unwords [ "reading space file", f ]
     Just sp <- getDefaultSpaceXML f
