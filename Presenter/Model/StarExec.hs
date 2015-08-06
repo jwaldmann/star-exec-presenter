@@ -62,10 +62,12 @@ data StarExecSpace = StarExecSpace
 data Space = Space 
   { spId :: Int
   , spName :: Name
-  , benchmarks :: [ Int ]
+  , benchmarks_with_names :: [ (Int,Text) ]
   , solvers :: [SolverInSpace ]
   , children :: [Space]
   } deriving ( Show, Eq )
+
+benchmarks = map fst . benchmarks_with_names
 
 data SolverInSpace = SolverInSpace
   { soId :: Int

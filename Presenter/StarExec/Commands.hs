@@ -303,8 +303,10 @@ makeSpace bs = do
                                  [ i ] -> read $ T.unpack i ; _ -> -1
                            , spName = case attribute "name" s of
                                  [ n ] -> n ; _ -> "noname"
-                           , benchmarks = map ( read . T.unpack )
-                             $ child s >>= laxElement "benchmark" >>= attribute "id"
+                           , benchmarks_with_names = child s
+                                >>= laxElement "benchmark" >>= \ b ->
+                                  (,) <$> ( read <$> T.unpack <$> attribute "id" b )
+                                      <*> attribute "name" b
                            , solvers = child s >>= \ c -> solver [c]
                            , children = child s >>= \ c ->  walk [c]
                            }
