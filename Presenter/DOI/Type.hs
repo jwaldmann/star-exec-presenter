@@ -21,11 +21,13 @@ instance Show DOI where
   show (TPI i) = "tpi:" ++ show i
 
 instance Read DOI where
-  readsPrec p ('t':'p':'i':s) = do
+  readsPrec p ('t':'p':'i':':':s) = do
     (n,rest) <- readsPrec p s
     return (TPI n, rest)
 
 makeTPI = TPI
+
+$(derivePersistField "DOI")
 
 instance PathPiece DOI where
   toPathPiece = T.pack . show

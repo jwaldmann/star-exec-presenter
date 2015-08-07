@@ -53,9 +53,15 @@
             $nothing
               0
   <tbody>
-    $forall ((bId,bName), results) <- benchmarkResults
+    $forall ((bKey,bName), results) <- benchmarkResults
       <tr>
-        <td><a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+        <td>
+          $case bKey
+            $of Left bId
+              <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+            $of Right doi
+             <a href=@{ResolveR doi}>#{shorten bName}</a>
+          
         $forall mResult <- results
           $maybe result <- mResult
             <td class="#{getClass result}">

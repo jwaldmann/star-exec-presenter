@@ -16,6 +16,7 @@ instance CSV.FromNamedRecord JobResultInfo where
                   <$> r CSV..: "pair id"
                   <*> r CSV..: "benchmark"
                   <*> r CSV..: "benchmark id"
+                  <*> pure Nothing
                   <*> r CSV..: "solver"
                   <*> r CSV..: "solver id"
                   <*> r CSV..: "configuration"

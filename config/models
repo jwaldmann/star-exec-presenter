@@ -22,6 +22,7 @@ JobResultInfo
     UniqueJobResultInfo pairId
     benchmark Text
     benchmarkId Int
+    benchmarkDOI DOI Maybe
     solver Text
     solverId Int
     configuration Text

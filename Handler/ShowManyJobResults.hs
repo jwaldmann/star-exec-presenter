@@ -32,9 +32,13 @@ shorten t = if T.length t > 50
               then shorten $ T.tail t
               else t
 
-getShowManyJobResultsR :: Scoring -> Query -> JobIds -> Handler Html
+getShowManyJobResultsR
+  :: Scoring -> Query -> JobIds -> Handler Html
 getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
+  (toDOI,fromDOI) <- doiService <$> getYesod
+
   qJobs <- queryManyJobs ids
+  
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       -- complexity = all isComplexity jobInfos
       complexity = (sc == Complexity)
@@ -48,6 +52,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
 
       benchmarks' = L.sortBy compareBenchmarks $
                       getInfo extractBenchmark $ jobResults
+                      
       groupedSolvers = map (getInfo extractSolver) jobs
       jobSolvers = concat $ map toTuples $ zip ids groupedSolvers
       benchmarkResults = getBenchmarkResults

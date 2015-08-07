@@ -353,8 +353,14 @@ getJobResults _ _jobId = do
                                 +> "&type=job&returnids=true"
                 }
   resp <- sendRequest req
+
+  (toDOI,fromDOI) <- doiService <$> getYesod
+  
   let archive = Zip.toArchive $ responseBody resp
       insertId ji = ji { jobResultInfoJobId = _jobId }
+      insertDOI ji =
+        ji { jobResultInfoBenchmarkDOI
+             = toDOI $ StarExecBenchmarkID $ jobResultInfoBenchmarkId ji }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
               -- liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry
@@ -364,7 +370,9 @@ getJobResults _ _jobId = do
                   liftIO $ putStrLn msg
                   return []
                 Right (_, jobInfos) ->
-                  return $ map insertId $ Vector.toList jobInfos
+                  return $ map insertId
+                         $ map insertDOI
+                         $ Vector.toList jobInfos
             [] -> return []
   return jobs
 

@@ -10,7 +10,7 @@ import qualified Data.Map.Strict as M
 import Control.Monad ( guard )
 
 type BenchmarkName = Name
-type UniqueBenchmark = (BenchmarkID, BenchmarkName)
+type UniqueBenchmark = (Either BenchmarkID DOI, BenchmarkName)
 --type UniqueSolver = (SolverID, SolverName)
 --type SolverName = Name
 type SolverResults = [Maybe SolverResult]
@@ -32,9 +32,19 @@ getInfo :: (JobResult -> S.Set a -> S.Set a) -> [JobResult] -> [a]
 getInfo f = S.toList . L.foldr f S.empty
 
 getBenchmark :: JobResult -> UniqueBenchmark
-getBenchmark jr = (toBenchmarkID jr, toBenchmarkName jr)
+getBenchmark jr = 
+  ( benchmarkKey jr
+  , toBenchmarkName jr
+  )
 
-extractBenchmark :: JobResult -> S.Set UniqueBenchmark -> S.Set UniqueBenchmark
+benchmarkKey jr@(StarExecResult se) =
+  case jobResultInfoBenchmarkDOI se of
+         Just doi -> Right doi
+         Nothing -> Left $ toBenchmarkID jr
+         
+extractBenchmark :: JobResult
+                 -> S.Set UniqueBenchmark
+                 -> S.Set UniqueBenchmark
 extractBenchmark jr set =
   S.insert (getBenchmark jr) set
 
@@ -45,7 +55,10 @@ extractSolver :: JobResult -> S.Set (SolverID, SolverName) -> S.Set (SolverID, S
 extractSolver jr set =
   S.insert (getSolver jr) set
 
-getBenchmarkResults :: [(JobID, UniqueSolver)] -> [JobResult] -> [UniqueBenchmark] -> [BenchmarkRow]
+getBenchmarkResults :: [(JobID, UniqueSolver)]
+                    -> [JobResult]
+                    -> [UniqueBenchmark]
+                    -> [BenchmarkRow]
 getBenchmarkResults solvers jobInfos = map getBenchmarkRow 
   where
     --getBenchmark :: UniqueBenchmark -> BenchmarkRow
@@ -58,11 +71,12 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
         Just result -> Just result
         Nothing -> Nothing
     isResult _benchmarkId _solverId _jobId jr =
-      (toBenchmarkID jr == _benchmarkId) &&
+      (benchmarkKey jr == _benchmarkId) &&
         (toSolverID jr == _solverId) &&
         (getJobID jr == _jobId)
 
-compareBenchmarks :: UniqueBenchmark -> UniqueBenchmark -> Ordering
+compareBenchmarks
+  :: UniqueBenchmark -> UniqueBenchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
 getScore :: JobResult -> Int
@@ -73,13 +87,15 @@ getScore jr = case toScore jr of
 
 -- | this is called to compute the total score (for a solver, in a category).
 -- it is applied to results that are already scored (see scoredResults function)
-calculateScores :: Scoring -> [JobResult] -> M.Map SolverID Int
+calculateScores
+  :: Scoring -> [JobResult] -> M.Map SolverID Int
 calculateScores sc jps = M.fromListWith (+) $ do
   jp <- jps ; return ( toSolverID jp, getScore jp )
 
 -- | this is called to compute the scores per jobpair (a cell in the table).
 -- TODO: this must handle hors_concours solvers specially.
-scoredResults :: Scoring -> [ JobResult ] -> [ JobResult ]
+scoredResults
+  :: Scoring -> [ JobResult ] -> [ JobResult ]
 scoredResults sc jps = do
   let bybench = M.fromListWith (++) $ do
         jp <- jps

@@ -13,6 +13,7 @@ import Presenter.Model.StarExec
   , SEQuery
   )
 import Presenter.Model.Competition (Competition)
+import Presenter.DOI.Type (DOI)
 import Prelude
 
 -- You can define all of your database entities in the entities file.
