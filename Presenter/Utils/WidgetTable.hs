@@ -4,7 +4,8 @@ import Import
 import Text.Blaze (ToMarkup)
 
 import Presenter.Short
-import Presenter.Processing ( getClass )
+import Presenter.Processing
+  ( getClass, BenchmarkKey, benchmarkKey )
 import Presenter.Model.Additional.Table
 import Presenter.Internal.Stringish
 import qualified Presenter.Utils.Colors as C
@@ -33,7 +34,7 @@ getManyJobCells :: [[ JobResult ]] -> Handler Table
 getManyJobCells iss = do
     --iss <- getManyJobResults ids
     let cells :: M.Map (JobID, (SolverID,Name),(ConfigID,Name)) 
-                       (M.Map (BenchmarkID,Name) Cell)
+                       (M.Map (BenchmarkKey,Name) Cell)
         cells = M.fromListWith M.union $ do
           p <- concat iss
           return ( ( getJobID p
@@ -44,7 +45,7 @@ getManyJobCells iss = do
                      , toConfigName p
                      )
                    )
-               , M.singleton ( toBenchmarkID p
+               , M.singleton ( benchmarkKey p
                              , toBenchmarkName p
                              ) 
                      $ cell_for_job_pair p
@@ -74,10 +75,16 @@ empty_cell =
          , mjr = Nothing
          }
 
-cell_for_bench :: ToMarkup a => (BenchmarkID, a) -> Cell
-cell_for_bench (bid, bname) = Cell
+cell_for_bench
+  :: (BenchmarkKey, Name)
+  -> Cell
+cell_for_bench (bkey, bname) = Cell
   { contents = [whamlet|
-<a href=@{ShowBenchmarkInfoR bid}>#{bname} 
+$case bkey
+  $of Left bId
+    <a href=@{ShowBenchmarkInfoR bId}>#{T.takeEnd 40 bname}
+  $of Right doi
+    <a href=@{ResolveR doi}>#{T.takeEnd 40 bname}
 |]
   , tdclass = fromString "bench"
   , url = fromString ""

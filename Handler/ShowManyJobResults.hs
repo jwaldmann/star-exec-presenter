@@ -28,15 +28,11 @@ toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
 
 shorten :: Text -> Text
-shorten t = if T.length t > 50
-              then shorten $ T.tail t
-              else t
+shorten t = T.takeEnd 50 t
 
 getShowManyJobResultsR
   :: Scoring -> Query -> JobIds -> Handler Html
 getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
-  (toDOI,fromDOI) <- doiService <$> getYesod
-
   qJobs <- queryManyJobs ids
   
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
@@ -46,20 +42,38 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
 
       jobResults :: [JobResult]
       jobResults = concat $ jobs
-
   
       stat = mconcat $ map jobStat jobResults
+
 
       benchmarks' = L.sortBy compareBenchmarks $
                       getInfo extractBenchmark $ jobResults
                       
       groupedSolvers = map (getInfo extractSolver) jobs
       jobSolvers = concat $ map toTuples $ zip ids groupedSolvers
-      benchmarkResults = getBenchmarkResults
+      -- FIXME: this doubles work (we already have the results)
+      benchmarkResults_ = getBenchmarkResults
                           jobSolvers
                           jobResults
-                          benchmarks'                          
-      scores = for jobs $  \ results -> calculateScores sc results
+                          benchmarks'
+
+      -- alternative implementation:
+      resultmap
+        :: M.Map UniqueBenchmark
+           (M.Map (JobID, (SolverID, SolverName)) JobResult)
+      resultmap = M.fromListWith M.union $ do
+        jr <- jobResults
+        return ( getBenchmark jr
+               , M.singleton (getJobID jr, getSolver jr) jr
+               )
+      benchmarkResults = do
+        (bm, rowmap) <- M.toList resultmap
+        let row = do
+              s <- jobSolvers
+              return $ M.lookup s rowmap 
+        return (bm, row)
+      scores = for jobs $  \ results ->
+        calculateScores sc results
   defaultLayout $ do
     toWidget $(luciusFile "templates/solver_result.lucius")
     if any (\q -> case queryStatus q of Latest -> False ; _ -> True) qJobs

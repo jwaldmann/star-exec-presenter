@@ -37,6 +37,8 @@ getBenchmark jr =
   , toBenchmarkName jr
   )
 
+type BenchmarkKey = Either BenchmarkID DOI
+
 benchmarkKey jr@(StarExecResult se) =
   case jobResultInfoBenchmarkDOI se of
          Just doi -> Right doi

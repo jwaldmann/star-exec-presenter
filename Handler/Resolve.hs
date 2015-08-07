@@ -1,13 +1,15 @@
 module Handler.Resolve where
 
 import Import
+import Presenter.DOI
 import qualified Data.Map.Strict as M
 
 getResolveR :: DOI -> Handler Html
 getResolveR doi = do
-  (toDOI,fromDOI) <- doiService <$> getYesod
-  let sol = fromDOI doi
-  defaultLayout [whamlet|
-<h1>resolve #{show doi}
-<p>name is #{show sol}
+  serv <- doiService <$> getYesod
+  render <- getUrlRender
+  case toBench serv doi of
+    Just ben -> redirect $ render $ ShowBenchmarkInfoR ben
+    Nothing -> defaultLayout [whamlet|
+<h1>#{show doi} does not refer to a benchmark
 |]                 

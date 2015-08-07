@@ -34,6 +34,7 @@ import Presenter.StarExec.Urls
 import Presenter.PersistHelper
 import Presenter.StarExec.Connection
 import Presenter.StarExec.Space
+import Presenter.DOI
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
@@ -354,13 +355,13 @@ getJobResults _ _jobId = do
                 }
   resp <- sendRequest req
 
-  (toDOI,fromDOI) <- doiService <$> getYesod
+  serv <- doiService <$> getYesod
   
   let archive = Zip.toArchive $ responseBody resp
       insertId ji = ji { jobResultInfoJobId = _jobId }
       insertDOI ji =
         ji { jobResultInfoBenchmarkDOI
-             = toDOI $ StarExecBenchmarkID $ jobResultInfoBenchmarkId ji }
+             = toDOI serv $ StarExecBenchmarkID $ jobResultInfoBenchmarkId ji }
   jobs <- case Zip.zEntries archive of
             entry:_ -> do
               -- liftIO $ BSL.writeFile ((show _jobId) ++ ".csv") $ Zip.fromEntry entry

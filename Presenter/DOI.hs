@@ -18,8 +18,11 @@ import Control.Monad ( forM )
 import Control.Applicative
 import Data.Monoid ((<>))
 
-type DOIService =
-  ( BenchmarkID -> Maybe DOI, DOI -> Maybe T.Text)
+data DOIService =  DOIService
+   { toDOI :: BenchmarkID -> Maybe DOI
+   , toName :: DOI -> Maybe T.Text
+   , toBench :: DOI -> Maybe BenchmarkID
+   }
 
 -- | reads a space build from a file like "TPDB-10.3_XML.zip"
 -- returns a map with entries like
@@ -49,14 +52,22 @@ makeDOI fs = do
     return out
   let m :: M.Map BenchmarkID T.Text
       m = foldr (M.unionWith $ error "makeDOI.duplicate") M.empty ms
+  
       unique_names = S.toList $ S.fromList $ M.elems m
+      
       fore :: M.Map DOI T.Text
       fore = M.fromList $ zip (map DOI.makeTPI [1..]) unique_names
       back :: M.Map T.Text DOI 
       back = M.fromList $ zip unique_names (map DOI.makeTPI [1..])
-      toDOI :: M.Map BenchmarkID  DOI
-      toDOI = M.map ( back M.! ) m
-  return ( flip M.lookup toDOI, flip M.lookup fore )
+
+      todoi = M.map ( back M.! ) m
+      mm = M.fromList $ do (k,v) <- M.toList todoi ; return (v,k)
+      
+  return $ DOIService
+    { toDOI = flip M.lookup todoi
+    , toName = flip M.lookup fore
+    , toBench = flip M.lookup mm
+    }
 
 makeDOI_for_2014_2015 =
   makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip" ]
