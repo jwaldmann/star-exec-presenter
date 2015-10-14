@@ -19,6 +19,10 @@ data Context ob at = Context
   , back :: Map at (Set ob)
   } deriving (Show)
 
+data Concept ob at = Concept
+  { obs :: Set ob
+  , ats :: Set at
+  } deriving (Show, Eq)
 
 contextFromList :: (Ord ob, Ord at) => [(ob, [at])] -> Context ob at
 contextFromList l = Context 
@@ -40,8 +44,8 @@ getObjects :: (Ord ob, Ord at) => Context ob at -> Set at -> Set ob
 getObjects c ats = foldr Set.intersection (objects c)
   $ map (\a -> back c Map.! a) $ Set.toList ats
 
-concepts :: (Ord ob, Ord at) => Context ob at -> [(Set ob, Set at)]
+concepts :: (Ord ob, Ord at) => Context ob at -> [Concept ob at]
 concepts c = do
   ats <- map (\ats -> Set.fromList ats) $ subsequences $ Set.toList $ attributes c
   guard $ ats == (getAttributes c $ getObjects c ats)
-  return (getObjects c ats, ats)
+  return (Concept (getObjects c ats) ats)

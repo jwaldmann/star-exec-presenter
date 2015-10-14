@@ -6,20 +6,20 @@
         <th> count pairs (of #{length $ objects context})
       <tbody>
 
-      $forall (currObs,currAts) <- concepts'
+      $forall currConcept <- concepts'
         <tr>
-          <td> #{show $ fromJust $ elemIndex (currObs,currAts) concepts'}
+          <td> #{show $ fromJust $ elemIndex currConcept concepts'}
           $forall at <- attributes context
-            $if elem at currAts
+            $if elem at $ats currConcept
               <td>X
             $else
               <td>
-          <td> #{length currObs}
+          <td> #{length $obs currConcept}
 
 <h1>Concepts
 <ul>
-$forall (o,a) <- concepts'
-  <li> #{show o} : #{show a}
+$forall c <- concepts'
+  <li> #{show $ obs c} : #{show $ ats c}
 
 <h1>Objects
 <ul>
