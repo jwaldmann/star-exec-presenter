@@ -75,6 +75,4 @@
 /competition/#CompetitionInfoId/text CompetitionTextR GET POST
 /resolve/#DOI ResolveR GET
 
-/eval/#Query/*JobIds EvalR GET
--- /dbtest/#JobID DbTestR GET
 /concepts/#JobID ConceptsR GET

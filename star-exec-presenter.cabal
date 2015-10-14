@@ -62,7 +62,6 @@ library
                      Handler.InstallSolvers
                      Handler.CompetitionText
                      Handler.Resolve
-                     Handler.Eval
                      Handler.Concepts
                      Presenter.Auth
                      Presenter.CompetitionResults

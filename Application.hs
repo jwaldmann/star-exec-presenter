@@ -73,7 +73,6 @@ import Handler.Rerun
 import Handler.InstallSolvers
 import Handler.CompetitionText
 import Handler.Resolve
-import Handler.Eval
 import Handler.Concepts
 
 import qualified Data.Map.Strict as M
