@@ -26,6 +26,7 @@ data Attribute =
 slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
 slowCpuTimeLimit = 10
 
+-- route to show concepts of given JobID
 getConceptsR :: JobID -> Handler Html
 getConceptsR jid = do
   jobResults <- getPersistJobResults jid
@@ -36,12 +37,14 @@ getConceptsR jid = do
     setTitle "concepts"
     $(widgetFile "concepts")
 
+-- create relation of JobPairId and declared attributes of given data
 collectData :: [JobResultInfo] -> [(JobPairId, [Attribute])]
 collectData results = do
   let jobResultInfoPairIds = map jobResultInfoPairId results
   let attrs = getAttributeCollection results
   zip jobResultInfoPairIds attrs
 
+-- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
 getAttributeCollection jobResults = do
   let jobResultInfoSolvers = map (jobResultInfoSolver) jobResults
@@ -52,6 +55,7 @@ getAttributeCollection jobResults = do
   zipWith4 (\a b c d -> [AJobResultInfoSolver a, AJobResultInfoConfiguration b, ASlowCpuTime c, ASolverResult d])
     jobResultInfoSolvers jobResultInfoConfigurations cpuTimeEvaluations jobResultInfoResults
 
+-- evaluate whether time are slow or not
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
