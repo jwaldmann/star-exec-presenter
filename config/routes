@@ -76,3 +76,4 @@
 /resolve/#DOI ResolveR GET
 
 /concepts/#JobID ConceptsR GET
+/image ImageR GET

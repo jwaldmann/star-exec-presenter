@@ -63,6 +63,7 @@ library
                      Handler.CompetitionText
                      Handler.Resolve
                      Handler.Concepts
+                     Handler.Image
                      Presenter.Auth
                      Presenter.CompetitionResults
                      Presenter.Control.Job
