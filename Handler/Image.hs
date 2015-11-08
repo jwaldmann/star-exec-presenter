@@ -2,7 +2,6 @@ module Handler.Image where
 
 import Import
 
-import qualified Data.GraphViz
 import System.Process (readProcess)
 import Control.Monad.IO.Class (liftIO)
 
