@@ -1,9 +1,10 @@
 <table class="table table-bordered table-striped">
       <thead>
-        <th> concepts
+        <th> concept number
         $forall at <- attributes context
           <th> #{show at}
-        <th> count pairs (of #{length $ objects context})
+        <th> num attrs (of #{length $ attributes context})
+        <th> num objs (of #{length $ objects context})
       <tbody>
 
       $forall currConcept <- concepts'
@@ -14,6 +15,7 @@
               <td>X
             $else
               <td>
+          <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
 
 <img src="@{ImageR}">
