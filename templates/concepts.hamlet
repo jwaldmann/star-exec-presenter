@@ -16,6 +16,8 @@
               <td>
           <td> #{length $obs currConcept}
 
+<img src="@{ImageR}">
+
 <h1>Concepts
 <ul>
 $forall c <- concepts'
