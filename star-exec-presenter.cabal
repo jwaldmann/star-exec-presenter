@@ -20,6 +20,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      ConceptAnalysis.FCA
+                     ConceptAnalysis.DotGraph
                      Handler.Home
                      Handler.Control
                      Handler.ListHiddenCompetitions
