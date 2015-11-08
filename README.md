@@ -27,6 +27,8 @@ Installation
     cabal install alex happy yesod-bin
     cabal install --enable-tests .
 
+    Graphviz installation on system
+
 Usage
 -----
 
