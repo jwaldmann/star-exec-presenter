@@ -7,10 +7,24 @@ import           Data.Graph.Inductive (mkGraph, Gr)
 import Data.GraphViz (graphToDot, GraphvizParams, nonClusteredParams)
 -- import Data.GraphViz.Types.Graph 
 import Data.GraphViz.Printing (renderDot, toDot)
-
+-- import Presenter.PersistHelper
+-- import Presenter.Model.Entities()
+-- import ConceptAnalysis.FCA
+-- import Handler.Concepts
+-- import Yesod
+-- import Control.Monad (liftM)
 
 -- global_graph_attributes ::
 -- global_graph_attributes = 
+
+
+-- getConcepts :: JobID -> [Concept ob at]
+-- getConcepts jid = do
+--   jobResults <- getPersistJobResults jid
+--   let contextData = collectData $ getStarExecResults jobResults
+--   let context = contextFromList contextData
+--   concepts context
+
 
 dotted_graph :: String
 dotted_graph = TL.unpack $ renderDot $ toDot $ graphToDot graph_params $ graph
