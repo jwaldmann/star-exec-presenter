@@ -18,7 +18,11 @@
           <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
 
-<img src="@{ImageR}">
+
+
+<object type="image/svg+xml" data="@{ImageR}">Your browser does not support SVG</object>
+<!--> <img src="@{ImageR}"> <!-->
+
 
 <h1>Concepts
 <ul>
