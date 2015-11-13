@@ -20,6 +20,7 @@ library
                      Settings.StaticFiles
                      Settings.Development
                      ConceptAnalysis.FCA
+                     ConceptAnalysis.FCAPreparation
                      ConceptAnalysis.DotGraph
                      Handler.Home
                      Handler.Control
@@ -56,7 +57,7 @@ library
                      Handler.LegacyListHiddenCompetitions
                      Handler.Problems
                      Handler.ShowConfigInfo
-                     Handler.Participant		     
+                     Handler.Participant
                      Handler.Pause
                      Handler.Resume
                      Handler.Rerun
