@@ -25,9 +25,10 @@
 
 
 <h1>Concepts
-<ul>
+[
 $forall c <- concepts'
-  <li> #{show $ obs c} : #{show $ ats c}
+  Concept (#{show $ obs c}) (#{show $ ats c}),
+]
 
 <h1>Objects
 <ul>
