@@ -38,5 +38,3 @@ getConceptsR jid = do
 --   -- let concepts' = concepts context
 --   svg_content <- liftIO $ readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] dotted_graph
 --   sendResponse $ toTypedContent (typeSvg, toContent svg_content)
-
-
