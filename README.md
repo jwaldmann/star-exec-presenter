@@ -17,7 +17,16 @@ Getting source
 --------------
 There may be submodules, so:
 
-    git clone --recursive ...
+    git clone --recursive git@github.com:rm--/star-exec-presenter.git
+
+
+Credentials
+-----------
+
+Please create the file '.star_exec' in your home directory with your [starexec account creadentials](https://www.starexec.org/starexec/secure/index.jsp).
+The file must contain the following line:
+
+    Login ">login<" ">password<"
 
 
 Installation
