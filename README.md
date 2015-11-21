@@ -13,15 +13,34 @@ Our Web App will provide these extra features:
 * caching (and permanent storage) of results 
   (we intend to include also results of earlier competitions)
 
-Getting source
---------------
+1 Getting source
+----------------
 There may be submodules, so:
 
-    git clone --recursive git@github.com:rm--/star-exec-presenter.git
+    git clone git@github.com:rm--/star-exec-presenter.git
 
 
-Credentials
------------
+2 Installation
+--------------
+    cabal sandbox init
+    cabal install alex happy yesod-bin
+    cabal install --enable-tests .
+
+You also need [Graphviz](http://www.graphviz.org/Download.php) on your system.
+
+3 Database
+----------
+  create user:
+
+    sudo -u postgres createuser -P yesod
+
+  create db:
+
+    sudo -u postgres createdb -O yesod yesod
+
+
+4 Credentials
+-------------
 
 Please create the file '.star_exec' in your home directory with your [starexec account creadentials](https://www.starexec.org/starexec/secure/index.jsp).
 The file must contain the following line:
@@ -29,21 +48,18 @@ The file must contain the following line:
     Login ">login<" ">password<"
 
 
-Installation
-------------
-    cabal sandbox init
-    cabal sandbox add-source graphviz
-    cabal install alex happy yesod-bin
-    cabal install --enable-tests .
-
-    Graphviz installation on system
-
-Usage
------
+5 Usage
+-------
 
     yesod devel
 
-* create user: sudo -u postgres createuser -P yesod
-* clear db: sudo -u postgres dropdb yesod
-* create db: sudo -u postgres createdb -O yesod yesod
-* access db: sudo -u postgres psql -d yesod
+
+Notes
+-----
+
+clear db:
+
+    sudo -u postgres dropdb yesod
+access db:
+
+    sudo -u postgres psql -d yesod
