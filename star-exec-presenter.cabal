@@ -196,7 +196,7 @@ library
                  , MonadCatchIO-transformers
                  , conduit-extra
                  , fgl
-                 , graphviz
+                 , graphviz >= 2999.18.0.2
                  , process
 
 executable         star-exec-presenter

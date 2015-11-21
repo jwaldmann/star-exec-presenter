@@ -6,6 +6,6 @@ help:
 
 install:
 	cabal sandbox init
-	cabal sandbox add-source graphviz
+	cabal update
 	cabal install alex happy yesod-bin
 	cabal install --enable-tests .
