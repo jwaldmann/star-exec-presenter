@@ -1,0 +1,7 @@
+dependencies:
+  override:
+    make install
+
+machine:
+  ghc:
+    version: 7.10.1
