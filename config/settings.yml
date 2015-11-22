@@ -12,7 +12,6 @@ Development:
 
 Testing:
   port: 3001
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-testing"
   <<: *defaults
 
 Staging:
