@@ -1,6 +1,6 @@
 dependencies:
   override:
-    make install
+    - make install
 
 machine:
   ghc:
