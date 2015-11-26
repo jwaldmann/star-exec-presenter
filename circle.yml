@@ -1,7 +1,26 @@
+## Customize the test machine
+machine:
+  pre:
+    # create 
+    echo "Login \" \" \" \"" > ~/.star_exec
+  ghc:
+    version: 7.10.2
+
+## Customize dependencies
 dependencies:
+  pre:
+    cabal --version
+    ghc --version
   override:
     - make install
 
-machine:
-  ghc:
-    version: 7.10.1
+## Customize database setup
+database:
+  override:
+    sudo -u postgres createuser yesod
+    sudo -u postgres createdb yesod
+
+## Customize test commands
+test:
+  override:
+    cabal test
