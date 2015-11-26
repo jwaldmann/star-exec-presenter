@@ -1,6 +1,6 @@
 A Web Application for Displaying Results of the Termination Competition
 -----------------------
-[![Circle CI](https://circleci.com/gh/rm--/star-exec-presenter/tree/fca-project.svg?style=svg)](https://circleci.com/gh/rm--/star-exec-presenter/tree/fca-project)
+[![Circle CI](https://circleci.com/gh/rm--/star-exec-presenter.svg?style=svg)](https://circleci.com/gh/rm--/star-exec-presenter)
 
 The Intl. Termination Competition 2014 <http://termination-portal.org/wiki/Termination_Competition_2014> will be run on <http://www.starexec.org> . 
 
