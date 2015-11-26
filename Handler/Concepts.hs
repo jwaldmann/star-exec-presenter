@@ -11,7 +11,11 @@ import ConceptAnalysis.FCAPreparation
 import ConceptAnalysis.DotGraph (dotted_graph)
 -- import System.Process (readProcess)
 -- import Control.Monad.IO.Class (liftIO)
-
+-- import Handler.Image (getImageR)
+import System.Process (readProcess)
+import Control.Monad.IO.Class (liftIO)
+import ConceptAnalysis.DotGraph (dotted_graph)
+-- import Yesod.Core as YC
 
 -- route to show concepts of given JobID
 getConceptsR :: JobID -> Handler Html
@@ -21,11 +25,7 @@ getConceptsR jid = do
   let context = contextFromList contextData
   let concepts' = concepts context
 
-  -- jobResults <- getPersistJobResults 7239
-  -- let contextData = collectData $ getStarExecResults jobResults
-  -- let context = contextFromList contextData
-  -- let concepts' = concepts context
-  -- let svg = getImage
+  -- let svg = getImageR jid
   defaultLayout $ do
     setTitle "concepts"
     $(widgetFile "concepts")

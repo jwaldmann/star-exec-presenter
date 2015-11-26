@@ -20,8 +20,9 @@
 
 
 
-<object type="image/svg+xml" data="@{ImageR}">Your browser does not support SVG</object>
+<object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
 <!--> <img src="@{ImageR}"> <!-->
+
 
 
 <h1>Concepts
