@@ -8,14 +8,6 @@ import Presenter.PersistHelper
 import Presenter.Model.Entities()
 import ConceptAnalysis.FCA
 import ConceptAnalysis.FCAPreparation
-import ConceptAnalysis.DotGraph (dotted_graph)
--- import System.Process (readProcess)
--- import Control.Monad.IO.Class (liftIO)
--- import Handler.Image (getImageR)
-import System.Process (readProcess)
-import Control.Monad.IO.Class (liftIO)
-import ConceptAnalysis.DotGraph (dotted_graph)
--- import Yesod.Core as YC
 
 -- route to show concepts of given JobID
 getConceptsR :: JobID -> Handler Html
@@ -24,17 +16,6 @@ getConceptsR jid = do
   let contextData = collectData $ getStarExecResults jobResults
   let context = contextFromList contextData
   let concepts' = concepts context
-
-  -- let svg = getImageR jid
   defaultLayout $ do
     setTitle "concepts"
     $(widgetFile "concepts")
-
--- getImage :: MonadHandler m => m TypedContent
--- getImage = do
---   -- jobResults <- getPersistJobResults 7239
---   -- let contextData = collectData $ getStarExecResults jobResults
---   -- let context = contextFromList contextData
---   -- let concepts' = concepts context
---   svg_content <- liftIO $ readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] dotted_graph
---   sendResponse $ toTypedContent (typeSvg, toContent svg_content)
