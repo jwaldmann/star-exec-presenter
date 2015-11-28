@@ -2,7 +2,6 @@ module Handler.CompetitionText where
 
 import Import
 import Yesod.Auth
-import Data.Maybe
 import qualified Data.Text as T
 import Presenter.Output
 import Data.String
@@ -18,7 +17,7 @@ inputForm mc =
         }
       compField = checkMMap (validateRead . unTextarea)
                             (Textarea . T.pack . show . output) textareaField
-      utcField = checkMMap (validateRead) (T.pack . show) textField            
+      utcField = checkMMap (validateRead) (T.pack . show) textField
   in renderTable $ CompetitionInfo
        <$> areq compField (fs "competition") ( competitionInfoCompetition <$> mc )
        <*> areq utcField "date" ( competitionInfoDate <$> mc)
@@ -36,7 +35,7 @@ getCompetitionTextR compId = do
   defaultLayout [whamlet|
       <h1>Update CompetitionInfo #{show compId}
       <form method=post action=@{CompetitionTextR compId} entype=#{enctype}>
-         <table> 
+         <table>
            ^{widget}
          <p>
            <button>Submit

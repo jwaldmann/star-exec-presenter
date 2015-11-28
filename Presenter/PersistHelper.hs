@@ -7,7 +7,6 @@ import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import Data.Text.Lazy.Encoding
 import qualified Data.Text.Lazy as TL
-import qualified Data.Text as T
 import Codec.Compression.GZip
 import Data.Time.Clock
 import qualified Data.List as L
@@ -16,7 +15,6 @@ import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Monad.Catch (bracket_)
 import Control.Exception (throw)
 import Control.Monad ((>=>))
-import Control.Monad.Logger
 
 -- ###### persist getter ######
 
@@ -194,7 +192,7 @@ compressBS = BSL.toStrict . compress . BSL.fromStrict
 
 runDB_writelocked :: YesodDB App b -> Handler b
 runDB_writelocked query = do
-  lock <- dbSem <$> getYesod 
+  lock <- dbSem <$> getYesod
   bracket_
     ( lift $ Lock.acquireWrite lock )
     ( lift $ (Lock.releaseWrite >=> either throw return) lock)
@@ -202,9 +200,8 @@ runDB_writelocked query = do
 
 runDB_readlocked :: YesodDB App b -> Handler b
 runDB_readlocked query = do
-  lock <- dbSem <$> getYesod 
+  lock <- dbSem <$> getYesod
   bracket_
     ( lift $ Lock.acquireRead lock )
     ( lift $ (Lock.releaseRead >=> either throw return) lock)
     $ Import.runDB query
-

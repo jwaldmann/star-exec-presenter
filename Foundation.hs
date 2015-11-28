@@ -4,14 +4,13 @@ import Prelude
 import Yesod
 import Yesod.Static
 import Yesod.Auth
-import Yesod.Auth.BrowserId
 import Yesod.Default.Config
 import Yesod.Default.Util (addStaticContentExternal)
 import Network.HTTP.Client.Conduit (Manager, HasHttpManager (getHttpManager))
 import qualified Settings
 import Settings.Development (development)
 import qualified Database.Persist
-import Database.Persist.Sql (SqlPersistT, SqlBackend)
+import Database.Persist.Sql (SqlBackend)
 import Settings.StaticFiles
 import Settings (widgetFile, Extra (..))
 import Presenter.Model
@@ -34,7 +33,6 @@ import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
-import Control.Concurrent.MVar
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -104,7 +102,7 @@ instance Yesod App where
                 , js_bootstrap_js
                 ])
             $(widgetFile "default-layout")
-        giveUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
+        withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
     -- This is done to provide an optimization for serving static files from
     -- a separate domain. Please see the staticRoot setting in Settings.hs
@@ -123,7 +121,7 @@ instance Yesod App where
     -- requires Authorization
     isAuthorized (ControlR _) _ = isAdmin
     isAuthorized ListHiddenCompetitionsR _ = isAdmin
-    
+
     -- Default to Authorized for now.
     isAuthorized _ _ = return Authorized
 

@@ -1,8 +1,6 @@
-{-# language DeriveGeneric #-}
 {-# language OverloadedStrings #-}
 {-# language DisambiguateRecordFields #-}
 {-# language FlexibleInstances #-}
-{-# language StandaloneDeriving #-}
 {-# language LambdaCase #-}
 
 module Presenter.Registration.Data
@@ -13,33 +11,21 @@ module Presenter.Registration.Data
 , newskel
 , findspaces
 )
-       
+
 where
 
 import Presenter.StarExec.Commands (getDefaultSpaceXML)
 import Presenter.Model.StarExec ( Space (spName,children,spId,solvers), SolverInSpace(..) )
-  
-import Presenter.Model ( Name, Year (..) )
+
+import Presenter.Model ( Name)
 import Presenter.Registration.Code
 
-import qualified Data.Text as T
 import qualified Data.Set as S
 import qualified Data.Map.Strict as M
 
-import Prelude 
+import Prelude
 
-import GHC.Generics
-
-import Text.PrettyPrint.Leijen as P hiding ((<$>), fill) 
-import Data.String
-import Data.List ( intersperse )
-import Text.Parsec 
-import Text.Parsec.String
-import Text.Parsec.Token as T
-import Text.Parsec.Language (haskell)
-import Control.Applicative ( (<$> ))
 import Control.Monad ( foldM, forM_ )
-import Data.Maybe ( isJust )
 
 -- | we need this when uploading a fresh TPDB version on starexec:
 -- the skeleton contains old space Ids, we want to replace them with the new ones.
@@ -54,7 +40,8 @@ newskel skel old new = do
   let translate (Hierarchy i) = Hierarchy $ (nmap M.! ) $  (omap M.!) $ i
       nskel = fmap ( \ ci -> ci { benchmarks = map translate $ benchmarks ci } ) skel
   print nskel
-  
+
+tops :: Space -> [(Int,Name)]
 tops sp = do
   s <- children sp
   return (spId s, spName s)
@@ -82,10 +69,10 @@ subspaces sp = sp : ( children sp >>= subspaces )
 
 {-
 
-identify year name = 
+identify year name =
   text ("tc_" ++ show year ++ "_" ++ T.unpack name)
-  
-code_part year name = 
+
+code_part year name =
   identify year name <+> "=" <+> output (extract year name)
 
 code year =
@@ -97,7 +84,7 @@ code year =
         name <- names
         return $ vcat [ "--" , code_part year name ]
 
-bare :: Year -> Competition [Participant]           
+bare :: Year -> Competition [Participant]
 bare year = fmap (const []) $ the_competition year
 
 skeleton year =
@@ -112,8 +99,8 @@ collect base cs =
   let computation = do
         let start = fmap (const[]) base
             insertC c d = do [e] <- insert [c] [d]; return e
-        c <- foldM insertC start cs 
-        fill base c 
+        c <- foldM insertC start cs
+        fill base c
   in  case computation of
     Right c -> c
     Left err -> error err
@@ -125,11 +112,11 @@ experiment2015 = Competition "Experiments for 2015"
    [ MetaCategory "Complexity Analysis of Term Rewriting"
      [ standard "Derivational Complexity - Full Rewriting"  [ Hierarchy 56613 ]
            [ -- Participant "matchbox-complex-boolector" ( Just (0,  2536, 17921 ))
-           -- , Participant "matchbox-complex-satchmo" ( Just (0,  2536, 17912 ))             
-             Participant "matchbox-complex-satchmo-repaired" ( Just (0,  2649, 19511 ))             
-           --  Participant "matchbox-nocon-complex-boolector" ( Just (0,  2536, 17918 )) 
+           -- , Participant "matchbox-complex-satchmo" ( Just (0,  2536, 17912 ))
+             Participant "matchbox-complex-satchmo-repaired" ( Just (0,  2649, 19511 ))
+           --  Participant "matchbox-nocon-complex-boolector" ( Just (0,  2536, 17918 ))
            -- , Participant "matchbox-nocon-complex-satchmo" ( Just (0,  2536, 17919 ))
-           , Participant "matchbox-nocon-complex-satchmo-repaired" ( Just (0,  2649, 19518 )) 
+           , Participant "matchbox-nocon-complex-satchmo-repaired" ( Just (0,  2649, 19518 ))
            ]
      ]
    , MetaCategory "Termination of Term Rewriting (and Transition Systems)"
@@ -140,7 +127,7 @@ experiment2015 = Competition "Experiments for 2015"
        ]
    ]
 
-maparts_std = 
+maparts_std =
   [ -- Participant "matchbox-dp-boolector" ( Just (0,  2536, 17916 ))
   -- , Participant "matchbox-dp-satchmo" ( Just (0,  2536, 17913 ))
     Participant "matchbox-dp-satchmo-repaired" ( Just (0,  2649, 19512 ))
@@ -149,7 +136,7 @@ maparts_std =
   , Participant "matchbox-dp-ur-satchmo-repaired" ( Just (0,  2649, 19519 ))
   ]
 
-maparts_cert = 
+maparts_cert =
   [ -- Participant "matchbox-nocon-dp-boolector" ( Just (0,  2536, 17910 ))
   -- , Participant "matchbox-nocon-dp-satchmo" ( Just (0,  2536, 17914 ))
     Participant "matchbox-nocon-dp-satchmo-repaired" ( Just (0,  2649, 19513 ))
@@ -160,11 +147,11 @@ maparts_cert =
 
 
 standard :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
-standard n bs ps = Category {  categoryName = n , contents = 
+standard n bs ps = Category {  categoryName = n , contents =
     Catinfo { postproc = 163 , benchmarks = bs , participants = ps } }
 
 certified :: Name -> [Benchmark_Source] -> [Participant] -> Category Catinfo
-certified n bs ps = Category { categoryName = n, contents = 
+certified n bs ps = Category { categoryName = n, contents =
     Catinfo { postproc = 172 , benchmarks = bs , participants = ps } }
 
 trss :: [Benchmark_Source]
@@ -248,7 +235,7 @@ tc2014 = Competition "Termination Competition 2014"
       , certified "TRS Outermost certified"  [ Hierarchy 56842  ]
            [ Participant "AProVE" ( Just (0,  1681, 2652  ) )
            ]
-      , standard "Higher-Order rewriting (union beta)"  
+      , standard "Higher-Order rewriting (union beta)"
            [ Hierarchy 56698 ]
            [ Participant "Wanda" ( Just (0, 1542, 2390))
            , Participant "THOR" ( Just (0, 1800, 2862))
@@ -284,7 +271,7 @@ tc2014 = Competition "Termination Competition 2014"
            [ Participant "CaT" ( Just (0, 1343, 1953))
            ]
      , certified "Runtime Complexity - Innermost Rewriting certified"  [ Hierarchy 56775 ]
-           [ 
+           [
            ]
      ]
    , MetaCategory "Termination of Programming Languages"
@@ -306,5 +293,3 @@ tc2014 = Competition "Termination Competition 2014"
            ]
      ]
    ]
-
-

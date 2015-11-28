@@ -1,7 +1,6 @@
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE FlexibleInstances #-}
 
-module Presenter.StarExec.Concurrent 
+module Presenter.StarExec.Concurrent
   ( runQuerySolverInfo
   , runQueryBenchmarkInfo
   , runQueryJobPair
@@ -14,8 +13,6 @@ module Presenter.StarExec.Concurrent
 import Import
 import Control.Exception.Base
 import Presenter.PersistHelper
-import Presenter.Processing
-import Presenter.StarExec.Connection
 import Presenter.StarExec.Commands
 import Data.Time.Clock
 
@@ -113,7 +110,7 @@ runQueryJob _jobId = do
   persistJobResults <- getPersistStarExecJobResults _jobId
   runQueryBase q $ \mQuery ->
     case mQuery of
-      Just eq -> 
+      Just eq ->
         return $ pendingQuery (entityKey eq) (mPersistJobInfo, persistJobResults)
       Nothing -> do
         mKey <- insertQuery q

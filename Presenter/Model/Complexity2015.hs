@@ -9,11 +9,10 @@ module Presenter.Model.Complexity2015 where
 
 import Presenter.Short
 import qualified Data.Text as T
-import Prelude 
+import Prelude
 
 import Text.ParserCombinators.ReadP
 import Data.Char ( isDigit )
-import Control.Applicative 
 
 -- | NOTE: Ord instance is required for keys in maps (?)
 -- but otherwise useless
@@ -23,15 +22,21 @@ data Bounds = Bounds { lower :: Function
      deriving (Eq, Ord)
 
 -- | test all branches of the original grammar:
+b1 :: Bounds
 b1 = Bounds { lower = Infinite, upper = Infinite } -- MAYBE
+b2 :: Bounds
 b2 = Bounds { lower = Finite, upper = Infinite } -- NON_POLY lower bound
+b3 :: Bounds
 b3 = Bounds { lower = Poly $ Just 2, upper = Finite } -- termination is known
+b4 :: Bounds
 b4 = Bounds { lower = Poly $ Just 2, upper = Infinite } -- termination is not known
-b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 } 
-b6 = Bounds { lower = Finite , upper = Poly $ Nothing }
+b5 :: Bounds
+b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 }
+b6 :: Bounds
+b6 = Bounds { lower = Finite , upper = Poly Nothing }
 
-instance Show Bounds where 
-    showsPrec p b = 
+instance Show Bounds where
+    showsPrec p b =
         let parens c = ("(" ++) . c . (")" ++)
             ( par, prefix, interesting) = case (lower b, upper b) of
                ( Infinite , Infinite ) -> (False, "MAYBE", False)
@@ -39,36 +44,38 @@ instance Show Bounds where
             maybe_parens c = if par && p > 0 then parens c else c
             out = prefix ++ if interesting
                       then "(" ++ showLower (lower b) ++ "," ++ showUpper (upper b) ++")"
-                      else ""   
+                      else ""
         in  maybe_parens (out ++)
 
 instance Short Bounds where
   short b =
     let sslower f = case f of
-          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d 
+          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
           Finite -> "?" ; Infinite -> "-"
         ssupper f = case f of
-          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d 
+          Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
           Finite -> "-" ; Infinite -> "?"
     in  T.pack $ sslower (lower b) ++ "/" ++ ssupper (upper b)
 
 instance Read Bounds where
     readsPrec _ = readP_to_S $ skipSpaces *> readP_Bounds
 
-
+readP_Bounds :: ReadP Bounds
 readP_Bounds = parens readP_Bounds_bare +++ readP_Bounds_bare
 
 -- | NOTE: the parser assumes the trivial lower bound (Finite)
 -- and the trivial upper bound (Infinite) and refines this
 -- if it reads a statement other than "?" for the respective bound.
-readP_Bounds_bare = 
+readP_Bounds_bare :: ReadP Bounds
+readP_Bounds_bare =
         do { token "WORST_CASE" ; pair Finite Infinite }
     +++ do { token "MAYBE" ; pair Finite Infinite }
 
-pair lo up = 
-    parens ( do l <- quest lo readP_FunctionL 
-                token "," 
-                u <- quest up readP_FunctionU 
+pair :: Function -> Function -> ReadP Bounds
+pair lo up =
+    parens ( do l <- quest lo readP_FunctionL
+                token ","
+                u <- quest up readP_FunctionU
                 return $ Bounds { lower = l, upper = u } )
     <++ return ( Bounds { lower = lo, upper = up } )
 
@@ -119,27 +126,34 @@ compare_for_upper_bounds f g = case (f,g) of
   ( Poly (Just _), Poly Nothing ) -> LT
   ( Poly (Just p), Poly (Just q)) -> compare p q
 
-
+isPoly :: Function -> Bool
 isPoly f = case f of Poly {} -> True ; _ -> False
 
+readP_FunctionL :: ReadP Function
 readP_FunctionL = do { token "NON_POLY" ; return $ Finite }
     +++ do { token "Omega" ; parens $ ( Poly . Just ) <$> readP_degreeL }
 
+readP_degreeL :: ReadP Int
 readP_degreeL =
   do { token "n" ; token "^"
      ; ds <- many1 $ satisfy isDigit ; skipSpaces
-     ; return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds 
+     ; return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds
      }
 
+readP_FunctionU :: ReadP Function
 readP_FunctionU = do { token "POLY" ; return $ Poly $ Nothing }
     +++ do { token "O" ; parens $ ( Poly . Just ) <$> readP_degreeU }
 
+readP_degreeU :: ReadP Int
 readP_degreeU = do { token "1" ; return 0 }
     +++ readP_degreeL
 
-token s = do string s ; skipSpaces
+token :: String -> ReadP ()
+token s = do
+  _ <- string s
+  skipSpaces
 
-parens p = between (token "(") (token ")") p
+parens = between (token "(") (token ")")
 
 showLower :: Function -> String
 showLower f = case f of

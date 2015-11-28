@@ -6,7 +6,6 @@ module Presenter.Model.Complexity where
 import Prelude
 import Text.ParserCombinators.ReadP
 import Data.Char ( isDigit )
-import Control.Applicative 
 
 data Bounds = Bounds
   { lower :: Function
@@ -14,15 +13,21 @@ data Bounds = Bounds
   } deriving ( Eq )
 
 -- | test all branches of the original grammar:
+b1 :: Bounds
 b1 = Bounds { lower = Infinite, upper = Infinite } -- NO
+b2 :: Bounds
 b2 = Bounds { lower = Finite, upper = Infinite } -- an actual MAYBE
+b3 :: Bounds
 b3 = Bounds { lower = Poly $ Just 2, upper = Finite } -- termination is known
+b4 :: Bounds
 b4 = Bounds { lower = Poly $ Just 2, upper = Infinite } -- termination is not known
-b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 } 
-b6 = Bounds { lower = Finite , upper = Poly $ Nothing }
+b5 :: Bounds
+b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 }
+b6 :: Bounds
+b6 = Bounds { lower = Finite , upper = Poly Nothing }
 
-instance Show Bounds where 
-  show b = 
+instance Show Bounds where
+  show b =
     let ( prefix, interesting) = case (lower b, upper b) of
           ( Infinite , _ ) -> ("NO", False)
           ( l, u ) -> case u of
@@ -39,10 +44,10 @@ readP_Bounds = do { token "YES" ; pair Finite Finite }
     +++ do { token "NO" ; pair Infinite Infinite }
 
 pair :: Function -> Function -> ReadP Bounds
-pair lo up = 
-    parens ( do l <- quest lo readP_Function 
-                token "," 
-                u <- quest up readP_Function 
+pair lo up =
+    parens ( do l <- quest lo readP_Function
+                token ","
+                u <- quest up readP_Function
                 return $ Bounds { lower = l, upper = u } )
     <++ return ( Bounds { lower = lo, upper = up } )
 
@@ -50,9 +55,9 @@ quest :: a -> ReadP a -> ReadP a
 quest q p = do { token "?" ; return q } +++ p
 
 data Function =
-  Poly { degree :: Maybe Int } 
-  | Finite 
-  | Infinite 
+  Poly { degree :: Maybe Int }
+  | Finite
+  | Infinite
   deriving ( Eq )
 
 isPoly :: Function -> Bool
@@ -66,14 +71,16 @@ readP_degree :: ReadP Int
 readP_degree = do { token "1" ; return 0 }
     +++ do { token "n" ; token "^"
            ; ds <- many1 $ satisfy isDigit ; skipSpaces
-           ; return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds 
+           ; return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds
            }
 
 token :: String -> ReadP ()
-token s = do string s ; skipSpaces
+token s = do
+  _ <- string s
+  skipSpaces
 
 parens :: ReadP a -> ReadP a
-parens p = between (token "(") (token ")") p
+parens = between (token "(") (token ")")
 
 instance Read Function where
     readsPrec _ = readP_to_S readP_Function

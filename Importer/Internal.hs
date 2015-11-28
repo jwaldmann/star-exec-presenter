@@ -2,7 +2,6 @@ module Importer.Internal where
 
 import Prelude
 import Data.ByteString.Lazy
-import Data.Maybe
 
 -- datatypes and type synonyms for LRI data
 

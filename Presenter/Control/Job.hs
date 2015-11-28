@@ -14,7 +14,6 @@ import System.Random
 
 import qualified Presenter.Registration as R
 import Presenter.StarExec.Commands
-import Presenter.StarExec.Connection
 
 data Selection = SelectionCompetition
                | SelectionDemonstration
@@ -28,7 +27,7 @@ data JobControl = JobControl
    , selection :: Selection
    , queue :: Int
    , space :: Int
-   , wallclock :: Int     
+   , wallclock :: Int
    , family_lower_bound :: Int
    , family_upper_bound :: Int
    , family_factor :: Double
@@ -59,8 +58,8 @@ getSpaceMap fp = do
   return $ M.fromList $ subspaces sp
 
 timed :: Show a => a -> Competition -> Competition
-timed now (Competition meta mcs) = 
-    let meta' = meta { getMetaDescription 
+timed now (Competition meta mcs) =
+    let meta' = meta { getMetaDescription
                  = T.unwords [ getMetaDescription meta, "(", T.pack $ show now, ")"] }
     in  Competition meta' mcs
 
@@ -77,14 +76,14 @@ pushmetacat :: JobControl -> R.MetaCategory R.Catinfo -> Handler (R.MetaCategory
 pushmetacat config mc = do
   sm <- getSpaceMap default_space
   now <- liftIO getCurrentTime
-  jobs <- forM (R.categories mc) $ \ cat ->  do 
+  jobs <- forM (R.categories mc) $ \ cat ->  do
           mkJobs sm config cat now
   js <- pushJobXML (jobCreationMethod config)  (space config) $ concat jobs
   let m = M.fromList $ do
           SEJob { description = d, jobids = Just ids } <- js
-          return ( d, ids ) 
+          return ( d, ids )
   return $ mc {
-              R.categories = for (R.categories mc) $ \ cat -> 
+              R.categories = for (R.categories mc) $ \ cat ->
                 cat {
                   R.contents = (R.contents cat, M.findWithDefault [] (repair $ R.categoryName cat) m )
                 }
@@ -95,16 +94,16 @@ pushcomp :: JobControl -> R.Competition R.Catinfo
 pushcomp config c = do
     sm <- getSpaceMap default_space
     now <- liftIO getCurrentTime
-    jobs <- forM ( R.metacategories c >>= R.categories ) $ \ cat -> do 
+    jobs <- forM ( R.metacategories c >>= R.categories ) $ \ cat -> do
             mkJobs sm config cat now
     js <- pushJobXML  (jobCreationMethod config) (space config) $ concat jobs
     let m = M.fromList $ do
             SEJob { description = d, jobids = Just ids } <- js
-            return ( d, ids ) 
+            return ( d, ids )
     return $ c {
-                R.metacategories = for (R.metacategories c) $ \ mc -> 
+                R.metacategories = for (R.metacategories c) $ \ mc ->
                   mc {
-                    R.categories = for (R.categories mc) $ \ cat -> 
+                    R.categories = for (R.categories mc) $ \ cat ->
                       cat {
                         R.contents = (R.contents cat, M.findWithDefault [] (repair $ R.categoryName cat) m )
                       }
@@ -118,14 +117,14 @@ compact :: Text -> Text
 compact = T.unwords . map (T.take 5) . T.words
 
 getSpaceXMLquick :: M.Map Int Space -> Int -> Handler (Maybe Space)
-getSpaceXMLquick sm sId = 
+getSpaceXMLquick sm sId =
     case M.lookup sId sm of
         Just s -> return $ Just s
         Nothing -> do
             getSpaceXML sId
 
 convertC :: R.Category (R.Catinfo, [Int]) -> Category
-convertC c = 
+convertC c =
   let (catInfo, jobs) = R.contents c
       name = R.categoryName c
       postProcId = R.postproc catInfo
@@ -151,13 +150,13 @@ mkJobs :: SpaceMap
        -> UTCTime
        -> Handler [ StarExecJob ]
 mkJobs sm config cat now = do
-    let ci = R.contents cat 
+    let ci = R.contents cat
         (+>) = T.append
     bss <- select_benchmarks sm config $ R.benchmarks ci
 
-    -- FIXME: too many separate jobs give problems 
+    -- FIXME: too many separate jobs give problems
 
-    return $ return $ SEJob 
+    return $ return $ SEJob
          { postproc_id = R.postproc ci
          , description = repair $ R.categoryName cat
          , job_name = compact $ repair $ R.categoryName cat +> "@" +> T.pack (show $ hash (bss, show now) )
@@ -167,8 +166,8 @@ mkJobs sm config cat now = do
          , cpu_timeout = num_cores * wallclock config
          , start_paused = startPaused config
          , jobpairs = case jobCreationMethod config of
-            PushJobXML -> do 
-               (jobspace, bs) <- bss  
+            PushJobXML -> do
+               (jobspace, bs) <- bss
                b <- sort bs
                R.Participant { R.solver_config = Just (_,_,c) } <- R.participants ci
                return $ SEJobPair
@@ -184,7 +183,7 @@ mkJobs sm config cat now = do
                        R.Participant { R.solver_config = Just (_,_,co)} <- R.participants ci
                        return co
                   }
-              
+
          , jobids = Nothing
          }
 
@@ -206,15 +205,15 @@ select_benchmarks sm config bs = do
             return $ case sp of
                 Nothing -> []
                 Just s -> families s
-            
+
     let given = concat bmss
     result <- forM given $ select_from_family config
 
     liftIO $ putStrLn $ unlines
        [ "benchmark sources: " ++ show bs
-       , "familiy sizes (given): " 
+       , "familiy sizes (given): "
                   ++ show (map (\(p,bs') -> (p,length bs')) given)
-       , "familiy sizes (selected): " 
+       , "familiy sizes (selected): "
                   ++ show (map (\(p,bs') -> (p,length bs')) result)
        ]
 
@@ -223,13 +222,13 @@ select_benchmarks sm config bs = do
 select_from_family :: JobControl -> (Name, [Int]) -> Handler (Name, [Int])
 select_from_family config (jobspace, bms)= do
     let given = length bms
-        part = round 
+        part = round
              $ family_factor config * fromIntegral given
-        selected = 
-            if part < family_lower_bound config 
-            then family_lower_bound config 
-            else if part > family_upper_bound config 
-            then family_upper_bound config 
+        selected =
+            if part < family_lower_bound config
+            then family_lower_bound config
+            else if part > family_upper_bound config
+            then family_upper_bound config
             else part
     bms' <- liftIO $ permute bms
     return ( jobspace, take selected  bms' )

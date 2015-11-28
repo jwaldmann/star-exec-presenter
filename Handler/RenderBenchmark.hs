@@ -2,7 +2,6 @@ module Handler.RenderBenchmark where
 
 import Import
 import Data.Text.Encoding
-import Presenter.StarExec.JobData
 import Presenter.StarExec.Commands (getBenchmark)
 import qualified Data.ByteString.Lazy as BSL
 import Handler.DisplayProof (getFile)
@@ -16,4 +15,3 @@ getRenderBenchmarkR (StarExecBenchmarkID bmId) = do
 getRenderXmlR :: Text -> Handler TypedContent
 getRenderXmlR f = do
   getFile f
-  

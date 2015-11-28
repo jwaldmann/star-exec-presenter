@@ -23,8 +23,6 @@ import Data.Maybe
 import qualified Data.Map.Strict as M
 import qualified Data.List as L
 import qualified Data.Text as T
-import Control.Monad ( forM_ )
-import Control.Monad.Logger
 
 toTuples :: (a, [b]) -> [(a,b)]
 toTuples (i, solvers) = map ((,) i) solvers
@@ -39,7 +37,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
   dois <- doiService <$> getYesod
   
   qJobs <- queryManyJobs ids
-  
+
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       -- complexity = all isComplexity jobInfos
       complexity = (sc == Complexity)
@@ -47,13 +45,13 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
 
       jobResults :: [JobResult]
       jobResults = concat $ jobs
-  
+
       stat = mconcat $ map jobStat jobResults
 
 
       benchmarks' = L.sortBy compareBenchmarks $
                       getInfo extractBenchmark $ jobResults
-                      
+
       groupedSolvers = map (getInfo extractSolver) jobs
       jobSolvers = concat $ map toTuples $ zip ids groupedSolvers
       -- FIXME: this doubles work (we already have the results)
@@ -76,7 +74,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
         (bm, rowmap) <- M.toList resultmap
         let row = do
               s <- jobSolvers
-              return $ M.lookup s rowmap 
+              return $ M.lookup s rowmap
         return (bm, row)
       scores = for jobs $  \ results ->
         calculateScores sc results
@@ -100,21 +98,3 @@ getShowManyJobResultsR sc q@(Query ts) jids @ (JobIds ids) = do
             <pre>#{show q}
         |]
     display sc jids [] ts tab
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

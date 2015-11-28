@@ -2,7 +2,6 @@
 {-# language OverloadedStrings #-}
 {-# language DisambiguateRecordFields #-}
 {-# language FlexibleInstances #-}
-{-# language StandaloneDeriving #-}
 
 module Presenter.Registration.Code
 
@@ -24,55 +23,52 @@ module Presenter.Registration.Code
 , parts, filterP, prune, insert, fill
 
 )
-       
+
 where
 
-import Presenter.Model ( Name, Year (..) )
+import Presenter.Model ( Name)
 
 import qualified Data.Text as T
 import qualified Data.Set as S
 
-import Prelude 
+import Prelude
 
 import GHC.Generics
 
-import Presenter.Model.RouteTypes 
+import Presenter.Model.RouteTypes
 import Presenter.Output
 
-import Text.PrettyPrint.Leijen as P hiding ((<$>), fill) 
-import Data.String
+import Text.PrettyPrint.Leijen as P hiding ((<$>), fill)
 import Data.List ( intersperse )
-import Text.Parsec 
+import Text.Parsec
 import Text.Parsec.String
 import Text.Parsec.Token as T
 import Text.Parsec.Language (haskell)
-import Control.Applicative ( (<$> ))
 import Control.Monad ( zipWithM )
-import Data.Maybe ( isJust )
 
 -- * data types
 
-data Competition a = 
+data Competition a =
      Competition { competitionName :: Name
-                 , metacategories :: [ MetaCategory a ] 
+                 , metacategories :: [ MetaCategory a ]
                  }
     deriving ( Eq, Generic )
 
-instance Functor Competition where 
+instance Functor Competition where
     fmap f c = c { metacategories = map (fmap f) $ metacategories c }
 
-data MetaCategory a = 
+data MetaCategory a =
      MetaCategory { metaCategoryName :: Name
-                  , categories :: [ Category a ] 
+                  , categories :: [ Category a ]
                   }
     deriving ( Eq, Generic )
 
 all_categories :: MetaCategory Catinfo -> [Category Catinfo]
-all_categories mc = 
+all_categories mc =
     filter ( \ c -> length (real_participants c) >= 1 ) $  categories mc
-    
+
 full_categories :: MetaCategory Catinfo -> [Category Catinfo]
-full_categories mc = 
+full_categories mc =
     filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
 
 demonstration_categories :: MetaCategory Catinfo -> [Category Catinfo]
@@ -82,28 +78,30 @@ demonstration_categories mc =
 real_participants :: Category Catinfo -> [Participant]
 real_participants c
   = filter ( \ p -> case solver_config p of
-                Just (sp,so,co) -> not $ hoco so
+                Just (_,so,_) -> not $ hoco so
                 Nothing -> False )
   $ participants
   $ contents c
 
 -- HACK, FIXME (must be configurable)
+hors_concours :: SolverID -> Bool
 hors_concours (StarExecSolverID id) = hoco id
+
 hoco id = id == 3797
 
-instance Functor MetaCategory where 
+instance Functor MetaCategory where
     fmap f c = c { categories = map (fmap f) $ categories c }
 
-data Category a = 
-     Category { categoryName :: Name 
-              , contents :: a 
+data Category a =
+     Category { categoryName :: Name
+              , contents :: a
               }
     deriving ( Eq, Generic )
 
-instance Functor Category where 
+instance Functor Category where
     fmap f c = c { contents = f $ contents c }
 
-data Catinfo = 
+data Catinfo =
      Catinfo { postproc :: Int
              , benchmarks :: [ Benchmark_Source ]
              , participants :: [ Participant ]
@@ -118,7 +116,7 @@ data Benchmark_Source
 
 type Registration = Competition Catinfo
 
-data Participant = 
+data Participant =
      Participant { participantName :: Name
                  , solver_config :: Maybe (Int,Int,Int) -- ^ space,solver,config
                  }
@@ -170,7 +168,7 @@ instance Prune (Competition [a]) where
 -- (only inner nodes, leaves with empty participant lists)
 class Insert a where
   insert :: [a] -> [a] -> Either String [a]
-  
+
 instance Insert Participant where
   insert xs ys = do
     let int = S.intersection
@@ -180,7 +178,7 @@ instance Insert Participant where
       then Left $ unlines
           [ unwords [ "insert", show xs, show ys ]
           , "forbidden because of overlaps:"
-          , show int 
+          , show int
           ]
       else return $ xs ++ ys
 
@@ -204,7 +202,7 @@ inst tag cons name cont =
 
 instance (Output a, Insert a) => Insert (Category [a]) where
   insert = inst "categories" Category categoryName contents
-  
+
 instance (Output a, Insert a) => Insert (MetaCategory [a]) where
   insert = inst "metacategories"
            MetaCategory metaCategoryName categories
@@ -239,7 +237,7 @@ instance Fill (Competition Catinfo) (Competition [Participant]) where
     assertEq (competitionName c) (competitionName d)
     o <- zipWithM fill (metacategories c) (metacategories d)
     return $ c { metacategories = o }
-    
+
 -- * I/O formatting
 
 class Input t where input :: Parser t
@@ -254,26 +252,26 @@ instance Input a => Input (Maybe a) where
     input = do reserved lexer "Nothing" ; return Nothing
         <|> do reserved lexer "Just" ; x <- input ; return $ Just x
 instance (Input a, Input b) => Input (a,b) where
-    input = T.parens lexer $ do x <- input ; T.comma lexer ; y <- input ; return (x,y)
+    input = T.parens lexer $ do x <- input ; _ <- T.comma lexer ; y <- input ; return (x,y)
 instance Input T.Text where
     input = T.pack <$> T.stringLiteral lexer
 instance Input Participant where
-    input = do 
+    input = do
         T.reserved lexer "Participant"
-        T.braces lexer $ undefined
+        T.braces lexer undefined
 
 instance Output a => Output (Competition a) where
-    output (Competition n mcs) = 
+    output (Competition n mcs) =
         ("Competition" <+> text (show n)) <#> output mcs
-instance Output a => Output (MetaCategory a) where 
-    output (MetaCategory n cs) = 
+instance Output a => Output (MetaCategory a) where
+    output (MetaCategory n cs) =
         ("MetaCategory" <+> text (show n)) <#> output cs
-instance Output a => Output (Category a) where 
-    output (Category n ps) = 
+instance Output a => Output (Category a) where
+    output (Category n ps) =
         ("Category" <+> text (show n)) <#> output ps
 instance Output Participant where
-    output p = 
-        "Participant" <+> P.braces ( hsep $ intersperse "," 
+    output p =
+        "Participant" <+> P.braces ( hsep $ intersperse ","
              [ "participantName" <+> equals <+> output (participantName p)
              , "solver_config" <+> equals <+> output (solver_config p)
              ] )

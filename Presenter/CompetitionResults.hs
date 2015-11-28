@@ -1,12 +1,12 @@
 -- | semantics specification:
 -- In each meta-category, a medal will be awarded to the highest-scoring solver.
--- For every meta-category, we consider the sum of the scores 
--- for each category within that meta-category: 
+-- For every meta-category, we consider the sum of the scores
+-- for each category within that meta-category:
 -- The score of a tool is determined by the number of other tools
--- which could be beaten in that category. 
+-- which could be beaten in that category.
 -- http://www.termination-portal.org/wiki/Termination_Competition_2014#Competition_Categories_and_Awards
 
-module Presenter.CompetitionResults 
+module Presenter.CompetitionResults
   ( getCompetitionResults
   , CompetitionResults(..)
   , MetaCategoryResult(..)
@@ -17,7 +17,6 @@ import Import
 import Presenter.StarExec.JobData
 import Presenter.Processing
 import Presenter.Statistics
-import Presenter.StarExec.Connection
 import Presenter.StarExec.Commands
 import Presenter.PersistHelper
 import qualified Data.List as L
@@ -53,8 +52,8 @@ getScores solver scoring results =
                 Nothing -> (s,0)
                 Just scr -> (s,scr)
 
---testGetRanking1 = 
---        getRanking [("foo", 30), ("bar", 20), ("what", 20), ("noh", 10)] 
+--testGetRanking1 =
+--        getRanking [("foo", 30), ("bar", 20), ("what", 20), ("noh", 10)]
 --    ==  [toRank (Just 1,"foo",30), toRank (Just 2,"bar",20), toRank (Nothing,"what",20), toRank (Just 4, "noh", 10)]
 --    where
 --      toRank (r,slv,scr) = SolverRankEntry r slv scr
@@ -62,7 +61,7 @@ getScores solver scoring results =
 -- | input is decreasing by score, output has same order of solvers
 getRanking  :: [(UniqueSolver, Score)] -> [SolverRankEntry]
 getRanking scores =
-  let indexedScores = zip [1..] scores 
+  let indexedScores = zip [1..] scores
       equals score (_,(_,scr)) = score == scr
       getRanking' :: (UniqueSolver, Score) -> SolverRankEntry
       getRanking' (solver, score) =
@@ -75,7 +74,7 @@ getRanking scores =
               }
   in map getRanking' scores
 
---testCalcScores1 = 
+--testCalcScores1 =
 --       calcScores [(Just 1,"foo",30),(Just 2,"bar",20),(Nothing,"what",20),(Just 4,"noh",10)]
 --    == [("foo",3),("bar",2),("what",2),("noh",0)]
 
@@ -165,11 +164,11 @@ getCategoriesResult_ procs infos results cat =
                   else Nothing
       cpuTotal = sum $ map toCpuTime jobResults
       wallTotal = sum $ map toWallclockTime jobResults
-      stat = Statistics { complete = complete 
+      stat = Statistics { complete = complete
                         , pairs = length jobResults
-                        , pairsCompleted = length 
+                        , pairsCompleted = length
                               $ filter ( ( == JobResultComplete) . getResultStatus ) jobResults
-                        , startTime = startTime, finishTime = endTime 
+                        , startTime = startTime, finishTime = endTime
                         , cpu = cpuTotal, wallclock = wallTotal
                         }
   in CategoryResult catName
@@ -197,7 +196,7 @@ getMetaResults metaCat = do
                   then maximum $ map categoryFinishTime catResults
                   else Nothing
       stat = mconcat $ map categoryStatistics catResults
-      
+
   return $ MetaCategoryResult metaName
                               catResults
                               ranking
@@ -310,7 +309,7 @@ getJobResults' con = mapM fetchResults
 getCompetitionResults :: Competition -> Handler CompetitionResults
 getCompetitionResults comp = do
   logWarnN $ T.pack $ "getCompetitionResults" <> show comp
-  
+
   let compMeta = getMetaData comp
       compName = getCompetitionName comp
       metaCats = getMetaCategories comp

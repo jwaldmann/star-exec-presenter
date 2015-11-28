@@ -11,7 +11,6 @@ import qualified Data.Map.Strict as M
 
 import Yesod.Auth
 import Yesod.Form.Bootstrap3
-import Data.Monoid
 import Data.Either
 import Data.Conduit
 import Data.Conduit.Binary
@@ -19,7 +18,6 @@ import Control.Monad.Trans.Resource
 import Control.Exception.Base
 import qualified Codec.Archive.Zip as Zip
 import qualified Codec.Compression.GZip as GZip
-import qualified Codec.Archive.Tar as Tar
 
 import qualified Data.Text as T
 
@@ -284,7 +282,7 @@ insertLRIResults solversMap benchmarksMap pairs = do
         (getResult <$> LRI.lrirCheckResult r)
         (LRI.lrirCheckCpuTime r)
         (LRI.lrirCheckWallclockTime r)
-    getResult LRI.LRIYES    = YES 
+    getResult LRI.LRIYES    = YES
     getResult LRI.LRINO     = NO
     getResult LRI.LRIERROR  = ERROR
     getResult LRI.LRIMAYBE  = MAYBE

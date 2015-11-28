@@ -6,7 +6,6 @@ import Presenter.Model.RouteTypes
 import Presenter.Output
 import Prelude (Show, Read, Eq, Ord, ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
-import Data.List (intersperse)
 import Control.Monad ((>=>))
 
 data Scoring =
@@ -41,7 +40,7 @@ instance Output Category where
              , "getCategoryScoring" <+> equals <#> output (getCategoryScoring c)
              , "getPostProcId" <+> equals <#> output (getPostProcId c)
              , "getJobIds" <+> equals <#> output (getJobIds c)
-             ] 
+             ]
 
 -- |  solver by rank in the categories
 data MetaCategory = MetaCategory
@@ -54,8 +53,8 @@ instance Output MetaCategory where
     output c = "MetaCategory" <#> dutch_record
              [ "getMetaCategoryName" <+> equals <#> output (getMetaCategoryName c)
              , "getCategories" <+> equals <#> output (getCategories c)
-             ] 
-             
+             ]
+
 data CompetitionMeta = CompetitionMeta
   { getMetaName :: Name
   , getMetaDescription :: Description
@@ -65,7 +64,7 @@ instance Output CompetitionMeta where
     output c = "CompetitionMeta" <#> dutch_record
              [ "getMetaName" <+> equals <#> output (getMetaName c)
              , "getMetaDescription" <+> equals <#> output (getMetaDescription c)
-             ] 
+             ]
 
 data Competition = Competition
   { getMetaData :: CompetitionMeta
@@ -84,7 +83,7 @@ instance Output Competition where
     output c = "Competition" <#> dutch_record
              [ "getMetaData" <+> equals <#> output (getMetaData c)
              , "getMetaCategories" <+> equals <#> output (getMetaCategories c)
-             ] 
+             ]
 
 instance PathPiece Competition where
   toPathPiece comp = T.pack $ show comp
@@ -97,7 +96,7 @@ instance PathPiece Scoring where
   fromPathPiece "complexity" = return Complexity
   fromPathPiece _ = Nothing
   toPathPiece s = T.toLower $ T.pack $ show s
-    
+
 class AllJobIDs c where allJobIDs :: c -> [JobID]
 
 instance AllJobIDs Category where allJobIDs = getJobIds

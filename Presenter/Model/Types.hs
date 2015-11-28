@@ -17,8 +17,11 @@ type PostProcId = Int
 
 data Login = Login Email Password deriving (Show, Read, Eq)
 
-user (Login u p) = u
-password (Login u p) = p
+user :: Login -> Email
+user (Login u _) = u
+
+password :: Login -> Password
+password (Login _ p) = p
 
 data SessionData = SessionData
   { cookieData :: CookieJar

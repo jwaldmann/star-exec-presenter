@@ -3,8 +3,6 @@ module Presenter.Model.RouteTypes where
 import Prelude
 import Yesod
 import qualified Data.Text as T
-import qualified Data.Text.Read as TR
-import Presenter.Internal.Stringish
 import Presenter.Model.Query
 import Presenter.Internal.Stringish
 
@@ -129,7 +127,7 @@ getUibkIds = (map getUibkId) . (filter isUibkID) . getIds
 
 {-
 -}
-newtype JobIds = JobIds 
+newtype JobIds = JobIds
   { getIds :: [JobID]
   }
   deriving (Show, Eq, Read)
@@ -262,4 +260,3 @@ instance PathPiece Query where
     _ -> Nothing
   toPathPiece NoQuery = "noquery"
   toPathPiece q = T.pack $ show q
-

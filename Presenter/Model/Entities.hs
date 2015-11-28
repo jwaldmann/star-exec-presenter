@@ -10,7 +10,6 @@ import Presenter.Model.StarExec
   , JobStatus(..))
 import Presenter.Model.Types (Seconds, Name)
 import Data.Maybe
-import Control.Applicative
 import Data.Time.Clock ( UTCTime )
 
 -- ###### TYPE-CLASSES ######
@@ -105,7 +104,7 @@ newtype Solvers = Solvers
 data Config =
   StarExecConfig StarExecConfigInfo
   deriving (Eq, Ord, Read, Show)
-           
+
 
 lriConfigName :: Name
 lriConfigName = "lri_config"

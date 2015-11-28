@@ -2,7 +2,6 @@ module Handler.ListProofs where
 
 import Import
 import Presenter.PersistHelper
-import Data.Maybe
 import Presenter.Internal.Stringish
 
 id2Text :: Pair -> Text

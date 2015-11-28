@@ -29,7 +29,6 @@ import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
-import qualified Network.HTTP.Client.MultipartFormData as MP
 import Presenter.StarExec.Urls
 import Presenter.PersistHelper
 import Presenter.StarExec.Connection
@@ -38,7 +37,6 @@ import Presenter.DOI
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.Csv as CSV
 import qualified Data.Vector as Vector
-import Text.HTML.DOM
 import Text.HTML.TagSoup
 import Text.XML.Cursor
 import Codec.Compression.GZip
@@ -51,15 +49,13 @@ import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
 import Data.Char (toLower)
-import Control.Monad ( guard, when, forM, forM_ )
+import Control.Monad ( guard, when, forM)
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
-import Data.List ( isSuffixOf, mapAccumL )
+import Data.List (mapAccumL )
 import Data.Maybe
 import Data.Char ( isAlphaNum )
 import Control.Monad.Logger
-import Prelude (init,tail)
-import Blaze.ByteString.Builder
 
 defaultDate :: UTCTime
 defaultDate = UTCTime
@@ -75,8 +71,8 @@ safeHead defaultVal [] = defaultVal
 
 -- * internal Methods
 
-decodeUtf8Body :: Response BSL.ByteString -> Text
-decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
+-- decodeUtf8Body :: Response BSL.ByteString -> Text
+-- decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
 
 getFirstTitle :: Cursor -> Text
 getFirstTitle c = head $ content h1
@@ -175,7 +171,7 @@ constructPostProcInfo _procId title tds =
       (keys,vals) = part ([],[]) tds
       keys' = map (safeHead "" . content) keys
       vals' = map (safeHead "" . content . head . child) vals
-      parse info xs = 
+      parse info xs =
         case xs of
           ("description",v):zs -> parse
                                     (info { postProcInfoDescription = v })
@@ -186,13 +182,13 @@ constructPostProcInfo _procId title tds =
 
 -- | create jobxml DOM according to spec
 jobs_to_XML :: [ StarExecJob ] -> Document
-jobs_to_XML js = Document (Prologue [] Nothing []) root [] where 
+jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
     t x = T.pack $ show x
     b x = T.pack $ map Data.Char.toLower $ show x
     -- path must be in  [_/\w\-\.\+\^=,!?:$%#@ ]*"
     -- but there is a strange '-' in Runtime_Complexity_-_Full_Rewriting etc.
     path_sanitize = T.filter $ \ c -> isAlphaNum c || c `elem` ("/_" :: String)
-    root = Element "tns:Jobs" 
+    root = Element "tns:Jobs"
              (M.fromList [("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
                          ,("xsi:schemaLocation", "https://www.starexec.org/starexec/public/batchJobSchema.xsd batchJobSchema.xsd")
                          ,("xmlns:tns","https://www.starexec.org/starexec/public/batchJobSchema.xsd") ]) [xml|
@@ -211,6 +207,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
       |]
 
+isSEJobPair :: StarExecJobPair -> Bool
 isSEJobPair p = case p of
   SEJobPair{} -> True
   _ -> False
@@ -222,16 +219,16 @@ isSEJobPair p = case p of
 -- and the extra result is
 -- [ Just 0, Nothing, Just 1, Just 2, Just 3, Nothing, Just 4 ]
 jobs_to_archive :: [ StarExecJob ] -> Maybe (BSL.ByteString, [Maybe Int])
-jobs_to_archive js = 
+jobs_to_archive js =
     let empty = null . jobpairs
         ne_js = filter ( not . empty ) js
-        ( _, remap ) = mapAccumL 
-            ( \ acc j -> if empty j 
+        ( _, remap ) = mapAccumL
+            ( \ acc j -> if empty j
             then (acc, Nothing) else (acc + 1, Just acc) ) 0 js
         d = jobs_to_XML ne_js
-        e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d ) 
+        e = Zip.toEntry "autojob.xml" 0 ( renderLBS def d )
         a = Zip.addEntryToArchive e Zip.emptyArchive
-    in  if null ne_js then Nothing 
+    in  if null ne_js then Nothing
         else Just ( Zip.fromArchive a, remap )
 
 -- * API
@@ -274,7 +271,7 @@ getSpaceXML _spaceId = do
 
 
 
-    
+
 getBenchmark :: StarExecConnection -> Int -> Handler (BSL.ByteString)
 getBenchmark _ bmId = do
   sec <- parseUrl starExecUrl
@@ -284,7 +281,7 @@ getBenchmark _ bmId = do
                       }
   resp <- sendRequest req
   return $ responseBody resp
-  
+
 getBenchmarkInfo :: StarExecConnection -> Int -> Handler (Maybe BenchmarkInfo)
 getBenchmarkInfo _ _benchmarkId = do
   sec <- parseUrl starExecUrl
@@ -356,7 +353,7 @@ getJobResults _ _jobId = do
   resp <- sendRequest req
 
   serv <- doiService <$> getYesod
-  
+
   let archive = Zip.toArchive $ responseBody resp
       insertId ji = ji { jobResultInfoJobId = _jobId }
       insertDOI ji =
@@ -439,7 +436,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
   Nothing -> return jobs
   Just (bs, remap) -> do
     sec <- parseUrl starExecUrl
-    req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId ) 
+    req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId )
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
          ] $ sec { method = "POST", path = pushjobxmlPath, responseTimeout = Nothing }
 
@@ -447,13 +444,13 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
           job <- jobs
           return $ "Job " <> description job
               <> " num. pairs: " <> T.pack (show $ length $ jobpairs job) <> ","
-    logWarnN $ "sending JobXML for " <> info          
-    -- replace False with True to write the job file to disk 
+    logWarnN $ "sending JobXML for " <> info
+    -- replace False with True to write the job file to disk
     when (False) $ do
         liftIO $ BSL.writeFile "command.zip" bs
 
     -- liftIO $ print req
-    
+
     resp <- sendRequest req
     let ids = find_job_numbers resp
 
@@ -461,7 +458,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
 
     return $ do
       (j, mpos) <- zip jobs remap
-      let ji = case mpos of 
+      let ji = case mpos of
             Nothing -> Nothing
             Just pos ->
               let i = ids !! pos in
@@ -469,11 +466,11 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
       return $ j { jobids = ji }
 
 
-find_job_numbers resp = 
+find_job_numbers resp =
     -- the job ids are in the returned cookie.
     -- if there are more, then it's a comma-separated list
     -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
-    
+
     let cs = destroyCookieJar $ responseCookieJar resp
 
         vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
@@ -482,22 +479,23 @@ find_job_numbers resp =
                        in  pre : cut' c ( drop 1 post)
     in  case vs of
       [] -> []
-      [s] -> map read $ cut' ',' 
+      [s] -> map read $ cut' ','
 -- FIXME, actually EXPLAINME:
--- single job: 
+-- single job:
 -- Cookie {cookie_name = "New_ID", cookie_value = "3048"
--- multiple jobs: 
+-- multiple jobs:
 -- Cookie {cookie_name = "New_ID", cookie_value = "\"3049,3050,3051,3052,3053\""
-                     $ filter ( /= '"' ) 
+                     $ filter ( /= '"' )
                      $ BSC.unpack s
 
 pauseJobs :: [JobID] -> Handler ()
 pauseJobs ids = do
   logWarnN $ "pausing jobs " <> T.pack (show ids)
-  forM ids $ pauseJob
+  _ <- forM ids $ pauseJob
   logWarnN $ "done pausing jobs " <> T.pack (show ids)
 
-pauseJob (StarExecJobID id) = do  
+pauseJob :: JobID -> Handler ()
+pauseJob (StarExecJobID id) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
                 , path = getURL pausePath [("{id}", show id)]
@@ -509,10 +507,10 @@ pauseJob (StarExecJobID id) = do
 resumeJobs :: [JobID] -> Handler ()
 resumeJobs ids = do
   logWarnN $ "resuming jobs " <> T.pack (show ids)
-  forM ids $ resumeJob
+  _ <- forM ids $ resumeJob
   logWarnN $ "done resuming jobs " <> T.pack (show ids)
 
-resumeJob (StarExecJobID id) = do  
+resumeJob (StarExecJobID id) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
                 , path = getURL resumePath [("{id}", show id)]
@@ -524,10 +522,10 @@ resumeJob (StarExecJobID id) = do
 rerunJobs :: [JobID] -> Handler ()
 rerunJobs ids = do
   logWarnN $ "re-running jobs " <> T.pack (show ids)
-  forM ids $ rerunJob
+  _ <- forM ids $ rerunJob
   logWarnN $ "done re-running jobs " <> T.pack (show ids)
 
-rerunJob (StarExecJobID id) = do  
+rerunJob (StarExecJobID id) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
                 , path = getURL rerunPath [("{id}", show id)]
@@ -614,7 +612,7 @@ data AddJob = AddJob
    , benchChoice :: BenchChoice -- ^ Only applies if runChoice is “choose”.
    , bench :: [Int] -- ^  The list of benchmarks to use in the job. Only applies if benchChoice is "runChosenFromSpace".
    , traversal :: Traversal
-   , suppressTimestamp :: Bool 
+   , suppressTimestamp :: Bool
    }
    deriving Show
 
@@ -626,7 +624,7 @@ In “quickJob,” a single job pair is created, using the given solver and the 
 In “choose”, a list of configurations is provided to use in the job.
 -}
 
-data RunChoice = KeepHierarchy | Choose   
+data RunChoice = KeepHierarchy | Choose
   deriving (Eq, Show)
 
 {- Describes how to select benchmarks for the job.
@@ -640,7 +638,7 @@ data BenchChoice = RunAllBenchInSpace
                  | RunAllBenchInHierarchy
                  | RunChosenFromSpace
   deriving (Eq, Show)
-           
+
 {-
 Controls the order in which job pairs are executed. Can be either “depth” or “robin.” With
 “depth,” all the job pairs in a single space will be executed before moving onto another space. With “robin,”
@@ -649,7 +647,7 @@ each space in the job will have a single pair executed before any space has a se
 
 data Traversal = Depth | Robin
   deriving (Eq, Show)
-           
+
 {-
 Description: Creates a new job with the given parameters.
 Returns: An HTTP redirect to the spaces page on success, and an HTTP message with an error code and error
@@ -663,12 +661,12 @@ addJob c = do
   logWarnN $ "addJob " <> T.pack (show c)
 
   base <- parseUrl starExecUrl
-  req <- encodeParams ( 
+  req <- encodeParams (
         [ ( "name" , name c )
         , ( "desc",  desc c )
         ] ++
         [ ( "preProcess" , show p ) | p <- maybeToList $ preProcess c ] ++
-        [ ( "seed" , show $ seed c ) ] ++ 
+        [ ( "seed" , show $ seed c ) ] ++
         [ ( "postProcess",  show p ) | p <- maybeToList $ postProcess c ] ++
         [ ( "queue", show $ queue c )
         , ( "sid" , show $ spaceId c )
@@ -721,10 +719,11 @@ encodeParams kvs req = return
   $ urlEncodedBody ( do (k,v) <- kvs; return (k, BSC.pack v) )
   $ req
 
-mpEncodeArrayInt name xs = do
-  (k,v) <- encodeArrayInt name xs
-  return $ MP.partBS (T.pack $ BSC.unpack k) v
-  
+-- mpEncodeArrayInt name xs = do
+--   (k,v) <- encodeArrayInt name xs
+--   return $ MP.partBS (T.pack $ BSC.unpack k) v
+
+toLowerHead :: [Char] -> [Char]
 toLowerHead "" = ""
 toLowerHead (c:cs) = toLower c : cs
 
@@ -737,7 +736,7 @@ createJob spId js = forM js $ \ j -> do
         mc <- addJob $ AddJob
          { name = T.unpack $ job_name j
          , desc = T.unpack $ description j
-                  
+
          -- error in API doc: cannot omit this, need dummy value
          , preProcess = Just (-1) -- Nothing
 
@@ -752,7 +751,7 @@ createJob spId js = forM js $ \ j -> do
          , benchChoice = RunAllBenchInHierarchy
          , runChoice = Choose
          , configs = jobGroupConfigs g
-         , bench = [] 
+         , bench = []
          , traversal = Robin
 
          -- error in API doc: following is required parameter
@@ -763,4 +762,3 @@ createJob spId js = forM js $ \ j -> do
       _ -> do
         error $ "Presenter.StarExec.Command.createJob.g: " ++ show g
     return $ j { jobids = Just $ catMaybes ids }
-  

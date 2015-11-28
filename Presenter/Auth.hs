@@ -2,14 +2,13 @@
 
 module Presenter.Auth where
 
--- source copied from 
+-- source copied from
 -- http://hackage.haskell.org/package/yesod-auth-1.3.1.1/docs/src/Yesod-Auth-Dummy.html
 -- and modified
 
 import Prelude
 import Yesod.Auth
 import Yesod.Form (runInputPost, textField, ireq)
-import Text.Hamlet (hamlet)
 import Yesod.Core
 
 import Presenter.Model.Types ( Login (..))
@@ -42,7 +41,7 @@ authSE =
         toWidget [hamlet|
 $newline never
 <form method="post" action="@{authToMaster url}">
-    <p>prove that you are the person who started this instance of star-exec-presenter: 
+    <p>prove that you are the person who started this instance of star-exec-presenter:
     <p>
         <input type="text" name="ident">
         <input type="password" name="pass">

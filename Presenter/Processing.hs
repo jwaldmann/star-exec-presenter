@@ -32,18 +32,19 @@ getInfo :: (JobResult -> S.Set a -> S.Set a) -> [JobResult] -> [a]
 getInfo f = S.toList . L.foldr f S.empty
 
 getBenchmark :: JobResult -> UniqueBenchmark
-getBenchmark jr = 
+getBenchmark jr =
   ( benchmarkKey jr
   , toBenchmarkName jr
   )
 
 type BenchmarkKey = Either BenchmarkID DOI
 
+benchmarkKey :: JobResult -> Either BenchmarkID DOI
 benchmarkKey jr@(StarExecResult se) =
   case jobResultInfoBenchmarkDOI se of
          Just doi -> Right doi
          Nothing -> Left $ toBenchmarkID jr
-         
+
 extractBenchmark :: JobResult
                  -> S.Set UniqueBenchmark
                  -> S.Set UniqueBenchmark
@@ -61,7 +62,7 @@ getBenchmarkResults :: [(JobID, UniqueSolver)]
                     -> [JobResult]
                     -> [UniqueBenchmark]
                     -> [BenchmarkRow]
-getBenchmarkResults solvers jobInfos = map getBenchmarkRow 
+getBenchmarkResults solvers jobInfos = map getBenchmarkRow
   where
     --getBenchmark :: UniqueBenchmark -> BenchmarkRow
     getBenchmarkRow benchmark@(bId, _) =
@@ -127,7 +128,7 @@ getupperbound jp = case getSolverResult jp of
 upperpoints jps = M.fromListWith (+) $ do
               me <- jps
               let greaterequals = length $ do
-                    you <- jps 
+                    you <- jps
                     guard $ compare_for_upper_bounds
                       (getupperbound me) (getupperbound you) <= EQ
                   points = if getupperbound me == uppertrivial then 0 else greaterequals
@@ -141,9 +142,8 @@ getlowerbound jp = case getSolverResult jp of
 lowerpoints jps = M.fromListWith (+) $ do
               me <- jps
               let greaterequals = length $ do
-                    you <- jps 
+                    you <- jps
                     guard $ compare_for_lower_bounds
                       (getlowerbound me) (getlowerbound you) >= EQ
                   points = if getlowerbound me == lowertrivial then 0 else greaterequals
               return ( toSolverID me , points )
-              

@@ -3,13 +3,11 @@ module Handler.Image where
 import Import
 
 import System.Process (readProcess)
-import Control.Monad.IO.Class (liftIO)
 import ConceptAnalysis.DotGraph (dottedGraph)
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
 import ConceptAnalysis.FCA
 import ConceptAnalysis.FCAPreparation
-import Handler.Concepts
 
 
 getImageR :: MonadHandler Handler => JobID -> Handler TypedContent

@@ -1,6 +1,5 @@
 module Presenter.Model.Query where
 
-import Yesod
 import Prelude
 import Presenter.Model.Types
 import Presenter.Model.StarExec
@@ -13,18 +12,18 @@ data Query =
 
 data Transform =
   Choose_Columns [ Int ]
-  | Filter_Rows Predicate 
-  deriving (Read,Show, Eq)               
+  | Filter_Rows Predicate
+  deriving (Read,Show, Eq)
 
 data Predicate =
   And [ Cell_Filter ]
   | Not Predicate
-  deriving (Read,Show, Eq)               
+  deriving (Read,Show, Eq)
 
 data Cell_Filter =
-  Any 
-  | Equals T.Text 
-  | Not_Equals T.Text 
+  Any
+  | Equals T.Text
+  | Not_Equals T.Text
   deriving (Read,Show, Eq)
 
 -- draft for a more generic querrying

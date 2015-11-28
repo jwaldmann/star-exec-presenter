@@ -5,9 +5,7 @@ import Prelude
 import qualified Data.Csv as CSV
 import qualified Data.Text as T
 import Data.Text.Encoding
-import Control.Applicative
 import Presenter.Model.StarExec
-import qualified Presenter.Model.Complexity2015 as C
 import Presenter.Output
 
 instance CSV.FromNamedRecord JobResultInfo where
@@ -56,5 +54,4 @@ instance Output CompetitionInfo where
              [ "competitionInfoCompetition" <+> equals <#> output (competitionInfoCompetition c)
              , "competitionInfoDate" <+> equals <#> output (competitionInfoDate c)
              , "competitionInfoPublic" <+> equals <#> output (competitionInfoPublic c)
-             ] 
-
+             ]

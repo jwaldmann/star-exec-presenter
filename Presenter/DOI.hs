@@ -15,7 +15,6 @@ import qualified Data.Set as S
 import qualified Data.Text as T
 import System.IO
 import Control.Monad ( forM )
-import Control.Applicative
 import Data.Monoid ((<>))
 
 data DOIService =  DOIService
@@ -28,7 +27,7 @@ data DOIService =  DOIService
 -- returns a map with entries like
 -- (StarExecBenchmarkID 2194993,"TRS_Standard/AProVE_04/JFP_Ex31.xml").
 -- It will ignore the very top spName (which is TPDB-10.3 in this case)
-spaceToNames :: Space -> M.Map BenchmarkID T.Text 
+spaceToNames :: Space -> M.Map BenchmarkID T.Text
 spaceToNames sp =
   let go f sp =
         let h t = f $ spName sp <> "/" <> t
@@ -41,9 +40,8 @@ spaceToNames sp =
 -- and output translation maps.
 -- handle duplicates in the correct way.
 -- watch out: assigned numbers depend on file contents and order.
-makeDOI :: [ FilePath ]
-        -> IO DOIService
-makeDOI fs = do 
+makeDOI :: [ FilePath ] -> IO DOIService
+makeDOI fs = do
   ms <- forM fs $ \ f -> do
     hPutStrLn stderr $ unwords [ "reading space file", f ]
     Just sp <- getDefaultSpaceXML f
@@ -52,17 +50,17 @@ makeDOI fs = do
     return out
   let m :: M.Map BenchmarkID T.Text
       m = foldr (M.unionWith $ error "makeDOI.duplicate") M.empty ms
-  
+
       unique_names = S.toList $ S.fromList $ M.elems m
-      
+
       fore :: M.Map DOI T.Text
       fore = M.fromList $ zip (map DOI.makeTPI [1..]) unique_names
-      back :: M.Map T.Text DOI 
+      back :: M.Map T.Text DOI
       back = M.fromList $ zip unique_names (map DOI.makeTPI [1..])
 
       todoi = M.map ( back M.! ) m
       mm = M.fromList $ do (k,v) <- M.toList todoi ; return (v,k)
-      
+
   return $ DOIService
     { toDOI = flip M.lookup todoi
     , toName = flip M.lookup fore

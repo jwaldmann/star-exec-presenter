@@ -1,12 +1,10 @@
-module Importer.Parser.LRI 
+module Importer.Parser.LRI
   ( parse
   ) where
 
 import Prelude
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Lazy.Char8 as Char8
-import Debug.Trace
-import qualified Data.List as L
 import Importer.Internal
 
 trimTrailingSpace :: Line -> Line

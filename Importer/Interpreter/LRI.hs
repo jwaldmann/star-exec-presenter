@@ -1,16 +1,14 @@
-module Importer.Interpreter.LRI 
+module Importer.Interpreter.LRI
   ( getBenchmarks
   , getSolvers
   , getResults
   ) where
-  
+
 import Prelude
-import qualified Data.Map.Strict as M
 import qualified Data.List as L
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Lazy.Char8 as Char8
 import Importer.Internal
-import Control.Applicative
 import Control.Monad
 
 isSolver :: Content -> Bool
@@ -62,7 +60,7 @@ readPairResult kvs key = do
 readPairResultMaybe :: Content -> Key -> Either String (Maybe LRIPairResult)
 readPairResultMaybe kvs key =
   case findKey kvs key of
-    Just (_,bs)    -> 
+    Just (_,bs)    ->
       case removeQuotes bs of
         "YES"       -> return $ Just LRIYES
         "NO"        -> return $ Just LRINO
@@ -122,11 +120,11 @@ readSolver (name, kvs) = do
     <*> readBool' "theory"
     <*> readBool' "certifying"
 
-interpret :: [Entry] -> Either String ([LRIBenchmark], [LRISolver])
-interpret entries = do
-  interpretedBenchmarks <- getBenchmarks entries
-  interpretedSolvers <- getSolvers entries
-  return (interpretedBenchmarks, interpretedSolvers)
+-- interpret :: [Entry] -> Either String ([LRIBenchmark], [LRISolver])
+-- interpret entries = do
+--   interpretedBenchmarks <- getBenchmarks entries
+--   interpretedSolvers <- getSolvers entries
+--   return (interpretedBenchmarks, interpretedSolvers)
 
 getBenchmarks :: [Entry] -> Either String [LRIBenchmark]
 getBenchmarks entries = do

@@ -2,7 +2,6 @@ module Handler.Resolve where
 
 import Import
 import Presenter.DOI
-import qualified Data.Map.Strict as M
 
 getResolveR :: DOI -> Handler Html
 getResolveR doi = do
@@ -12,4 +11,4 @@ getResolveR doi = do
     Just ben -> redirect $ render $ ShowBenchmarkInfoR ben
     Nothing -> defaultLayout [whamlet|
 <h1>#{show doi} does not refer to a benchmark
-|]                 
+|]

@@ -1,10 +1,6 @@
 module Handler.ShowConfigInfo where
 
 import Import
-import Presenter.StarExec.JobData
-import Presenter.Internal.Stringish
-import Presenter.Utils.WidgetMetaRefresh
-import Presenter.PersistHelper
 
 getShowConfigInfoR :: ConfigID -> Handler Html
 getShowConfigInfoR sid@(StarExecConfigID _id) = do
@@ -15,7 +11,7 @@ getShowConfigInfoR sid@(StarExecConfigID _id) = do
          <p>view original config-info on star-exec: <a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{show _id}">#{show _id}</a>
     |]
 
-{-  
+{-
   (QueryResult qStatus mConfigInfo) <- queryConfigInfo sid
   defaultLayout $ do
     case qStatus of

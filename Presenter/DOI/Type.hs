@@ -7,9 +7,9 @@ module Presenter.DOI.Type
 ( DOI
 , makeTPI
 )
-       
+
 where
-  
+
 import Prelude
 import Yesod
 import qualified Data.Text as T
@@ -25,6 +25,7 @@ instance Read DOI where
     (n,rest) <- readsPrec p s
     return (TPI n, rest)
 
+makeTPI :: Int ->DOI
 makeTPI = TPI
 
 $(derivePersistField "DOI")
@@ -35,4 +36,3 @@ instance PathPiece DOI where
     case readsPrec 0 $ T.unpack t of
       [(d,"")] -> return d
       _ -> Nothing
-      

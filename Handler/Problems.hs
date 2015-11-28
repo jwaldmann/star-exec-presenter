@@ -4,12 +4,10 @@ module Handler.Problems
 
 import Import
 import Presenter.StarExec.JobData
-import Presenter.Model (Function(..))
 import Presenter.Processing (getupperbound, getlowerbound,getClass)
 import Handler.ShowManyJobResults (shorten)
 import Presenter.Utils.WidgetMetaRefresh
 import Text.Lucius (luciusFile)
-import Text.Blaze.Html.Renderer.String (renderHtml)
 import Presenter.Short
 
 import qualified Data.Map.Strict as M
@@ -58,9 +56,9 @@ getProblemsR jids @ (JobIds ids) = do
                <td>
                  <a href=@{ShowConfigInfoR (toConfigID me)}>
                    #{toConfigName me}
-               <td class="#{getClass me}"> 
+               <td class="#{getClass me}">
                  <a class="pair-link" href=@{ShowJobPairR (getPairID me)}>
-                   #{short $ getSolverResult me} 
+                   #{short $ getSolverResult me}
            |]
       benchmark_cell me = [whamlet|
                <td>
@@ -125,21 +123,3 @@ getProblemsR jids @ (JobIds ids) = do
                ^{benchmark_cell me}
                ^{solver_result_cell me}
     |]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

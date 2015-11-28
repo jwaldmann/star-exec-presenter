@@ -3,14 +3,11 @@ module Presenter.StarExec.Space where
 import Presenter.Model.StarExec
 
 import Text.HTML.DOM
-import Text.HTML.TagSoup
 import Text.XML.Cursor
-import Codec.Compression.GZip
 import qualified Codec.Archive.Zip as Zip
 import qualified Data.ByteString.Lazy as BSL
 
 import Prelude
-import System.IO
 import Control.Monad.IO.Class
 import qualified Data.Text as T
 import Data.List ( isSuffixOf )
@@ -26,8 +23,8 @@ getDefaultSpaceXML fp = do
 makeSpace :: MonadIO m => BSL.ByteString -> m (Maybe Space)
 makeSpace bs = do
   let archive = Zip.toArchive bs
-      xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e ) 
-                 $ Zip.zEntries archive 
+      xml_entries = filter ( \ e -> isSuffixOf ".xml" $ Zip.eRelativePath e )
+                 $ Zip.zEntries archive
   let spaces =  case xml_entries of
         [ e ] -> do
           let cursor = cursorFromDOM $ Zip.fromEntry e
@@ -62,4 +59,3 @@ makeSpace bs = do
 
 cursorFromDOM :: BSL.ByteString -> Cursor
 cursorFromDOM = fromDocument . Text.HTML.DOM.parseLBS
-

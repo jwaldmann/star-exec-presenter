@@ -4,14 +4,11 @@ module Importer.Parser.UIBK
 
 import Prelude
 import qualified Data.ByteString.Lazy as BSL
-import qualified Data.List as L
 import qualified Data.Text.Lazy.Encoding as TLE
 import qualified Data.Text.Lazy as TL
 import Data.Text (Text)
 import Importer.Internal
 import Data.Default
-import Data.Monoid
-import Debug.Trace
 
 import Presenter.Internal.Stringish
 import qualified Text.XML as XML

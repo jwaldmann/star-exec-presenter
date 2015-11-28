@@ -7,7 +7,6 @@ module Presenter.StarExec.Connection
     ) where
 
 import Import
-import Prelude (head)
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status (ok200)
 import qualified Data.ByteString.Lazy as BSL
@@ -19,11 +18,9 @@ import qualified Data.Text as T
 --import qualified Data.Text.IO as TIO
 import Presenter.StarExec.Urls
 import Presenter.Auth ( getLoginCredentials )
-import Presenter.Prelude (diffTime)
 import Data.Time.Clock (getCurrentTime, diffUTCTime, UTCTime(..), secondsToDiffTime)
 import Data.Time.Calendar
 import Control.Concurrent.STM
-import Control.Concurrent.MVar
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Exception (throw)
@@ -32,8 +29,6 @@ import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
 import Data.Maybe (listToMaybe)
 
-import qualified Network.HTTP.Types.Header as H
-
 -- | we're doing this at the very beginning (not inside a Handler)
 initial_login :: Manager -> IO CookieJar
 initial_login man = do
@@ -41,10 +36,10 @@ initial_login man = do
       Just base = parseUrl starExecUrl
   let send req = do
         print req
-        resp <- httpLbs req man 
+        resp <- httpLbs req man
         print resp
         return resp
-  
+
   resp1 <- send
       $ base { method = "GET", path = indexPath , cookieJar = Just cj0 }
   let cj1 = responseCookieJar resp1
@@ -52,9 +47,9 @@ initial_login man = do
   creds <- getLoginCredentials
   resp2 <- send
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
-                           , ("j_password", TE.encodeUtf8 $ password creds) 
+                           , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
-                           ] 
+                           ]
                  $ base { method = "POST" , path = loginPath
                         , cookieJar = Just cj1
                         }
@@ -68,7 +63,7 @@ initial_login man = do
 
 runCon_exclusive :: Handler b -> Handler b
 runCon_exclusive action = do
-  lock <- conSem <$> getYesod 
+  lock <- conSem <$> getYesod
   -- Lock.withWrite lock action
   bracket_
     ( lift $ Lock.acquireWrite lock )
@@ -85,10 +80,9 @@ setSessionData cj sid d = do
   app <- getYesod
   lift $ atomically $ writeTVar (sessionData app) $ SessionData cj sid d
 
--- | raw request. 
+-- | raw request.
 --  will silently set cookies to session state.
-sendRequestRaw :: Request
-               -> Handler (Response BSL.ByteString)
+sendRequestRaw :: Request -> Handler (Response BSL.ByteString)
 sendRequestRaw req0 = do
   man <- httpManager <$> getYesod
   SessionData cj sid d <- getSessionData
@@ -98,7 +92,7 @@ sendRequestRaw req0 = do
                   -- , requestHeaders = [ ( H.hAcceptLanguage, "en-US,en;q=0.5" ) ]
                   }
       reqInfo = T.pack $ BSC.unpack
-                $ method req <> " " <> path req <> "?" <> queryString req 
+                $ method req <> " " <> path req <> "?" <> queryString req
   logWarnN  $ "sendRequestRaw: " <> reqInfo
   logWarnN  $ T.pack  $ "using sid: " <> show (getJsessionidFromCJ cj)
   when False $ case requestBody req of
@@ -120,47 +114,50 @@ sendRequestRaw req0 = do
   return resp
 
 
-
 -- | managed requests: will execute Login if necessary.
+sendRequest ::  Request -> Handler (Response BSL.ByteString)
 sendRequest req0 = do
   logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- runCon_exclusive $ sendRequestRaw  $ req0 
+  resp0 <- runCon_exclusive $ sendRequestRaw  $ req0
   if not $ needs_login resp0
      then do
        logWarnN  $ T.pack  $ "sendRequest: OK"
        return resp0
-    else do    
+    else do
        logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
 
-       runCon_exclusive $ do        
+       runCon_exclusive $ do
          base <- parseUrl starExecUrl
          resp1 <- sendRequestRaw  $ base { method = "GET", path = indexPath }
          creds <- getLoginCredentials
-         resp2 <- sendRequestRaw 
+         resp2 <- sendRequestRaw
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
-                           , ("j_password", TE.encodeUtf8 $ password creds) 
+                           , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
-                           ] 
-                 $ base { method = "POST" , path = loginPath }      
+                           ]
+                 $ base { method = "POST" , path = loginPath }
          resp3 <- sendRequestRaw $ base { method = "GET", path = indexPath }
          return ()
 
        logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
        sendRequest req0
 
+getJsessionidFromCJ :: CookieJar -> Maybe BSC.ByteString
 getJsessionidFromCJ cj = listToMaybe $ do
   c <- destroyCookieJar cj
   guard $ cookie_name c == "JSESSIONID"
   return $ cookie_value c
-      
-getJsessionidFromHeaders hs = listToMaybe $ do
-        (k,v) <- hs
-        guard $ k == "Set-Cookie"
-        let js = "JSESSIONID=" 
-        let (pre,post) = BS.splitAt (BS.length js) v
-        guard $ pre == js
-        return $ BSC.takeWhile isHexDigit post
 
+
+-- getJsessionidFromHeaders hs = listToMaybe $ do
+--         (k,v) <- hs
+--         guard $ k == "Set-Cookie"
+--         let js = "JSESSIONID="
+--         let (pre,post) = BS.splitAt (BS.length js) v
+--         guard $ pre == js
+--         return $ BSC.takeWhile isHexDigit post
+
+needs_login :: Response BSL.ByteString -> Bool
 needs_login r =
    ( responseStatus r /= ok200)
   ||   ( BS.isInfixOf "<title>Login - StarExec</title>" $ BSL.toStrict $ responseBody r )
@@ -190,7 +187,7 @@ future :: UTCTime
 future = UTCTime (ModifiedJulianDay 562000) (secondsToDiffTime 0)
 
 
-  
+
 {-
 getConnection = runCon_exclusive $ do
   logWarnN  $ T.pack  $ "getConnection"
@@ -213,7 +210,7 @@ index (sec, man, cookies) = do
   return (sec, man, responseCookieJar resp)
 
 getLocation :: Response body -> Maybe BS.ByteString
-getLocation resp = 
+getLocation resp =
     let locs = filter (\(n,_) -> n == "Location" ) (responseHeaders resp)
     in
       if null locs then Nothing else Just $ snd $ head locs
@@ -242,9 +239,9 @@ login con@(sec, man, cookies) creds = do
     else do
       logWarnN $ T.pack $ "we are not logged in"
       let req = urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
-                           , ("j_password", TE.encodeUtf8 $ password creds) 
+                           , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
-                           ] 
+                           ]
               $ sec { method = "POST"
                     , path = loginPath
                     }

@@ -21,7 +21,7 @@ import Presenter.Model.CompetitionResults
 import Presenter.Model.Complexity2015
 import Presenter.Model.Defaults
 import Presenter.Model.Entities
-import Presenter.Model.PersistInstances
+import Presenter.Model.PersistInstances()
 import Presenter.Model.Query
 import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec

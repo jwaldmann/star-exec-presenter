@@ -7,7 +7,6 @@ import Presenter.Short
 import Prelude
 import Yesod
 import Text.Blaze
-import Text.Blaze.Internal
 import Data.Text (Text)
 import qualified Data.Text as T
 
@@ -25,7 +24,7 @@ instance ToMarkup JobStatus where
   preEscapedToMarkup = preEscapedString . show
 
 data SolverResult =
-    YES 
+    YES
   | NO
   | BOUNDS C.Bounds
   | CERTIFIED
@@ -59,7 +58,7 @@ data StarExecSpace = StarExecSpace
 
 -- | this is (some of) the data in the xml file returned by download-space-XML
 -- (for the moment, only benchmarks and solvers, ignoring permissions)
-data Space = Space 
+data Space = Space
   { spId :: Int
   , spName :: Name
   , benchmarks_with_names :: [ (Int,Text) ]
@@ -67,19 +66,20 @@ data Space = Space
   , children :: [Space]
   } deriving ( Show, Eq )
 
+benchmarks :: Space -> [Int]
 benchmarks = map fst . benchmarks_with_names
 
 data SolverInSpace = SolverInSpace
   { soId :: Int
   , soName :: Name
-  } deriving (Eq,Show)  
+  } deriving (Eq,Show)
 
 families :: Space -> [ (Name, [Int]) ]
-families s = 
+families s =
   let path ns = T.intercalate "/" ns
-      walk s' = 
+      walk s' =
         let here = benchmarks s'
-            below = children s' >>= walk 
+            below = children s' >>= walk
         in    map ( \ (p,b) -> (spName s' : p, b) )
             $ if Prelude.null here then below else ([], here) : below
   in  map ( \ (p,b) -> (path p, b) ) $ walk s
@@ -103,14 +103,14 @@ data StarExecJob = SEJob
 
 data StarExecJobPair
   = SEJobPair
-    { jobPairSpace :: ! Text   
+    { jobPairSpace :: ! Text
     , jobPairBench :: ! Int
-    , jobPairConfig :: ! Int 
+    , jobPairConfig :: ! Int
     }
   | SEJobGroup
     { jobGroupBench :: ! Int
     , jobGroupConfigs :: ! [Int]
-    }  
+    }
                      deriving ( Show )
 
 data JobCreationMethod = PushJobXML | CreateJob
