@@ -2,6 +2,7 @@ module ConceptAnalysis.FCAPreparation where
 
 import Import
 import Data.List
+import Data.Text (append, pack)
 
 type JobPairId = Int
 
@@ -39,12 +40,15 @@ evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
 -- proper name for template table columns
--- properName :: Attribute -> Text
--- properName (AJobResultInfoSolver name) = append "solver name " name
--- properName (AJobResultInfoConfiguration config) = append "solver configuration " config
--- properName (ASlowCpuTime False) = "cpuTime <= 10s"
--- properName (ASlowCpuTime True) = "cpuTime > 10s"
--- properName (ASolverResult YES) = "result YES"
--- properName (ASolverResult NO) = "result NO"
--- properName (ASolverResult MAYBE) = "result MAYBE"
--- properName (ASolverResult (OTHER text)) = append "result OTHER" text
+properName :: Attribute -> Text
+properName (AJobResultInfoSolver name) = append "Solver "  name
+properName (AJobResultInfoConfiguration config) = append "Solver config " config
+properName (ASlowCpuTime False) = "CPU time <= 10s"
+properName (ASlowCpuTime True) = "CPU time > 10s"
+properName (ASolverResult YES) = "Result YES"
+properName (ASolverResult NO) = "Result NO"
+properName (ASolverResult MAYBE) = "Result MAYBE"
+properName (ASolverResult (OTHER text)) = append "Result OTHER " text
+properName (ASolverResult (BOUNDS b)) = pack $ show b
+properName (ASolverResult CERTIFIED) = "Certified"
+properName (ASolverResult ERROR) = "Error"

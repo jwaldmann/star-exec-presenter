@@ -2,9 +2,9 @@
       <thead>
         <th> concept number
         $forall at <- attributes context
-          <th> #{show at}
-        <th> num attrs (of #{length $ attributes context})
-        <th> num objs (of #{length $ objects context})
+          <th> #{properName at}
+        <th> Num attrs (of #{length $ attributes context})
+        <th> Num objs (of #{length $ objects context})
       <tbody>
 
       $forall currConcept <- concepts'
@@ -18,12 +18,8 @@
           <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
 
-
-
 <object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
-<!--> <img src="@{ImageR}"> <!-->
-
-
+<!-- <img src="@{ImageR}"> -->
 
 <h1>Concepts
 [
