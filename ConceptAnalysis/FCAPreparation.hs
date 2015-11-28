@@ -2,14 +2,10 @@ module ConceptAnalysis.FCAPreparation where
 
 import Import
 import Data.List
-import           Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
-import           Data.Set (Set)
-import qualified Data.Set as Set
 
 type JobPairId = Int
 
-data Attribute = 
+data Attribute =
   AJobResultInfoSolver Text
    | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
@@ -17,7 +13,7 @@ data Attribute =
  deriving (Eq, Ord, Show)
 
 -- all job pairs with a response time greater 10 seconds is slow
-slowCpuTimeLimit :: ((Num Double, Ord Double)) => Double
+slowCpuTimeLimit :: (Num Double, Ord Double) => Double
 slowCpuTimeLimit = 10
 
 -- create relation of JobPairId and declared attributes of given data
@@ -30,11 +26,11 @@ collectData results = do
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
 getAttributeCollection jobResults = do
-  let jobResultInfoSolvers = map (jobResultInfoSolver) jobResults
+  let jobResultInfoSolvers = map jobResultInfoSolver jobResults
   let jobResultInfoConfigurations = map jobResultInfoConfiguration jobResults
   -- let jobResultInfoBenchmarkIds = map (jobResultInfoBenchmarkId) jobResults
   let cpuTimeEvaluations = evaluateCpuTime jobResults
-  let jobResultInfoResults = map (jobResultInfoResult) jobResults
+  let jobResultInfoResults = map jobResultInfoResult jobResults
   zipWith4 (\a b c d -> [AJobResultInfoSolver a, AJobResultInfoConfiguration b, ASlowCpuTime c, ASolverResult d])
     jobResultInfoSolvers jobResultInfoConfigurations cpuTimeEvaluations jobResultInfoResults
 

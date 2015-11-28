@@ -18,9 +18,8 @@ import qualified Network.Wai.Middleware.RequestLogger as RequestLogger
 import qualified Database.Persist
 import Database.Persist.Sql (runMigration)
 import Network.Connection
-import Network.HTTP.Client.Conduit 
-import Network.HTTP.Client.TLS (tlsManagerSettings)
-import Network.HTTP.Conduit (createCookieJar,mkManagerSettings)
+import Network.HTTP.Client.Conduit
+import Network.HTTP.Conduit (mkManagerSettings)
 import qualified Network.HTTP.Client.Conduit as NHCC
 import Control.Monad.Logger (runLoggingT)
 import System.Log.FastLogger (newStdoutLoggerSet, defaultBufSize)
@@ -78,8 +77,7 @@ import Handler.Image
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
-import Control.Concurrent.MVar
-import Presenter.StarExec.Connection (killmenothing, initial_login)
+import Presenter.StarExec.Connection (initial_login)
 import Presenter.DOI
 
 -- import Control.Concurrent.SSem
@@ -129,7 +127,7 @@ makeFoundation conf = do
     now <- getCurrentTime
     session <- atomically $ newTVar
         $ SessionData cj Nothing now
-          
+
     s <- staticSite
     dbconf <- withYamlEnvironment "config/postgresql.yml" (appEnv conf)
               Database.Persist.loadConfig >>=
@@ -149,7 +147,7 @@ makeFoundation conf = do
 
     -- resolver
     doiS <- makeDOI_for_2014_2015_extra
-    
+
     let logger = Yesod.Core.Types.Logger loggerSet' getter
         foundation = App conf s p manager dbconf logger session crCache dbS conS doiS
 
