@@ -26,7 +26,7 @@ dottedGraph concept_lattice = do
 -- graphToDot :: (Ord cl, Graph gr) => GraphvizParams Node nl el cl l -> gr nl el -> DotGraph Node
 
 graph :: (Eq ob, Eq at, Show at, Ord at) => [Concept ob at] -> Gr TL.Text TL.Text
-graph concept_lattice =  mkGraph (getNodes concept_lattice) . getEdges concept_lattice
+graph concept_lattice =  mkGraph (getNodes concept_lattice) $ getEdges concept_lattice
 
 getNodes :: (Eq ob, Eq at, Show at) => [Concept ob at] -> [LNode TL.Text]
 getNodes concept_lattice = map
