@@ -1,13 +1,12 @@
 module Presenter.Model.Additional.Table where
 
-import Model
 import Presenter.Model.Entities
 import Prelude (Maybe)
 import Foundation (Widget)
 
 import qualified Data.Text as T
 
-data Table = 
+data Table =
      Table { header :: [ Cell ]
            , rows :: [ Row ] }
 type Row = [ Cell ]

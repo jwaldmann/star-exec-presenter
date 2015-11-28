@@ -510,6 +510,7 @@ resumeJobs ids = do
   _ <- forM ids $ resumeJob
   logWarnN $ "done resuming jobs " <> T.pack (show ids)
 
+resumeJob :: JobID -> Handler ()
 resumeJob (StarExecJobID id) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"

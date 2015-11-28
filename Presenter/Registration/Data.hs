@@ -35,9 +35,9 @@ newskel skel old new = do
   print $ tops o
   let omap = M.fromListWith (error "omap") $ tops o
   let nmap = M.fromListWith (error "nmap") $ map (\(x,y)->(y,x)) $ tops n
-  print $ omap
-  print $ nmap
-  let translate (Hierarchy i) = Hierarchy $ (nmap M.! ) $  (omap M.!) $ i
+  print omap
+  print nmap
+  let translate (Hierarchy i) = Hierarchy $ (nmap M.! ) $  (omap M.!) i
       nskel = fmap ( \ ci -> ci { benchmarks = map translate $ benchmarks ci } ) skel
   print nskel
 
@@ -65,6 +65,7 @@ findspaces comp = do
     print p
     print $ M.lookup so smap
 
+subspaces :: Space -> [Space]
 subspaces sp = sp : ( children sp >>= subspaces )
 
 {-
@@ -127,6 +128,7 @@ experiment2015 = Competition "Experiments for 2015"
        ]
    ]
 
+maparts_std :: [Participant]
 maparts_std =
   [ -- Participant "matchbox-dp-boolector" ( Just (0,  2536, 17916 ))
   -- , Participant "matchbox-dp-satchmo" ( Just (0,  2536, 17913 ))
@@ -136,6 +138,7 @@ maparts_std =
   , Participant "matchbox-dp-ur-satchmo-repaired" ( Just (0,  2649, 19519 ))
   ]
 
+maparts_cert :: [Participant]
 maparts_cert =
   [ -- Participant "matchbox-nocon-dp-boolector" ( Just (0,  2536, 17910 ))
   -- , Participant "matchbox-nocon-dp-satchmo" ( Just (0,  2536, 17914 ))

@@ -5,8 +5,10 @@ import Presenter.Registration.Data
 
 import Data.Maybe
 
+tc_Y2015_skeleton :: Competition Catinfo
 tc_Y2015_skeleton = tc_Y2015_skeleton_10_3
 
+tc_Y2015_skeleton_10_3 :: Competition Catinfo
 tc_Y2015_skeleton_10_3 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
@@ -75,7 +77,7 @@ tc_Y2015_skeleton_10_3 = Competition "Termination Competition 2015"
           ,Category "Functional Programming"
                Catinfo {postproc = 234 , benchmarks = [Hierarchy 101968] , participants = []}]]
 
-
+tc_Y2015 :: Competition Catinfo
 tc_Y2015 = collect tc_Y2015_skeleton
                          [tc_Y2015_AProVE
                          ,tc_Y2015_AutoNon
@@ -92,7 +94,8 @@ tc_Y2015 = collect tc_Y2015_skeleton
                          ,tc_Y2015_cycsrs
                          ,tc_Y2015_matchbox
                          ,tc_Y2015_muterm]
---
+
+tc_Y2015_AProVE :: Competition [Participant]
 tc_Y2015_AProVE = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
@@ -112,7 +115,7 @@ tc_Y2015_AProVE = Competition "Termination Competition 2015"
            [Participant {participantName = "AProVE" , solver_config = Just (19356, 3931,24733)}]
           ,Category "SRS Relative certified"
            [Participant {participantName = "AProVE" , solver_config = Just (19356, 3931,24733)}]
-                                                                                                        
+
           ,Category "TRS Equational"
                [Participant {participantName = "AProVE" , solver_config = Just (19356, 3870,24272)}]
           ,Category "TRS Conditional"
@@ -151,28 +154,32 @@ tc_Y2015_AProVE = Competition "Termination Competition 2015"
                [Participant {participantName = "AProVE" , solver_config = Just (19356, 3870,24269)}]
           ,Category "Functional Programming"
                [Participant {participantName = "AProVE" , solver_config = Just (19356, 3870,24265)}]]]
---
+
+tc_Y2015_AutoNon :: Competition [Participant]
 tc_Y2015_AutoNon = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
           [Participant {participantName = "AutoNon" , solver_config = Just (99108,3865,24242)}]
      ,Category "SRS Standard"
           [Participant {participantName = "AutoNon" , solver_config = Just (99108,3865,24242)}]]]
---
+
+tc_Y2015_Ctrl :: Competition [Participant]
 tc_Y2015_Ctrl = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Integer Transition Systems"
           [Participant {participantName = "Ctrl" , solver_config = Just (55489, 3723,23757)}]
      ,Category "Integer TRS"
           [Participant {participantName = "Ctrl" , solver_config = Just (55489, 3723,23758)}]]]
---
+
+tc_Y2015_HipTNT :: Competition [Participant]
 tc_Y2015_HipTNT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
           [Category "C"
                [Participant {participantName = "HipTNT+" , solver_config = Just (100354, 3902,24352)}]
           ,Category "C Integer Programs"
                [Participant {participantName = "HipTNT+" , solver_config = Just (100354, 3902,24352)}]]]
---
+
+tc_Y2015_NaTT :: Competition [Participant]
 tc_Y2015_NaTT = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
@@ -183,12 +190,14 @@ tc_Y2015_NaTT = Competition "Termination Competition 2015"
           [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]
      ,Category "SRS Relative"
           [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]]]
---
+
+tc_Y2015_T2 :: Competition [Participant]
 tc_Y2015_T2 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Integer Transition Systems"
      [Participant {participantName = "T2" , solver_config = Just (57120, 3509,23138)}]]]
---
+
+tc_Y2015_TCT2 :: Competition [Participant]
 tc_Y2015_TCT2 = Competition "Termination Competition 2015"
      [MetaCategory "Complexity Analysis of Term Rewriting"
      [Category "Derivational Complexity - Full Rewriting"
@@ -203,7 +212,8 @@ tc_Y2015_TCT2 = Competition "Termination Competition 2015"
           [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24069)}]
      ,Category "Runtime Complexity - Innermost Rewriting certified"
           [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24072)}]]]
---
+
+tc_Y2015_TCT3 :: Competition [Participant]
 tc_Y2015_TCT3 = Competition "Termination Competition 2015"
      [MetaCategory "Complexity Analysis of Term Rewriting"
      [Category "Derivational Complexity - Full Rewriting"
@@ -218,7 +228,8 @@ tc_Y2015_TCT3 = Competition "Termination Competition 2015"
           [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24247)}]
      ,Category "Runtime Complexity - Innermost Rewriting certified"
           [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24250)}]]]
---
+
+tc_Y2015_TTT2 :: Competition [Participant]
 tc_Y2015_TTT2 = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
@@ -237,31 +248,36 @@ tc_Y2015_TTT2 = Competition "Termination Competition 2015"
           [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]
      ,Category "SRS Relative certified"
           [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]]]
---
+
+tc_Y2015_UltimateBuchiAutomizer :: Competition [Participant]
 tc_Y2015_UltimateBuchiAutomizer = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
           [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 3942,24757)}]
      ,Category "C Integer Programs"
           [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 3942,24757)}]]]
---
+
+tc_Y2015_UltimateBuchiAutomizerJoogie :: Competition [Participant]
 tc_Y2015_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Programming Languages"
      [Category "Java Bytecode"
      [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (51412, 3942,24758)}]]]
---
+
+tc_Y2015_Wanda :: Competition [Participant]
 tc_Y2015_Wanda = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
           [Participant {participantName = "Wanda" , solver_config = Just (55489, 1542,2389)}]
      ,Category "Higher-Order rewriting (union beta)"
           [Participant {participantName = "Wanda" , solver_config = Just (55489, 1542,2390)}]]]
---
+
+tc_Y2015_cycsrs :: Competition [Participant]
 tc_Y2015_cycsrs = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "Cycles"
      [Participant {participantName = "cycsrs" , solver_config = Just (98142,3869,24259)}]]]
---
+
+tc_Y2015_matchbox :: Competition [Participant]
 tc_Y2015_matchbox = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
@@ -277,7 +293,8 @@ tc_Y2015_matchbox = Competition "Termination Competition 2015"
      ,MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Derivational Complexity - Full Rewriting"
           [Participant {participantName = "matchbox" , solver_config = Just (62205, 3804,24117)}]]]
---
+
+tc_Y2015_muterm :: Competition [Participant]
 tc_Y2015_muterm = Competition "Termination Competition 2015"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"

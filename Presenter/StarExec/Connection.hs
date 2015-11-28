@@ -12,7 +12,6 @@ import Network.HTTP.Types.Status (ok200)
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
-import Data.Char (isHexDigit)
 import qualified Data.Text.Encoding as TE
 import qualified Data.Text as T
 --import qualified Data.Text.IO as TIO

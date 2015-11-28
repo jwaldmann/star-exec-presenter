@@ -78,8 +78,7 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
         (toSolverID jr == _solverId) &&
         (getJobID jr == _jobId)
 
-compareBenchmarks
-  :: UniqueBenchmark -> UniqueBenchmark -> Ordering
+compareBenchmarks :: UniqueBenchmark -> UniqueBenchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
 getScore :: JobResult -> Int
@@ -90,15 +89,13 @@ getScore jr = case toScore jr of
 
 -- | this is called to compute the total score (for a solver, in a category).
 -- it is applied to results that are already scored (see scoredResults function)
-calculateScores
-  :: Scoring -> [JobResult] -> M.Map SolverID Int
+calculateScores :: Scoring -> [JobResult] -> M.Map SolverID Int
 calculateScores sc jps = M.fromListWith (+) $ do
   jp <- jps ; return ( toSolverID jp, getScore jp )
 
 -- | this is called to compute the scores per jobpair (a cell in the table).
 -- TODO: this must handle hors_concours solvers specially.
-scoredResults
-  :: Scoring -> [ JobResult ] -> [ JobResult ]
+scoredResults :: Scoring -> [ JobResult ] -> [ JobResult ]
 scoredResults sc jps = do
   let bybench = M.fromListWith (++) $ do
         jp <- jps
@@ -120,11 +117,14 @@ standardpoints jps = M.fromList $ do
         YES -> 1 ; NO -> 1 ; _ -> 0
   return ( toSolverID me, points )
 
+uppertrivial :: Function
 uppertrivial = Infinite
+
 getupperbound jp = case getSolverResult jp of
               BOUNDS bounds -> upper bounds
               YES -> Finite
               _ -> uppertrivial
+
 upperpoints jps = M.fromListWith (+) $ do
               me <- jps
               let greaterequals = length $ do
@@ -134,7 +134,9 @@ upperpoints jps = M.fromListWith (+) $ do
                   points = if getupperbound me == uppertrivial then 0 else greaterequals
               return ( toSolverID me , points )
 
+lowertrivial :: Function
 lowertrivial = Finite
+
 getlowerbound jp = case getSolverResult jp of
               BOUNDS bounds -> lower bounds
               NO -> Infinite

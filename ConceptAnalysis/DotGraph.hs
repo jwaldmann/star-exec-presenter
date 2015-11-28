@@ -12,7 +12,7 @@ import Data.GraphViz.Algorithms (transitiveReduction)
 import Data.GraphViz.Printing (renderDot, toDot)
 import ConceptAnalysis.FCA
 import ConceptAnalysis.FCAPreparation
-import Data.Set (fromList, showTree, isProperSubsetOf)
+import Data.Set (showTree, isProperSubsetOf)
 
 -- global_graph_attributes ::
 -- global_graph_attributes =

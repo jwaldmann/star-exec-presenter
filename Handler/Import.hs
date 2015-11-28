@@ -17,7 +17,6 @@ import Data.Conduit.Binary
 import Control.Monad.Trans.Resource
 import Control.Exception.Base
 import qualified Codec.Archive.Zip as Zip
-import qualified Codec.Compression.GZip as GZip
 
 import qualified Data.Text as T
 
