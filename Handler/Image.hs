@@ -10,7 +10,7 @@ import ConceptAnalysis.FCA
 import ConceptAnalysis.FCAPreparation
 
 
-getImageR :: MonadHandler Handler => JobID -> Handler TypedContent
+getImageR :: JobID -> Handler TypedContent
 getImageR jid = do
   jobResults <- getPersistJobResults jid
   let contextData = collectData $ getStarExecResults jobResults
