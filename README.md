@@ -2,21 +2,20 @@ A Web Application for Displaying Results of the Termination Competition
 -----------------------
 [![Circle CI](https://circleci.com/gh/rm--/star-exec-presenter.svg?style=svg)](https://circleci.com/gh/rm--/star-exec-presenter)
 
-The Intl. Termination Competition 2014 <http://termination-portal.org/wiki/Termination_Competition_2014> will be run on <http://www.starexec.org> . 
+The Intl. Termination Competition 2014 <http://termination-portal.org/wiki/Termination_Competition_2014> will be run on <http://www.starexec.org> .
 
 Our Web App will provide these extra features:
 
-* computation and display of results per category, 
+* computation and display of results per category,
   and medalists per meta-category
-* flexible 2-dimensional results tables 
-  (x-axis: solver, y-axis: benchmark) 
+* flexible 2-dimensional results tables
+  (x-axis: solver, y-axis: benchmark)
   (with filters for rows and columns, sorters, etc.)
-* caching (and permanent storage) of results 
+* caching (and permanent storage) of results
   (we intend to include also results of earlier competitions)
 
 1 Getting source
 ----------------
-There may be submodules, so:
 
     git clone git@github.com:rm--/star-exec-presenter.git
 
