@@ -7,20 +7,21 @@ import Data.List (elemIndex)
 import Data.Maybe (fromJust)
 import qualified Data.Text.Lazy as TL
 import           Data.Graph.Inductive (mkGraph, Gr, LNode, LEdge)
-import Data.GraphViz (graphToDot, GraphvizParams, nonClusteredParams)
+import qualified Data.GraphViz as G
 import Data.GraphViz.Algorithms (transitiveReduction)
 import Data.GraphViz.Printing (renderDot, toDot)
+import Data.GraphViz.Attributes.Complete as GAttr
 import ConceptAnalysis.FCA
-import ConceptAnalysis.FCAPreparation
+import ConceptAnalysis.FCAPreparation as FCA
 import Data.Set (showTree, isProperSubsetOf)
 
 -- global_graph_attributes ::
 -- global_graph_attributes =
 
 
-dottedGraph :: [Concept JobPairId Attribute] -> String
+dottedGraph :: [Concept JobPairId FCA.Attribute] -> String
 dottedGraph concept_lattice = do
-  let graph_with_trans_edges = graphToDot graphParams $ graph concept_lattice
+  let graph_with_trans_edges = G.graphToDot graphParams $ graph concept_lattice
   TL.unpack $ renderDot $ toDot $ transitiveReduction graph_with_trans_edges
 -- renderDot :: DotCode -> Text
 -- graphToDot :: (Ord cl, Graph gr) => GraphvizParams Node nl el cl l -> gr nl el -> DotGraph Node
@@ -41,5 +42,18 @@ getEdges concept_lattice = do
   -- math: ats concept < ats concept2 -> (ats concept) -> (ats concept2)
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
-graphParams :: GraphvizParams n TL.Text TL.Text () TL.Text
-graphParams = nonClusteredParams
+graphParams :: G.GraphvizParams n TL.Text TL.Text () TL.Text
+-- graphParams = nonClusteredParams
+graphParams = G.Params { G.isDirected       = True
+                        -- RandDir GAttr.FromBottom
+                       , G.globalAttributes = [G.GraphAttrs [GAttr.RankDir GAttr.FromLeft]]
+                       , G.clusterBy        = G.N
+                       , G.isDotCluster     = const True
+                       , G.clusterID        = const (G.Num $ G.Int 0)
+                       , G.fmtCluster       = const []
+                       -- , G.fmtNode          = const []
+                       ,G.fmtNode            = \ (_,l) ->
+                         -- GAttr.PlainText recommended for htmllabels
+                         [ GAttr.Shape GAttr.BoxShape]
+                       , G.fmtEdge          = const []
+                       }
