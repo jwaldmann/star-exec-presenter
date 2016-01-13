@@ -19,7 +19,7 @@
           <td> #{length $obs currConcept}
 
 <object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
-<!-- <img src="@{ImageR}"> -->
+<!-- <img src="@{ImageR $ jid}"> -->
 
 <h1>Concepts
 [
