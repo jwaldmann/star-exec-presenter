@@ -14,6 +14,8 @@ Our Web App will provide these extra features:
 * caching (and permanent storage) of results
   (we intend to include also results of earlier competitions)
 
+This branch is running at the moment [here](http://termcomp.imn.htwk-leipzig.de/).
+
 1 Getting source
 ----------------
 
