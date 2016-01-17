@@ -16,6 +16,9 @@ import ConceptAnalysis.FCA
 import Data.Set (isProperSubsetOf, toList)
 
 
+-- add wrapper for func chains like the following:
+-- GA.Label $ GA.HtmlLabel $ GAH.Text [GAH.Str "test label"]
+
 dottedGraph :: (Eq ob, Eq at, Show ob, Show at, Ord at) => [Concept ob at] -> String
 dottedGraph concept_lattice = do
   let graph_params = getGraphParams concept_lattice
@@ -39,13 +42,13 @@ getEdges concept_lattice = do
 
 getGraphParams :: (Integral n, Show n, Show at, Show ob) => [Concept ob at] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
 getGraphParams concept_lattice = G.Params {
-    G.isDirected       = True
-   , G.globalAttributes = [G.GraphAttrs [GA.RankDir GA.FromBottom]]
+   G.globalAttributes = [G.GraphAttrs [GA.RankDir GA.FromBottom]]
+   , G.isDirected       = True
    , G.clusterBy        = G.N
    , G.isDotCluster     = const True
    , G.clusterID        = const (G.Num $ G.Int 0)
    , G.fmtCluster       = const []
-   ,G.fmtNode           = \ (n, _) -> do
+   , G.fmtNode          = \ (n, _) -> do
      let concept = concept_lattice!!(fromIntegral n)
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
      [

@@ -276,9 +276,9 @@ getBenchmark :: StarExecConnection -> Int -> Handler (BSL.ByteString)
 getBenchmark _ bmId = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "GET"
-                      , queryString = "limit=-1"
-                      , path = getURL benchmarkPath [("{bmId}", show bmId)]
-                      }
+                , queryString = "limit=-1"
+                , path = getURL benchmarkPath [("{bmId}", show bmId)]
+                }
   resp <- sendRequest req
   return $ responseBody resp
 
