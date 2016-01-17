@@ -21,14 +21,14 @@ $newline never
     <body>
         <div class="container-fluid">
             <header>
+                <!-- build navigation bar -->
                 <a href="">current competition </a>
-                | <a href=@{ListCompetitionsR}>competitions </a>
-                | <a href=@{ListJobsR}>jobs </a>
-                | <a href=@{ListBenchmarksR}>benchmarks </a>
-                | <a href=@{ListSolversR}>solvers </a>
-                | <a href=@{ListJobPairsR}>job pairs </a>
-                | <a href=@{ListProofsR}>proofs </a>
-                | <a href=@{ListPostProcsR}>post processors </a>
+                $forall (route, routeName) <- navRoutes
+                    <!--current page gets no link in navigation bar-->
+                    $if route == fromJust currentRoute
+                      | <span>#{routeName} </span>
+                    $else
+                      | <a href=@{route}>#{routeName} </a>
                 <hr>
             <div id="main" role="main">
               ^{pageBody pc}

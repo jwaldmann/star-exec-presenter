@@ -28,11 +28,13 @@ import Yesod.Core.Types (Logger)
 --import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
 import Presenter.Auth (authSE)
 import Data.Text (Text)
+import qualified Data.Text.Lazy as TL
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
+import Data.Maybe
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -91,6 +93,16 @@ instance Yesod App where
         -- default-layout-wrapper is the entire page. Since the final
         -- value passed to hamletToRepHtml cannot be a widget, this allows
         -- you to use normal widget features in default-layout.
+
+        -- navigation bar elements
+        currentRoute <- getCurrentRoute
+        let routes = [
+                      (ListCompetitionsR, "competitions"),(ListJobsR, "jobs"),
+                      (ListBenchmarksR, "benchmarks"), (ListSolversR, "solvers"),
+                      (ListJobPairsR, "pairs"), (ListProofsR, "proofs"),
+                      (ListPostProcsR, "post processors")
+                     ]
+        let navRoutes = map (\(route, routeName) -> (route, TL.pack routeName)) routes
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR
