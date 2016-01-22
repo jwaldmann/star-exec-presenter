@@ -13,13 +13,14 @@ import Data.GraphViz.Printing (renderDot, toDot)
 import Data.GraphViz.Attributes.Complete as GA
 import Data.GraphViz.Attributes.HTML as GAH
 import ConceptAnalysis.FCA
-import Data.Set (isProperSubsetOf, toList)
+import Data.Set (isProperSubsetOf, toList, lookupLE)
+import ConceptAnalysis.FCAPreparation as FCAP
 
 
 -- add wrapper for func chains like the following:
 -- GA.Label $ GA.HtmlLabel $ GAH.Text [GAH.Str "test label"]
 
-dottedGraph :: (Eq ob, Eq at, Show ob, Show at, Ord at) => [Concept ob at] -> String
+dottedGraph :: (Eq ob, Show ob) => [Concept ob FCAP.Attribute] -> String
 dottedGraph concept_lattice = do
   let graph_params = getGraphParams concept_lattice
   let graph_with_trans_edges = G.graphToDot graph_params $ createGraph concept_lattice
@@ -40,7 +41,7 @@ getEdges concept_lattice = do
   -- math: ats concept < ats concept2 -> (ats concept) -> (ats concept2)
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
-getGraphParams :: (Integral n, Show n, Show at, Show ob) => [Concept ob at] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
+getGraphParams :: (Integral n, Show n) => [Concept ob FCAP.Attribute] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
 getGraphParams concept_lattice = G.nonClusteredParams {
    G.globalAttributes = [G.GraphAttrs
                           [
@@ -52,6 +53,7 @@ getGraphParams concept_lattice = G.nonClusteredParams {
    , G.isDirected       = True
    , G.fmtNode          = \ (n, _) -> do
      let concept = concept_lattice!!(fromIntegral n)
+     let atLabels = map properName . toList $ ats concept
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
      [
        GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing [ GAH.CellBorder 0] [
@@ -60,6 +62,6 @@ getGraphParams concept_lattice = G.nonClusteredParams {
        -- second row:
        GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ length $ obs concept]],
        -- third row:
-       GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ toList $ ats concept]]
+       GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show atLabels]]
       ]]
    }
