@@ -16,5 +16,5 @@ getImageR jid = do
   let contextData = collectData $ getStarExecResults jobResults
   let context = contextFromList contextData
   let concepts' = concepts context
-  svg_content <- liftIO $ readProcess "dot" [ "-Tsvg", "-Gsize=10,100" ] $ dottedGraph concepts'
+  svg_content <- liftIO $ readProcess "dot" ["-Tsvg"] $ dottedGraph concepts'
   sendResponse $ toTypedContent (typeSvg, toContent svg_content)

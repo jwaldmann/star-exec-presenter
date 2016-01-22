@@ -41,13 +41,15 @@ getEdges concept_lattice = do
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
 getGraphParams :: (Integral n, Show n, Show at, Show ob) => [Concept ob at] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
-getGraphParams concept_lattice = G.Params {
-   G.globalAttributes = [G.GraphAttrs [GA.RankDir GA.FromBottom]]
+getGraphParams concept_lattice = G.nonClusteredParams {
+   G.globalAttributes = [G.GraphAttrs
+                          [
+                            GA.RankDir GA.FromLeft,
+                            GA.Size GA.GSize {width=15, height=Nothing, desiredSize=False},
+                            GA.Tooltip " "
+                          ]
+                        ]
    , G.isDirected       = True
-   , G.clusterBy        = G.N
-   , G.isDotCluster     = const True
-   , G.clusterID        = const (G.Num $ G.Int 0)
-   , G.fmtCluster       = const []
    , G.fmtNode          = \ (n, _) -> do
      let concept = concept_lattice!!(fromIntegral n)
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
@@ -60,5 +62,4 @@ getGraphParams concept_lattice = G.Params {
        -- third row:
        GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ toList $ ats concept]]
       ]]
-   , G.fmtEdge          = const []
    }
