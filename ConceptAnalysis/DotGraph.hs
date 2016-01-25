@@ -94,7 +94,7 @@ getSolverResultColor solverResults
 replaceLabelWithColor :: Set TL.Text -> (Set TL.Text, Color)
 replaceLabelWithColor labels = do
   let solverResults = S.filter (\at -> "Result " `TL.isPrefixOf` at) labels
-  if S.null solverResults || length solverResults > 1
+  if length solverResults == 1
     then
-      (difference labels solverResults, toColor G.White)
-    else (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)
+      (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)
+    else (difference labels solverResults, toColor G.White)
