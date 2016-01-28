@@ -97,12 +97,16 @@ instance Yesod App where
         -- navigation bar elements
         currentRoute <- getCurrentRoute
         let routes = [
+                      (HomeR, "home"),
+                      (HomeR, "current competition"), --replace with correct route after tc15 merge
                       (ListCompetitionsR, "competitions"),(ListJobsR, "jobs"),
                       (ListBenchmarksR, "benchmarks"), (ListSolversR, "solvers"),
                       (ListJobPairsR, "pairs"), (ListProofsR, "proofs"),
-                      (ListPostProcsR, "post processors")
+                      (ListPostProcsR, "post processors"),
+                      (ConceptsR $ StarExecJobID 7239, "concept example")
                      ]
         let navRoutes = map (\(route, routeName) -> (route, TL.pack routeName)) routes
+
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR

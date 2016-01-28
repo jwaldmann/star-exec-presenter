@@ -22,13 +22,13 @@ $newline never
         <div class="container-fluid">
             <header>
                 <!-- build navigation bar -->
-                <a href="">current competition </a>
                 $forall (route, routeName) <- navRoutes
                     <!--current page gets no link in navigation bar-->
                     $if route == fromJust currentRoute
                       | <span>#{routeName} </span>
                     $else
                       | <a href=@{route}>#{routeName} </a>
+
                 <hr>
             <div id="main" role="main">
               ^{pageBody pc}
