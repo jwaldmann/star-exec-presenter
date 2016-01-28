@@ -135,7 +135,7 @@ library
                 ViewPatterns
 
     build-depends: base
-                 , cereal < 0.5
+                 , cereal
                  , yesod
                  , yesod-core
                  , yesod-auth
