@@ -1,13 +1,13 @@
 module Handler.Image where
 
+import FCA.DotGraph (dottedGraph)
+import FCA.Utils
+import FCA.StarExec
 import Import
-
-import System.Process (readProcess)
-import ConceptAnalysis.DotGraph (dottedGraph)
 import Presenter.PersistHelper
 import Presenter.Model.Entities()
-import ConceptAnalysis.FCA
-import ConceptAnalysis.FCAPreparation
+
+import System.Process (readProcess)
 
 
 getImageR :: JobID -> Handler TypedContent

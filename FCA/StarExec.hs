@@ -1,8 +1,10 @@
-module ConceptAnalysis.FCAPreparation where
+module FCA.StarExec where
 
 import Import
+
 import Data.List
 import Data.Text (append, pack)
+
 
 type JobPairId = Int
 

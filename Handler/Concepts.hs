@@ -9,8 +9,8 @@ import Presenter.PersistHelper
 import Presenter.Model.Entities()
 import Presenter.StarExec.JobData (queryJob)
 import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
-import ConceptAnalysis.FCA
-import ConceptAnalysis.FCAPreparation
+import FCA.Utils
+import FCA.StarExec
 
 -- route to show concepts of given JobID
 getConceptsR :: JobID -> Handler Html

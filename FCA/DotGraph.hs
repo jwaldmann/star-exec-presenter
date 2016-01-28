@@ -1,7 +1,7 @@
-module ConceptAnalysis.DotGraph where
+module FCA.DotGraph where
 
-import ConceptAnalysis.FCA
-import ConceptAnalysis.FCAPreparation as FCAP
+import FCA.Utils
+import FCA.StarExec as FSE
 import Import hiding (delete)
 import Presenter.Utils.Colors as C
 
@@ -22,7 +22,7 @@ import qualified Data.Text.Lazy as TL
 -- add wrapper for func chains like the following:
 -- GA.Label $ GA.HtmlLabel $ GAH.Text [GAH.Str "test label"]
 
-dottedGraph :: (Eq ob, Show ob) => [Concept ob FCAP.Attribute] -> String
+dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> String
 dottedGraph concept_lattice = do
   let graph_params = getGraphParams concept_lattice
   let graph_with_trans_edges = G.graphToDot graph_params $ createGraph concept_lattice
@@ -43,7 +43,7 @@ getEdges concept_lattice = do
   -- math: ats concept < ats concept2 -> (ats concept) -> (ats concept2)
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
-getGraphParams :: (Integral n, Show n) => [Concept ob FCAP.Attribute] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
+getGraphParams :: (Integral n, Show n) => [Concept ob FSE.Attribute] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
 getGraphParams concept_lattice = G.nonClusteredParams {
    G.globalAttributes = [G.GraphAttrs
                           [
@@ -57,16 +57,6 @@ getGraphParams concept_lattice = G.nonClusteredParams {
      let concept = concept_lattice!!(fromIntegral n)
      let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properName $ ats concept
 
-     --renderfunc <- getUrlRender
-     --toMaster <- getRouteToMaster
-     --aurl <- getCurrentRoute
-     --let surl = case aurl of
-     --  Just u  -> renderfunc $ toMaster u
-     --  Nothing -> ""
-     -- renderfunc <- getUrlRender
-     -- currentRoute <- getCurrentRoute
-     --toMaster <- getRouteToMaster
-     --let node_url = renderfunc $ toMaster ListCompetitionsR
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
      [
        GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing [ GAH.CellBorder 0, GAH.BGColor nodeColor] [
@@ -78,7 +68,6 @@ getGraphParams concept_lattice = G.nonClusteredParams {
        GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ toList atLabels]]
       ]]
    }
-
 
 getSolverResultColor :: T.Text -> Color
 getSolverResultColor solverResults

@@ -1,4 +1,4 @@
-module ConceptAnalysis.FCA where
+module FCA.Utils where
 
 import Import
 import Control.Monad (guard)

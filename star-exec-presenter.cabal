@@ -19,9 +19,9 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
-                     ConceptAnalysis.FCA
-                     ConceptAnalysis.FCAPreparation
-                     ConceptAnalysis.DotGraph
+                     FCA.Utils
+                     FCA.StarExec
+                     FCA.DotGraph
                      Handler.Home
                      Handler.Control
                      Handler.ListHiddenCompetitions
