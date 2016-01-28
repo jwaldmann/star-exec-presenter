@@ -1,21 +1,22 @@
 module ConceptAnalysis.DotGraph where
 
+import ConceptAnalysis.FCA
+import ConceptAnalysis.FCAPreparation as FCAP
 import Import hiding (delete)
+import Presenter.Utils.Colors as C
 
-import Control.Monad (guard)
-import Data.Maybe (fromJust)
-import Data.List (elemIndex)
-import qualified Data.Text.Lazy as TL
-import           Data.Graph.Inductive (mkGraph, Gr, LNode, LEdge)
-import qualified Data.GraphViz as G
-import Data.GraphViz.Algorithms (transitiveReduction)
-import Data.GraphViz.Printing (renderDot, toDot)
+import Control.Monad
+import Data.Graph.Inductive hiding (getNodes)
+import Data.GraphViz as G
+import Data.GraphViz.Algorithms
 import Data.GraphViz.Attributes.Complete as GA
 import Data.GraphViz.Attributes.HTML as GAH
-import ConceptAnalysis.FCA
+import Data.GraphViz.Printing
+import Data.List as L
+import Data.Maybe
 import Data.Set as S
-import ConceptAnalysis.FCAPreparation as FCAP
-import Presenter.Utils.Colors as C
+import Data.Text as T hiding (length, map)
+import qualified Data.Text.Lazy as TL
 
 
 -- add wrapper for func chains like the following:
@@ -31,7 +32,7 @@ createGraph :: (Eq ob, Eq at, Show at, Ord at) => [Concept ob at] -> (Gr TL.Text
 createGraph concept_lattice = mkGraph (getNodes concept_lattice) $ getEdges concept_lattice
 
 getNodes :: (Eq ob, Eq at, Show at) => [Concept ob at] -> [LNode TL.Text]
-getNodes concept_lattice = Import.map
+getNodes concept_lattice = L.map
  (\c -> (fromJust $ elemIndex c concept_lattice, "")) concept_lattice
 
 getEdges :: (Eq ob, Eq at, Ord at) => [Concept ob at] -> [LEdge TL.Text]
@@ -79,21 +80,21 @@ getGraphParams concept_lattice = G.nonClusteredParams {
    }
 
 
-getSolverResultColor :: TL.Text -> Color
+getSolverResultColor :: T.Text -> Color
 getSolverResultColor solverResults
-    | TL.isInfixOf (TL.fromStrict "YES") solverResults = C.colorYes
-    | TL.isInfixOf (TL.fromStrict "NO") solverResults = C.colorNo
-    | TL.isInfixOf (TL.fromStrict "MAYBE") solverResults  = C.colorMaybe
-    | TL.isInfixOf (TL.fromStrict "CERTIFIED") solverResults  = C.colorCertified
-    | TL.isInfixOf (TL.fromStrict "BOUNDS") solverResults  = C.colorAnything --no color for bounds?
-    | TL.isInfixOf (TL.fromStrict "ERROR") solverResults  = C.colorError
+    | T.isInfixOf "YES" solverResults = C.colorYes
+    | T.isInfixOf "NO" solverResults = C.colorNo
+    | T.isInfixOf "MAYBE" solverResults  = C.colorMaybe
+    | T.isInfixOf "CERTIFIED" solverResults  = C.colorCertified
+    | T.isInfixOf "BOUNDS" solverResults  = C.colorAnything --no color for bounds?
+    | T.isInfixOf "ERROR" solverResults  = C.colorError
     | otherwise = C.colorAnything
     -- where MAYBE = TL.isInfixOf (TL.fromStrict "MAYBE") solverResults
 
 
-replaceLabelWithColor :: Set TL.Text -> (Set TL.Text, Color)
+replaceLabelWithColor :: Set T.Text -> (Set T.Text, Color)
 replaceLabelWithColor labels = do
-  let solverResults = S.filter (\at -> "Result " `TL.isPrefixOf` at) labels
+  let solverResults = S.filter (\at -> "Result " `T.isPrefixOf` at) labels
   if length solverResults == 1
     then
       (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)

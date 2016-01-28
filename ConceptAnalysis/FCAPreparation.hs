@@ -1,15 +1,14 @@
 module ConceptAnalysis.FCAPreparation where
 
-import Import as I
+import Import
 import Data.List
-import Data.Text.Lazy as TL hiding (map, zip)
-import Presenter.Utils.Colors as C
+import Data.Text (append, pack)
 
 type JobPairId = Int
 
 data Attribute =
-  AJobResultInfoSolver I.Text
-   | AJobResultInfoConfiguration I.Text
+  AJobResultInfoSolver Text
+   | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
  deriving (Eq, Ord, Show)
@@ -41,15 +40,15 @@ evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
 -- proper name for template table columns
-properName :: Attribute -> TL.Text
-properName (AJobResultInfoSolver name) = TL.append "Solver " $ fromStrict name
-properName (AJobResultInfoConfiguration config) = TL.append "Solver config " $ fromStrict config
+properName :: Attribute -> Text
+properName (AJobResultInfoSolver name) = append "Solver " name
+properName (AJobResultInfoConfiguration config) = append "Solver config " config
 properName (ASlowCpuTime False) = "CPU time <= 10s"
 properName (ASlowCpuTime True) = "CPU time > 10s"
 properName (ASolverResult YES) = "Result YES"
 properName (ASolverResult NO) = "Result NO"
 properName (ASolverResult MAYBE) = "Result MAYBE"
-properName (ASolverResult (OTHER text)) =  TL.append "Result OTHER " $ fromStrict text
+properName (ASolverResult (OTHER text)) = append "Result OTHER " text
 properName (ASolverResult (BOUNDS b)) = append "Result " $ pack $ show b
 properName (ASolverResult CERTIFIED) = "Result Certified"
 properName (ASolverResult ERROR) = "Result Error"
