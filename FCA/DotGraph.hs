@@ -61,11 +61,11 @@ getGraphParams concept_lattice = G.nonClusteredParams {
      [
        GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing [ GAH.CellBorder 0, GAH.BGColor nodeColor] [
        -- first row:
-       GAH.Cells [GAH.LabelCell [HRef "http://example.com"] $ GAH.Text [GAH.Str $ TL.pack $ show n]],
+       GAH.Cells [GAH.LabelCell [HRef "http://example.com"] $ GAH.Text [htmlTextItemWrapper n]],
        -- second row:
-       GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ length $ obs concept]],
+       GAH.Cells [GAH.LabelCell [] $ GAH.Text [htmlTextItemWrapper $ length $ obs concept]],
        -- third row:
-       GAH.Cells [GAH.LabelCell [] $ GAH.Text [GAH.Str $ TL.pack $ show $ toList atLabels]]
+       GAH.Cells [GAH.LabelCell [] $ GAH.Text [htmlTextItemWrapper $ toList atLabels]]
       ]]
    }
 
@@ -88,3 +88,8 @@ replaceLabelWithColor labels = do
     then
       (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)
     else (difference labels solverResults, toColor G.White)
+
+
+htmlTextItemWrapper :: Show a => a -> TextItem
+htmlTextItemWrapper string = GAH.Str $ TL.pack $ show string
+
