@@ -2,7 +2,7 @@ module Handler.Flexible_Table where
 
 import Import
 
-import qualified Handler.Colors as C
+import qualified Presenter.Utils.Colors as C
 
 import StarExec.Types 
 import StarExec.JobData ( queryManyJobs )
