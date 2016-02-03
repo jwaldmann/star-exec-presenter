@@ -19,9 +19,6 @@ import Data.Text as T hiding (length, map)
 import qualified Data.Text.Lazy as TL
 
 
--- add wrapper for func chains like the following:
--- GA.Label $ GA.HtmlLabel $ GAH.Text [GAH.Str "test label"]
-
 dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> String
 dottedGraph concept_lattice = do
   let graph_params = getGraphParams concept_lattice
@@ -92,4 +89,3 @@ replaceLabelWithColor labels = do
 
 htmlTextItemWrapper :: Show a => a -> TextItem
 htmlTextItemWrapper string = GAH.Str $ TL.pack $ show string
-
