@@ -10,6 +10,8 @@ colorNo :: C.Color
 colorNo = C.RGB  0x22 0x8B 0x22
 colorMaybe :: C.Color
 colorMaybe = C.RGB 0xFF 0xFF 0x99
+colorBounds :: C.Color
+colorBounds = C.RGB 0xB0 0xED 0xEA
 colorCertified :: C.Color
 colorCertified = C.RGB 0x5C 0xB8 0x5C
 colorError :: C.Color

@@ -51,6 +51,6 @@ properName (ASolverResult YES) = "Result YES"
 properName (ASolverResult NO) = "Result NO"
 properName (ASolverResult MAYBE) = "Result MAYBE"
 properName (ASolverResult (OTHER text)) = append "Result OTHER " text
-properName (ASolverResult (BOUNDS b)) = append "Result " $ pack $ show b
+properName (ASolverResult (BOUNDS b)) = append "Result BOUNDS " $ pack $ show b
 properName (ASolverResult CERTIFIED) = "Result Certified"
 properName (ASolverResult ERROR) = "Result Error"

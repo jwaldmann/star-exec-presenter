@@ -75,7 +75,7 @@ getSolverResultColor solverResults
     | T.isInfixOf "NO" solverResults = C.colorNo
     | T.isInfixOf "MAYBE" solverResults  = C.colorMaybe
     | T.isInfixOf "CERTIFIED" solverResults  = C.colorCertified
-    | T.isInfixOf "BOUNDS" solverResults  = C.colorAnything --no color for bounds?
+    | T.isInfixOf "BOUNDS" solverResults  = C.colorBounds
     | T.isInfixOf "ERROR" solverResults  = C.colorError
     | otherwise = C.colorAnything
     -- where MAYBE = TL.isInfixOf (TL.fromStrict "MAYBE") solverResults
