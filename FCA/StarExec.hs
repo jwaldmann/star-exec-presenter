@@ -1,6 +1,9 @@
 module FCA.StarExec where
 
+import FCA.Utils
 import Import
+import Presenter.Model.Entities()
+import Presenter.PersistHelper
 
 import Data.List
 import Data.Text (append, pack)
@@ -14,6 +17,13 @@ data Attribute =
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
  deriving (Eq, Ord, Show)
+
+
+-- get context of job results by given JobID
+jobResultsContext:: JobID -> Handler (Context JobPairId Attribute)
+jobResultsContext jid = do
+  jobResults <- getPersistJobResults jid
+  return $ contextFromList . collectData $ getStarExecResults jobResults
 
 -- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
