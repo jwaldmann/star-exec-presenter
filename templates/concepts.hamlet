@@ -17,32 +17,6 @@
               <td>
           <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
+<div>
+  <a href=@{ImageR $ jid}>Hasse diagram
 <object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
-
-<h1>Concepts
-[
-$forall c <- concepts'
-  Concept (#{show $ obs c}) (#{show $ ats c}),
-]
-
-<h1>Objects
-<ul>
-$forall k <- objects context
-  <li> #{show k}
-  #{show $ getAttributes context $ Set.fromList [k]}
-
-<h1>Attributes
-<ul>
-$forall k <- attributes context
-  <li> #{show k}
-  #{show $ getObjects context $ Set.fromList [k]}
-
-<h1>ContextData
-<ul>
-$forall obj <- contextData
-  <li> #{show obj}
-
-<h1>Original records
-<ul>
-$forall jobResult <- getStarExecResults jobResults
-  <li> #{show jobResult}
