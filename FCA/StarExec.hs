@@ -53,14 +53,17 @@ evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
 -- proper name for template table columns
 properName :: Attribute -> Text
-properName (AJobResultInfoSolver name) = append "Solver " name
-properName (AJobResultInfoConfiguration config) = append "Solver config " config
-properName (ASlowCpuTime False) = "CPU time <= 10s"
-properName (ASlowCpuTime True) = "CPU time > 10s"
-properName (ASolverResult YES) = "Result YES"
-properName (ASolverResult NO) = "Result NO"
-properName (ASolverResult MAYBE) = "Result MAYBE"
-properName (ASolverResult (OTHER text)) = append "Result OTHER " text
-properName (ASolverResult (BOUNDS b)) = append "Result BOUNDS " $ pack $ show b
-properName (ASolverResult CERTIFIED) = "Result Certified"
-properName (ASolverResult ERROR) = "Result Error"
+properName at = case at of
+ (AJobResultInfoSolver name)          -> append "Solver " name
+ (AJobResultInfoConfiguration config) -> append "Solver config " config
+ (ASlowCpuTime fast)    -> case fast of
+                            False         -> "CPU time <= 10s"
+                            True          -> "CPU time > 10s"
+ (ASolverResult result) -> case result of
+                            YES           -> "Result YES"
+                            NO            -> "Result NO"
+                            MAYBE         -> "Result MAYBE"
+                            (BOUNDS b)    -> append "Result BOUNDS " $ pack $ show b
+                            CERTIFIED     -> "Result Certified"
+                            ERROR         -> "Result Error"
+                            (OTHER text)  -> append "Result OTHER " text

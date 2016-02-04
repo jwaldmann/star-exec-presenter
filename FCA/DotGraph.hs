@@ -68,14 +68,20 @@ getGraphParams concept_lattice = G.nonClusteredParams {
 
 getSolverResultColor :: T.Text -> Color
 getSolverResultColor solverResults
-    | T.isInfixOf "YES" solverResults = C.colorYes
-    | T.isInfixOf "NO" solverResults = C.colorNo
-    | T.isInfixOf "MAYBE" solverResults  = C.colorMaybe
-    | T.isInfixOf "CERTIFIED" solverResults  = C.colorCertified
-    | T.isInfixOf "BOUNDS" solverResults  = C.colorBounds
-    | T.isInfixOf "ERROR" solverResults  = C.colorError
+    | containsYes solverResults = C.colorYes
+    | containsNo solverResults = C.colorNo
+    | containsMaybe solverResults  = C.colorMaybe
+    | containsBounds solverResults  = C.colorBounds
+    | containsCertified solverResults  = C.colorCertified
+    | containsError solverResults  = C.colorError
     | otherwise = C.colorAnything
-    -- where MAYBE = TL.isInfixOf (TL.fromStrict "MAYBE") solverResults
+    where
+      containsYes = T.isInfixOf "YES"
+      containsNo = T.isInfixOf "NO"
+      containsMaybe = T.isInfixOf "MAYBE"
+      containsBounds = T.isInfixOf "BOUNDS"
+      containsCertified = T.isInfixOf "CERTIFIED"
+      containsError = T.isInfixOf "ERROR"
 
 
 replaceLabelWithColor :: Set T.Text -> (Set T.Text, Color)
