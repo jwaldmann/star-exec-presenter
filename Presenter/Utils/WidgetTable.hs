@@ -175,9 +175,11 @@ predecessors xs = do
   (pre, Just x : post) <- splits xs
   return $ pre ++ Nothing : post
 
+splits :: [a] -> [([a], [a])]
 splits xs = zip (inits xs) (tails xs)
 
--- | ignore nodes with exactly one successor
+-- ignore nodes with exactly one successor
+remove_units :: G.DynGraph gr => gr a () -> gr a ()
 remove_units g =
   case G.gsel (\ c -> 1 == length (G.suc' c)) g of
     c : _ -> remove_units

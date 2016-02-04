@@ -452,7 +452,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
     -- liftIO $ print req
 
     resp <- sendRequest req
-    let ids = find_job_numbers resp
+    let ids = findJobNumber resp
 
     logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show ids)
 
@@ -465,8 +465,8 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
               if i > 0 then Just [i] else Nothing
       return $ j { jobids = ji }
 
-
-find_job_numbers resp =
+findJobNumber :: Read t => Response body -> [t]
+findJobNumber resp =
     -- the job ids are in the returned cookie.
     -- if there are more, then it's a comma-separated list
     -- Cookie {cookie_name = "New_ID", cookie_value = "2818", ... }
@@ -495,10 +495,10 @@ pauseJobs ids = do
   logWarnN $ "done pausing jobs " <> T.pack (show ids)
 
 pauseJob :: JobID -> Handler ()
-pauseJob (StarExecJobID id) = do
+pauseJob (StarExecJobID jid) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
-                , path = getURL pausePath [("{id}", show id)]
+                , path = getURL pausePath [("{id}", show jid)]
                 }
   resp <- sendRequest req
   logWarnN $ T.pack $ show resp
@@ -511,10 +511,10 @@ resumeJobs ids = do
   logWarnN $ "done resuming jobs " <> T.pack (show ids)
 
 resumeJob :: JobID -> Handler ()
-resumeJob (StarExecJobID id) = do
+resumeJob (StarExecJobID jid) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
-                , path = getURL resumePath [("{id}", show id)]
+                , path = getURL resumePath [("{id}", show jid)]
                 }
   resp <- sendRequest req
   logWarnN $ T.pack $ show resp
@@ -526,10 +526,11 @@ rerunJobs ids = do
   _ <- forM ids $ rerunJob
   logWarnN $ "done re-running jobs " <> T.pack (show ids)
 
-rerunJob (StarExecJobID id) = do
+rerunJob :: JobID -> Handler ()
+rerunJob (StarExecJobID jid) = do
   sec <- parseUrl starExecUrl
   let req = sec { method = "POST"
-                , path = getURL rerunPath [("{id}", show id)]
+                , path = getURL rerunPath [("{id}", show jid)]
                 }
   resp <- sendRequest req
   logWarnN $ T.pack $ show resp
@@ -715,7 +716,7 @@ encodeArrayIntS name xs = do
   x <- xs
   return (name , show x)
 
-
+encodeParams :: Monad m => [(BSC.ByteString, String)] -> Request -> m Request
 encodeParams kvs req = return
   $ urlEncodedBody ( do (k,v) <- kvs; return (k, BSC.pack v) )
   $ req
