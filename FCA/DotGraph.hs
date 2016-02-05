@@ -37,7 +37,7 @@ getEdges concept_lattice = do
   concept <- concept_lattice
   concept2 <- concept_lattice
   guard (isProperSubsetOf (ats concept) (ats concept2))
-  -- math: ats concept < ats concept2 -> (ats concept) -> (ats concept2)
+  -- math: ats concept < ats concept2 --> Edge((ats concept), (ats concept2))
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
 getGraphParams :: (Integral n, Show n) => [Concept ob FSE.Attribute] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
@@ -52,7 +52,7 @@ getGraphParams concept_lattice = G.nonClusteredParams {
    , G.isDirected       = True
    , G.fmtNode          = \ (n, _) -> do
      let concept = concept_lattice!!(fromIntegral n)
-     let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properName $ ats concept
+     let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properAttrName $ ats concept
 
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
      [

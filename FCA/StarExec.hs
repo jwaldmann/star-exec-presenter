@@ -51,9 +51,9 @@ getAttributeCollection jobResults = do
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
 evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
--- proper name for template table columns
-properName :: Attribute -> Text
-properName at = case at of
+-- proper names for attributes in template
+properAttrName :: Attribute -> Text
+properAttrName at = case at of
  (AJobResultInfoSolver name)          -> append "Solver " name
  (AJobResultInfoConfiguration config) -> append "Solver config " config
  (ASlowCpuTime fast)    -> case fast of
@@ -64,6 +64,6 @@ properName at = case at of
                             NO            -> "Result NO"
                             MAYBE         -> "Result MAYBE"
                             (BOUNDS b)    -> append "Result BOUNDS " $ pack $ show b
-                            CERTIFIED     -> "Result Certified"
-                            ERROR         -> "Result Error"
+                            CERTIFIED     -> "Result CERTIFIED"
+                            ERROR         -> "Result ERROR"
                             (OTHER text)  -> append "Result OTHER " text

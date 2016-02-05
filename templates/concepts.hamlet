@@ -2,7 +2,7 @@
       <thead>
         <th> concept number
         $forall at <- attributes context
-          <th> #{properName at}
+          <th> #{properAttrName at}
         <th> Num attrs (of #{length $ attributes context})
         <th> Num objs (of #{length $ objects context})
       <tbody>
