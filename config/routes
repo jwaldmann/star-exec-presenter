@@ -75,5 +75,5 @@
 /competition/#CompetitionInfoId/text CompetitionTextR GET POST
 /resolve/#DOI ResolveR GET
 
-/concepts/#JobID ConceptsR GET
+/concepts/#JobID ConceptsR GET POST
 /image/#JobID ImageR GET

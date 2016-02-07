@@ -1,3 +1,11 @@
+<h2>Attributes for #{show jid}
+<ul>
+$forall at <- attributes context
+  <li> #{properAttrName at}
+<h2>chosen attributes:
+
+
+
 <table class="table table-bordered table-striped">
       <thead>
         <th> concept number
