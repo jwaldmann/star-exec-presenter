@@ -1,4 +1,4 @@
-.PHONY: create-db, install
+.PHONY: create-db deploy install
 
 help:
 	@echo "Please use 'make <target>' where <target> is one of"
@@ -22,6 +22,9 @@ install:
 deploy:
 	cabal clean
 	cabal configure && cabal build
-	cp dist/build/star-exec-presenter/star-exec-presenter /var/star-exec-presenter
-	cp -R config/ /var/star-exec-presenter
-	cp -R static/ /var/star-exec-presenter
+	sudo star-exec-presenter stop
+	sudo cp dist/build/star-exec-presenter/star-exec-presenter /var/star-exec-presenter
+	sudo cp -R config/ /var/star-exec-presenter
+	sudo cp -R static/ /var/star-exec-presenter
+	sudo star-exec-presenter start
+	sudo nginx start
