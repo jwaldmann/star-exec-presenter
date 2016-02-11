@@ -1,6 +1,3 @@
-<form method=post action=@{ConceptsR $ jid}>
-  <select name="attributes of #{show jid}>" multiple size="#{length attrs}">
-    $forall at <- attrs
-      <option selected name=#{properAttrName at}>#{properAttrName at}
-  <br>
+<form method=post action=@{ConceptsR $ jid} enctype=#{enctype}>
+  ^{widget}
   <button type="submit" .btn .btn-primary>Choose

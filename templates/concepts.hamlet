@@ -3,7 +3,7 @@
 $forall at <- attributes context
   <li> #{properAttrName at}
 <h2>chosen attributes:
-
+#{show $ attributeSet $ fromJust chosenAttributes}
 
 
 <table class="table table-bordered table-striped">

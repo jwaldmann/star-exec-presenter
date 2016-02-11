@@ -16,7 +16,7 @@ data Attribute =
    | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
- deriving (Eq, Ord, Show)
+  deriving (Eq, Ord, Show)
 
 
 -- get context of job results by given JobID

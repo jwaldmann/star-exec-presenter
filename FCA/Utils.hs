@@ -1,6 +1,7 @@
 module FCA.Utils where
 
 import Import
+
 import Control.Monad (guard)
 import Data.List
 import           Data.Map.Strict (Map)
