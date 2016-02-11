@@ -1,11 +1,10 @@
 module Handler.Concepts where
 
 import Import
-import Presenter.StarExec.JobData (queryJob)
-import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
+-- import Presenter.StarExec.JobData (queryJob)
+-- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 import FCA.Utils
 import FCA.StarExec
-
 
 import Data.List (elemIndex)
 import Data.Maybe
@@ -18,8 +17,9 @@ import Yesod.Form.Bootstrap3
 data AttributeChoice = AttributeChoice
   { attributeSet :: [Attribute] }
   deriving (Eq)
- 
 
+
+-- route to multiselect with attributes of JobID
 getConceptsR :: JobID -> Handler Html
 getConceptsR jid =  do
   context <- jobResultsContext jid
@@ -40,14 +40,10 @@ postConceptsR jid = do
   let chosenAttributes = case result of
         FormSuccess ca -> Just ca
         _ -> Nothing
-  let newAttributes = attributeSet $ fromJust chosenAttributes
-
-
-  -- set chosen attributes and calculate new context
-  -- calculate concepts with perhabs reduced amount of concepts
+  let newAttributes = Set.fromList $ attributeSet $ fromJust chosenAttributes
   -- if old attributeSet == new attributeSet do nothing
 
-  let concepts' = concepts context
+  let concepts' = concepts $ filteredContext context newAttributes
   defaultLayout $ do
     -- fetch job from starexec if not present in database
     -- when (qStatus /= Latest)
@@ -56,34 +52,14 @@ postConceptsR jid = do
     $(widgetFile "concepts")
 
 
-
 attributeForm :: [(Text, Attribute)] -> Form AttributeChoice
 attributeForm options = renderBootstrap3 BootstrapBasicForm $ AttributeChoice
-  --pre-select all options
+  -- pre-select all options
+  -- change widget size to length options
   <$> areq (multiSelectFieldList options) "chooseAttributes" Nothing
   --where attributes = [("1"::Text, (AJobResultInfoSolver "woohoo"))]
 
 
-attributeOptions :: [(Text, Attribute)]
-attributeOptions = [ ("1"::Text, (AJobResultInfoSolver "woohoo"))
-                   , ("2"::Text, (AJobResultInfoConfiguration "woooo"))
-                   ]
-
 attrOptionsFromContext :: Set Attribute -> [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   map (\at -> (properAttrName at, at)) $ Set.toList attrs
-
-
--- <select name="attributes of #{show jid}>" multiple size="#{length attrs}">
---    $forall at <- attrs
---      <option selected name=#{properAttrName at}>#{properAttrName at}
---  <br>
-
-
-
-
-
-
-
-
-
