@@ -1,10 +1,16 @@
-.PHONY: create-db deploy install
+.PHONY: clean create-db deploy install
 
 help:
 	@echo "Please use 'make <target>' where <target> is one of"
-	@echo "		 install          to install star-exec-presenter"
+	@echo "		 clean            to clean up cabal sandbox"
 	@echo "		 create-db        to create a new PostgreSQL user and database"
 	@echo "		 deploy           to create executable and move to correct place"
+	@echo "		 install          to install star-exec-presenter"
+
+
+clean:
+	rm -R .cabal-sandbox
+	rm cabal.sandbox.config
 
 
 create-db:
@@ -22,9 +28,9 @@ install:
 deploy:
 	cabal clean
 	cabal configure && cabal build
-	sudo star-exec-presenter stop
+	sudo service star-exec-presenter stop
 	sudo cp dist/build/star-exec-presenter/star-exec-presenter /var/star-exec-presenter
 	sudo cp -R config/ /var/star-exec-presenter
 	sudo cp -R static/ /var/star-exec-presenter
-	sudo star-exec-presenter start
-	sudo nginx start
+	sudo service star-exec-presenter start
+	sudo service nginx start
