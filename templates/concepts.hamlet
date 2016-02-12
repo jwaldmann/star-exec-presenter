@@ -10,7 +10,7 @@ $forall at <- attributes context
 <table class="table table-bordered table-striped">
       <thead>
         <th> concept number
-        $forall at <- attributes context
+        $forall at <- newAttributes
           <th> #{properAttrName at}
         <th> Num attrs (of #{length $ attributes context})
         <th> Num objs (of #{length $ objects context})
@@ -19,7 +19,7 @@ $forall at <- attributes context
       $forall currConcept <- concepts'
         <tr>
           <td> #{show $ fromJust $ elemIndex currConcept concepts'}
-          $forall at <- attributes context
+          $forall at <- newAttributes
             $if elem at $ats currConcept
               <td>X
             $else
@@ -27,5 +27,10 @@ $forall at <- attributes context
           <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
 <div>
+  #{svg_contents}
+
+<!--
+<div>
   <a href=@{ImageR $ jid}>Hasse diagram
 <object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
+-->
