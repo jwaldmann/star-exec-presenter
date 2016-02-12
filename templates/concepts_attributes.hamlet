@@ -1,3 +1,2 @@
-<form method=post action=@{ConceptsR $ jid} enctype=#{enctype}>
+<form class="form-horizontal" method=post action=@{ConceptsR $ jid} enctype=#{enctype}>
   ^{widget}
-  <button type="submit" .btn .btn-primary>Choose

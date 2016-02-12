@@ -54,7 +54,7 @@ evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 -- proper names for attributes in template
 properAttrName :: Attribute -> Text
 properAttrName at = case at of
- (AJobResultInfoSolver name)          -> append "Solver " name
+ (AJobResultInfoSolver name)          -> append "Solver name " name
  (AJobResultInfoConfiguration config) -> append "Solver config " config
  (ASlowCpuTime fast)    -> case fast of
                             False         -> "CPU time <= 10s"
