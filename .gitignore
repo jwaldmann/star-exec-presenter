@@ -7,11 +7,10 @@ config/client_session_key.aes
 *.dyn_hi
 *.dyn_o
 *.sqlite3
+.stack-work/*
 .hsenv*
 cabal-dev/
 yesod-devel/
-.cabal-sandbox
-cabal.sandbox.config
 .DS_Store
 *.swp
 .dir-locals.el

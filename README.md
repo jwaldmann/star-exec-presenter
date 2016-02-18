@@ -24,28 +24,21 @@ This branch is running at the moment [here](http://termcomp.imn.htwk-leipzig.de/
 
 2 Installation
 --------------
-    cabal sandbox init
-    cabal install alex happy yesod-bin
-    cabal install --enable-tests .
+
+    make install
 
 You also need [Graphviz](http://www.graphviz.org/Download.php) on your system.
 
-3 Database
-----------
-  create user:
+3 Create database user and database:
+------------------------------------
 
-    sudo -u postgres createuser -P yesod
-
-  create db:
-
-    sudo -u postgres createdb -O yesod yesod
-
+    make create-db
 
 4 Credentials
 -------------
 
-Please create the file '.star_exec' in your home directory with your [starexec account creadentials](https://www.starexec.org/starexec/secure/index.jsp).
-The file must contain the following line:
+Please create the file '.star_exec' in your home directory with your [starexec account credentials](https://www.starexec.org/starexec/secure/index.jsp).
+This file must contain the following line:
 
     Login ">login<" ">password<"
 
@@ -53,7 +46,7 @@ The file must contain the following line:
 5 Usage
 -------
 
-    yesod devel
+    make run
 
 
 Notes

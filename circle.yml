@@ -4,13 +4,16 @@ machine:
     # required for tests
     - echo "Login \" \" \" \"" > ~/.star_exec
   ghc:
-    version: 7.10.2
+    version: 7.10.3
 
 ## Customize dependencies
 dependencies:
+  cache_directories:
+    - "~/.stack"
   pre:
-    - cabal --version
-    - ghc --version
+    - wget https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-x86_64-linux.gz -O /tmp/stack.gz
+    - gunzip /tmp/stack.gz && chmod +x /tmp/stack
+    - sudo mv /tmp/stack /usr/bin/stack
   override:
     - make install
 
@@ -23,4 +26,4 @@ database:
 ## Customize test commands
 test:
   override:
-    - cabal test
+    - stack test
