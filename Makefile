@@ -22,7 +22,6 @@ install:
 	stack setup
 	stack build yesod-bin-1.4.17.1 --verbosity silent
 	stack build --verbosity silent
-	stack exec yesod devel
 
 
 deploy:
