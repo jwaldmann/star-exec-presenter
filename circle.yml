@@ -3,17 +3,16 @@ machine:
   pre:
     # required for tests
     - echo "Login \" \" \" \"" > ~/.star_exec
-  ghc:
-    version: 7.10.3
 
 ## Customize dependencies
 dependencies:
   cache_directories:
     - "~/.stack"
+    - "~/star-exec-presenter/.stack-work"
   pre:
-    - wget https://github.com/commercialhaskell/stack/releases/download/v0.1.2.0/stack-0.1.2.0-x86_64-linux.gz -O /tmp/stack.gz
-    - gunzip /tmp/stack.gz && chmod +x /tmp/stack
-    - sudo mv /tmp/stack /usr/bin/stack
+    - wget https://github.com/commercialhaskell/stack/releases/download/v0.1.6.0/stack-0.1.6.0-linux-x86_64.tar.gz -O /tmp/stack.tar.gz
+    - tar xvzf /tmp/stack.tar.gz -C /tmp
+    - sudo mv /tmp/stack-0.1.6.0-linux-x86_64/stack /usr/bin/stack
   override:
     - make install
 
