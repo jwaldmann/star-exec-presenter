@@ -38,7 +38,7 @@ getConceptsR jid =  do
   let attrs = attributes context
   let options = attrOptionsFromContext attrs
   (widget, enctype) <- generateFormPost $ renderBootstrap3
-    (BootstrapHorizontalForm (ColMd 1) (ColMd 1) (ColSm 0) (ColSm 0)) $ attributeForm options
+    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
   defaultLayout $ do
     when (qStatus /= Latest)
       -- fetch job from starexec if not present in database
@@ -53,7 +53,7 @@ postConceptsR jid = do
   let attrs = attributes context
   let options = attrOptionsFromContext attrs
   ((result, _), _) <- runFormPost $ renderBootstrap3 
-    (BootstrapHorizontalForm (ColMd 1) (ColMd 1) (ColSm 0) (ColSm 0)) $ attributeForm options
+    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
   let chosenAttributes = case result of
         FormSuccess ca -> Just ca
         _ -> Nothing
