@@ -1,2 +1,5 @@
+
+<p>
+  <em>Choose the attributes you are interested in. You can see all combinations of these attributes on the next page.
 <form class="form-horizontal" method=post action=@{ConceptsR $ jid} enctype=#{enctype}>
   ^{widget}

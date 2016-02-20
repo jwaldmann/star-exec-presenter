@@ -79,10 +79,10 @@ attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoice
 attributeForm options =  AttributeChoice
   -- pre-select all options
   -- change widget size to length options
-  <$> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
+  <$> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" options) "Solver configs" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing
   <* bootstrapSubmit (BootstrapSubmit {
       bsClasses="btn btn-primary",
       bsValue="choose",
