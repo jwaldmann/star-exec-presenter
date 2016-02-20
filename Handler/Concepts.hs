@@ -22,10 +22,10 @@ import Yesod.Form.Bootstrap3
 
 
 data AttributeChoice = AttributeChoice
-  { chosenResults :: [Attribute]
-  , chosenCpu :: [Attribute]
-  , chosenSolver :: [Attribute]
-  , chosenConfig :: [Attribute]
+  { chosenResults :: Maybe [Attribute]
+  , chosenCpu :: Maybe [Attribute]
+  , chosenSolver :: Maybe [Attribute]
+  , chosenConfig :: Maybe [Attribute]
   }
   deriving (Eq)
 
@@ -59,10 +59,10 @@ postConceptsR jid = do
         _ -> Nothing
 
   -- not very beautiful, use applicative instead
-  let newAttributes = Set.fromList $ (chosenResults $ fromJust chosenAttributes)
-                                  ++ (chosenCpu $ fromJust chosenAttributes)
-                                  ++ (chosenSolver $ fromJust chosenAttributes)
-                                  ++ (chosenConfig $ fromJust chosenAttributes)
+  let newAttributes = Set.fromList $ (getChosenAttributes $ chosenResults $ fromJust chosenAttributes)
+                                  ++ (getChosenAttributes $ chosenCpu $ fromJust chosenAttributes)
+                                  ++ (getChosenAttributes $ chosenSolver $ fromJust chosenAttributes)
+                                  ++ (getChosenAttributes $ chosenConfig $ fromJust chosenAttributes)
   let concepts' = concepts $ filteredContext context newAttributes
 
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts'
@@ -79,10 +79,10 @@ attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoice
 attributeForm options =  AttributeChoice
   -- pre-select all options
   -- change widget size to length options
-  <$> areq (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
-  <*> areq (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing
-  <*> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
-  <*> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" options) "Solver configs" Nothing
+  <$> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" options) "Solver configs" Nothing
   <* bootstrapSubmit (BootstrapSubmit {
       bsClasses="btn btn-primary",
       bsValue="choose",
@@ -98,3 +98,9 @@ attrOptionsFromContext attrs = do
   Map.insert "Solver name" (filter (\(label, _) -> T.isInfixOf "Solver name" label) allOptions) llll
   -- let options = map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allOptions)) ["Result", "CPU", "Solver conifg", "Solver name"]
   -- Map.fromList options
+
+
+getChosenAttributes :: Maybe [Attribute] -> [Attribute]
+getChosenAttributes attrs = case attrs of
+  Nothing -> []
+  Just a -> a
