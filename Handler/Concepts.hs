@@ -21,7 +21,7 @@ import System.Process (readProcess)
 import Yesod.Form.Bootstrap3
 
 
-data AttributeChoice = AttributeChoice
+data AttributeChoices = AttributeChoices
   { chosenResults :: Maybe [Attribute]
   , chosenCpu :: Maybe [Attribute]
   , chosenSolver :: Maybe [Attribute]
@@ -58,11 +58,9 @@ postConceptsR jid = do
         FormSuccess ca -> Just ca
         _ -> Nothing
 
-  -- not very beautiful, use applicative instead
-  let newAttributes = Set.fromList $ (getChosenAttributes $ chosenResults $ fromJust chosenAttributes)
-                                  ++ (getChosenAttributes $ chosenCpu $ fromJust chosenAttributes)
-                                  ++ (getChosenAttributes $ chosenSolver $ fromJust chosenAttributes)
-                                  ++ (getChosenAttributes $ chosenConfig $ fromJust chosenAttributes)
+  let newAttributes = Set.fromList $ concat $
+                      map (\f -> (maybe [] id) .f $ fromJust chosenAttributes)
+                      [chosenResults, chosenCpu, chosenSolver, chosenConfig]
   let concepts' = concepts $ filteredContext context newAttributes
 
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts'
@@ -75,8 +73,8 @@ postConceptsR jid = do
     $(widgetFile "concepts")
 
 
-attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoice
-attributeForm options =  AttributeChoice
+attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
+attributeForm options =  AttributeChoices
   -- pre-select all options
   -- change widget size to length options
   <$> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
@@ -92,15 +90,5 @@ attributeForm options =  AttributeChoice
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   let allOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
-  let ll = Map.singleton "Result" (filter (\(label, _) -> T.isInfixOf "Result" label) allOptions)
-  let lll = Map.insert "CPU" (filter (\(label, _) -> T.isInfixOf "CPU" label) allOptions) ll
-  let llll = Map.insert "Solver config" (filter (\(label, _) -> T.isInfixOf "Solver config" label) allOptions) lll
-  Map.insert "Solver name" (filter (\(label, _) -> T.isInfixOf "Solver name" label) allOptions) llll
-  -- let options = map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allOptions)) ["Result", "CPU", "Solver conifg", "Solver name"]
-  -- Map.fromList options
-
-
-getChosenAttributes :: Maybe [Attribute] -> [Attribute]
-getChosenAttributes attrs = case attrs of
-  Nothing -> []
-  Just a -> a
+  let keys = ["Result", "CPU", "Solver config", "Solver name"]
+  Map.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allOptions)) keys

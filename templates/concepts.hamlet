@@ -28,9 +28,3 @@ $forall at <- attributes context
           <td> #{length $obs currConcept}
 <div>
   #{svg_contents}
-
-<!--
-<div>
-  <a href=@{ImageR $ jid}>Hasse diagram
-<object type="image/svg+xml" data="@{ImageR $ jid}">Your browser does not support SVG</object>
--->
