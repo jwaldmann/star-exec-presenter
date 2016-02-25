@@ -1,3 +1,6 @@
+GHC_VERSION = 7.10.3
+LTS_VERSION = 5.4
+
 .PHONY: clean create-db deploy install run
 
 help:
@@ -20,15 +23,14 @@ create-db:
 
 install:
 	stack setup
-	stack build yesod-bin-1.4.17.1 --verbosity silent
+	stack build yesod-bin --verbosity silent
 	stack build --verbosity silent
 
 
 deploy:
-	cabal clean
-	cabal configure && cabal build
+	stack build
 	sudo service star-exec-presenter stop
-	sudo cp dist/build/star-exec-presenter/star-exec-presenter /var/star-exec-presenter
+	sudo cp .stack-work/install/x86_64-linux/lts-$(LTS_VERSION)/$(GHC_VERSION)/bin/star-exec-presenter /var/star-exec-presenter
 	sudo cp -R config/ /var/star-exec-presenter
 	sudo cp -R static/ /var/star-exec-presenter
 	sudo service star-exec-presenter start
