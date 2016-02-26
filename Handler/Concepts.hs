@@ -22,9 +22,9 @@ import Yesod.Form.Bootstrap3
 
 
 data AttributeChoices = AttributeChoices
-  { chosenResults :: Maybe [Attribute]
+  { chosenSolver :: [Attribute]
+  , chosenResults :: Maybe [Attribute]
   , chosenCpu :: Maybe [Attribute]
-  , chosenSolver :: Maybe [Attribute]
   , chosenConfig :: Maybe [Attribute]
   }
   deriving (Eq)
@@ -58,9 +58,10 @@ postConceptsR jid cid = do
         FormSuccess ca -> Just ca
         _ -> Nothing
 
-  let newAttributes = Set.fromList $ concat $
+  let solverNames = chosenSolver $ fromJust chosenAttributes
+  let newAttributes = Set.fromList $ (++) solverNames $ concat $
                       map (\f -> (maybe [] id) .f $ fromJust chosenAttributes)
-                      [chosenResults, chosenCpu, chosenSolver, chosenConfig]
+                      [chosenResults, chosenCpu, chosenConfig]
   let concepts' = concepts $ filteredContext context newAttributes
 
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts'
@@ -79,7 +80,7 @@ attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
 attributeForm options =  AttributeChoices
   -- pre-select all options
   -- change widget size to length options
-  <$> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
+  <$> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" options) "Solver configs" Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing

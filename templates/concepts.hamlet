@@ -36,7 +36,8 @@ $forall at <- attributes context
   <thead>
     <tr>
       <th>Benchmarks
-      <!- print all selected Solvernames ->
+      $forall solverName <- solverNames
+        <th> #{show solverName}
   <tbody>
     $forall obj <- chosenObjects
       <tr>
