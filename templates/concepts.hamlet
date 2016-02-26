@@ -1,4 +1,4 @@
-<h2>All attributes for <a href=@{ConceptsR $ jid}>#{show jid}</a>
+<h2>All attributes for <a href=@{ConceptsR (jid) 0}>#{show jid}</a>
 <ul>
 $forall at <- attributes context
     $if elem at newAttributes
@@ -15,7 +15,6 @@ $forall at <- attributes context
         <th> Num attrs (of #{length $ attributes context})
         <th> Num objs (of #{length $ objects context})
       <tbody>
-
       $forall currConcept <- concepts'
         <tr>
           <td> #{show $ fromJust $ elemIndex currConcept concepts'}
@@ -28,3 +27,19 @@ $forall at <- attributes context
           <td> #{length $obs currConcept}
 <div>
   #{svg_contents}
+
+
+
+
+#{length $ objects $ context}
+<table class="table">
+  <thead>
+    <tr>
+      <th>Benchmarks
+      <!- print all selected Solvernames ->
+  <tbody>
+    $forall obj <- chosenObjects
+      <tr>
+        <td> Benchmark x
+        <td> #{show obj}
+        <!- show job pair ->

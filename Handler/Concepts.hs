@@ -31,8 +31,8 @@ data AttributeChoices = AttributeChoices
 
 
 -- route with multiselect to choose attributes of JobID
-getConceptsR :: JobID -> Handler Html
-getConceptsR jid =  do
+getConceptsR :: JobID -> ConceptId-> Handler Html
+getConceptsR jid cid = do
   QueryResult qStatus _ <- queryJob jid
   context <- jobResultsContext jid
   let attrs = attributes context
@@ -47,12 +47,12 @@ getConceptsR jid =  do
 
 
 -- route to show concepts of given JobID
-postConceptsR :: JobID -> Handler Html
-postConceptsR jid = do
+postConceptsR :: JobID -> ConceptId-> Handler Html
+postConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
   let options = attrOptionsFromContext attrs
-  ((result, _), _) <- runFormPost $ renderBootstrap3 
+  ((result, _), _) <- runFormPost $ renderBootstrap3
     (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
   let chosenAttributes = case result of
         FormSuccess ca -> Just ca
@@ -65,6 +65,8 @@ postConceptsR jid = do
 
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts'
   -- FIXME: there must be a better way to remove <xml> tag
+
+  let chosenObjects = Set.toList $ obs $ concepts'!!cid
   let svg_contents = B.preEscapedLazyText
                      $ TL.pack $ unlines
                      $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
@@ -85,7 +87,7 @@ attributeForm options =  AttributeChoices
       bsClasses="btn btn-primary",
       bsValue="choose",
       bsAttrs=[("attr-name", "attr-value")]} :: BootstrapSubmit Text)
-  
+
 
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do

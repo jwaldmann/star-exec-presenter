@@ -40,6 +40,9 @@ lriBenchmarkPrefix = "lri_benchmark."
 uibkBenchmarkPrefix :: Prefix
 uibkBenchmarkPrefix = "uibk_benchmark."
 
+
+type ConceptId = Int
+
 {-
 -}
 data ErrorID =
