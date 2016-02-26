@@ -14,7 +14,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf)
+import Data.Text as T (isInfixOf, pack)
 import Data.Text.Lazy as TL (pack)
 import qualified Text.Blaze as B
 import System.Process (readProcess)
@@ -31,32 +31,23 @@ data AttributeChoices = AttributeChoices
 
 
 -- route with multiselect to choose attributes of JobID
-getConceptsR :: JobID -> ConceptId-> Handler Html
-getConceptsR jid cid = do
-  QueryResult qStatus _ <- queryJob jid
-  context <- jobResultsContext jid
-  let attrs = attributes context
-  let options = attrOptionsFromContext attrs
-  (widget, enctype) <- generateFormPost $ renderBootstrap3
-    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
-  defaultLayout $ do
-    when (qStatus /= Latest)
-      -- fetch job from starexec if not present in database
-      insertWidgetMetaRefresh
-    $(widgetFile "concepts_attributes")
-
+getConceptsR :: JobID -> ConceptId -> [Text] -> Handler Html
+getConceptsR = postConceptsR
 
 -- route to show concepts of given JobID
-postConceptsR :: JobID -> ConceptId-> Handler Html
-postConceptsR jid cid = do
+postConceptsR :: JobID -> ConceptId -> [Text] -> Handler Html
+postConceptsR jid cid ats_= do
   context <- jobResultsContext jid
   let attrs = attributes context
   let options = attrOptionsFromContext attrs
-  ((result, _), _) <- runFormPost $ renderBootstrap3
+  ((result, widget), enctype) <- runFormPost $ renderBootstrap3
     (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
   let chosenAttributes = case result of
         FormSuccess ca -> Just ca
-        _ -> Nothing
+        _ -> Just AttributeChoices { chosenSolver=[AJobResultInfoSolver (ats_!!0)]
+                                   , chosenResults=Just []
+                                   , chosenCpu=Just []
+                                   , chosenConfig=Just []}
 
   let solverNames = chosenSolver $ fromJust chosenAttributes
   let newAttributes = Set.fromList $ (++) solverNames $ concat $

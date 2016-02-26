@@ -1,4 +1,10 @@
-<h2>All attributes for <a href=@{ConceptsR (jid) 0}>#{show jid}</a>
+<p>
+  <em>Choose the attributes you are interested in. You can see all combinations of these attributes on the next page.
+<form class="form-horizontal" method=post action=@{ConceptsR (jid) cid [T.pack "TTT2"]} enctype=#{enctype}>
+  ^{widget}
+
+
+<h2>All attributes for <a href=@{ConceptsR (jid) cid [T.pack "TTT2"]}>#{show jid}</a>
 <ul>
 $forall at <- attributes context
     $if elem at newAttributes

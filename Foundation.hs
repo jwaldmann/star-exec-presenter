@@ -27,7 +27,7 @@ import Yesod.Core.Types (Logger)
 
 --import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
 import Presenter.Auth (authSE)
-import Data.Text (Text)
+import Data.Text (Text, pack)
 import qualified Data.Text.Lazy as TL
 
 import qualified Data.Map.Strict as M
@@ -103,7 +103,7 @@ instance Yesod App where
                       (ListBenchmarksR, "benchmarks"), (ListSolversR, "solvers"),
                       (ListJobPairsR, "pairs"), (ListProofsR, "proofs"),
                       (ListPostProcsR, "post processors"),
-                      (ConceptsR (StarExecJobID 7239) 0, "concept example")
+                      (ConceptsR (StarExecJobID 7239) 0 [pack "TTT2"], "concept example")
                      ]
         let navRoutes = map (\(route, routeName) -> (route, TL.pack routeName)) routes
 
