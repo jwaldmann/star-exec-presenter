@@ -103,8 +103,8 @@ instance Yesod App where
                       (ListBenchmarksR, "benchmarks"), (ListSolversR, "solvers"),
                       (ListJobPairsR, "pairs"), (ListProofsR, "proofs"),
                       (ListPostProcsR, "post processors"),
-                      (ConceptsR (StarExecJobID 7239) 0 [pack "TTT2"], "concept example")
-                     ]
+                      (ConceptsR (StarExecJobID 7239) 0, "concept example")
+                      ]
         let navRoutes = map (\(route, routeName) -> (route, TL.pack routeName)) routes
 
 

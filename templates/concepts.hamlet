@@ -1,16 +1,19 @@
+<h1><a href=#{currURL}>#{show jid}</a>
 <p>
-  <em>Choose the attributes you are interested in. You can see all combinations of these attributes on the next page.
-<form class="form-horizontal" method=post action=@{ConceptsR (jid) cid [T.pack "TTT2"]} enctype=#{enctype}>
+  <em>Choose the attributes you are interested in. You can see all combinations of these attributes below.<br>
+  <em>You can hold CTRL to choose multiple ones.
+<form class="form-horizontal" method=get action=#{actionURL} enctype=#{enctype}>
   ^{widget}
 
-
-<h2>All attributes for <a href=@{ConceptsR (jid) cid [T.pack "TTT2"]}>#{show jid}</a>
+<!--
+<h2>All attributes for <a href=#{currURL}>#{show jid}</a>
 <ul>
 $forall at <- attributes context
     $if elem at newAttributes
       <li> <strong>#{properAttrName at}</strong>
     $else
       <li> #{properAttrName at}
+
 
 <h2>Concepts
 <table class="table table-bordered table-striped">
@@ -31,13 +34,21 @@ $forall at <- attributes context
               <td>
           <td> #{length $ats currConcept}
           <td> #{length $obs currConcept}
+-->
+<h2>All combinations for chosen attributes
+<p>
+  <em>Click on the node you are interested in to load results.
 <div>
   #{svg_contents}
 
 
 
-
+all objects in this context <br>
 #{length $ objects $ context}
+
+all objects in this concept
+#{length chosenObjects}
+
 <table class="table">
   <thead>
     <tr>

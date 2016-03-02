@@ -4,10 +4,10 @@ import FCA.Utils
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
 import Import
-import Presenter.StarExec.JobData (queryJob)
-import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
+-- import Presenter.StarExec.JobData (queryJob)
+-- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 
-import Control.Monad (when)
+-- import Control.Monad (when)
 import Data.List (elemIndex, isPrefixOf)
 import Data.Maybe
 import           Data.Map.Strict (Map)
@@ -20,42 +20,44 @@ import qualified Text.Blaze as B
 import System.Process (readProcess)
 import Yesod.Form.Bootstrap3
 
-
 data AttributeChoices = AttributeChoices
   { chosenSolver :: [Attribute]
   , chosenResults :: Maybe [Attribute]
   , chosenCpu :: Maybe [Attribute]
   , chosenConfig :: Maybe [Attribute]
   }
-  deriving (Eq)
+  deriving (Eq, Show)
 
 
 -- route with multiselect to choose attributes of JobID
-getConceptsR :: JobID -> ConceptId -> [Text] -> Handler Html
+getConceptsR :: JobID -> ConceptId -> Handler Html
 getConceptsR = postConceptsR
 
 -- route to show concepts of given JobID
-postConceptsR :: JobID -> ConceptId -> [Text] -> Handler Html
-postConceptsR jid cid ats_= do
+postConceptsR :: JobID -> ConceptId -> Handler Html
+postConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
-  let options = attrOptionsFromContext attrs
-  ((result, widget), enctype) <- runFormPost $ renderBootstrap3
-    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm options
+  let formOptions = attrOptionsFromContext attrs
+  ((result, widget), enctype) <- runFormGet $ renderBootstrap3
+    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm formOptions
   let chosenAttributes = case result of
         FormSuccess ca -> Just ca
-        _ -> Just AttributeChoices { chosenSolver=[AJobResultInfoSolver (ats_!!0)]
-                                   , chosenResults=Just []
-                                   , chosenCpu=Just []
-                                   , chosenConfig=Just []}
-
+        _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
   let solverNames = chosenSolver $ fromJust chosenAttributes
   let newAttributes = Set.fromList $ (++) solverNames $ concat $
                       map (\f -> (maybe [] id) .f $ fromJust chosenAttributes)
                       [chosenResults, chosenCpu, chosenConfig]
+  let newAttributes_ = map (T.pack . show) $ Set.toList newAttributes
   let concepts' = concepts $ filteredContext context newAttributes
 
-  svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts'
+
+  -- actionURL points to concept 0 that shows all objects
+  actionURL <- getConceptURL jid 0
+  currURL <- getConceptURL jid cid
+  nodeUrls <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
+
+  svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeUrls
   -- FIXME: there must be a better way to remove <xml> tag
 
   let chosenObjects = Set.toList $ obs $ concepts'!!cid
@@ -68,13 +70,12 @@ postConceptsR jid cid ats_= do
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
-attributeForm options =  AttributeChoices
-  -- pre-select all options
-  -- change widget size to length options
-  <$> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" options) "Solver names" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" options) "Solver configs" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" options) "Results" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" options) "CPU times" Nothing
+attributeForm formOptions =  AttributeChoices
+  -- change widget size to length of respective option
+  <$> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" formOptions) "Solver names" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" formOptions) "Solver configs" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" formOptions) "Results" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" formOptions) "CPU times" Nothing
   <* bootstrapSubmit (BootstrapSubmit {
       bsClasses="btn btn-primary",
       bsValue="choose",
@@ -83,6 +84,14 @@ attributeForm options =  AttributeChoices
 
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
-  let allOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
+  let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
   let keys = ["Result", "CPU", "Solver config", "Solver name"]
-  Map.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allOptions)) keys
+  Map.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
+
+
+getConceptURL :: JobID -> ConceptId -> Handler Text
+getConceptURL jid cid = do
+  rq <- getRequest
+  let getParams = reqGetParams rq
+  renderer <- getUrlRenderParams
+  return $ (renderer $ ConceptsR (jid) cid) getParams

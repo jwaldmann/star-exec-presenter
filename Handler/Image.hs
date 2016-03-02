@@ -11,5 +11,5 @@ import System.Process (readProcess)
 getImageR :: JobID -> Handler TypedContent
 getImageR jid = do
   concepts' <- concepts <$> jobResultsContext jid
-  svg_content <- liftIO $ readProcess "dot" ["-Tsvg"] $ dottedGraph concepts'
+  svg_content <- liftIO $ readProcess "dot" ["-Tsvg"] $ dottedGraph concepts' []
   sendResponse $ toTypedContent (typeSvg, toContent svg_content)
