@@ -20,8 +20,8 @@ import qualified Data.Text.Lazy as TL
 
 
 dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> [T.Text] -> String
-dottedGraph concept_lattice nodeUrls = do
-  let graph_params = getGraphParams concept_lattice nodeUrls
+dottedGraph concept_lattice nodeURLs = do
+  let graph_params = getGraphParams concept_lattice nodeURLs
   let graph_with_trans_edges = G.graphToDot graph_params $ createGraph concept_lattice
   TL.unpack $ renderDot $ toDot $ transitiveReduction graph_with_trans_edges
 
@@ -41,7 +41,7 @@ getEdges concept_lattice = do
   return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
 
 getGraphParams :: (Integral n, Show n) => [Concept ob FSE.Attribute] -> [T.Text] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
-getGraphParams concept_lattice nodeUrls = G.nonClusteredParams {
+getGraphParams concept_lattice nodeURLs = G.nonClusteredParams {
    G.globalAttributes = [G.GraphAttrs
                           [
                             GA.RankDir GA.FromLeft,
@@ -58,7 +58,7 @@ getGraphParams concept_lattice nodeUrls = G.nonClusteredParams {
      [
        GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing [ GAH.CellBorder 0, GAH.BGColor nodeColor] [
        -- first row:
-       GAH.Cells [GAH.LabelCell [HRef $ TL.fromStrict $ nodeUrls!!(fromIntegral n)] $ GAH.Text [htmlTextItemWrapper n]],
+       GAH.Cells [GAH.LabelCell [HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n)] $ GAH.Text [htmlTextItemWrapper n]],
        -- second row:
        GAH.Cells [GAH.LabelCell [] $ GAH.Text [htmlTextItemWrapper $ length $ obs concept]],
        -- third row:

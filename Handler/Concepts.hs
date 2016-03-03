@@ -14,7 +14,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf, pack)
+import Data.Text as T (isInfixOf)
 import Data.Text.Lazy as TL (pack)
 import qualified Text.Blaze as B
 import System.Process (readProcess)
@@ -38,32 +38,24 @@ postConceptsR :: JobID -> ConceptId -> Handler Html
 postConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
-  let formOptions = attrOptionsFromContext attrs
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm formOptions
-  let chosenAttributes = case result of
+    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm $ attrOptionsFromContext attrs
+  let attributeChoices = case result of
         FormSuccess ca -> Just ca
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
-  let solverNames = chosenSolver $ fromJust chosenAttributes
-  let newAttributes = Set.fromList $ (++) solverNames $ concat $
-                      map (\f -> (maybe [] id) .f $ fromJust chosenAttributes)
+  let solverNames = chosenSolver $ fromJust attributeChoices
+  let chosenAttributes = Set.fromList $ (++) solverNames $ concat $
+                      map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
                       [chosenResults, chosenCpu, chosenConfig]
-  let newAttributes_ = map (T.pack . show) $ Set.toList newAttributes
-  let concepts' = concepts $ filteredContext context newAttributes
-
+  let concepts' = concepts $ filteredContext context chosenAttributes
+  let chosenObjects = Set.toList $ obs $ concepts'!!cid
 
   -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0
   currURL <- getConceptURL jid cid
-  nodeUrls <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
+  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
 
-  svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeUrls
-  -- FIXME: there must be a better way to remove <xml> tag
-
-  let chosenObjects = Set.toList $ obs $ concepts'!!cid
-  let svg_contents = B.preEscapedLazyText
-                     $ TL.pack $ unlines
-                     $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
+  svg_contents <- renderConceptSVG concepts' nodeURLs
   defaultLayout $ do
     setTitle "concepts"
     $(widgetFile "concepts")
@@ -95,3 +87,10 @@ getConceptURL jid cid = do
   let getParams = reqGetParams rq
   renderer <- getUrlRenderParams
   return $ (renderer $ ConceptsR (jid) cid) getParams
+
+
+renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
+renderConceptSVG concepts' nodeURLs = do
+  svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
+  -- FIXME: there must be a better way to remove <xml> tag
+  return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg

@@ -5,43 +5,11 @@
 <form class="form-horizontal" method=get action=#{actionURL} enctype=#{enctype}>
   ^{widget}
 
-<!--
-<h2>All attributes for <a href=#{currURL}>#{show jid}</a>
-<ul>
-$forall at <- attributes context
-    $if elem at newAttributes
-      <li> <strong>#{properAttrName at}</strong>
-    $else
-      <li> #{properAttrName at}
-
-
-<h2>Concepts
-<table class="table table-bordered table-striped">
-      <thead>
-        <th> concept number
-        $forall at <- newAttributes
-          <th> #{properAttrName at}
-        <th> Num attrs (of #{length $ attributes context})
-        <th> Num objs (of #{length $ objects context})
-      <tbody>
-      $forall currConcept <- concepts'
-        <tr>
-          <td> #{show $ fromJust $ elemIndex currConcept concepts'}
-          $forall at <- newAttributes
-            $if elem at $ats currConcept
-              <td>X
-            $else
-              <td>
-          <td> #{length $ats currConcept}
-          <td> #{length $obs currConcept}
--->
 <h2>All combinations for chosen attributes
 <p>
   <em>Click on the node you are interested in to load results.
 <div>
   #{svg_contents}
-
-
 
 all objects in this context <br>
 #{length $ objects $ context}
