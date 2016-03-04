@@ -1,7 +1,7 @@
 module FCA.DotGraph where
 
-import FCA.Utils
 import FCA.StarExec as FSE
+import FCA.Utils
 import Import hiding (delete)
 import Presenter.Utils.Colors as C
 
@@ -20,28 +20,28 @@ import qualified Data.Text.Lazy as TL
 
 
 dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> [T.Text] -> String
-dottedGraph concept_lattice nodeURLs = do
-  let graph_params = getGraphParams concept_lattice nodeURLs
-  let graph_with_trans_edges = G.graphToDot graph_params $ createGraph concept_lattice
-  TL.unpack $ renderDot $ toDot $ transitiveReduction graph_with_trans_edges
+dottedGraph conceptLattice nodeURLs = do
+  let graph_params = getGraphParams conceptLattice nodeURLs
+  let graphWithTransEdges = G.graphToDot graph_params $ createGraph conceptLattice
+  TL.unpack $ renderDot $ toDot $ transitiveReduction graphWithTransEdges
 
 createGraph :: (Eq ob, Eq at, Show at, Ord at) => [Concept ob at] -> (Gr TL.Text TL.Text)
-createGraph concept_lattice = mkGraph (getNodes concept_lattice) $ getEdges concept_lattice
+createGraph conceptLattice = mkGraph (getNodes conceptLattice) $ getEdges conceptLattice
 
 getNodes :: (Eq ob, Eq at, Show at) => [Concept ob at] -> [LNode TL.Text]
-getNodes concept_lattice = L.map
- (\c -> (fromJust $ elemIndex c concept_lattice, "")) concept_lattice
+getNodes conceptLattice = L.map
+ (\c -> (fromJust $ elemIndex c conceptLattice, "")) conceptLattice
 
 getEdges :: (Eq ob, Eq at, Ord at) => [Concept ob at] -> [LEdge TL.Text]
-getEdges concept_lattice = do
-  concept <- concept_lattice
-  concept2 <- concept_lattice
+getEdges conceptLattice = do
+  concept <- conceptLattice
+  concept2 <- conceptLattice
   guard (isProperSubsetOf (ats concept) (ats concept2))
   -- math: ats concept < ats concept2 --> Edge((ats concept), (ats concept2))
-  return (fromJust $ elemIndex concept concept_lattice, fromJust $ elemIndex concept2 concept_lattice, "")
+  return (fromJust $ elemIndex concept conceptLattice, fromJust $ elemIndex concept2 conceptLattice, "")
 
 getGraphParams :: (Integral n, Show n) => [Concept ob FSE.Attribute] -> [T.Text] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
-getGraphParams concept_lattice nodeURLs = G.nonClusteredParams {
+getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
    G.globalAttributes = [G.GraphAttrs
                           [
                             GA.RankDir GA.FromLeft,
@@ -51,7 +51,7 @@ getGraphParams concept_lattice nodeURLs = G.nonClusteredParams {
                         ]
    , G.isDirected       = True
    , G.fmtNode          = \ (n, _) -> do
-     let concept = concept_lattice!!(fromIntegral n)
+     let concept = conceptLattice!!(fromIntegral n)
      let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properAttrName $ ats concept
 
      -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table

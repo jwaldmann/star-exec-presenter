@@ -11,21 +11,38 @@
 <div>
   #{svg_contents}
 
-all objects in this context <br>
-#{length $ objects $ context}
-
-all objects in this concept
-#{length chosenObjects}
-
 <table class="table">
   <thead>
     <tr>
-      <th>Benchmarks
-      $forall solverName <- solverNames
-        <th> #{show solverName}
+      <th>Jobs
+      <!--
+      $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
+        <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
+      -->
+    <tr>
+      <th>Solver
+      $forall (_, (sId, sName)) <- jobSolvers
+        <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
   <tbody>
-    $forall obj <- chosenObjects
+    $forall ((bKey,bName), results) <- benchmarkResults
       <tr>
-        <td> Benchmark x
-        <td> #{show obj}
-        <!- show job pair ->
+        <td>
+          $case bKey
+            $of Left bId
+              <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+            $of Right doi
+             <a href=@{ResolveR doi}>#{shorten bName}</a>
+
+        $forall mResult <- results
+          $maybe result <- mResult
+            <td class="#{getClass result}">
+              $if isResultComplete result
+                <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
+                  #{short $ getSolverResult result }
+                  <span style="opacity:0.5">
+                    #{toFixed 1 $ toCpuTime result} /
+                    #{toFixed 1 $ toWallclockTime result}
+              $else
+                not finished
+          $nothing
+            <td>

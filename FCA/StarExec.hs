@@ -9,8 +9,6 @@ import Data.List
 import Data.Text (append, pack)
 
 
-type JobPairId = Int
-
 data Attribute =
   AJobResultInfoSolver Text
    | AJobResultInfoConfiguration Text
@@ -20,7 +18,7 @@ data Attribute =
 
 
 -- get context of job results by given JobID
-jobResultsContext:: JobID -> Handler (Context JobPairId Attribute)
+jobResultsContext:: JobID -> Handler (Context JobPairID Attribute)
 jobResultsContext jid = do
   jobResults <- getPersistJobResults jid
   return $ contextFromList . collectData $ getStarExecResults jobResults
@@ -29,12 +27,9 @@ jobResultsContext jid = do
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
 slowCpuTimeLimit = 10
 
--- create relation of JobPairId and declared attributes of given data
-collectData :: [JobResultInfo] -> [(JobPairId, [Attribute])]
-collectData results = do
-  let jobResultInfoPairIds = map jobResultInfoPairId results
-  let attrs = getAttributeCollection results
-  zip jobResultInfoPairIds attrs
+-- create relation of JobPairID and declared attributes of given data
+collectData :: [JobResultInfo] -> [(JobPairID, [Attribute])]
+collectData results = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results)
 
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> [[Attribute]]

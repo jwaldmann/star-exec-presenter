@@ -4,20 +4,25 @@ import FCA.Utils
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
 import Import
+import Presenter.PersistHelper
+import Presenter.Processing
+import Presenter.Short
 -- import Presenter.StarExec.JobData (queryJob)
 -- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 
 -- import Control.Monad (when)
+import Data.Double.Conversion.Text
 import Data.List (elemIndex, isPrefixOf)
 import Data.Maybe
 import           Data.Map.Strict (Map)
-import qualified Data.Map.Strict as Map
+import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf)
+import Data.Text as T (isInfixOf, takeEnd)
 import Data.Text.Lazy as TL (pack)
-import qualified Text.Blaze as B
 import System.Process (readProcess)
+import qualified Text.Blaze as B
+import Text.Lucius (luciusFile)
 import Yesod.Form.Bootstrap3
 
 data AttributeChoices = AttributeChoices
@@ -43,20 +48,26 @@ postConceptsR jid cid = do
   let attributeChoices = case result of
         FormSuccess ca -> Just ca
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
-  let solverNames = chosenSolver $ fromJust attributeChoices
-  let chosenAttributes = Set.fromList $ (++) solverNames $ concat $
+  let solvers = chosenSolver $ fromJust attributeChoices
+  let chosenAttributes = Set.fromList $ (++) solvers $ concat $
                       map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
                       [chosenResults, chosenCpu, chosenConfig]
-  let concepts' = concepts $ filteredContext context chosenAttributes
+  let concepts' = concepts $ filterContext context chosenAttributes
   let chosenObjects = Set.toList $ obs $ concepts'!!cid
+
+  jobResults <- mapM (\obj -> getPersistJobResult obj) chosenObjects
+  let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
+  let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
+  --let rm = resultmap jobResults
+
 
   -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0
   currURL <- getConceptURL jid cid
   nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
-
   svg_contents <- renderConceptSVG concepts' nodeURLs
   defaultLayout $ do
+    toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
 
@@ -64,10 +75,10 @@ postConceptsR jid cid = do
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
 attributeForm formOptions =  AttributeChoices
   -- change widget size to length of respective option
-  <$> areq (multiSelectFieldList $ fromJust $ Map.lookup "Solver name" formOptions) "Solver names" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Solver config" formOptions) "Solver configs" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "Result" formOptions) "Results" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ Map.lookup "CPU" formOptions) "CPU times" Nothing
+  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "Solver name" formOptions) "Solver names" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) "Solver configs" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) "Results" Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) "CPU times" Nothing
   <* bootstrapSubmit (BootstrapSubmit {
       bsClasses="btn btn-primary",
       bsValue="choose",
@@ -78,7 +89,7 @@ attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
   let keys = ["Result", "CPU", "Solver config", "Solver name"]
-  Map.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
+  M.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
 
 
 getConceptURL :: JobID -> ConceptId -> Handler Text
@@ -94,3 +105,20 @@ renderConceptSVG concepts' nodeURLs = do
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
   -- FIXME: there must be a better way to remove <xml> tag
   return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
+
+
+resultmap :: [JobResult] -> Map UniqueBenchmark (Map (JobID, (SolverID, SolverName)) JobResult)
+resultmap jobResults = M.fromListWith M.union $ do
+  jr <- jobResults
+  return ( getBenchmark jr, M.singleton (getJobID jr, getSolver jr) jr )
+
+getBenchmarkRows :: [JobResult] -> Set (JobID, (SolverID, SolverName)) -> [(UniqueBenchmark, [Maybe JobResult])]
+getBenchmarkRows jobResults jobSolvers = do
+    (bm, rowmap) <- M.toList $ resultmap jobResults
+    let row = do
+          s <- Set.toList jobSolvers
+          return $ M.lookup s rowmap
+    return (bm, row)
+
+shorten :: Text -> Text
+shorten t = T.takeEnd 50 t

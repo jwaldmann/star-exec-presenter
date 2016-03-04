@@ -42,8 +42,8 @@ contextToList context = do
   map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
 
 -- reduce attributes of existing context and return reduced one
-filteredContext :: (Ord ats, Ord ob) => Context ob ats -> Set ats -> Context ob ats
-filteredContext context attrs = do
+filterContext :: (Ord ats, Ord ob) => Context ob ats -> Set ats -> Context ob ats
+filterContext context attrs = do
   let l = map (\(ob, ats) -> (ob, Set.toList $ Set.intersection attrs $ Set.fromList ats)) $ contextToList context
   contextFromList l
 
