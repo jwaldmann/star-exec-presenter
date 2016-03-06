@@ -58,8 +58,6 @@ postConceptsR jid cid = do
   jobResults <- mapM (\obj -> getPersistJobResult obj) chosenObjects
   let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
   let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
-  --let rm = resultmap jobResults
-
 
   -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0

@@ -30,7 +30,7 @@ createGraph conceptLattice = mkGraph (getNodes conceptLattice) $ getEdges concep
 
 getNodes :: (Eq ob, Eq at, Show at) => [Concept ob at] -> [LNode TL.Text]
 getNodes conceptLattice = L.map
- (\c -> (fromJust $ elemIndex c conceptLattice, "")) conceptLattice
+ (\c -> (fromJust $ elemIndex c conceptLattice, " ")) conceptLattice
 
 getEdges :: (Eq ob, Eq at, Ord at) => [Concept ob at] -> [LEdge TL.Text]
 getEdges conceptLattice = do
@@ -38,33 +38,27 @@ getEdges conceptLattice = do
   concept2 <- conceptLattice
   guard (isProperSubsetOf (ats concept) (ats concept2))
   -- math: ats concept < ats concept2 --> Edge((ats concept), (ats concept2))
-  return (fromJust $ elemIndex concept conceptLattice, fromJust $ elemIndex concept2 conceptLattice, "")
+  return (fromJust $ elemIndex concept conceptLattice, fromJust $ elemIndex concept2 conceptLattice, " ")
 
 getGraphParams :: (Integral n, Show n) => [Concept ob FSE.Attribute] -> [T.Text] -> G.GraphvizParams n TL.Text TL.Text () TL.Text
 getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
-   G.globalAttributes = [G.GraphAttrs
-                          [
-                            GA.RankDir GA.FromLeft,
-                            GA.Size GA.GSize {width=15, height=Nothing, desiredSize=False},
-                            GA.Tooltip " "
-                          ]
-                        ]
-   , G.isDirected       = True
-   , G.fmtNode          = \ (n, _) -> do
-     let concept = conceptLattice!!(fromIntegral n)
-     let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properAttrName $ ats concept
-
-     -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
-     [
-       GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing [ GAH.CellBorder 0, GAH.BGColor nodeColor] [
-       -- first row:
-       GAH.Cells [GAH.LabelCell [HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n)] $ GAH.Text [htmlTextItemWrapper n]],
-       -- second row:
-       GAH.Cells [GAH.LabelCell [] $ GAH.Text [htmlTextItemWrapper $ length $ obs concept]],
-       -- third row:
-       GAH.Cells [GAH.LabelCell [] $ GAH.Text [htmlTextItemWrapper $ toList atLabels]]
-      ]]
-   }
+  G.globalAttributes = [G.GraphAttrs [GA.RankDir GA.FromTop
+                                     , GA.Size GA.GSize {width=15, height=Nothing, desiredSize=False}
+                                     , GA.Tooltip " "
+                                     ]]
+  , G.isDirected       = True
+  , G.fmtNode          = \ (n, _) -> do
+    let concept = conceptLattice!!(fromIntegral n)
+    let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properAttrName $ ats concept
+    -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
+    [GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing
+      [GAH.CellBorder 0, GAH.BGColor nodeColor, HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n), Title " "]
+        [ -- first row:
+          GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Str $ TL.pack $ show $ length $ obs concept]],
+          -- second row:
+          GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text [GAH.Str $ TL.fromStrict $ T.intercalate ", " $ toList atLabels]]
+        ]]
+}
 
 getSolverResultColor :: T.Text -> Color
 getSolverResultColor solverResults
@@ -83,7 +77,6 @@ getSolverResultColor solverResults
       containsCertified = T.isInfixOf "CERTIFIED"
       containsError = T.isInfixOf "ERROR"
 
-
 replaceLabelWithColor :: Set T.Text -> (Set T.Text, Color)
 replaceLabelWithColor labels = do
   let solverResults = S.filter (\at -> "Result " `T.isPrefixOf` at) labels
@@ -91,7 +84,3 @@ replaceLabelWithColor labels = do
     then
       (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)
     else (difference labels solverResults, toColor G.White)
-
-
-htmlTextItemWrapper :: Show a => a -> TextItem
-htmlTextItemWrapper string = GAH.Str $ TL.pack $ show string
