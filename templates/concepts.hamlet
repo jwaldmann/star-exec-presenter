@@ -1,4 +1,5 @@
 <h1><a href=#{currURL}>#{show jid}</a>
+<a href=@{ShowManyJobResultsR Standard NoQuery $ JobIds [jid]}>results table</a>
 <p>
   <em>Choose the attributes you are interested in. You can see all combinations of these attributes below.<br>
   <em>You can hold CTRL to choose multiple ones.
