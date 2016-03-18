@@ -56,7 +56,8 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
         [ -- first row:
           GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Str $ TL.pack $ show $ length $ obs concept]],
           -- second row:
-          GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text [GAH.Str $ TL.fromStrict $ T.intercalate ", " $ toList atLabels]]
+          GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text $ L.intersperse (GAH.Newline []) $
+            L.map (\label -> GAH.Str $ TL.fromStrict $ stripAttributePrefixes label) $ toList atLabels]
         ]]
 }
 

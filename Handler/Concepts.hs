@@ -89,7 +89,9 @@ attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
   let keys = ["Result", "CPU", "Solver config", "Solver name"]
-  M.fromList $ map (\key -> (key, filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
+  M.fromList $ map (\key -> (key, 
+    map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
+    filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
 
 
 getConceptURL :: JobID -> ConceptId -> Handler Text

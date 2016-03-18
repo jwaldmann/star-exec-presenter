@@ -5,8 +5,9 @@ import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
-import Data.List
-import Data.Text (append, pack)
+import Data.Maybe
+import Data.List hiding (isPrefixOf, stripPrefix)
+import Data.Text (append, pack, isPrefixOf, stripPrefix)
 
 
 data Attribute =
@@ -62,3 +63,11 @@ properAttrName at = case at of
                             CERTIFIED     -> "Result CERTIFIED"
                             ERROR         -> "Result ERROR"
                             (OTHER text)  -> append "Result OTHER " text
+
+stripAttributePrefixes :: Text -> Text
+stripAttributePrefixes at
+  | isPrefixOf "Result " at = fromJust $ stripPrefix "Result " at
+  | isPrefixOf "Solver config " at = fromJust $ stripPrefix "Solver config " at
+  | isPrefixOf "Solver name " at = fromJust $ stripPrefix "Solver name " at
+  | isPrefixOf "CPU " at = fromJust $ stripPrefix "CPU " at
+  | otherwise = at
