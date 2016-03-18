@@ -7,10 +7,10 @@ import Import
 import Presenter.PersistHelper
 import Presenter.Processing
 import Presenter.Short
--- import Presenter.StarExec.JobData (queryJob)
--- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
+import Presenter.StarExec.JobData (queryJob)
+import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 
--- import Control.Monad (when)
+import Control.Monad (when)
 import Data.Double.Conversion.Text
 import Data.List (elemIndex, isPrefixOf)
 import Data.Maybe
@@ -37,6 +37,7 @@ data AttributeChoices = AttributeChoices
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: JobID -> ConceptId -> Handler Html
 getConceptsR jid cid = do
+  QueryResult qStatus _ <- queryJob jid
   context <- jobResultsContext jid
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
@@ -63,6 +64,9 @@ getConceptsR jid cid = do
   nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
   svg_contents <- renderConceptSVG concepts' nodeURLs
   defaultLayout $ do
+    when (qStatus /= Latest)
+       -- fetch job from starexec if not present in database
+       insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
