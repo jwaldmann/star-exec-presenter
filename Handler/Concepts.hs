@@ -36,11 +36,7 @@ data AttributeChoices = AttributeChoices
 
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: JobID -> ConceptId -> Handler Html
-getConceptsR = postConceptsR
-
--- route to show concepts of given JobID
-postConceptsR :: JobID -> ConceptId -> Handler Html
-postConceptsR jid cid = do
+getConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
