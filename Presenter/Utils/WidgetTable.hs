@@ -5,7 +5,8 @@ import Text.Blaze (ToMarkup)
 
 import Presenter.Short
 import Presenter.Processing
-  ( getClass, BenchmarkKey, benchmarkKey )
+  ( getClass, BenchmarkKey, benchmarkKey, getBenchmark )
+import qualified Presenter.DOI as DOI
 import Presenter.Model.Additional.Table
 import Presenter.Internal.Stringish
 import qualified Presenter.Utils.Colors as C
@@ -30,9 +31,16 @@ import Control.Monad ( guard )
 import Data.Maybe ( isJust, maybeToList )
 import Data.Double.Conversion.Text
 
+bminfo dois (key,name) = case key of
+  Left bid -> (Left bid, name)
+  Right doi -> (Right doi , maybe ( T.pack $ show doi ) id $ DOI.toName dois doi)
+
 getManyJobCells :: [[ JobResult ]] -> Handler Table
 getManyJobCells iss = do
     --iss <- getManyJobResults ids
+
+    dois <- doiService <$> getYesod
+  
     let cells :: M.Map (JobID, (SolverID,Name),(ConfigID,Name)) 
                        (M.Map (BenchmarkKey,Name) Cell)
         cells = M.fromListWith M.union $ do
@@ -45,9 +53,7 @@ getManyJobCells iss = do
                      , toConfigName p
                      )
                    )
-               , M.singleton ( benchmarkKey p
-                             , toBenchmarkName p
-                             ) 
+               , M.singleton ( bminfo dois $ getBenchmark p ) 
                      $ cell_for_job_pair p
                )
         headers = M.keys cells

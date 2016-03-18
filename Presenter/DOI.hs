@@ -24,7 +24,7 @@ data DOIService =  DOIService
    , toBench :: DOI -> Maybe BenchmarkID
    }
 
--- | reads a space build from a file like "TPDB-10.3_XML.zip"
+-- | reads a space built from a file like "TPDB-10.3_XML.zip"
 -- returns a map with entries like
 -- (StarExecBenchmarkID 2194993,"TRS_Standard/AProVE_04/JFP_Ex31.xml").
 -- It will ignore the very top spName (which is TPDB-10.3 in this case)

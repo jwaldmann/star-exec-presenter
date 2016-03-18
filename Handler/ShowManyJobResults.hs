@@ -15,6 +15,8 @@ import Presenter.Processing
 import Presenter.Statistics
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.Utils.WidgetTable
+import qualified Presenter.DOI as DOI
+
 import Text.Lucius (luciusFile)
 import Data.Double.Conversion.Text
 import Data.Maybe
@@ -33,6 +35,9 @@ shorten t = T.takeEnd 50 t
 getShowManyJobResultsR
   :: Scoring -> Query -> JobIds -> Handler Html
 getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
+
+  dois <- doiService <$> getYesod
+  
   qJobs <- queryManyJobs ids
   
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
@@ -59,11 +64,12 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
 
       -- alternative implementation:
       resultmap
-        :: M.Map UniqueBenchmark
+        :: M.Map
+           UniqueBenchmark --  <== this is wrong, should be BenchmarkKey
            (M.Map (JobID, (SolverID, SolverName)) JobResult)
       resultmap = M.fromListWith M.union $ do
         jr <- jobResults
-        return ( getBenchmark jr
+        return ( bminfo dois $ getBenchmark jr
                , M.singleton (getJobID jr, getSolver jr) jr
                )
       benchmarkResults = do
