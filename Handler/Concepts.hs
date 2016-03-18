@@ -48,10 +48,12 @@ postConceptsR jid cid = do
   let attributeChoices = case result of
         FormSuccess ca -> Just ca
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
+  
   let solvers = chosenSolver $ fromJust attributeChoices
   let chosenAttributes = Set.fromList $ (++) solvers $ concat $
-                      map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
-                      [chosenResults, chosenCpu, chosenConfig]
+                       map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
+                       [chosenResults, chosenCpu, chosenConfig]
+
   let concepts' = concepts $ filterContext context chosenAttributes
   let chosenObjects = Set.toList $ obs $ concepts'!!cid
 

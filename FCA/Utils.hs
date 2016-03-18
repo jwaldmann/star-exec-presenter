@@ -42,10 +42,10 @@ contextToList context = do
   map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
 
 -- reduce attributes of existing context and return reduced one
-filterContext :: (Ord ats, Ord ob) => Context ob ats -> Set ats -> Context ob ats
+filterContext :: (Ord at, Ord ob) => Context ob at -> Set at -> Context ob at
 filterContext context attrs = do
   let l = map (\(ob, ats) -> (ob, Set.toList $ Set.intersection attrs $ Set.fromList ats)) $ contextToList context
-  contextFromList l
+  contextFromList $ filter (\(_,ats) -> (not . null) ats ) l
 
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
