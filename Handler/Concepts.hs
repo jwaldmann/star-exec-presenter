@@ -50,11 +50,11 @@ postConceptsR jid cid = do
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
   
   let solvers = chosenSolver $ fromJust attributeChoices
-  let chosenAttributes = Set.fromList $ (++) solvers $ concat $
+  let chosenAttributes = (++) [solvers] $
                        map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
                        [chosenResults, chosenCpu, chosenConfig]
-
-  let concepts' = concepts $ filterContext context chosenAttributes
+  let concepts' = concepts $ filterContext context $ Set.fromList $
+                map Set.fromList $ sequenceA $ filter ((not . null)) chosenAttributes
   let chosenObjects = Set.toList $ obs $ concepts'!!cid
 
   jobResults <- mapM (\obj -> getPersistJobResult obj) chosenObjects

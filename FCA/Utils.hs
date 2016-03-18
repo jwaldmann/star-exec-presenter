@@ -41,11 +41,12 @@ contextToList context = do
   let obAtsRel = fore context
   map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
 
--- reduce attributes of existing context and return reduced one
-filterContext :: (Ord at, Ord ob) => Context ob at -> Set at -> Context ob at
-filterContext context attrs = do
-  let l = map (\(ob, ats) -> (ob, Set.toList $ Set.intersection attrs $ Set.fromList ats)) $ contextToList context
-  contextFromList $ filter (\(_,ats) -> (not . null) ats ) l
+-- filter context by given attributes and return reduced one
+filterContext :: (Ord at) => Context ob at -> Set (Set at) -> Context ob at
+filterContext context ats = Context
+ { fore=Map.filter (\v -> any id (map (\at -> Set.isSubsetOf at v) $ Set.toList ats)) $ fore context
+  , back=Map.filterWithKey (\k _ -> any id (map (\at -> Set.member k at) $ Set.toList ats)) $ back context
+  }
 
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
