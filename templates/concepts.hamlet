@@ -12,7 +12,7 @@
 <div>
   #{svg_contents}
 
-<table class="table">
+<table class="table" id="result-table">
   <thead>
     <tr>
       <th>Jobs

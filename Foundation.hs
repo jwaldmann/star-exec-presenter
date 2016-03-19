@@ -27,7 +27,7 @@ import Yesod.Core.Types (Logger)
 
 --import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
 import Presenter.Auth (authSE)
-import Data.Text (Text, pack)
+import Data.Text (Text)
 import qualified Data.Text.Lazy as TL
 
 import qualified Data.Map.Strict as M

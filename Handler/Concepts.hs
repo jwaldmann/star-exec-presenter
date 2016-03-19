@@ -18,7 +18,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf, takeEnd)
+import Data.Text as T (append, isInfixOf, takeEnd)
 import Data.Text.Lazy as TL (pack)
 import System.Process (readProcess)
 import qualified Text.Blaze as B
@@ -45,7 +45,7 @@ getConceptsR jid cid = do
   let attributeChoices = case result of
         FormSuccess ca -> Just ca
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
-  
+
   let solvers = chosenSolver $ fromJust attributeChoices
   let chosenAttributes = (++) [solvers] $
                        map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
@@ -62,7 +62,7 @@ getConceptsR jid cid = do
   actionURL <- getConceptURL jid 0
   currURL <- getConceptURL jid cid
   nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
-  svg_contents <- renderConceptSVG concepts' nodeURLs
+  svg_contents <- renderConceptSVG concepts' $ addTableAnchor nodeURLs
   defaultLayout $ do
     when (qStatus /= Latest)
        -- fetch job from starexec if not present in database
@@ -89,7 +89,7 @@ attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
   let keys = ["Result", "CPU", "Solver config", "Solver name"]
-  M.fromList $ map (\key -> (key, 
+  M.fromList $ map (\key -> (key,
     map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
     filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
 
@@ -123,4 +123,8 @@ getBenchmarkRows jobResults jobSolvers = do
     return (bm, row)
 
 shorten :: Text -> Text
-shorten t = T.takeEnd 50 t
+shorten = T.takeEnd 50
+
+
+addTableAnchor :: [Text] ->  [Text]
+addTableAnchor = map (\nodeURL -> append nodeURL "#result-table")
