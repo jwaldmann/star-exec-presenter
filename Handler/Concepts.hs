@@ -41,7 +41,8 @@ getConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    (BootstrapHorizontalForm (ColSm 0) (ColSm 2) (ColSm 0) (ColSm 4)) $ attributeForm $ attrOptionsFromContext attrs
+    -- (BootstrapHorizontalForm (ColXs 0) (ColXs 4) (ColXs 0) (ColXs 8)) $ attributeForm $ attrOptionsFromContext attrs
+    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext attrs
   let attributeChoices = case result of
         FormSuccess ca -> Just ca
         _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
@@ -73,16 +74,31 @@ getConceptsR jid cid = do
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
-attributeForm formOptions =  AttributeChoices
+attributeForm formOptions = AttributeChoices
+
   -- change widget size to length of respective option
-  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "Solver name" formOptions) "Solver names" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) "Solver configs" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) "Results" Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) "CPU times" Nothing
+  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "Solver name" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) (bfsFormControl MsgSolverConfigs "SolverConfigs") Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
+  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
   <* bootstrapSubmit (BootstrapSubmit {
-      bsClasses="btn btn-primary",
+      bsClasses="btn btn-primary col-xs-offset-5",
       bsValue="choose",
-      bsAttrs=[("attr-name", "attr-value")]} :: BootstrapSubmit Text)
+      bsAttrs=[]} :: BootstrapSubmit Text)
+
+-- bsFieldSettings ::  RenderMessage master msg => msg -> FieldSettings master
+-- bsFieldSettings msg = FieldSettings {
+--   fsLabel=msg,
+--   fsTooltip=Nothing,
+--   fsId=Just msg,
+--   fsName=Just $ toMessage msg,
+--   fsAttrs=[]
+-- }
+
+-- ("Attr", "Values")
+
+bfsFormControl :: RenderMessage master msg => msg -> Text -> FieldSettings master
+bfsFormControl msg label = (bfs msg) {fsName = Just label, fsAttrs = [("class", "form-control")]}
 
 
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]

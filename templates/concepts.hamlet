@@ -3,7 +3,7 @@
 <p>
   <em>Choose the attributes you are interested in. You can see all combinations of these attributes below.<br>
   <em>You can hold CTRL to choose multiple ones.
-<form class="form-horizontal" method=get action=#{actionURL} enctype=#{enctype}>
+<form id="concepts-form" method=get action=#{actionURL} enctype=#{enctype}>
   ^{widget}
 
 <h2>All combinations for chosen attributes
