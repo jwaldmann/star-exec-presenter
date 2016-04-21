@@ -73,7 +73,6 @@ import Handler.InstallSolvers
 import Handler.CompetitionText
 import Handler.Resolve
 import Handler.Concepts
-import Handler.Image
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM

@@ -41,7 +41,6 @@ getConceptsR jid cid = do
   context <- jobResultsContext jid
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    -- (BootstrapHorizontalForm (ColXs 0) (ColXs 4) (ColXs 0) (ColXs 8)) $ attributeForm $ attrOptionsFromContext attrs
     BootstrapBasicForm $ attributeForm $ attrOptionsFromContext attrs
   let attributeChoices = case result of
         FormSuccess ca -> Just ca
@@ -82,24 +81,12 @@ attributeForm formOptions = AttributeChoices
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
   <* bootstrapSubmit (BootstrapSubmit {
-      bsClasses="btn btn-primary col-xs-offset-5",
+      bsClasses="btn btn-primary",
       bsValue="choose",
       bsAttrs=[]} :: BootstrapSubmit Text)
 
--- bsFieldSettings ::  RenderMessage master msg => msg -> FieldSettings master
--- bsFieldSettings msg = FieldSettings {
---   fsLabel=msg,
---   fsTooltip=Nothing,
---   fsId=Just msg,
---   fsName=Just $ toMessage msg,
---   fsAttrs=[]
--- }
-
--- ("Attr", "Values")
-
 bfsFormControl :: RenderMessage master msg => msg -> Text -> FieldSettings master
 bfsFormControl msg label = (bfs msg) {fsName = Just label, fsAttrs = [("class", "form-control")]}
-
 
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
@@ -109,7 +96,6 @@ attrOptionsFromContext attrs = do
     map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
     filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
 
-
 getConceptURL :: JobID -> ConceptId -> Handler Text
 getConceptURL jid cid = do
   rq <- getRequest
@@ -117,13 +103,11 @@ getConceptURL jid cid = do
   renderer <- getUrlRenderParams
   return $ (renderer $ ConceptsR (jid) cid) getParams
 
-
 renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
 renderConceptSVG concepts' nodeURLs = do
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
   -- FIXME: there must be a better way to remove <xml> tag
   return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
-
 
 resultmap :: [JobResult] -> Map UniqueBenchmark (Map (JobID, (SolverID, SolverName)) JobResult)
 resultmap jobResults = M.fromListWith M.union $ do
@@ -140,7 +124,6 @@ getBenchmarkRows jobResults jobSolvers = do
 
 shorten :: Text -> Text
 shorten = T.takeEnd 50
-
 
 addTableAnchor :: [Text] ->  [Text]
 addTableAnchor = map (\nodeURL -> append nodeURL "#result-table")
