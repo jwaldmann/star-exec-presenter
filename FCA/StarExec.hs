@@ -1,12 +1,16 @@
 module FCA.StarExec where
 
-import FCA.Utils
+import FCA.Utils hiding (concepts)
 import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
+import Control.Monad (guard)
+import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
+import           Data.Set (Set)
+import qualified Data.Set as Set
 import Data.Text (append, pack, isPrefixOf, stripPrefix)
 
 
@@ -64,6 +68,7 @@ properAttrName at = case at of
                             ERROR         -> "Result ERROR"
                             (OTHER text)  -> append "Result OTHER " text
 
+
 stripAttributePrefixes :: Text -> Text
 stripAttributePrefixes at
   | isPrefixOf "Result " at = fromJust $ stripPrefix "Result " at
@@ -71,3 +76,17 @@ stripAttributePrefixes at
   | isPrefixOf "Solver name " at = fromJust $ stripPrefix "Solver name " at
   | isPrefixOf "CPU " at = fromJust $ stripPrefix "CPU " at
   | otherwise = at
+
+
+-- create all attribute combinations from existing attributes without duplicates
+attributeCombination :: (Ord at) => Context ob at -> Set (Set at)
+attributeCombination context = do
+  let ats = Set.fromList $ Map.elems $ fore context
+  Set.fromList $ map Set.fromList $ concat $ map (subsequences . Set.toList) $ Set.toList ats
+
+-- determine all concepts of given context with StarExec attributes
+concepts :: (Ord at, Ord ob, Show ob, Show at) => Context ob at -> [Concept ob at]
+concepts c = do
+  ats <- Set.toList $ attributeCombination c
+  guard $ ats == getAttributes c (getObjects c ats)
+  return (Concept (getObjects c ats) ats)

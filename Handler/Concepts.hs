@@ -1,6 +1,6 @@
 module Handler.Concepts where
 
-import FCA.Utils
+import FCA.Utils hiding (concepts)
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
 import Import
@@ -50,8 +50,10 @@ getConceptsR jid cid = do
   let chosenAttributes = (++) [solvers] $
                        map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
                        [chosenResults, chosenCpu, chosenConfig]
-  let concepts' = concepts $ filterContext context $ Set.fromList $
+  let filtered_context = filterContext context $ Set.fromList $
                 map Set.fromList $ sequenceA $ filter ((not . null)) chosenAttributes
+  let concepts' = concepts filtered_context
+
   let chosenObjects = Set.toList $ obs $ concepts'!!cid
 
   jobResults <- mapM (\obj -> getPersistJobResult obj) chosenObjects
