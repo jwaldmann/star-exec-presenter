@@ -43,10 +43,11 @@ contextToList context = do
 
 -- filter context by given attributes and return reduced one
 filterContext :: (Ord at) => Context ob at -> Set (Set at) -> Context ob at
-filterContext context ats = Context
- { fore=Map.filter (\v -> any id (map (\at -> Set.isSubsetOf at v) $ Set.toList ats)) $ fore context
-  , back=Map.filterWithKey (\k _ -> any id (map (\at -> Set.member k at) $ Set.toList ats)) $ back context
-  }
+filterContext context ats = do 
+    let a = Set.fromList $ concat $ map Set.toList $ Set.toList ats
+    Context { fore=Map.map (Set.intersection a) $ fore context
+    , back=Map.filterWithKey (\k _ -> any id (map (\at -> Set.member k at) $ Set.toList ats)) $ back context
+    }
 
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
