@@ -42,12 +42,20 @@ contextToList context = do
   map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
 
 -- filter context by given attributes and return reduced one
-filterContext :: (Ord at) => Context ob at -> Set (Set at) -> Context ob at
-filterContext context ats = do 
-    let a = Set.fromList $ concat $ map Set.toList $ Set.toList ats
-    Context { fore=Map.map (Set.intersection a) $ fore context
-    , back=Map.filterWithKey (\k _ -> any id (map (\at -> Set.member k at) $ Set.toList ats)) $ back context
-    }
+filterContext :: (Ord at, Ord ob) => Context ob at -> [[at]] -> Maybe (Context ob at)
+filterContext context chosenAts =
+  if (null . head) chosenAts
+    then Just context
+    else do
+      -- chosenAtsCombination contains all allowed attribute combinations
+      let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
+      let allMember = any (id) . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+      let newFore = Map.filter (allMember) $ fore context
+      case (Map.null newFore) of
+        True  -> Nothing
+        False -> Just Context { fore=newFore
+                , back=Map.filter (not . null) $ Map.map (Set.intersection $ (Set.fromList . Map.keys) newFore) $ back context
+                }
 
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]

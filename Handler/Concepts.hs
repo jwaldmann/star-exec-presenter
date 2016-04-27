@@ -42,29 +42,29 @@ getConceptsR jid cid = do
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
     BootstrapBasicForm $ attributeForm $ attrOptionsFromContext attrs
-  let attributeChoices = case result of
-        FormSuccess ca -> Just ca
-        _ -> Just AttributeChoices {chosenSolver=[], chosenResults=Just [], chosenCpu=Just [], chosenConfig=Just []}
-
-  let solvers = chosenSolver $ fromJust attributeChoices
-  let chosenAttributes = (++) [solvers] $
-                       map (\f -> (maybe [] id) .f $ fromJust attributeChoices)
+  let chosenAttributes = case result of
+        FormSuccess ca -> do
+          let solvers = chosenSolver ca
+          filter ((not . null)) $ (++) [solvers] $
+                       map (\f -> maybeListId .f $ ca)
                        [chosenResults, chosenCpu, chosenConfig]
-  let filtered_context = filterContext context $ Set.fromList $
-                map Set.fromList $ sequenceA $ filter ((not . null)) chosenAttributes
-  let concepts' = concepts filtered_context
+        _ -> [[]]
 
-  let chosenObjects = Set.toList $ obs $ concepts'!!cid
+  let filtered_context = filterContext context chosenAttributes
+  let concepts' = case filtered_context of
+                    Nothing -> Nothing
+                    Just fc -> Just $ concepts fc
 
-  jobResults <- mapM (\obj -> getPersistJobResult obj) chosenObjects
+  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid) concepts'
   let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
   let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
 
-  -- actionURL points to concept 0 that shows all objects
+  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c $ maybeListId concepts')) $ maybeListId concepts'
+  svg_contents <- renderConceptSVG (maybeListId concepts') $ addTableAnchor nodeURLs
+
+-- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0
   currURL <- getConceptURL jid cid
-  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c concepts')) concepts'
-  svg_contents <- renderConceptSVG concepts' $ addTableAnchor nodeURLs
   defaultLayout $ do
     when (qStatus /= Latest)
        -- fetch job from starexec if not present in database
@@ -129,3 +129,6 @@ shorten = T.takeEnd 50
 
 addTableAnchor :: [Text] ->  [Text]
 addTableAnchor = map (\nodeURL -> append nodeURL "#result-table")
+
+maybeListId :: Maybe [a] -> [a]
+maybeListId = maybe [] id

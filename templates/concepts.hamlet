@@ -6,44 +6,47 @@
 <form id="concepts-form" method=get action=#{actionURL} enctype=#{enctype}>
   ^{widget}
 
-<h2>All combinations for chosen attributes
-<p>
-  <em>Click on the node you are interested in to load results.
-<div>
-  #{svg_contents}
+$maybe _ <- concepts'
+  <h2>All combinations for chosen attributes
+  <p>
+    <em>Click on the node you are interested in to load results.
+  <div>
+    #{svg_contents}
 
-<table class="table" id="result-table">
-  <thead>
-    <tr>
-      <th>Jobs
-      <!--
-      $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
-        <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
-      -->
-    <tr>
-      <th>Solver
-      $forall (_, (sId, sName)) <- jobSolvers
-        <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
-  <tbody>
-    $forall ((bKey,bName), results) <- benchmarkResults
+  <table class="table" id="result-table">
+    <thead>
       <tr>
-        <td>
-          $case bKey
-            $of Left bId
-              <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
-            $of Right doi
-             <a href=@{ResolveR doi}>#{shorten bName}</a>
+        <th>Jobs
+        <!--
+        $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
+          <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
+        -->
+      <tr>
+        <th>Solver
+        $forall (_, (sId, sName)) <- jobSolvers
+          <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
+    <tbody>
+      $forall ((bKey,bName), results) <- benchmarkResults
+        <tr>
+          <td>
+            $case bKey
+              $of Left bId
+                <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+              $of Right doi
+               <a href=@{ResolveR doi}>#{shorten bName}</a>
 
-        $forall mResult <- results
-          $maybe result <- mResult
-            <td class="#{getClass result}">
-              $if isResultComplete result
-                <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
-                  #{short $ getSolverResult result }
-                  <span style="opacity:0.5">
-                    #{toFixed 1 $ toCpuTime result} /
-                    #{toFixed 1 $ toWallclockTime result}
-              $else
-                not finished
-          $nothing
-            <td>
+          $forall mResult <- results
+            $maybe result <- mResult
+              <td class="#{getClass result}">
+                $if isResultComplete result
+                  <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
+                    #{short $ getSolverResult result }
+                    <span style="opacity:0.5">
+                      #{toFixed 1 $ toCpuTime result} /
+                      #{toFixed 1 $ toWallclockTime result}
+                $else
+                  not finished
+            $nothing
+              <td>
+$nothing
+  <h1>No matching cells. Choose other attributes for this job.
