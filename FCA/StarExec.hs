@@ -79,14 +79,23 @@ stripAttributePrefixes at
 
 
 -- create all attribute combinations from existing attributes without duplicates
-attributeCombination :: (Ord at) => Context ob at -> Set (Set at)
+attributeCombination :: (Ord at) => Context ob at -> [Set at]
 attributeCombination context = do
-  let ats = Set.fromList $ Map.elems $ fore context
-  Set.fromList $ map Set.fromList $ concat $ map (subsequences . Set.toList) $ Set.toList ats
+  let ats = Map.elems $ fore context
+  ordNub $ map Set.fromList $ concat $ map (subsequences . Set.toList) $ ordNub ats
 
 -- determine all concepts of given context with StarExec attributes
 concepts :: (Ord at, Ord ob, Show ob, Show at) => Context ob at -> [Concept ob at]
 concepts c = do
-  ats <- Set.toList $ attributeCombination c
+  ats <- attributeCombination c
   guard $ ats == getAttributes c (getObjects c ats)
   return (Concept (getObjects c ats) ats)
+
+
+-- https://github.com/nh2/haskell-ordnub#dont-use-nub
+ordNub :: (Ord a) => [a] -> [a]
+ordNub l = go Set.empty l
+  where
+    go _ [] = []
+    go s (x:xs) = if x `Set.member` s then go s xs
+                                      else x : go (Set.insert x s) xs
