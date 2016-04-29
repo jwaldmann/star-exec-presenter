@@ -88,3 +88,7 @@
   position: relative;
   right: 0px;
 }
+
+.form-control {
+  overflow-y: scroll
+}
