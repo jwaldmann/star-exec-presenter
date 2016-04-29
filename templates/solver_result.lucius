@@ -77,6 +77,14 @@
 }
 
 
-#concepts-form div.form-group{
+#concepts-form div.form-group:nth-of-type(-n+4) {
+  bottom: 0px;
+  top: 0px;
+  float: left;
   width: 25%;
+  min-height: 1px;
+  padding-left: 15px;
+  padding-right: 15px;
+  position: relative;
+  right: 0px;
 }

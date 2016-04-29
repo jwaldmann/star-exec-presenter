@@ -83,7 +83,7 @@ attributeForm formOptions = AttributeChoices
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
   <* bootstrapSubmit (BootstrapSubmit {
-      bsClasses="btn btn-primary",
+      bsClasses="btn btn-primary center-block",
       bsValue="choose",
       bsAttrs=[]} :: BootstrapSubmit Text)
 
