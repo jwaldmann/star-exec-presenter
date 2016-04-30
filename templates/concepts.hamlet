@@ -13,7 +13,7 @@ $maybe _ <- concepts'
   <div>
     #{svg_contents}
 
-  <table class="table" id="result-table">
+  <table class="table">
     <thead>
       <tr>
         <th>Jobs

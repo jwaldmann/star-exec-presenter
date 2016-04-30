@@ -18,7 +18,7 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (append, isInfixOf, takeEnd)
+import Data.Text as T (isInfixOf, takeEnd)
 import Data.Text.Lazy as TL (pack)
 import System.Process (readProcess)
 import qualified Text.Blaze as B
@@ -55,16 +55,25 @@ getConceptsR jid cid = do
                     Nothing -> Nothing
                     Just fc -> Just $ concepts fc
 
-  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid) concepts'
+
+  let new_concepts = reduceConceptsToProperSubsets concepts' cid
+
+  let cid' =
+        if (cid > length new_concepts)
+          then 0
+          else cid
+
+  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid') new_concepts
   let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
   let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
 
-  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c $ maybeListId concepts')) $ maybeListId concepts'
-  svg_contents <- renderConceptSVG (maybeListId concepts') $ addTableAnchor nodeURLs
+
+  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c $ maybeListId concepts')) $ maybeListId new_concepts
+  svg_contents <- renderConceptSVG (maybeListId new_concepts) nodeURLs
 
 -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0
-  currURL <- getConceptURL jid cid
+  currURL <- getConceptURL jid cid'
   defaultLayout $ do
     when (qStatus /= Latest)
        -- fetch job from starexec if not present in database
@@ -76,8 +85,6 @@ getConceptsR jid cid = do
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
 attributeForm formOptions = AttributeChoices
-
-  -- change widget size to length of respective option
   <$> areq (multiSelectFieldList $ fromJust $ M.lookup "Solver name" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) (bfsFormControl MsgSolverConfigs "SolverConfigs") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
@@ -126,9 +133,6 @@ getBenchmarkRows jobResults jobSolvers = do
 
 shorten :: Text -> Text
 shorten = T.takeEnd 50
-
-addTableAnchor :: [Text] ->  [Text]
-addTableAnchor = map (\nodeURL -> append nodeURL "#result-table")
 
 maybeListId :: Maybe [a] -> [a]
 maybeListId = maybe [] id

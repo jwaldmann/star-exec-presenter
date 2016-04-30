@@ -28,35 +28,6 @@ data Concept ob at = Concept
   } deriving (Show, Eq)
 
 
--- create a context of given input data
-contextFromList :: (Ord at, Ord ob) => [(ob, [at])] -> Context ob at
-contextFromList l = Context
-  { fore=Map.fromListWith Set.union $ map (\(ob, ats) -> (ob, Set.fromList ats)) l
-  , back=Map.fromListWith Set.union $ do (ob, ats) <- l; at <- ats; return (at,Set.singleton ob)
-  }
-
--- create list of pairs of a context
-contextToList :: (Ord ob) => Context ob at -> [(ob, [at])]
-contextToList context = do
-  let obAtsRel = fore context
-  map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
-
--- filter context by given attributes and return reduced one
-filterContext :: (Ord at, Ord ob) => Context ob at -> [[at]] -> Maybe (Context ob at)
-filterContext context chosenAts =
-  if (null . head) chosenAts
-    then Just context
-    else do
-      -- chosenAtsCombination contains all allowed attribute combinations
-      let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
-      let allMember = any (id) . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
-      let newFore = Map.filter (allMember) $ fore context
-      case (Map.null newFore) of
-        True  -> Nothing
-        False -> Just Context { fore=newFore
-                , back=Map.filter (not . null) $ Map.map (Set.intersection $ (Set.fromList . Map.keys) newFore) $ back context
-                }
-
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
 concepts c = do
@@ -81,3 +52,41 @@ getAttributes c obs = foldr Set.intersection (attributes c)
 getObjects :: (Ord at, Ord ob) => Context ob at -> Set at -> Set ob
 getObjects c ats = foldr Set.intersection (objects c)
   $ map (\a -> back c Map.! a) $ Set.toList ats
+
+
+-- filter context by given attributes and return reduced one
+filterContext :: (Ord at, Ord ob) => Context ob at -> [[at]] -> Maybe (Context ob at)
+filterContext context chosenAts =
+  if (null . head) chosenAts
+    then Just context
+    else do
+      -- chosenAtsCombination contains all allowed attribute combinations
+      let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
+      let allMember = any (id) . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+      let newFore = Map.filter (allMember) $ fore context
+      case (Map.null newFore) of
+        True  -> Nothing
+        False -> Just Context { fore=newFore
+                , back=Map.filter (not . null) $ Map.map (Set.intersection $ (Set.fromList . Map.keys) newFore) $ back context
+                }
+
+-- reduce concepts to concepts with proper subsets of given concept id
+reduceConceptsToProperSubsets :: (Ord at) => Maybe [Concept ob at] -> ConceptId -> Maybe [Concept ob at]
+reduceConceptsToProperSubsets c cid = case c of
+                                    Nothing -> Nothing
+                                    Just concepts' -> do
+                                      let concept = concepts'!!cid
+                                      return $ concept:filter (\c' -> Set.isProperSubsetOf (ats concept) (ats c')) concepts'
+
+-- create a context of given input data
+contextFromList :: (Ord at, Ord ob) => [(ob, [at])] -> Context ob at
+contextFromList l = Context
+  { fore=Map.fromListWith Set.union $ map (\(ob, ats) -> (ob, Set.fromList ats)) l
+  , back=Map.fromListWith Set.union $ do (ob, ats) <- l; at <- ats; return (at,Set.singleton ob)
+  }
+
+-- create list of pairs of a context
+contextToList :: (Ord ob) => Context ob at -> [(ob, [at])]
+contextToList context = do
+  let obAtsRel = fore context
+  map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
