@@ -58,12 +58,7 @@ getConceptsR jid cid = do
 
   let new_concepts = reduceConceptsToProperSubsets concepts' cid
 
-  let cid' =
-        if (cid > length new_concepts)
-          then 0
-          else cid
-
-  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid') new_concepts
+  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid) concepts'
   let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
   let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
 
@@ -73,7 +68,7 @@ getConceptsR jid cid = do
 
 -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL jid 0
-  currURL <- getConceptURL jid cid'
+  currURL <- getConceptURL jid cid
   defaultLayout $ do
     when (qStatus /= Latest)
        -- fetch job from starexec if not present in database
