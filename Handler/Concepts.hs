@@ -7,12 +7,12 @@ import Import
 import Presenter.PersistHelper
 import Presenter.Processing
 import Presenter.Short
-import Presenter.StarExec.JobData (queryJob)
+import Presenter.StarExec.JobData (queryManyJobs)
 import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
+-- import Presenter.Utils.WidgetTable
 
-import Control.Monad (when)
 import Data.Double.Conversion.Text
-import Data.List (elemIndex, isPrefixOf)
+import Data.List (elemIndex, head, isPrefixOf)
 import Data.Maybe
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -35,9 +35,13 @@ data AttributeChoices = AttributeChoices
 
 
 -- route with multiselect to choose attributes of JobID
-getConceptsR :: JobID -> ConceptId -> Handler Html
-getConceptsR jid cid = do
-  QueryResult qStatus _ <- queryJob jid
+getConceptsR :: ConceptId -> JobIds -> Handler Html
+getConceptsR cid jids@(JobIds ids) = do
+  qJobs <- queryManyJobs ids
+  -- tab <- getManyJobCells $ map (snd . queryResult) qJobs
+
+  -- remove next line, when context can handle multiple jids
+  let jid = head ids
   context <- jobResultsContext jid
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
@@ -63,16 +67,16 @@ getConceptsR jid cid = do
   let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
 
 
-  nodeURLs <- mapM (\c -> getConceptURL jid (fromJust $ elemIndex c $ maybeListId concepts')) $ maybeListId new_concepts
+  nodeURLs <- mapM (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $ maybeListId new_concepts
   svg_contents <- renderConceptSVG (maybeListId new_concepts) nodeURLs
 
 -- actionURL points to concept 0 that shows all objects
-  actionURL <- getConceptURL jid 0
-  currURL <- getConceptURL jid cid
+  actionURL <- getConceptURL 0 ids
+  currURL <- getConceptURL cid ids
   defaultLayout $ do
-    when (qStatus /= Latest)
-       -- fetch job from starexec if not present in database
-       insertWidgetMetaRefresh
+    if any (\q' -> queryStatus q' /= Latest) qJobs
+      then insertWidgetMetaRefresh
+      else return ()
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
@@ -100,12 +104,12 @@ attrOptionsFromContext attrs = do
     map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
     filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
 
-getConceptURL :: JobID -> ConceptId -> Handler Text
-getConceptURL jid cid = do
+getConceptURL :: ConceptId -> [JobID] -> Handler Text
+getConceptURL cid jids = do
   rq <- getRequest
   let getParams = reqGetParams rq
   renderer <- getUrlRenderParams
-  return $ (renderer $ ConceptsR (jid) cid) getParams
+  return $ (renderer $ ConceptsR (cid) $ JobIds jids) getParams
 
 renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
 renderConceptSVG concepts' nodeURLs = do
