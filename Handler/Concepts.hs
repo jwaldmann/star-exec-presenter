@@ -36,11 +36,8 @@ getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
 
   context <- contextsUnion . jobResultsContexts $ getIds jids
-
-
-  let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext attrs
+    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ attributes context
   let chosenAttributes = case result of
         FormSuccess ca -> do
           let solvers = chosenSolver ca
@@ -49,21 +46,23 @@ getConceptsR cid jids@(JobIds ids) = do
                        [chosenResults, chosenCpu, chosenConfig]
         _ -> [[]]
 
-  let filtered_context = filterContext context chosenAttributes
-  let concepts' = case filtered_context of
+  let concepts' = case filterContext context chosenAttributes of
                     Nothing -> Nothing
                     Just fc -> Just $ concepts fc
+  let newConcepts = reduceConceptsToProperSubsets concepts' cid
 
+  nodeURLs <- mapM
+              (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $
+              maybeListId newConcepts
+  svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
 
-  let new_concepts = reduceConceptsToProperSubsets concepts' cid
-
-  nodeURLs <- mapM (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $ maybeListId new_concepts
-  svg_contents <- renderConceptSVG (maybeListId new_concepts) nodeURLs
-
-  let objects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
+  let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
   qJobs <- queryManyJobs ids
-  let jobResults = map (snd . queryResult) qJobs
-  let filteredJobResults = map (wrapResults . (\js -> filter (\j -> Set.member (getPairID j) objects) $ getStarExecResults js)) jobResults
+  let filteredJobResults = map 
+                           (wrapResults . (\jrs -> filter
+                                                  (\jr -> Set.member (getPairID jr) currObjects)
+                                                  $ getStarExecResults jrs)) $
+                           map (snd . queryResult) qJobs
   tab <- getManyJobCells filteredJobResults
 
 -- actionURL points to concept 0 that shows all objects
@@ -104,9 +103,8 @@ attrOptionsFromContext attrs = do
 getConceptURL :: ConceptId -> [JobID] -> Handler Text
 getConceptURL cid jids = do
   rq <- getRequest
-  let getParams = reqGetParams rq
   renderer <- getUrlRenderParams
-  return $ (renderer $ ConceptsR (cid) $ JobIds jids) getParams
+  return $ (renderer $ ConceptsR (cid) $ JobIds jids) $ reqGetParams rq
 
 renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
 renderConceptSVG concepts' nodeURLs = do

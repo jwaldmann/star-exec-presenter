@@ -11,6 +11,6 @@ $maybe _ <- concepts'
   <p>
     <em>Click on the node you are interested in to load results.
   <div>
-    #{svg_contents}
+    #{svgContent}
 $nothing
   <h1>No matching cells. Choose other attributes for this job.
