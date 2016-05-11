@@ -162,6 +162,7 @@ display sc jids previous ts tab  = do
 displayConcept :: JobIds -> Table -> Widget
 displayConcept jids tab = do
   let rs = rows tab
+  let indices = [1..length rs]
   [whamlet|
        <h3>Result table
        <table class="table">
@@ -170,10 +171,14 @@ displayConcept jids tab = do
               $forall h <- header tab
                   <th> ^{contents h}
         <tbody>
-              $forall row <- rs
+              $forall (row, i) <- zip rs indices
                   <tr>
-                    $forall cell <- row
-                      <td class="#{tdclass cell}"> ^{contents cell}
+                      $forall cell <- row
+                        <td class="#{tdclass cell}"> ^{contents cell}
+                  $if (mod i 20 == 0)
+                       <tr>
+                          $forall h <- header tab
+                            <th> ^{contents h}
       |]
 
 supertypes :: [a] -> [[Maybe a]]
