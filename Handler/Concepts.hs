@@ -4,21 +4,18 @@ import FCA.Utils hiding (concepts)
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
 import Import
-import Presenter.PersistHelper
-import Presenter.Processing
-import Presenter.Short
+import Presenter.StarExec.JobData
 -- import Presenter.StarExec.JobData (queryManyJobs)
 -- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
--- import Presenter.Utils.WidgetTable
+import Presenter.Utils.WidgetTable
 
-import Data.Double.Conversion.Text
-import Data.List (elemIndex, head, isPrefixOf, last)
+import Data.List (elemIndex, isPrefixOf)
 import Data.Maybe
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf, takeEnd)
+import Data.Text as T (isInfixOf)
 import Data.Text.Lazy as TL (pack)
 import System.Process (readProcess)
 import qualified Text.Blaze as B
@@ -37,11 +34,7 @@ data AttributeChoices = AttributeChoices
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
-  -- qJobs <- queryManyJobs ids
-  -- tab <- getManyJobCells $ map (snd . queryResult) qJobs
 
-  -- remove next line, when context can handle multiple jids
-  let jid = last ids
   context <- contextsUnion . jobResultsContexts $ getIds jids
 
 
@@ -64,13 +57,14 @@ getConceptsR cid jids@(JobIds ids) = do
 
   let new_concepts = reduceConceptsToProperSubsets concepts' cid
 
-  jobResults <- mapM (\obj -> getPersistJobResult obj) $ Set.toList $ maybe Set.empty (\c -> obs $ c!!cid) concepts'
-  let jobSolvers = Set.fromList $ map (\jr -> (jid, getSolver jr)) $ catMaybes jobResults
-  let benchmarkResults = getBenchmarkRows (catMaybes jobResults) jobSolvers
-
-
   nodeURLs <- mapM (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $ maybeListId new_concepts
   svg_contents <- renderConceptSVG (maybeListId new_concepts) nodeURLs
+
+  let objects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
+  qJobs <- queryManyJobs ids
+  let jobResults = map (snd . queryResult) qJobs
+  let filteredJobResults = map (wrapResults . (\js -> filter (\j -> Set.member (getPairID j) objects) $ getStarExecResults js)) jobResults
+  tab <- getManyJobCells filteredJobResults
 
 -- actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL 0 ids
@@ -82,6 +76,7 @@ getConceptsR cid jids@(JobIds ids) = do
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
+    displayConcept jids tab
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
@@ -118,22 +113,6 @@ renderConceptSVG concepts' nodeURLs = do
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
   -- FIXME: there must be a better way to remove <xml> tag
   return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
-
-resultmap :: [JobResult] -> Map UniqueBenchmark (Map (JobID, (SolverID, SolverName)) JobResult)
-resultmap jobResults = M.fromListWith M.union $ do
-  jr <- jobResults
-  return ( getBenchmark jr, M.singleton (getJobID jr, getSolver jr) jr )
-
-getBenchmarkRows :: [JobResult] -> Set (JobID, (SolverID, SolverName)) -> [(UniqueBenchmark, [Maybe JobResult])]
-getBenchmarkRows jobResults jobSolvers = do
-    (bm, rowmap) <- M.toList $ resultmap jobResults
-    let row = do
-          s <- Set.toList jobSolvers
-          return $ M.lookup s rowmap
-    return (bm, row)
-
-shorten :: Text -> Text
-shorten = T.takeEnd 50
 
 maybeListId :: Maybe [a] -> [a]
 maybeListId = maybe [] id

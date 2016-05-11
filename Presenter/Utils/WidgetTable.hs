@@ -50,7 +50,7 @@ getManyJobCells iss = do
                      , toConfigName p
                      )
                    )
-               , M.singleton ( bminfo dois $ getBenchmark p ) 
+               , M.singleton ( bminfo dois $ getBenchmark p )
                      $ cell_for_job_pair p
                )
         headers = M.keys cells
@@ -166,6 +166,23 @@ display sc jids previous ts tab  = do
                           $forall cell <- row
                             <td class="#{tdclass cell}"> ^{contents cell}
             |]
+
+displayConcept :: JobIds -> Table -> Widget
+displayConcept jids tab = do
+  let rs = rows tab
+  [whamlet|
+       <h3>Result table
+       <table class="table">
+        <thead>
+          <tr>
+              $forall h <- header tab
+                  <th> ^{contents h}
+        <tbody>
+              $forall row <- rs
+                  <tr>
+                    $forall cell <- row
+                      <td class="#{tdclass cell}"> ^{contents cell}
+      |]
 
 supertypes :: [a] -> [[Maybe a]]
 supertypes xs = sequence $ map ( \ x -> [Just x, Nothing] ) xs
