@@ -7,12 +7,12 @@ import Import
 import Presenter.PersistHelper
 import Presenter.Processing
 import Presenter.Short
-import Presenter.StarExec.JobData (queryManyJobs)
-import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
+-- import Presenter.StarExec.JobData (queryManyJobs)
+-- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 -- import Presenter.Utils.WidgetTable
 
 import Data.Double.Conversion.Text
-import Data.List (elemIndex, head, isPrefixOf)
+import Data.List (elemIndex, head, isPrefixOf, last)
 import Data.Maybe
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -37,12 +37,14 @@ data AttributeChoices = AttributeChoices
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
-  qJobs <- queryManyJobs ids
+  -- qJobs <- queryManyJobs ids
   -- tab <- getManyJobCells $ map (snd . queryResult) qJobs
 
   -- remove next line, when context can handle multiple jids
-  let jid = head ids
-  context <- jobResultsContext jid
+  let jid = last ids
+  context <- contextsUnion . jobResultsContexts $ getIds jids
+
+
   let attrs = attributes context
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
     BootstrapBasicForm $ attributeForm $ attrOptionsFromContext attrs
@@ -74,9 +76,9 @@ getConceptsR cid jids@(JobIds ids) = do
   actionURL <- getConceptURL 0 ids
   currURL <- getConceptURL cid ids
   defaultLayout $ do
-    if any (\q' -> queryStatus q' /= Latest) qJobs
-      then insertWidgetMetaRefresh
-      else return ()
+    -- if any (\q' -> queryStatus q' /= Latest) qJobs
+    --   then insertWidgetMetaRefresh
+    --   else return ()
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
@@ -135,3 +137,4 @@ shorten = T.takeEnd 50
 
 maybeListId :: Maybe [a] -> [a]
 maybeListId = maybe [] id
+

@@ -5,6 +5,7 @@ import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
+import Control.Applicative
 import Control.Monad (guard)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
@@ -24,9 +25,26 @@ data Attribute =
 
 -- get context of job results by given JobID
 jobResultsContext:: JobID -> Handler (Context JobPairID Attribute)
-jobResultsContext jid = do
-  jobResults <- getPersistJobResults jid
-  return $ contextFromList . collectData $ getStarExecResults jobResults
+jobResultsContext jid = liftA 
+  (contextFromList . collectData . getStarExecResults)
+  (getPersistJobResults jid)
+
+-- get all contexts to given jids and merge to one
+-- jobResultsContexts :: JobIds -> Handler [Context JobPairID Attribute]
+jobResultsContexts :: [JobID] -> [Handler (Context JobPairID Attribute)]
+jobResultsContexts jids = map
+  (\j -> liftA (contextFromList . collectData . getStarExecResults) (getPersistJobResults j))
+  jids
+
+-- unite all given contexts to a single one
+contextsUnion :: [Handler (Context JobPairID Attribute)] -> Handler (Context JobPairID Attribute)
+contextsUnion = foldr 
+    (\a' b' -> do
+      a <- a'
+      b <- b'
+      return $ Context {fore=Map.unionWith (Set.union) (fore a) (fore b), back=Map.unionWith (Set.union) (back a) (back b)}
+    )
+    (return $ Context {fore=Map.empty, back=Map.empty})
 
 -- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
