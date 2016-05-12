@@ -36,38 +36,44 @@ data AttributeChoices = AttributeChoices
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
 
-  context <- contextsUnion . jobResultsContexts $ getIds jids
+  jobResultAts <- jobResultsAttributes $ getIds jids
+  jobResultPairs' <- jobResultPairs $ getIds jids
+
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ attributes context
+    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ Set.fromList jobResultAts
   let concepts' = case result of
         FormSuccess ca -> do
           let chosenAttributes = filter (not . null) $
                                    (++) [chosenSolver ca] $
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
-          case filterContext context chosenAttributes of
+          let filteredJobResults = map (`filterJobResultPair` chosenAttributes) jobResultPairs'
+          case filteredJobResults of
             Nothing -> Nothing
-            Just fc -> Just $ concepts fc
+            Just fjr -> do
+                    let context = contextsUnion $ map contextFromList fjr
+                    return $ concepts context
         _ -> Nothing
+
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
 
   nodeURLs <- mapM
-              (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $
-              maybeListId newConcepts
+             (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $
+             maybeListId newConcepts
   svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
 
   let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
   qJobs <- queryManyJobs ids
   let filteredJobResults = map
-                           ((wrapResults .
-                             filter
-                             (\jr -> Set.member (getPairID jr) currObjects)
-                             . getStarExecResults)
-                             . snd . queryResult)
-                           qJobs
+                          ((wrapResults .
+                            filter
+                            (\jr -> Set.member (getPairID jr) currObjects)
+                            . getStarExecResults)
+                            . snd . queryResult)
+                          qJobs
   tab <- getManyJobCells filteredJobResults
 
--- actionURL points to concept 0 that shows all objects
+  --actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL 0 ids
   currURL <- getConceptURL cid ids
   defaultLayout $ do
@@ -77,8 +83,7 @@ getConceptsR cid jids@(JobIds ids) = do
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
-    when (isJust concepts') $ do
-      displayConcept jids tab
+    when (isJust concepts') $ displayConcept jids tab
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices

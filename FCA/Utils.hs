@@ -53,23 +53,6 @@ getObjects :: (Ord at, Ord ob) => Context ob at -> Set at -> Set ob
 getObjects c ats = foldr Set.intersection (objects c)
   $ map (\a -> back c Map.! a) $ Set.toList ats
 
-
--- filter context by given attributes and return reduced one
-filterContext :: (Ord at, Ord ob) => Context ob at -> [[at]] -> Maybe (Context ob at)
-filterContext context chosenAts =
-  if (null . head) chosenAts
-    then Just context
-    else do
-      -- chosenAtsCombination contains all allowed attribute combinations
-      let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
-      let anyMember = any id . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
-      let newFore = Map.filter anyMember $ fore context
-      case (Map.null newFore) of
-        True  -> Nothing
-        False -> Just Context { fore=newFore
-                , back=Map.filter (not . null) $ Map.map (Set.intersection $ (Set.fromList . Map.keys) newFore) $ back context
-                }
-
 -- reduce concepts to concepts with proper subsets of given concept id
 reduceConceptsToProperSubsets :: (Ord at) => Maybe [Concept ob at] -> ConceptId -> Maybe [Concept ob at]
 reduceConceptsToProperSubsets c cid = case c of

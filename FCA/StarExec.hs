@@ -25,26 +25,38 @@ data Attribute =
 
 -- get context of job results by given JobID
 jobResultsContext:: JobID -> Handler (Context JobPairID Attribute)
-jobResultsContext jid = liftA 
+jobResultsContext jid = liftA
   (contextFromList . collectData . getStarExecResults)
   (getPersistJobResults jid)
 
 -- get all contexts to given jids and merge to one
--- jobResultsContexts :: JobIds -> Handler [Context JobPairID Attribute]
 jobResultsContexts :: [JobID] -> [Handler (Context JobPairID Attribute)]
-jobResultsContexts jids = map
-  (\j -> liftA (contextFromList . collectData . getStarExecResults) (getPersistJobResults j))
-  jids
+jobResultsContexts = map (liftA (contextFromList . collectData . getStarExecResults) . getPersistJobResults)
+
+--
+jobResultPairs :: [JobID] -> Handler [[(JobPairID, [Attribute])]]
+jobResultPairs ids = do
+  jobResults <- mapM getPersistJobResults ids
+  return $ map (collectData . getStarExecResults) jobResults
+
+--
+filterJobResultPair :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
+filterJobResultPair pairs chosenAts = do
+  -- chosenAtsCombination contains all allowed attribute combinations
+  let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
+  let anyMember = any id . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+  let filteredJobResults = filter (\(_,ats) -> anyMember $ Set.fromList ats) pairs
+  case filteredJobResults of
+    [] -> Nothing
+    _ -> Just filteredJobResults
 
 -- unite all given contexts to a single one
-contextsUnion :: [Handler (Context JobPairID Attribute)] -> Handler (Context JobPairID Attribute)
-contextsUnion = foldr 
-    (\a' b' -> do
-      a <- a'
-      b <- b'
-      return $ Context {fore=Map.unionWith (Set.union) (fore a) (fore b), back=Map.unionWith (Set.union) (back a) (back b)}
-    )
-    (return $ Context {fore=Map.empty, back=Map.empty})
+contextsUnion :: [Context JobPairID Attribute] -> Context JobPairID Attribute
+contextsUnion = foldr
+      (\a b ->
+        Context {fore=Map.unionWith Set.union (fore a) (fore b), back=Map.unionWith Set.union (back a) (back b)}
+      )
+      Context {fore=Map.empty, back=Map.empty}
 
 -- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
@@ -53,6 +65,12 @@ slowCpuTimeLimit = 10
 -- create relation of JobPairID and declared attributes of given data
 collectData :: [JobResultInfo] -> [(JobPairID, [Attribute])]
 collectData results = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results)
+
+-- get attributes of JobIds
+jobResultsAttributes :: [JobID] -> Handler [Attribute]
+jobResultsAttributes ids = do
+  jobResults <- mapM getPersistJobResults ids
+  return $ concat $ concatMap (getAttributeCollection . getStarExecResults) jobResults
 
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
