@@ -9,6 +9,7 @@ import Presenter.StarExec.JobData
 -- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 import Presenter.Utils.WidgetTable
 
+import Control.Monad
 import Data.List (elemIndex, isPrefixOf)
 import Data.Maybe
 import           Data.Map.Strict (Map)
@@ -38,17 +39,16 @@ getConceptsR cid jids@(JobIds ids) = do
   context <- contextsUnion . jobResultsContexts $ getIds jids
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
     BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ attributes context
-  let chosenAttributes = case result of
+  let concepts' = case result of
         FormSuccess ca -> do
-          let solvers = chosenSolver ca
-          filter (not . null) $ (++) [solvers] $
-                       map (\f -> maybeListId .f $ ca)
-                       [chosenResults, chosenCpu, chosenConfig]
-        _ -> [[]]
+          let chosenAttributes = filter (not . null) $
+                                   (++) [chosenSolver ca] $
+                                   map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
+          case filterContext context chosenAttributes of
+            Nothing -> Nothing
+            Just fc -> Just $ concepts fc
+        _ -> Nothing
 
-  let concepts' = case filterContext context chosenAttributes of
-                    Nothing -> Nothing
-                    Just fc -> Just $ concepts fc
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
 
   nodeURLs <- mapM
@@ -77,7 +77,8 @@ getConceptsR cid jids@(JobIds ids) = do
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
-    displayConcept jids tab
+    when (isJust concepts') $ do
+      displayConcept jids tab
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
