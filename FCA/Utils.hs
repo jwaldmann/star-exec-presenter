@@ -62,8 +62,8 @@ filterContext context chosenAts =
     else do
       -- chosenAtsCombination contains all allowed attribute combinations
       let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
-      let allMember = any (id) . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
-      let newFore = Map.filter (allMember) $ fore context
+      let anyMember = any id . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+      let newFore = Map.filter anyMember $ fore context
       case (Map.null newFore) of
         True  -> Nothing
         False -> Just Context { fore=newFore
@@ -76,7 +76,7 @@ reduceConceptsToProperSubsets c cid = case c of
                                     Nothing -> Nothing
                                     Just concepts' -> do
                                       let concept = concepts'!!cid
-                                      return $ concept:filter (\c' -> Set.isProperSubsetOf (ats concept) (ats c')) concepts'
+                                      return $ concept:filter (Set.isProperSubsetOf (ats concept) . ats) concepts'
 
 -- create a context of given input data
 contextFromList :: (Ord at, Ord ob) => [(ob, [at])] -> Context ob at

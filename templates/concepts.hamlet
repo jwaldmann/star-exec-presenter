@@ -13,4 +13,4 @@ $maybe _ <- concepts'
   <div>
     #{svgContent}
 $nothing
-  <h1>No matching cells. Choose other attributes for this job.
+  <h3>No matching cells. Choose other attributes for this job.

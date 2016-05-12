@@ -100,7 +100,8 @@ stripAttributePrefixes at
 attributeCombination :: (Ord at) => Context ob at -> [Set at]
 attributeCombination context = do
   let ats = Map.elems $ fore context
-  ordNub $ map Set.fromList $ concat $ map (subsequences . Set.toList) $ ordNub ats
+  -- using ordNub to reduce duplicate items and keep order
+  ordNub $ map Set.fromList $ concatMap (subsequences . Set.toList) $ ordNub ats
 
 -- determine all concepts of given context with StarExec attributes
 concepts :: (Ord at, Ord ob, Show ob, Show at) => Context ob at -> [Concept ob at]
@@ -112,7 +113,7 @@ concepts c = do
 
 -- https://github.com/nh2/haskell-ordnub#dont-use-nub
 ordNub :: (Ord a) => [a] -> [a]
-ordNub l = go Set.empty l
+ordNub = go Set.empty
   where
     go _ [] = []
     go s (x:xs) = if x `Set.member` s then go s xs

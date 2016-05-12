@@ -41,7 +41,7 @@ getConceptsR cid jids@(JobIds ids) = do
   let chosenAttributes = case result of
         FormSuccess ca -> do
           let solvers = chosenSolver ca
-          filter ((not . null)) $ (++) [solvers] $
+          filter (not . null) $ (++) [solvers] $
                        map (\f -> maybeListId .f $ ca)
                        [chosenResults, chosenCpu, chosenConfig]
         _ -> [[]]
@@ -58,11 +58,13 @@ getConceptsR cid jids@(JobIds ids) = do
 
   let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
   qJobs <- queryManyJobs ids
-  let filteredJobResults = map 
-                           (wrapResults . (\jrs -> filter
-                                                  (\jr -> Set.member (getPairID jr) currObjects)
-                                                  $ getStarExecResults jrs)) $
-                           map (snd . queryResult) qJobs
+  let filteredJobResults = map
+                           ((wrapResults .
+                             filter
+                             (\jr -> Set.member (getPairID jr) currObjects)
+                             . getStarExecResults)
+                             . snd . queryResult)
+                           qJobs
   tab <- getManyJobCells filteredJobResults
 
 -- actionURL points to concept 0 that shows all objects
@@ -104,7 +106,7 @@ getConceptURL :: ConceptId -> [JobID] -> Handler Text
 getConceptURL cid jids = do
   rq <- getRequest
   renderer <- getUrlRenderParams
-  return $ (renderer $ ConceptsR (cid) $ JobIds jids) $ reqGetParams rq
+  return $ renderer (ConceptsR cid $ JobIds jids) $ reqGetParams rq
 
 renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
 renderConceptSVG concepts' nodeURLs = do
@@ -113,5 +115,4 @@ renderConceptSVG concepts' nodeURLs = do
   return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
 
 maybeListId :: Maybe [a] -> [a]
-maybeListId = maybe [] id
-
+maybeListId = fromMaybe []
