@@ -36,27 +36,25 @@ data AttributeChoices = AttributeChoices
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
 
-  jobResultAts <- jobResultsAttributes $ getIds jids
-  jobResultPairs' <- jobResultPairs $ getIds jids
+  attributePairs' <- attributePairs $ getIds jids
 
   ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ Set.fromList jobResultAts
+    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ uniteJobPairAttributes attributePairs'
   let concepts' = case result of
         FormSuccess ca -> do
           let chosenAttributes = filter (not . null) $
                                    (++) [chosenSolver ca] $
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
-          let filteredJobResults = map (`filterJobResultPair` chosenAttributes) jobResultPairs'
-          case filteredJobResults of
+          let filteredPairs = filterPairs attributePairs' chosenAttributes
+          case filteredPairs of
             Nothing -> Nothing
-            Just fjr -> do
-                    let context = contextsUnion $ map contextFromList fjr
+            Just fjp -> do
+                    let context = contextFromList fjp
                     return $ concepts context
         _ -> Nothing
 
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
-
   nodeURLs <- mapM
              (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $
              maybeListId newConcepts

@@ -5,7 +5,6 @@ import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
-import Control.Applicative
 import Control.Monad (guard)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
@@ -23,25 +22,15 @@ data Attribute =
   deriving (Eq, Ord, Show)
 
 
--- get context of job results by given JobID
-jobResultsContext:: JobID -> Handler (Context JobPairID Attribute)
-jobResultsContext jid = liftA
-  (contextFromList . collectData . getStarExecResults)
-  (getPersistJobResults jid)
-
--- get all contexts to given jids and merge to one
-jobResultsContexts :: [JobID] -> [Handler (Context JobPairID Attribute)]
-jobResultsContexts = map (liftA (contextFromList . collectData . getStarExecResults) . getPersistJobResults)
-
---
-jobResultPairs :: [JobID] -> Handler [[(JobPairID, [Attribute])]]
-jobResultPairs ids = do
+-- get attribute pairs of given job ids
+attributePairs :: [JobID] -> Handler [(JobPairID, [Attribute])]
+attributePairs ids = do
   jobResults <- mapM getPersistJobResults ids
-  return $ map (collectData . getStarExecResults) jobResults
+  return $ concatMap (collectData . getStarExecResults) jobResults
 
---
-filterJobResultPair :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
-filterJobResultPair pairs chosenAts = do
+  -- filter all job pairs by given attribute groups
+filterPairs :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
+filterPairs pairs chosenAts = do
   -- chosenAtsCombination contains all allowed attribute combinations
   let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
   let anyMember = any id . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
@@ -50,13 +39,9 @@ filterJobResultPair pairs chosenAts = do
     [] -> Nothing
     _ -> Just filteredJobResults
 
--- unite all given contexts to a single one
-contextsUnion :: [Context JobPairID Attribute] -> Context JobPairID Attribute
-contextsUnion = foldr
-      (\a b ->
-        Context {fore=Map.unionWith Set.union (fore a) (fore b), back=Map.unionWith Set.union (back a) (back b)}
-      )
-      Context {fore=Map.empty, back=Map.empty}
+-- unite all attributes of given jobpair attributes
+uniteJobPairAttributes :: [(JobPairID, [Attribute])] -> Set Attribute
+uniteJobPairAttributes pairs = Set.fromList $ concatMap snd pairs
 
 -- all job pairs with a response time greater 10 seconds is slow
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
@@ -65,12 +50,6 @@ slowCpuTimeLimit = 10
 -- create relation of JobPairID and declared attributes of given data
 collectData :: [JobResultInfo] -> [(JobPairID, [Attribute])]
 collectData results = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results)
-
--- get attributes of JobIds
-jobResultsAttributes :: [JobID] -> Handler [Attribute]
-jobResultsAttributes ids = do
-  jobResults <- mapM getPersistJobResults ids
-  return $ concat $ concatMap (getAttributeCollection . getStarExecResults) jobResults
 
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
@@ -92,9 +71,7 @@ properAttrName :: Attribute -> Text
 properAttrName at = case at of
  (AJobResultInfoSolver name)          -> append "Solver name " name
  (AJobResultInfoConfiguration config) -> append "Solver config " config
- (ASlowCpuTime fast)    -> case fast of
-                            False         -> "CPU time <= 10s"
-                            True          -> "CPU time > 10s"
+ (ASlowCpuTime slow)    -> if slow then "CPU time > 10s" else "CPU time <= 10s"
  (ASolverResult result) -> case result of
                             YES           -> "Result YES"
                             NO            -> "Result NO"
@@ -107,10 +84,10 @@ properAttrName at = case at of
 
 stripAttributePrefixes :: Text -> Text
 stripAttributePrefixes at
-  | isPrefixOf "Result " at = fromJust $ stripPrefix "Result " at
-  | isPrefixOf "Solver config " at = fromJust $ stripPrefix "Solver config " at
-  | isPrefixOf "Solver name " at = fromJust $ stripPrefix "Solver name " at
-  | isPrefixOf "CPU " at = fromJust $ stripPrefix "CPU " at
+  | "Result " `isPrefixOf` at = fromJust $ stripPrefix "Result " at
+  | "Solver config " `isPrefixOf` at = fromJust $ stripPrefix "Solver config " at
+  | "Solver name " `isPrefixOf` at = fromJust $ stripPrefix "Solver name " at
+  | "CPU " `isPrefixOf` at = fromJust $ stripPrefix "CPU " at
   | otherwise = at
 
 
