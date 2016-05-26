@@ -3,6 +3,7 @@ module Handler.Concepts where
 import FCA.Utils hiding (concepts)
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
+import FCA.Helpers
 import Import
 import Presenter.StarExec.JobData
 -- import Presenter.StarExec.JobData (queryManyJobs)
@@ -86,7 +87,7 @@ getConceptsR cid jids@(JobIds ids) = do
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
 attributeForm formOptions = AttributeChoices
-  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "Solver name" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
+  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "SolverYearName" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) (bfsFormControl MsgSolverConfigs "SolverConfigs") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
   <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
@@ -101,7 +102,7 @@ bfsFormControl msg label = (bfs msg) {fsName = Just label, fsAttrs = [("class", 
 attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
 attrOptionsFromContext attrs = do
   let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
-  let keys = ["Result", "CPU", "Solver config", "Solver name"]
+  let keys = ["Result", "CPU", "Solver config", "SolverYearName"]
   M.fromList $ map (\key -> (key,
     map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
     filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
@@ -117,6 +118,3 @@ renderConceptSVG concepts' nodeURLs = do
   svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
   -- FIXME: there must be a better way to remove <xml> tag
   return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
-
-maybeListId :: Maybe [a] -> [a]
-maybeListId = fromMaybe []

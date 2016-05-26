@@ -22,6 +22,7 @@ library
                      FCA.Utils
                      FCA.StarExec
                      FCA.DotGraph
+                     FCA.Helpers
                      Handler.Home
                      Handler.Control
                      Handler.ListHiddenCompetitions
@@ -198,6 +199,7 @@ library
                  , fgl
                  , graphviz >= 2999.18.0.2
                  , process
+                 , regex-tdfa
 
 executable         star-exec-presenter
     if flag(library-only)

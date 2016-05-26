@@ -1,6 +1,7 @@
 module FCA.StarExec where
 
 import FCA.Utils hiding (concepts)
+import FCA.Helpers
 import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
@@ -11,11 +12,12 @@ import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text (append, pack, isPrefixOf, stripPrefix)
-
+import Data.Text as T (append, pack, isPrefixOf, stripPrefix, take)
 
 data Attribute =
-  AJobResultInfoSolver Text
+  ASolverBasename Text
+   | AJobResultInfoSolver Text
+   | AYearSpecificSolverName Text
    | AJobResultInfoConfiguration Text
    | ASlowCpuTime Bool
    | ASolverResult SolverResult
@@ -26,7 +28,8 @@ data Attribute =
 attributePairs :: [JobID] -> Handler [(JobPairID, [Attribute])]
 attributePairs ids = do
   jobResults <- mapM getPersistJobResults ids
-  return $ concatMap (collectData . getStarExecResults) jobResults
+  competitionYears <- mapM getCompetitionYear ids
+  return $ concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
 
   -- filter all job pairs by given attribute groups
 filterPairs :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
@@ -48,19 +51,30 @@ slowCpuTimeLimit :: (Num Double, Ord Double) => Double
 slowCpuTimeLimit = 10
 
 -- create relation of JobPairID and declared attributes of given data
-collectData :: [JobResultInfo] -> [(JobPairID, [Attribute])]
-collectData results = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results)
+collectData :: [JobResultInfo] -> Text -> [(JobPairID, [Attribute])]
+collectData results year = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results year)
 
 -- create collection of selected attributes of given data
-getAttributeCollection :: [JobResultInfo] -> [[Attribute]]
-getAttributeCollection jobResults = do
+getAttributeCollection :: [JobResultInfo] -> Text -> [[Attribute]]
+getAttributeCollection jobResults year = do
   let jobResultInfoSolvers = map jobResultInfoSolver jobResults
-  let jobResultInfoConfigurations = map jobResultInfoConfiguration jobResults
-  -- let jobResultInfoBenchmarkIds = map (jobResultInfoBenchmarkId) jobResults
+  let solverBasenames = map (getSolverBasename . jobResultInfoSolver) jobResults
+  let yearSpecificSolverNames = map (`T.append` year) solverBasenames
+  let jobResultInfoConfigurations = map
+                                   (\(jr,name) -> name `append` (dashPrefix $ jobResultInfoConfiguration jr)) $
+                                   zip jobResults yearSpecificSolverNames
   let cpuTimeEvaluations = evaluateCpuTime jobResults
   let jobResultInfoResults = map jobResultInfoResult jobResults
-  zipWith4 (\a b c d -> [AJobResultInfoSolver a, AJobResultInfoConfiguration b, ASlowCpuTime c, ASolverResult d])
-    jobResultInfoSolvers jobResultInfoConfigurations cpuTimeEvaluations jobResultInfoResults
+  zipWith6
+    (\a b c d e f-> [
+      AJobResultInfoSolver a,
+      ASolverBasename b,
+      AYearSpecificSolverName c,
+      AJobResultInfoConfiguration d,
+      ASlowCpuTime e,
+      ASolverResult f
+    ])
+    jobResultInfoSolvers solverBasenames yearSpecificSolverNames jobResultInfoConfigurations cpuTimeEvaluations jobResultInfoResults
 
 -- evaluate whether time are slow or not
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
@@ -69,25 +83,29 @@ evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 -- proper names for attributes in template
 properAttrName :: Attribute -> Text
 properAttrName at = case at of
- (AJobResultInfoSolver name)          -> append "Solver name " name
- (AJobResultInfoConfiguration config) -> append "Solver config " config
+ (AJobResultInfoSolver name)          -> T.append "Solver name " name
+ (ASolverBasename name)               -> T.append "Solver basename " name
+ (AYearSpecificSolverName name)               -> T.append "SolverYearName " name
+ (AJobResultInfoConfiguration config) -> T.append "Solver config " config
  (ASlowCpuTime slow)    -> if slow then "CPU time > 10s" else "CPU time <= 10s"
  (ASolverResult result) -> case result of
                             YES           -> "Result YES"
                             NO            -> "Result NO"
                             MAYBE         -> "Result MAYBE"
-                            (BOUNDS b)    -> append "Result BOUNDS " $ pack $ show b
+                            (BOUNDS b)    -> T.append "Result BOUNDS " $ T.pack $ show b
                             CERTIFIED     -> "Result CERTIFIED"
                             ERROR         -> "Result ERROR"
-                            (OTHER text)  -> append "Result OTHER " text
+                            (OTHER text)  -> T.append "Result OTHER " text
 
 
 stripAttributePrefixes :: Text -> Text
 stripAttributePrefixes at
-  | "Result " `isPrefixOf` at = fromJust $ stripPrefix "Result " at
-  | "Solver config " `isPrefixOf` at = fromJust $ stripPrefix "Solver config " at
-  | "Solver name " `isPrefixOf` at = fromJust $ stripPrefix "Solver name " at
-  | "CPU " `isPrefixOf` at = fromJust $ stripPrefix "CPU " at
+  | "Result " `T.isPrefixOf` at = fromJust $ T.stripPrefix "Result " at
+  | "Solver config " `isPrefixOf` at = fromJust $ T.stripPrefix "Solver config " at
+  | "Solver basename " `T.isPrefixOf` at = fromJust $ T.stripPrefix "Solver basename " at
+  | "SolverYearName " `T.isPrefixOf` at = fromJust $ T.stripPrefix "SolverYearName " at
+  | "Solver name " `T.isPrefixOf` at = fromJust $ T.stripPrefix "Solver name " at
+  | "CPU " `T.isPrefixOf` at = fromJust $ T.stripPrefix "CPU " at
   | otherwise = at
 
 
@@ -105,11 +123,8 @@ concepts c = do
   guard $ ats == getAttributes c (getObjects c ats)
   return (Concept (getObjects c ats) ats)
 
-
--- https://github.com/nh2/haskell-ordnub#dont-use-nub
-ordNub :: (Ord a) => [a] -> [a]
-ordNub = go Set.empty
-  where
-    go _ [] = []
-    go s (x:xs) = if x `Set.member` s then go s xs
-                                      else x : go (Set.insert x s) xs
+-- get competition year from JobID
+getCompetitionYear :: JobID -> Handler Text
+getCompetitionYear jid = do
+  jobInfo <- getPersistStarExecJobInfo $ getStarExecId jid
+  return $ dashPrefix $ T.take 4 . jobInfoDate $ fromJust jobInfo
