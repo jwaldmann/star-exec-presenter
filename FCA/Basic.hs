@@ -1,4 +1,4 @@
-module FCA.Utils where
+module FCA.Basic where
 
 import Import
 

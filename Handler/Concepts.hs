@@ -1,6 +1,6 @@
 module Handler.Concepts where
 
-import FCA.Utils hiding (concepts)
+import FCA.Basic hiding (concepts)
 import FCA.StarExec
 import FCA.DotGraph (dottedGraph)
 import FCA.Helpers

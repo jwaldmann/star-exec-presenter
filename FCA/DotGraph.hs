@@ -1,7 +1,7 @@
 module FCA.DotGraph where
 
 import FCA.StarExec as FSE
-import FCA.Utils
+import FCA.Basic
 import Import hiding (delete)
 import Presenter.Utils.Colors as C
 

@@ -1,6 +1,6 @@
 module FCA.StarExec where
 
-import FCA.Utils hiding (concepts)
+import FCA.Basic hiding (concepts)
 import FCA.Helpers
 import Import
 import Presenter.Model.Entities()
@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (append, pack, isPrefixOf, stripPrefix, take)
+import Data.Text as T (append, isPrefixOf, pack, stripPrefix, take)
 
 data Attribute =
   ASolverBasename Text

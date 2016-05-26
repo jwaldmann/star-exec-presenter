@@ -19,10 +19,10 @@ library
                      Settings
                      Settings.StaticFiles
                      Settings.Development
-                     FCA.Utils
-                     FCA.StarExec
+                     FCA.Basic
                      FCA.DotGraph
                      FCA.Helpers
+                     FCA.StarExec
                      Handler.Home
                      Handler.Control
                      Handler.ListHiddenCompetitions
