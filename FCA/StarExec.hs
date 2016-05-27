@@ -12,7 +12,7 @@ import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (append, isPrefixOf, pack, stripPrefix, take)
+import Data.Text as T (append, isPrefixOf, null, pack, stripPrefix, take)
 
 data Attribute =
   ASolverBasename Text
@@ -57,12 +57,12 @@ collectData results year = zip (map (StarExecPairID . jobResultInfoPairId) resul
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> Text -> [[Attribute]]
 getAttributeCollection jobResults year = do
-  let jobResultInfoSolvers = map jobResultInfoSolver jobResults
   let solverBasenames = map (getSolverBasename . jobResultInfoSolver) jobResults
   let yearSpecificSolverNames = map (`T.append` year) solverBasenames
+  let jobResultInfoSolvers = map jobResultInfoSolver jobResults
   let jobResultInfoConfigurations = map
-                                   (\(jr,name) -> name `append` (dashPrefix $ jobResultInfoConfiguration jr)) $
-                                   zip jobResults yearSpecificSolverNames
+                                    (\(jr,name) -> name `append` (dashPrefix $ jobResultInfoConfiguration jr)) $
+                                    zip jobResults yearSpecificSolverNames
   let cpuTimeEvaluations = evaluateCpuTime jobResults
   let jobResultInfoResults = map jobResultInfoResult jobResults
   zipWith6
@@ -128,4 +128,7 @@ concepts c = do
 getCompetitionYear :: JobID -> Handler Text
 getCompetitionYear jid = do
   jobInfo <- getPersistStarExecJobInfo $ getStarExecId jid
-  return $ dashPrefix $ T.take 4 . jobInfoDate $ fromJust jobInfo
+  let year = T.take 4 . jobInfoDate $ fromJust jobInfo
+  if T.null year
+    then return $ year
+    else return $ dashPrefix year
