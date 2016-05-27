@@ -39,11 +39,11 @@ getConceptsR cid jids@(JobIds ids) = do
 
   attributePairs' <- attributePairs $ getIds jids
 
-  ((result, widget), enctype) <- runFormGet $ renderBootstrap3
-    BootstrapBasicForm $ attributeForm $ attrOptionsFromContext $ uniteJobPairAttributes attributePairs'
+  ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
+    attrOptionsFromContext $ uniteJobPairAttributes attributePairs'
   let concepts' = case result of
         FormSuccess ca -> do
-          let chosenAttributes = filter (not . null) $
+          let chosenAttributes = filter (not . null) .
                                    (++) [chosenSolver ca] $
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
           let filteredPairs = filterPairs attributePairs' chosenAttributes
@@ -57,7 +57,7 @@ getConceptsR cid jids@(JobIds ids) = do
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
   nodeURLs <- mapM
-             (\c -> getConceptURL (fromJust $ elemIndex c $ maybeListId concepts') ids) $
+             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') ids) $
              maybeListId newConcepts
   svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
 
@@ -87,10 +87,10 @@ getConceptsR cid jids@(JobIds ids) = do
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
 attributeForm formOptions = AttributeChoices
-  <$> areq (multiSelectFieldList $ fromJust $ M.lookup "SolverYearName" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Solver config" formOptions) (bfsFormControl MsgSolverConfigs "SolverConfigs") Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
-  <*> aopt (multiSelectFieldList $ fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
+  <$> areq (multiSelectFieldList . fromJust $ M.lookup "SolverYearName" formOptions) (bfsFormControl MsgSolverNames "SolverNames") Nothing
+  <*> aopt (multiSelectFieldList . fromJust $ M.lookup "Solver config" formOptions) (bfsFormControl MsgSolverConfigs "SolverConfigs") Nothing
+  <*> aopt (multiSelectFieldList . fromJust $ M.lookup "Result" formOptions) (bfsFormControl MsgResults "Results") Nothing
+  <*> aopt (multiSelectFieldList . fromJust $ M.lookup "CPU" formOptions) (bfsFormControl MsgCPUTimes "CPUTimes") Nothing
   <* bootstrapSubmit (BootstrapSubmit {
       bsClasses="btn btn-primary center-block",
       bsValue="choose",
@@ -111,10 +111,10 @@ getConceptURL :: ConceptId -> [JobID] -> Handler Text
 getConceptURL cid jids = do
   rq <- getRequest
   renderer <- getUrlRenderParams
-  return $ renderer (ConceptsR cid $ JobIds jids) $ reqGetParams rq
+  return . renderer (ConceptsR cid $ JobIds jids) $ reqGetParams rq
 
 renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
 renderConceptSVG concepts' nodeURLs = do
-  svg <- liftIO $ readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
+  svg <- liftIO . readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
   -- FIXME: there must be a better way to remove <xml> tag
-  return $ B.preEscapedLazyText $ TL.pack $ unlines $ dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
+  return . B.preEscapedLazyText . TL.pack . unlines . dropWhile ( not . isPrefixOf "<svg" ) $ lines svg

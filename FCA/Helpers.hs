@@ -33,4 +33,3 @@ matchBasename n = (n =~ ("[a-zA-Z]*" :: String) :: String)
 
 maybeListId :: Maybe [a] -> [a]
 maybeListId = fromMaybe []
-

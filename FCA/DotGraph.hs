@@ -23,7 +23,7 @@ dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> [T.Text] -> Str
 dottedGraph conceptLattice nodeURLs = do
   let graph_params = getGraphParams conceptLattice nodeURLs
   let graphWithTransEdges = G.graphToDot graph_params $ createGraph conceptLattice
-  TL.unpack $ renderDot $ toDot $ transitiveReduction graphWithTransEdges
+  (TL.unpack . renderDot) . toDot $ transitiveReduction graphWithTransEdges
 
 createGraph :: (Eq ob, Eq at, Show at, Ord at) => [Concept ob at] -> (Gr TL.Text TL.Text)
 createGraph conceptLattice = mkGraph (getNodes conceptLattice) $ getEdges conceptLattice
@@ -49,7 +49,7 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
   , G.isDirected       = True
   , G.fmtNode          = \ (n, _) -> do
     let concept = conceptLattice!!(fromIntegral n)
-    let (atLabels,nodeColor) = replaceLabelWithColor $ S.map properAttrName $ ats concept
+    let (atLabels,nodeColor) = replaceLabelWithColor . S.map properAttrName $ ats concept
     -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
     [GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing
       [GAH.CellBorder 0, GAH.BGColor nodeColor, HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n), Title " "]

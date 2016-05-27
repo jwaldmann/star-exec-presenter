@@ -31,7 +31,7 @@ data Concept ob at = Concept
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
 concepts c = do
-  ats <- map Set.fromList $ subsequences $ Set.toList $ attributes c
+  ats <- (map Set.fromList . subsequences) . Set.toList $ attributes c
   guard $ ats == getAttributes c (getObjects c ats)
   return (Concept (getObjects c ats) ats)
 
@@ -72,4 +72,4 @@ contextFromList l = Context
 contextToList :: (Ord ob) => Context ob at -> [(ob, [at])]
 contextToList context = do
   let obAtsRel = fore context
-  map (\k -> (k, Set.toList $ fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel
+  map (\k -> (k, Set.toList . fromJust $ Map.lookup k obAtsRel)) $ Map.keys obAtsRel

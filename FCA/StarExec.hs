@@ -6,7 +6,7 @@ import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
-import Control.Monad (guard, when)
+import Control.Monad (guard, unless)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
@@ -29,14 +29,14 @@ attributePairs :: [JobID] -> Handler [(JobPairID, [Attribute])]
 attributePairs ids = do
   jobResults <- mapM getPersistJobResults ids
   competitionYears <- mapM getCompetitionYear ids
-  return $ concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
+  return . concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
 
   -- filter all job pairs by given attribute groups
 filterPairs :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
 filterPairs pairs chosenAts = do
   -- chosenAtsCombination contains all allowed attribute combinations
   let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
-  let anyMember = any id . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+  let anyMember = or . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
   let filteredJobResults = filter (\(_,ats) -> anyMember $ Set.fromList ats) pairs
   case filteredJobResults of
     [] -> Nothing
@@ -52,19 +52,19 @@ slowCpuTimeLimit = 10
 
 -- create relation of JobPairID and declared attributes of given data
 collectData :: [JobResultInfo] -> Text -> [(JobPairID, [Attribute])]
-collectData results year = zip (map (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results year)
+collectData results year = zip (fmap (StarExecPairID . jobResultInfoPairId) results) (getAttributeCollection results year)
 
 -- create collection of selected attributes of given data
 getAttributeCollection :: [JobResultInfo] -> Text -> [[Attribute]]
 getAttributeCollection jobResults year = do
-  let solverBasenames = map (getSolverBasename . jobResultInfoSolver) jobResults
-  let yearSpecificSolverNames = map (`T.append` year) solverBasenames
-  let jobResultInfoSolvers = map jobResultInfoSolver jobResults
-  let jobResultInfoConfigurations = map
+  let solverBasenames = fmap (getSolverBasename . jobResultInfoSolver) jobResults
+  let yearSpecificSolverNames = fmap (`T.append` year) solverBasenames
+  let jobResultInfoSolvers = fmap jobResultInfoSolver jobResults
+  let jobResultInfoConfigurations = fmap
                                     (\(jr,name) -> name `append` (dashPrefix $ jobResultInfoConfiguration jr)) $
                                     zip jobResults yearSpecificSolverNames
   let cpuTimeEvaluations = evaluateCpuTime jobResults
-  let jobResultInfoResults = map jobResultInfoResult jobResults
+  let jobResultInfoResults = fmap jobResultInfoResult jobResults
   zipWith6
     (\a b c d e f-> [
       AJobResultInfoSolver a,
@@ -78,7 +78,7 @@ getAttributeCollection jobResults year = do
 
 -- evaluate whether time are slow or not
 evaluateCpuTime :: [JobResultInfo] -> [Bool]
-evaluateCpuTime = map ((> slowCpuTimeLimit). jobResultInfoCpuTime)
+evaluateCpuTime = fmap ((> slowCpuTimeLimit). jobResultInfoCpuTime)
 
 -- proper names for attributes in template
 properAttrName :: Attribute -> Text
@@ -92,7 +92,7 @@ properAttrName at = case at of
                             YES           -> "Result YES"
                             NO            -> "Result NO"
                             MAYBE         -> "Result MAYBE"
-                            (BOUNDS b)    -> T.append "Result BOUNDS " $ T.pack $ show b
+                            (BOUNDS b)    -> T.append "Result BOUNDS " . T.pack $ show b
                             CERTIFIED     -> "Result CERTIFIED"
                             ERROR         -> "Result ERROR"
                             (OTHER text)  -> T.append "Result OTHER " text
@@ -114,14 +114,14 @@ attributeCombination :: (Ord at) => Context ob at -> [Set at]
 attributeCombination context = do
   let ats = Map.elems $ fore context
   -- using ordNub to reduce duplicate items and keep order
-  ordNub $ map Set.fromList $ concatMap (subsequences . Set.toList) $ ordNub ats
+  ordNub . fmap Set.fromList . concatMap (subsequences . Set.toList) $ ordNub ats
 
 -- determine all concepts of given context with StarExec attributes
 concepts :: (Ord at, Ord ob, Show ob, Show at) => Context ob at -> [Concept ob at]
 concepts c = do
   ats <- attributeCombination c
   let obs = getObjects c ats
-  when (not $ Set.null obs) $ guard $ ats == (getAttributes c) obs
+  unless (Set.null obs) . guard $ (ats == (getAttributes c) obs)
   return (Concept obs ats)
 
 -- get competition year from JobID
