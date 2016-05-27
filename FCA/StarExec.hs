@@ -6,7 +6,7 @@ import Import
 import Presenter.Model.Entities()
 import Presenter.PersistHelper
 
-import Control.Monad (guard)
+import Control.Monad (guard, when)
 import qualified Data.Map.Strict as Map
 import Data.Maybe
 import Data.List hiding (isPrefixOf, stripPrefix)
@@ -120,8 +120,9 @@ attributeCombination context = do
 concepts :: (Ord at, Ord ob, Show ob, Show at) => Context ob at -> [Concept ob at]
 concepts c = do
   ats <- attributeCombination c
-  guard $ ats == getAttributes c (getObjects c ats)
-  return (Concept (getObjects c ats) ats)
+  let obs = getObjects c ats
+  when (not $ Set.null obs) $ guard $ ats == (getAttributes c) obs
+  return (Concept obs ats)
 
 -- get competition year from JobID
 getCompetitionYear :: JobID -> Handler Text
