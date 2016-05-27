@@ -74,22 +74,34 @@ safeHead defaultVal [] = defaultVal
 -- decodeUtf8Body :: Response BSL.ByteString -> Text
 -- decodeUtf8Body = TE.decodeUtf8 . BSL.toStrict . responseBody
 
+-- Source of the exception when request benchmark info
+-- There was an exception during a concurrent action:
+-- Prelude.head: empty list
+-- FIXME: replacing head with safeHead "" is no real solution
 getFirstTitle :: Cursor -> Text
-getFirstTitle c = head $ content h1
-  where h1 = head $ descendant c >>= element "h1" >>= child
+getFirstTitle c = safeHead "" $ content h1
+  where h1 = safeHead c $ descendant c >>= element "h1" >>= child
 
 getJobInfoFieldset :: Cursor -> Cursor
 getJobInfoFieldset c = getFieldsetByID c "detailField"
 --getJobInfoFieldset c = head $ descendant c >>= element "fieldset" >>= attributeIs "id" "detailField"
 
+-- Source of the exception when request benchmark info
+-- There was an exception during a concurrent action:
+-- Prelude.head: empty list
+-- FIXME: replacing head with safeHead "" is no real solution
 getFirstFieldset :: Cursor -> Cursor
-getFirstFieldset c = head $ getFieldsets c
+getFirstFieldset c = safeHead c $ getFieldsets c
 
 getFieldsets :: Cursor -> [Cursor]
 getFieldsets c = descendant c >>= element "fieldset"
 
+-- Source of the exception when request benchmark info
+-- There was an exception during a concurrent action:
+-- Prelude.head: empty list
+-- FIXME: replacing head with safeHead "" is no real solution
 getFieldsetByID :: Cursor -> Text -> Cursor
-getFieldsetByID c _id = head $ getFieldsets c >>= attributeIs "id" _id
+getFieldsetByID c _id = safeHead c $ getFieldsets c >>= attributeIs "id" _id
 
 getTds :: Cursor -> [Cursor]
 getTds c = descendant c >>= element "td" >>= child
