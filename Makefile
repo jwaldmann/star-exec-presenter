@@ -1,5 +1,5 @@
 GHC_VERSION = 7.10.3
-LTS_VERSION = 5.4
+LTS_VERSION = 6.0
 
 .PHONY: clean create-db deploy install run
 
