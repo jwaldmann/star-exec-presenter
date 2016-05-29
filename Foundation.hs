@@ -112,7 +112,9 @@ instance Yesod App where
             $(combineStylesheets 'StaticR
                 [ css_bootstrap_css ])
             $(combineScripts 'StaticR
-                [ js_bootstrap_js ])
+                [ js_jquery_js
+                , js_bootstrap_js
+                ])
             $(widgetFile "default-layout")
         withUrlRenderer $(hamletFile "templates/default-layout-wrapper.hamlet")
 
