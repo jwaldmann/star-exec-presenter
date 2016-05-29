@@ -1,3 +1,4 @@
+{-# LANGUAGE StandaloneDeriving #-}
 module Foundation where
 
 import Prelude
@@ -28,13 +29,14 @@ import Yesod.Core.Types (Logger)
 --import Presenter.Model (SessionData, CompetitionMeta, CompetitionResults)
 import Presenter.Auth (authSE)
 import Data.Text (Text)
-import qualified Data.Text.Lazy as TL
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
-import Data.Maybe
+
+-- navigation bar types
+data MenuElement = MenuEntry (Text, Route App) | MenuDropdown (Text, [MenuElement])
 
 -- | The site argument for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -95,18 +97,23 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         -- navigation bar elements
-        currentRoute <- getCurrentRoute
-        let routes = [
-                      (HomeR, "home"),
-                      (HomeR, "current competition"), --replace with correct route after tc15 merge
-                      (ListCompetitionsR, "competitions"),(ListJobsR, "jobs"),
-                      (ListBenchmarksR, "benchmarks"), (ListSolversR, "solvers"),
-                      (ListJobPairsR, "pairs"), (ListProofsR, "proofs"),
-                      (ListPostProcsR, "post processors"),
-                      (ConceptsR 0 (JobIds [StarExecJobID 7239]), "concept example")
-                      ]
-        let navRoutes = map (\(route, routeName) -> (route, TL.pack routeName)) routes
-
+        let menuElements = [MenuEntry ("Home", HomeR)
+                           , MenuDropdown
+                           ("Competition Results"
+                           , [MenuEntry ("2015", ListCompetitionsR)
+                           , MenuEntry ("2014", ListCompetitionsR)
+                           ])
+                           , MenuDropdown
+                           ("Analysis"
+                           , [MenuEntry ("Concepts example", ConceptsR 0 (JobIds [StarExecJobID 9515, StarExecJobID 10299]))
+                           ])
+                           , MenuDropdown
+                               ("StarExec Interaction"
+                               , [MenuEntry ("Import", ImportR)
+                               , MenuEntry ("Install Solver", InstallSolversR Y2015)
+                               , MenuEntry ("Job Control", ControlR Y2015)
+                             ])
+                           ]
 
         pc <- widgetToPageContent $ do
             $(combineStylesheets 'StaticR

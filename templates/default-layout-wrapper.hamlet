@@ -21,15 +21,23 @@ $newline never
     <body>
         <div class="container-fluid">
             <header>
-                <!-- build navigation bar -->
-                $forall (route, routeName) <- navRoutes
-                    <!--current page gets no link in navigation bar-->
-                    $if route == fromJust currentRoute
-                      | <span>#{routeName} </span>
-                    $else
-                      | <a href=@{route}>#{routeName} </a>
-
-                <hr>
+              <nav class="navbar navbar-default">
+                <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                  <ul class="nav navbar-nav">
+                    $forall menuElement <- menuElements
+                      $case menuElement
+                        $of MenuEntry (name,route)
+                          <li><a href=@{route}>#{name}</a></li>
+                        $of MenuDropdown (name,menuEntries)
+                          <li class="dropdown">
+                            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">#{name}<span class="caret"></span></a>
+                            <ul class="dropdown-menu">
+                              $forall menuEntry <- menuEntries
+                                $case menuEntry
+                                  $of MenuEntry (name,route)
+                                    <li><a href=@{route}>#{name}</a></li>
+                                  $of MenuDropdown _
+                                    {return ()}
             <div id="main" role="main">
               ^{pageBody pc}
             <footer>
