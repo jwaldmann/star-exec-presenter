@@ -33,7 +33,8 @@ data AttributeChoices = AttributeChoices
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
-  attributePairs' <- attributePairs $ getIds jids
+
+  attributePairs' <- attributePairs $ fmap (snd . queryResult) qJobs
 
   ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
     attrOptionsFromContext $ uniteJobPairAttributes attributePairs'

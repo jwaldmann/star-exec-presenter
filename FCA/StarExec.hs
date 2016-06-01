@@ -24,10 +24,10 @@ data Attribute =
   deriving (Eq, Ord, Show)
 
 
--- get attribute pairs of given job ids
-attributePairs :: [JobID] -> Handler [(JobPairID, [Attribute])]
-attributePairs ids = do
-  jobResults <- mapM getPersistJobResults ids
+  -- get attribute pairs of given job results
+attributePairs :: [[JobResult]] -> Handler [(JobPairID, [Attribute])]
+attributePairs jobResults = do
+  let ids = fmap (StarExecJobID . jobResultInfoJobId . head . getStarExecResults) jobResults
   competitionYears <- mapM getCompetitionYear ids
   return . concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
 
