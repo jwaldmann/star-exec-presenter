@@ -16,8 +16,16 @@ import Data.List as L
 import Data.Maybe
 import Data.Set as S
 import Data.Text as T hiding (length, map)
+import qualified Text.Blaze as B
 import qualified Data.Text.Lazy as TL
+import System.Process (readProcess)
 
+
+renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob FSE.Attribute] -> [T.Text] -> m B.Markup
+renderConceptSVG concepts' nodeURLs = do
+  svg <- liftIO . readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
+  -- FIXME: there must be a better way to remove <xml> tag
+  return . B.preEscapedLazyText . TL.pack . L.unlines . L.dropWhile ( not . L.isPrefixOf "<svg" ) $ L.lines svg
 
 dottedGraph :: (Eq ob, Show ob) => [Concept ob FSE.Attribute] -> [T.Text] -> String
 dottedGraph conceptLattice nodeURLs = do

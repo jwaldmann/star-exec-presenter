@@ -2,25 +2,21 @@ module Handler.Concepts where
 
 import FCA.Basic hiding (concepts)
 import FCA.StarExec
-import FCA.DotGraph (dottedGraph)
+import FCA.DotGraph (renderConceptSVG)
 import FCA.Helpers
 import Import
 import Presenter.StarExec.JobData
--- import Presenter.StarExec.JobData (queryManyJobs)
 -- import Presenter.Utils.WidgetMetaRefresh (insertWidgetMetaRefresh)
 import Presenter.Utils.WidgetTable
 
 import Control.Monad
-import Data.List (elemIndex, isPrefixOf)
+import Data.List (elemIndex)
 import Data.Maybe
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
 import Data.Text as T (isInfixOf)
-import Data.Text.Lazy as TL (pack)
-import System.Process (readProcess)
-import qualified Text.Blaze as B
 import Text.Lucius (luciusFile)
 import Yesod.Form.Bootstrap3
 
@@ -36,7 +32,7 @@ data AttributeChoices = AttributeChoices
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: ConceptId -> JobIds -> Handler Html
 getConceptsR cid jids@(JobIds ids) = do
-
+  qJobs <- queryManyJobs ids
   attributePairs' <- attributePairs $ getIds jids
 
   ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
@@ -62,8 +58,8 @@ getConceptsR cid jids@(JobIds ids) = do
   svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
 
   let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
-  qJobs <- queryManyJobs ids
-  let filteredJobResults = map
+
+  let filteredJobResults = fmap
                           ((wrapResults .
                             filter
                             (\jr -> Set.member (getPairID jr) currObjects)
@@ -76,9 +72,7 @@ getConceptsR cid jids@(JobIds ids) = do
   actionURL <- getConceptURL 0 ids
   currURL <- getConceptURL cid ids
   defaultLayout $ do
-    -- if any (\q' -> queryStatus q' /= Latest) qJobs
-    --   then insertWidgetMetaRefresh
-    --   else return ()
+    -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
@@ -112,9 +106,3 @@ getConceptURL cid jids = do
   rq <- getRequest
   renderer <- getUrlRenderParams
   return . renderer (ConceptsR cid $ JobIds jids) $ reqGetParams rq
-
-renderConceptSVG :: (Eq ob, Show ob, MonadIO m) => [Concept ob Attribute] -> [Text] -> m B.Markup
-renderConceptSVG concepts' nodeURLs = do
-  svg <- liftIO . readProcess "dot" [ "-Tsvg" ] $ dottedGraph concepts' nodeURLs
-  -- FIXME: there must be a better way to remove <xml> tag
-  return . B.preEscapedLazyText . TL.pack . unlines . dropWhile ( not . isPrefixOf "<svg" ) $ lines svg
