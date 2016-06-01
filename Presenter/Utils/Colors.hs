@@ -20,3 +20,5 @@ colorNothing :: C.Color
 colorNothing = C.RGB 0xFF 0xFF 0xFF
 colorAnything :: C.Color
 colorAnything = C.RGB 0xA0 0xA0 0xA0
+colorOther :: C.Color
+colorOther = C.RGB 0xF2 0xCD 0xAC

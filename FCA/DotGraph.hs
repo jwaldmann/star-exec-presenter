@@ -63,6 +63,7 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
 
 getSolverResultColor :: T.Text -> Color
 getSolverResultColor solverResults
+    | containsOther solverResults  = C.colorOther
     | containsYes solverResults = C.colorYes
     | containsNo solverResults = C.colorNo
     | containsMaybe solverResults  = C.colorMaybe
@@ -76,7 +77,9 @@ getSolverResultColor solverResults
       containsMaybe = T.isInfixOf "MAYBE"
       containsBounds = T.isInfixOf "BOUNDS"
       containsCertified = T.isInfixOf "CERTIFIED"
+      containsOther = T.isInfixOf "OTHER"
       containsError = T.isInfixOf "ERROR"
+
 
 replaceLabelWithColor :: Set T.Text -> (Set T.Text, Color)
 replaceLabelWithColor labels = do
