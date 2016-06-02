@@ -62,7 +62,7 @@ getGraphParams conceptLattice nodeURLs complURLs = G.nonClusteredParams {
     [GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing
       [GAH.CellBorder 0, GAH.BGColor nodeColor, HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n), Title " "]
         [ -- first row:
-          GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Format GAH.Underline $ [GAH.Str $ TL.pack $ (++) (show $ length $ obs concept) " job-pair(s)."]]
+          GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Format GAH.Underline $ [GAH.Str $ TL.pack $ (++) (show $ length $ obs concept) " job-pair(s)"]]
                     , GAH.LabelCell [Align HCenter, Title " ", HRef $ TL.fromStrict $ complURLs!!(fromIntegral n)] $ GAH.Text [GAH.Str $ TL.pack $ "X"]],
           -- second row:
           GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text $ L.intersperse (GAH.Newline []) $

@@ -5,7 +5,7 @@
   $forall jid <- getIds jids
     $if isStarExecID jid
       <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid},
-| <a href=@{ConceptsR 0 NoIds jids}>concepts</a>
+| <a href=@{ConceptsR 0 (Ids []) jids}>concepts</a>
 
 <h2>Statistics
 #{stat}

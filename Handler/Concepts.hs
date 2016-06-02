@@ -108,7 +108,7 @@ attrOptions attrs = do
                ,("SolverYearName",isAYearSpecificSolverName)]
 
 getConceptURL :: ConceptId -> ComplementIds -> [JobID] -> Handler Text
-getConceptURL cid complIds jids = do
+getConceptURL cid compls jids = do
   rq <- getRequest
   renderer <- getUrlRenderParams
-  return . renderer (ConceptsR cid complIds $ JobIds jids) $ reqGetParams rq
+  return . renderer (ConceptsR cid compls $ JobIds jids) $ reqGetParams rq

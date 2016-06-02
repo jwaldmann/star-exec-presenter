@@ -1,6 +1,4 @@
-#{show complIds}
-
-<a href=@{ConceptsR 0 (Ids [4,14]) jids}>concepts</a>
+Removed the following concepts: #{show complIds}
 
 <h1><a href=#{currURL}>#{show $ map getStarExecId $ getIds jids}</a>
 <a href=@{ShowManyJobResultsR Standard NoQuery $ jids}>results table</a>
