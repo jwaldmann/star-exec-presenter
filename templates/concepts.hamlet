@@ -1,3 +1,7 @@
+#{show complIds}
+
+<a href=@{ConceptsR 0 (Ids [4,14]) jids}>concepts</a>
+
 <h1><a href=#{currURL}>#{show $ map getStarExecId $ getIds jids}</a>
 <a href=@{ShowManyJobResultsR Standard NoQuery $ jids}>results table</a>
 <p>

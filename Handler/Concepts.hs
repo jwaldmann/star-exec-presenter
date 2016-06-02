@@ -30,7 +30,7 @@ data AttributeChoices = AttributeChoices
 
 -- route with multiselect to choose attributes of JobID
 getConceptsR :: ConceptId -> ComplementIds -> JobIds -> Handler Html
-getConceptsR cid complIds jids@(JobIds ids) = do
+getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
 
   attributePairs' <- attributePairs $ fmap (snd . queryResult) qJobs
@@ -53,9 +53,12 @@ getConceptsR cid complIds jids@(JobIds ids) = do
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
   nodeURLs <- mapM
-             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') complIds ids) $
+             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') compls ids) $
              maybeListId newConcepts
-  svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
+  complURLs <- mapM
+              (\c -> getConceptURL cid (Ids (complIds ++ [fromJust . elemIndex c $ maybeListId concepts'])) ids) $
+              maybeListId newConcepts
+  svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs complURLs
 
   let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
 
@@ -69,8 +72,8 @@ getConceptsR cid complIds jids@(JobIds ids) = do
   tab <- getManyJobCells filteredJobResults
 
   --actionURL points to concept 0 that shows all objects
-  actionURL <- getConceptURL 0 complIds ids
-  currURL <- getConceptURL cid complIds ids
+  actionURL <- getConceptURL 0 compls ids
+  currURL <- getConceptURL cid compls ids
   defaultLayout $ do
     -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
