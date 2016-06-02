@@ -29,8 +29,8 @@ data AttributeChoices = AttributeChoices
 
 
 -- route with multiselect to choose attributes of JobID
-getConceptsR :: ConceptId -> JobIds -> Handler Html
-getConceptsR cid jids@(JobIds ids) = do
+getConceptsR :: ConceptId -> ComplementIds -> JobIds -> Handler Html
+getConceptsR cid complIds jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
 
   attributePairs' <- attributePairs $ fmap (snd . queryResult) qJobs
@@ -53,7 +53,7 @@ getConceptsR cid jids@(JobIds ids) = do
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
   nodeURLs <- mapM
-             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') ids) $
+             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') complIds ids) $
              maybeListId newConcepts
   svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs
 
@@ -69,8 +69,8 @@ getConceptsR cid jids@(JobIds ids) = do
   tab <- getManyJobCells filteredJobResults
 
   --actionURL points to concept 0 that shows all objects
-  actionURL <- getConceptURL 0 ids
-  currURL <- getConceptURL cid ids
+  actionURL <- getConceptURL 0 complIds ids
+  currURL <- getConceptURL cid complIds ids
   defaultLayout $ do
     -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
@@ -104,8 +104,8 @@ attrOptions attrs = do
                ,isAJobResultInfoConfiguration)
                ,("SolverYearName",isAYearSpecificSolverName)]
 
-getConceptURL :: ConceptId -> [JobID] -> Handler Text
-getConceptURL cid jids = do
+getConceptURL :: ConceptId -> ComplementIds -> [JobID] -> Handler Text
+getConceptURL cid complIds jids = do
   rq <- getRequest
   renderer <- getUrlRenderParams
-  return . renderer (ConceptsR cid $ JobIds jids) $ reqGetParams rq
+  return . renderer (ConceptsR cid complIds $ JobIds jids) $ reqGetParams rq

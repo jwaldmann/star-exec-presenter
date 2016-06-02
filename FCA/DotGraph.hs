@@ -62,7 +62,8 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
     [GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing
       [GAH.CellBorder 0, GAH.BGColor nodeColor, HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n), Title " "]
         [ -- first row:
-          GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Format GAH.Underline $ [GAH.Str $ TL.pack $ (++) (show $ length $ obs concept) " job-pair(s)."]]],
+          GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Format GAH.Underline $ [GAH.Str $ TL.pack $ (++) (show $ length $ obs concept) " job-pair(s)."]]
+                    , GAH.LabelCell [Align HCenter, Title " ", HRef "http://example.com"] $ GAH.Text [GAH.Str $ TL.pack $ "X"]],
           -- second row:
           GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text $ L.intersperse (GAH.Newline []) $
             L.map (\at -> GAH.Str $ TL.fromStrict $ properAttrName at) $ toList atsWithoutResult]
@@ -83,9 +84,9 @@ getSolverResultColor' solverResults = case solverResults of
 
 
 replaceLabelWithColor :: Set FSE.Attribute -> (Set FSE.Attribute, Color)
-replaceLabelWithColor ats = do
-  let solverResults = S.filter isASolverResult ats
+replaceLabelWithColor attrs' = do
+  let solverResults = S.filter isASolverResult attrs'
   if length solverResults == 1
     then
-      (difference ats solverResults, getSolverResultColor' $ S.elemAt 0 solverResults)
-    else (difference ats solverResults, toColor G.White)
+      (difference attrs' solverResults, getSolverResultColor' $ S.elemAt 0 solverResults)
+    else (difference attrs' solverResults, toColor G.White)

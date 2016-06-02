@@ -75,4 +75,4 @@
 /competition/#CompetitionInfoId/text CompetitionTextR GET POST
 /resolve/#DOI ResolveR GET
 
-/concepts/#ConceptId/*JobIds ConceptsR GET
+/concepts/#ConceptId/#ComplementIds/*JobIds ConceptsR GET

@@ -105,7 +105,7 @@ instance Yesod App where
                            ])
                            , MenuDropdown
                            ("Analysis"
-                           , [MenuEntry ("Concepts example", ConceptsR 0 (JobIds [StarExecJobID 9515, StarExecJobID 10299]))
+                           , [MenuEntry ("Concepts example", ConceptsR 0 NoIds (JobIds [StarExecJobID 9515, StarExecJobID 10299]))
                            ])
                            , MenuDropdown
                                ("StarExec Interaction"

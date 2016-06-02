@@ -263,3 +263,16 @@ instance PathPiece Query where
     _ -> Nothing
   toPathPiece NoQuery = "noquery"
   toPathPiece q = T.pack $ show q
+
+data ComplementIds =
+  NoIds
+  | Ids [ConceptId]
+  deriving (Show, Read, Eq, Ord)
+
+instance PathPiece ComplementIds where
+  fromPathPiece "nothing" = return NoIds
+  fromPathPiece t = case reads (T.unpack t) of
+    [(c, "")] -> return c
+    _  -> Nothing
+  toPathPiece NoIds = "nothing"
+  toPathPiece cs = T.pack $ show cs
