@@ -16,7 +16,6 @@ import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
 import           Data.Set (Set)
 import qualified Data.Set as Set
-import Data.Text as T (isInfixOf)
 import Text.Lucius (luciusFile)
 import Yesod.Form.Bootstrap3
 
@@ -37,7 +36,7 @@ getConceptsR cid jids@(JobIds ids) = do
   attributePairs' <- attributePairs $ fmap (snd . queryResult) qJobs
 
   ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
-    attrOptionsFromContext $ uniteJobPairAttributes attributePairs'
+    attrOptions $ uniteJobPairAttributes attributePairs'
   let concepts' = case result of
         FormSuccess ca -> do
           let chosenAttributes = filter (not . null) .
@@ -94,13 +93,16 @@ attributeForm formOptions = AttributeChoices
 bfsFormControl :: RenderMessage master msg => msg -> Text -> FieldSettings master
 bfsFormControl msg label = (bfs msg) {fsName = Just label, fsAttrs = [("class", "form-control")]}
 
-attrOptionsFromContext :: Set Attribute -> Map Text [(Text, Attribute)]
-attrOptionsFromContext attrs = do
-  let allFormOptions = map (\at -> (properAttrName at, at)) $ Set.toList attrs
-  let keys = ["Result", "CPU", "Solver config", "SolverYearName"]
-  M.fromList $ map (\key -> (key,
-    map (\(label, ats) -> (stripAttributePrefixes label, ats)) $
-    filter (\(label, _) -> T.isInfixOf key label) allFormOptions)) keys
+-- create attribute form field options
+attrOptions :: Set Attribute -> Map Text [(Text, Attribute)]
+attrOptions attrs = do
+  M.fromList $ fmap
+               (\(fieldName, atrPred) -> (fieldName, filter (\(_, atr) ->  atrPred atr) . fmap (\atr -> (properAttrName atr, atr)) $ Set.toList attrs))
+               [("Result",isASolverResult)
+               ,("CPU",isASlowCpuTime)
+               ,("Solver config"
+               ,isAJobResultInfoConfiguration)
+               ,("SolverYearName",isAYearSpecificSolverName)]
 
 getConceptURL :: ConceptId -> [JobID] -> Handler Text
 getConceptURL cid jids = do

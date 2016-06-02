@@ -57,7 +57,7 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
   , G.isDirected       = True
   , G.fmtNode          = \ (n, _) -> do
     let concept = conceptLattice!!(fromIntegral n)
-    let (atLabels,nodeColor) = replaceLabelWithColor . S.map properAttrName $ ats concept
+    let (atsWithoutResult,nodeColor) = replaceLabelWithColor $ ats concept
     -- https://hackage.haskell.org/package/graphviz-2999.18.0.2/docs/Data-GraphViz-Attributes-HTML.html#t:Table
     [GA.Shape GA.PlainText, GA.Label $ GA.HtmlLabel $ GAH.Table $ GAH.HTable Nothing
       [GAH.CellBorder 0, GAH.BGColor nodeColor, HRef $ TL.fromStrict $ nodeURLs!!(fromIntegral n), Title " "]
@@ -65,34 +65,27 @@ getGraphParams conceptLattice nodeURLs = G.nonClusteredParams {
           GAH.Cells [GAH.LabelCell [Align HCenter, Title " "] $ GAH.Text [GAH.Format GAH.Underline $ [GAH.Str $ TL.pack $ (++) (show $ length $ obs concept) " job-pair(s)."]]],
           -- second row:
           GAH.Cells [GAH.LabelCell [Title " "] $ GAH.Text $ L.intersperse (GAH.Newline []) $
-            L.map (\label -> GAH.Str $ TL.fromStrict $ stripAttributePrefixes label) $ toList atLabels]
+            L.map (\at -> GAH.Str $ TL.fromStrict $ properAttrName at) $ toList atsWithoutResult]
         ]]
 }
 
-getSolverResultColor :: T.Text -> Color
-getSolverResultColor solverResults
-    | containsOther solverResults  = C.colorOther
-    | containsYes solverResults = C.colorYes
-    | containsNo solverResults = C.colorNo
-    | containsMaybe solverResults  = C.colorMaybe
-    | containsBounds solverResults  = C.colorBounds
-    | containsCertified solverResults  = C.colorCertified
-    | containsError solverResults  = C.colorError
-    | otherwise = C.colorAnything
-    where
-      containsYes = T.isInfixOf "YES"
-      containsNo = T.isInfixOf "NO"
-      containsMaybe = T.isInfixOf "MAYBE"
-      containsBounds = T.isInfixOf "BOUNDS"
-      containsCertified = T.isInfixOf "CERTIFIED"
-      containsOther = T.isInfixOf "OTHER"
-      containsError = T.isInfixOf "ERROR"
+getSolverResultColor' :: FSE.Attribute -> Color
+getSolverResultColor' solverResults = case solverResults of
+  ASolverResult result -> case result of
+    YES       -> C.colorYes
+    NO        -> C.colorNo
+    MAYBE     -> C.colorMaybe
+    BOUNDS _  -> C.colorBounds
+    CERTIFIED -> C.colorCertified
+    ERROR     -> C.colorError
+    OTHER _   -> C.colorOther
+  _           -> C.colorAnything
 
 
-replaceLabelWithColor :: Set T.Text -> (Set T.Text, Color)
-replaceLabelWithColor labels = do
-  let solverResults = S.filter (\at -> "Result " `T.isPrefixOf` at) labels
+replaceLabelWithColor :: Set FSE.Attribute -> (Set FSE.Attribute, Color)
+replaceLabelWithColor ats = do
+  let solverResults = S.filter isASolverResult ats
   if length solverResults == 1
     then
-      (difference labels solverResults, getSolverResultColor $ S.elemAt 0 solverResults)
-    else (difference labels solverResults, toColor G.White)
+      (difference ats solverResults, getSolverResultColor' $ S.elemAt 0 solverResults)
+    else (difference ats solverResults, toColor G.White)
