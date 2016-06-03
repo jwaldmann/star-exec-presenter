@@ -1,10 +1,10 @@
-Removed the following concepts: #{show complIds}&nbsp;<a href=#{resetComplURL}>X</a>
+The following concepts are excluded (<a href=#{resetComplURL}>reset them</a>):<pre>#{show complIds}</pre>
 
 <h1><a href=#{currURL}>#{show $ map getStarExecId $ getIds jids}</a>
 <a href=@{ShowManyJobResultsR Standard NoQuery $ jids}>results table</a>
 <p>
   <em>Choose the attributes you are interested in. You can see all combinations of these attributes below.<br>
-  <em>You can hold CTRL to choose multiple ones.
+  <em>You can hold CTRL to choose multiple ones.</em> <a href=@{ConceptsR 0 compls jids}>reset all choices</a>
 <form id="concepts-form" method=get action=#{actionURL} enctype=#{enctype}>
   ^{widget}
 
