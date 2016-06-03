@@ -12,8 +12,9 @@ $maybe _ <- concepts'
     <h2>All combinations for chosen attributes
     <p>
       <em>Click on the node you are interested in to load results.
-    $if (not . null) complIds
+  $if (not . null) complIds
     The following concepts are excluded (<a href=#{resetComplURL}>reset them</a>):<pre>#{show complIds}</pre>
+  $if (not . null) currObjects
     <div>
       #{svgContent}
 $nothing
