@@ -32,8 +32,8 @@ attributePairs jobResults = do
   return . concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
 
   -- filter all job pairs by given attribute groups
-filterPairs :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
-filterPairs pairs chosenAts = do
+filterPairsByAttributes :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
+filterPairsByAttributes pairs chosenAts = do
   -- chosenAtsCombination contains all allowed attribute combinations
   let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
   let anyMember = or . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
@@ -41,6 +41,10 @@ filterPairs pairs chosenAts = do
   case filteredJobResults of
     [] -> Nothing
     _ -> Just filteredJobResults
+
+
+filterPairsByObjects :: [(JobPairID, [Attribute])] -> Set JobPairID -> [(JobPairID, [Attribute])]
+filterPairsByObjects pairs objs = filter (\(obj,_) -> Set.notMember obj objs) pairs
 
 -- unite all attributes of given jobpair attributes
 uniteJobPairAttributes :: [(JobPairID, [Attribute])] -> Set Attribute
@@ -149,4 +153,16 @@ isAJobResultInfoConfiguration at = case at of
 isAYearSpecificSolverName :: Attribute -> Bool
 isAYearSpecificSolverName at = case at of
   AYearSpecificSolverName _  -> True
-  _                              -> False
+  _                          -> False
+
+
+reducePairsByComplements :: [(JobPairID, [Attribute])] -> ComplementIds -> [(JobPairID, [Attribute])]
+reducePairsByComplements pairs (Ids complIds) = case complIds of
+  []   -> pairs
+  compl:compls -> case pairs of
+    []        -> []
+    _ -> do
+      let concept = safeGetIndex (concepts $ contextFromList pairs) compl
+      case concept of
+        Nothing -> reducePairsByComplements pairs $ Ids compls
+        Just c  -> reducePairsByComplements (filterPairsByObjects pairs $ obs c) $ Ids compls

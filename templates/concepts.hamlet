@@ -1,4 +1,4 @@
-Removed the following concepts: #{show complIds}
+Removed the following concepts: #{show complIds}&nbsp;<a href=#{resetComplURL}>X</a>
 
 <h1><a href=#{currURL}>#{show $ map getStarExecId $ getIds jids}</a>
 <a href=@{ShowManyJobResultsR Standard NoQuery $ jids}>results table</a>

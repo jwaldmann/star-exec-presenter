@@ -10,6 +10,7 @@ import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
 
+import FCA.Helpers
 -- example:
 -- let c = contextFromList [(1,["foo", "bar"]), (2, ["foo","baz"])]
 -- getAttributes c $ Set.fromList [1,2]
@@ -31,9 +32,9 @@ data Concept ob at = Concept
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
 concepts c = do
-  ats <- (map Set.fromList . subsequences) . Set.toList $ attributes c
-  guard $ ats == getAttributes c (getObjects c ats)
-  return (Concept (getObjects c ats) ats)
+  attrs <- (map Set.fromList . subsequences) . Set.toList $ attributes c
+  guard $ attrs == getAttributes c (getObjects c attrs)
+  return (Concept (getObjects c attrs) attrs)
 
 -- get all attributes of given context
 attributes :: (Ord at, Ord ob) => Context ob at -> Set at
@@ -45,27 +46,29 @@ objects c = Map.keysSet $ fore c
 
 -- get all attributes of given context and specific objects
 getAttributes :: (Ord at, Ord ob) => Context ob at -> Set ob -> Set at
-getAttributes c obs = foldr Set.intersection (attributes c)
-  $ map (\o -> fore c Map.! o) $ Set.toList obs
+getAttributes c objs = foldr Set.intersection (attributes c)
+  $ map (\o -> fore c Map.! o) $ Set.toList objs
 
 -- get all objects of given context and specific attributes
 getObjects :: (Ord at, Ord ob) => Context ob at -> Set at -> Set ob
-getObjects c ats = foldr Set.intersection (objects c)
-  $ map (\a -> back c Map.! a) $ Set.toList ats
+getObjects c attrs = foldr Set.intersection (objects c)
+  $ map (\a -> back c Map.! a) $ Set.toList attrs
 
 -- reduce concepts to concepts with proper subsets of given concept id
 reduceConceptsToProperSubsets :: (Ord at) => Maybe [Concept ob at] -> ConceptId -> Maybe [Concept ob at]
-reduceConceptsToProperSubsets c cid = case c of
+reduceConceptsToProperSubsets conceptLattice cid = case conceptLattice of
                                     Nothing -> Nothing
                                     Just concepts' -> do
-                                      let concept = concepts'!!cid
-                                      return $ concept:filter (Set.isProperSubsetOf (ats concept) . ats) concepts'
+                                      let concept = safeGetIndex concepts' cid
+                                      case concept of
+                                        Nothing -> Nothing
+                                        Just c  -> return $ c:filter (Set.isProperSubsetOf (ats c) . ats) concepts'
 
 -- create a context of given input data
 contextFromList :: (Ord at, Ord ob) => [(ob, [at])] -> Context ob at
 contextFromList l = Context
-  { fore=Map.fromListWith Set.union $ map (\(ob, ats) -> (ob, Set.fromList ats)) l
-  , back=Map.fromListWith Set.union $ do (ob, ats) <- l; at <- ats; return (at,Set.singleton ob)
+  { fore=Map.fromListWith Set.union $ map (\(ob, attrs) -> (ob, Set.fromList attrs)) l
+  , back=Map.fromListWith Set.union $ do (ob, attrs) <- l; at <- attrs; return (at,Set.singleton ob)
   }
 
 -- create list of pairs of a context

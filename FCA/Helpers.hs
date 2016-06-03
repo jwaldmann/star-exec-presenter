@@ -33,3 +33,8 @@ matchBasename n = (n =~ ("[a-zA-Z]*" :: String) :: String)
 
 maybeListId :: Maybe [a] -> [a]
 maybeListId = fromMaybe []
+
+safeGetIndex :: [a] -> Int -> Maybe a
+safeGetIndex xs k = case drop k xs of
+                    x:_ -> Just x
+                    [] -> Nothing

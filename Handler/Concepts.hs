@@ -42,25 +42,33 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
           let chosenAttributes = filter (not . null) .
                                    (++) [chosenSolver ca] $
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
-          let filteredPairs = filterPairs attributePairs' chosenAttributes
+          let filteredPairs = filterPairsByAttributes attributePairs' chosenAttributes
           case filteredPairs of
             Nothing -> Nothing
-            Just fjp -> do
-                    let context = contextFromList fjp
-                    return $ concepts context
+            Just pairs -> do
+                    return . concepts $ contextFromList $ reducePairsByComplements pairs $ Ids complIds
         _ -> Nothing
 
 
   let newConcepts = reduceConceptsToProperSubsets concepts' cid
+
   nodeURLs <- mapM
              (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') compls ids) $
              maybeListId newConcepts
   complURLs <- mapM
               (\c -> getConceptURL cid (Ids (complIds ++ [fromJust . elemIndex c $ maybeListId concepts'])) ids) $
               maybeListId newConcepts
+
   svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs complURLs
 
-  let currObjects = maybe Set.empty (\ c -> obs $ c!!cid) concepts'
+  let currObjects = maybe
+                    Set.empty
+                    (\ c -> do
+                      let concept = safeGetIndex c cid
+                      case concept of
+                        Nothing -> Set.empty
+                        Just c'  -> obs c')
+                    concepts'
 
   let filteredJobResults = fmap
                           ((wrapResults .
@@ -74,6 +82,7 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
   --actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL 0 compls ids
   currURL <- getConceptURL cid compls ids
+  resetComplURL <- getConceptURL cid (Ids []) ids
   defaultLayout $ do
     -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
