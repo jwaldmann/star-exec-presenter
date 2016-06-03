@@ -31,18 +31,21 @@ attributePairs jobResults = do
   competitionYears <- mapM getCompetitionYear ids
   return . concatMap (\(jr, year) -> collectData (getStarExecResults jr) year) $ zip jobResults competitionYears
 
-  -- filter all job pairs by given attribute groups
+-- calculate all possible attribute combination of given attributes
+-- Only attribute combination of different attribute constructor are allowed!
+attributeGroupCombinations :: [[Attribute]] -> [[Attribute]]
+attributeGroupCombinations = foldr (\a b -> (:) <$> a <*> b) [[]]
+
+-- filter all attribute pairs by given attribute groups
 filterPairsByAttributes :: [(JobPairID, [Attribute])] -> [[Attribute]] -> Maybe [(JobPairID, [Attribute])]
-filterPairsByAttributes pairs chosenAts = do
-  -- chosenAtsCombination contains all allowed attribute combinations
-  let chosenAtsCombination = foldr (\a b -> (:) <$> a <*> b) [[]] chosenAts
-  let anyMember = or . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) chosenAtsCombination)
+filterPairsByAttributes pairs attrCombinations = do
+  let anyMember = or . (\s -> map (\v -> Set.isSubsetOf (Set.fromList v) s) attrCombinations)
   let filteredJobResults = filter (\(_,attrs) -> anyMember $ Set.fromList attrs) pairs
   case filteredJobResults of
     [] -> Nothing
     _ -> Just filteredJobResults
 
-
+-- filter all attribute pairs by given set of objects
 filterPairsByObjects :: [(JobPairID, [Attribute])] -> Set JobPairID -> [(JobPairID, [Attribute])]
 filterPairsByObjects pairs objs = filter (\(obj,_) -> Set.notMember obj objs) pairs
 
@@ -50,7 +53,7 @@ filterPairsByObjects pairs objs = filter (\(obj,_) -> Set.notMember obj objs) pa
 uniteJobPairAttributes :: [(JobPairID, [Attribute])] -> Set Attribute
 uniteJobPairAttributes pairs = Set.fromList $ concatMap snd pairs
 
--- all job pairs with a response time greater 10 seconds is slow
+-- constant: all job pairs with a response cpu time greater 10 seconds is slow
 slowCpuTimeLimit :: (Num Double, Ord Double) => Double
 slowCpuTimeLimit = 10
 
@@ -155,7 +158,9 @@ isAYearSpecificSolverName at = case at of
   AYearSpecificSolverName _  -> True
   _                          -> False
 
-
+-- recursive function to calculate concepts list and reduce attribute pairs
+-- by objects of concept at first index of complement list.
+-- Each complement list element refers to the index of the current concepts list
 reducePairsByComplements :: [(JobPairID, [Attribute])] -> ComplementIds -> [(JobPairID, [Attribute])]
 reducePairsByComplements pairs (Ids complIds) = case complIds of
   []   -> pairs
@@ -166,3 +171,15 @@ reducePairsByComplements pairs (Ids complIds) = case complIds of
       case concept of
         Nothing -> reducePairsByComplements pairs $ Ids compls
         Just c  -> reducePairsByComplements (filterPairsByObjects pairs $ obs c) $ Ids compls
+
+-- get index of concept in concept list
+conceptElemIndex :: (Eq at, Eq ob) => Concept ob at -> Maybe [Concept ob at] -> Int
+conceptElemIndex concept conceptLattice = fromJust . elemIndex concept $ maybeListId conceptLattice
+
+-- get objects of a concept in concept lattice from index
+safeGetConceptObjectsFromLattice :: [Concept ob at] -> Int -> Set ob
+safeGetConceptObjectsFromLattice concept k = do
+  let concept' = safeGetIndex concept k
+  case concept' of
+    Nothing -> Set.empty
+    Just c  -> obs c

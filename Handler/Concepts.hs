@@ -10,7 +10,6 @@ import Presenter.StarExec.JobData
 import Presenter.Utils.WidgetTable
 
 import Control.Monad
-import Data.List (elemIndex)
 import Data.Maybe
 import           Data.Map.Strict (Map)
 import qualified Data.Map.Strict as M
@@ -38,36 +37,32 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
   ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
     attrOptions $ uniteJobPairAttributes attributePairs'
   let concepts' = case result of
+        FormMissing    -> Nothing
+        FormFailure _  -> Nothing
         FormSuccess ca -> do
           let chosenAttributes = filter (not . null) .
                                    (++) [chosenSolver ca] $
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
-          let filteredPairs = filterPairsByAttributes attributePairs' chosenAttributes
-          case filteredPairs of
+          case filterPairsByAttributes attributePairs' $ attributeGroupCombinations chosenAttributes of
             Nothing -> Nothing
             Just pairs -> do
-                    return . concepts $ contextFromList $ reducePairsByComplements pairs $ Ids complIds
-        _ -> Nothing
+                    ((return . concepts) . contextFromList) . reducePairsByComplements pairs $ Ids complIds
 
 
-  let newConcepts = reduceConceptsToProperSubsets concepts' cid
+  let reducedConcepts = reduceConceptsToProperSubsets concepts' cid
 
   nodeURLs <- mapM
-             (\c -> getConceptURL (fromJust . elemIndex c $ maybeListId concepts') compls ids) $
-             maybeListId newConcepts
+             (\c -> getConceptURL (conceptElemIndex c concepts') compls ids) $
+             maybeListId reducedConcepts
   complURLs <- mapM
-              (\c -> getConceptURL cid (Ids (complIds ++ [fromJust . elemIndex c $ maybeListId concepts'])) ids) $
-              maybeListId newConcepts
+              (\c -> getConceptURL cid (Ids (complIds `mappend` [conceptElemIndex c concepts'])) ids) $
+              maybeListId reducedConcepts
 
-  svgContent <- renderConceptSVG (maybeListId newConcepts) nodeURLs complURLs
+  svgContent <- renderConceptSVG (maybeListId reducedConcepts) nodeURLs complURLs
 
   let currObjects = maybe
                     Set.empty
-                    (\ c -> do
-                      let concept = safeGetIndex c cid
-                      case concept of
-                        Nothing -> Set.empty
-                        Just c'  -> obs c')
+                    (\ c -> safeGetConceptObjectsFromLattice c cid)
                     concepts'
 
   let filteredJobResults = fmap
@@ -82,7 +77,7 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
   --actionURL points to concept 0 that shows all objects
   actionURL <- getConceptURL 0 compls ids
   currURL <- getConceptURL cid compls ids
-  resetComplURL <- getConceptURL cid (Ids []) ids
+  resetComplURL <- getConceptURL 0 (Ids []) ids
   defaultLayout $ do
     -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
