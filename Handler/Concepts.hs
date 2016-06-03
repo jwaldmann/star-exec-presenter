@@ -83,7 +83,7 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
     $(widgetFile "concepts")
-    when (isJust concepts') $ displayConcept jids tab
+    unless (null currObjects) $ displayConcept jids tab
 
 
 attributeForm :: Map Text [(Text, Attribute)] -> AForm Handler AttributeChoices
