@@ -15,12 +15,12 @@ import qualified Data.Set as Set
 import Data.Text as T (append, isPrefixOf, null, pack, stripPrefix, take)
 
 data Attribute =
-  ASolverBasename Text
-   | AJobResultInfoSolver Text
-   | AYearSpecificSolverName Text
-   | AJobResultInfoConfiguration Text
-   | ASlowCpuTime Bool
-   | ASolverResult SolverResult
+  ASolverBasename !Text
+   | AJobResultInfoSolver !Text
+   | AYearSpecificSolverName !Text
+   | AJobResultInfoConfiguration !Text
+   | ASlowCpuTime !Bool
+   | ASolverResult !SolverResult
   deriving (Eq, Ord, Show)
 
 
