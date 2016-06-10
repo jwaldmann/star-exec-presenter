@@ -200,6 +200,7 @@ library
                  , graphviz >= 2999.18.0.2
                  , process
                  , regex-tdfa
+                 , begriff
 
 executable         star-exec-presenter
     if flag(library-only)

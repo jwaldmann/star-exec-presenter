@@ -10,6 +10,11 @@ import qualified Data.Map.Strict as Map
 import           Data.Set (Set)
 import qualified Data.Set as Set
 
+import qualified Data.Begriff.Context as BX
+import qualified Data.Begriff.Concept as BP
+import qualified Data.Begriff.Build   as BB
+
+
 import FCA.Helpers
 -- example:
 -- let c = contextFromList [(1,["foo", "bar"]), (2, ["foo","baz"])]
@@ -31,7 +36,14 @@ data Concept ob at = Concept
 
 -- determine all concepts of given context
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
-concepts c = do
+concepts = concepts_bfs
+
+concepts_bfs c = do
+  (node, neighbours) <- BB.lattice $ BX.build $ do
+    (x, ys) <- contextToList c ; y <- ys ; return (x,y)
+  return $ Concept { obs = BP.objects node , ats = BP.attributes node }
+
+concepts_basic c = do
   attrs <- (map Set.fromList . subsequences) . Set.toList $ attributes c
   guard $ attrs == getAttributes c (getObjects c attrs)
   return (Concept (getObjects c attrs) attrs)

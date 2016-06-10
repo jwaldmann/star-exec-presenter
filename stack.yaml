@@ -6,6 +6,9 @@ resolver: lts-6.0
 # Local packages, usually specified by relative directory name
 packages:
 - '.'
+- location:
+    git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
+    commit: 382588ead20d987f6f58bcd31eecb9fa7f69144c
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []
