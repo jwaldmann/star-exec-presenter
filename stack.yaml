@@ -8,7 +8,7 @@ packages:
 - '.'
 - location:
     git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
-    commit: 382588ead20d987f6f58bcd31eecb9fa7f69144c
+    commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
 
 # Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps: []

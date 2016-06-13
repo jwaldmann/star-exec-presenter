@@ -1,6 +1,7 @@
 module Handler.Concepts where
 
 import FCA.Basic hiding (concepts)
+import qualified FCA.Basic as FCA
 import FCA.StarExec
 import FCA.DotGraph (renderConceptSVG)
 import FCA.Helpers
@@ -17,6 +18,7 @@ import           Data.Set (Set)
 import qualified Data.Set as Set
 import Text.Lucius (luciusFile)
 import Yesod.Form.Bootstrap3
+import Data.List (sortOn)
 
 data AttributeChoices = AttributeChoices
   { chosenSolver :: [Attribute]
@@ -36,7 +38,7 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
 
   ((result, widget), enctype) <- ((runFormGet . renderBootstrap3 BootstrapBasicForm) . attributeForm ) .
     attrOptions $ uniteJobPairAttributes attributePairs'
-  let concepts' = case result of
+  let mc = case result of
         FormMissing    -> Nothing
         FormFailure _  -> Nothing
         FormSuccess ca -> do
@@ -45,10 +47,14 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
                                    map (\f -> maybeListId .f $ ca) [chosenResults, chosenCpu, chosenConfig]
           case filterPairsByAttributes attributePairs' $ attributeGroupCombinations chosenAttributes of
             Nothing -> Nothing
-            Just pairs -> do
-                    ((return . concepts) . contextFromList) . reducePairsByComplements pairs $ Ids complIds
+            Just pairs -> 
+              let ctx = contextFromList . reducePairsByComplements pairs $ Ids complIds
+                  lat = FCA.lattice $ FCA.einpack ctx
+              in  Just ( map (auspack . fst) lat , FCA.implications lat )
 
-
+  let concepts' :: Maybe [Concept JobPairID Attribute]
+      concepts' = fmap fst mc
+      implications = fmap snd mc
   let reducedConcepts = reduceConceptsToProperSubsets concepts' cid
 
   nodeURLs <- mapM
@@ -82,6 +88,19 @@ getConceptsR cid compls@(Ids complIds) jids@(JobIds ids) = do
     -- when (any (\q' -> queryStatus q' /= Latest) qJobs ) insertWidgetMetaRefresh
     toWidget $(luciusFile "templates/solver_result.lucius")
     setTitle "concepts"
+    case implications of
+      Nothing -> return ()
+      Just imps -> do
+        let fst3 (x,y,z) = x
+            att_size conc = Set.size $ FCA.ats $ auspack conc
+            obj_size conc = Set.size $ FCA.obs $ auspack conc
+            imps' = sortOn (att_size . fst3) $ filter ((>0) . att_size . fst3 ) imps
+        [whamlet|$forall (conc,at,atts) <- imps'
+             <pre>
+                for #{show $ obj_size conc} objects with attributes #{show $ FCA.ats $ auspack conc},
+                attribute #{show at}
+                implies attributes #{show atts}
+        |]
     $(widgetFile "concepts")
     unless (null currObjects) $ displayConcept jids tab
 

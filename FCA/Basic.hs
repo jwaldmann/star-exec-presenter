@@ -38,10 +38,17 @@ data Concept ob at = Concept
 concepts :: (Ord at, Ord ob) => Context ob at -> [Concept ob at]
 concepts = concepts_bfs
 
-concepts_bfs c = do
-  (node, neighbours) <- BB.lattice $ BX.build $ do
+lattice = BB.lattice
+implications = BB.implications
+
+einpack c = BX.build $ do
     (x, ys) <- contextToList c ; y <- ys ; return (x,y)
-  return $ Concept { obs = BP.objects node , ats = BP.attributes node }
+
+auspack node = Concept { obs = BP.objects node , ats = BP.attributes node }
+
+concepts_bfs c = do
+  (node, neighbours) <- BB.lattice $ einpack c
+  return $ auspack node
 
 concepts_basic c = do
   attrs <- (map Set.fromList . subsequences) . Set.toList $ attributes c

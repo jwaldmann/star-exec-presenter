@@ -49,7 +49,7 @@ import Text.XML
 import qualified Data.Char
 import Data.CaseInsensitive ()
 import Data.Char (toLower)
-import Control.Monad ( guard, when, forM)
+import Control.Monad ( guard, when, forM, forM_)
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List (mapAccumL )
@@ -303,16 +303,18 @@ getBenchmarkInfo _ _benchmarkId = do
                 }
   resp <- sendRequest req
   let cursor = cursorFromDOM $ responseBody resp
-      benchmarkTitle = getFirstTitle cursor
-  if "http" == T.take 4 benchmarkTitle
-    then return Nothing
-    else do
+      bmts = descendant cursor {- >>= element "h1" >>= child -} >>= content
+  forM_ (zip [0..] bmts) $ \ this -> 
+    $(logWarn) $ T.pack $ "bmts: " ++ show this
+  case bmts of
+    [ benchmarkTitle ] -> do
       let detailFieldset = getFirstFieldset cursor
           typeFieldset = getFieldsetByID cursor "fieldType"
           detailTds = getTds detailFieldset
           typeTds = getTds typeFieldset
       return $ Just $ constructBenchmarkInfo
         _benchmarkId benchmarkTitle $ detailTds ++ typeTds
+    _ -> return Nothing
 
 getSolverInfo :: StarExecConnection -> Int -> Handler (Maybe SolverInfo)
 getSolverInfo _ _solverId = do
