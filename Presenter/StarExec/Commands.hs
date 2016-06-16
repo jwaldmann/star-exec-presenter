@@ -27,6 +27,7 @@ import System.IO ( stderr )
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Lazy as BSL
+import qualified Data.ByteString.Lazy.Char8 as BSLC
 import Network.HTTP.Conduit
 import Network.HTTP.Types.Status
 import Presenter.StarExec.Urls
@@ -253,7 +254,7 @@ getJobInfo _ _jobId = do
                 , queryString = "id=" +> (BSC.pack $ show _jobId)
                 }
   resp <- sendRequest req
-  let cursor = cursorFromDOM $ responseBody resp
+  let cursor = cursorFromDOM $ remove_invalid_html $ responseBody resp
       jobTitle = getFirstTitle cursor
   if "http" == T.take 4 jobTitle
     then return Nothing
@@ -302,19 +303,25 @@ getBenchmarkInfo _ _benchmarkId = do
                 , queryString = "id=" +> (BSC.pack $ show _benchmarkId)
                 }
   resp <- sendRequest req
-  let cursor = cursorFromDOM $ responseBody resp
-      bmts = descendant cursor {- >>= element "h1" >>= child -} >>= content
-  forM_ (zip [0..] bmts) $ \ this -> 
-    $(logWarn) $ T.pack $ "bmts: " ++ show this
-  case bmts of
-    [ benchmarkTitle ] -> do
+  let cursor = cursorFromDOM $ remove_invalid_html $ responseBody resp
+      benchmarkTitle = getFirstTitle cursor 
+  if "http" == T.take 4 benchmarkTitle
+    then return Nothing
+    else do
       let detailFieldset = getFirstFieldset cursor
           typeFieldset = getFieldsetByID cursor "fieldType"
           detailTds = getTds detailFieldset
           typeTds = getTds typeFieldset
       return $ Just $ constructBenchmarkInfo
         _benchmarkId benchmarkTitle $ detailTds ++ typeTds
-    _ -> return Nothing
+
+remove_invalid_html :: BSLC.ByteString -> BSLC.ByteString
+remove_invalid_html =
+  let broken  = [ "<! This viewport meta tag should not be deleted. Allows website to render on phones. >"
+                , "<!TODO META tags for debugging, delete when finished>"
+                ]
+      invalid l = BSLC.words l `elem` map BSLC.words broken
+  in  BSLC.unlines . filter ( not . invalid ) . BSLC.lines 
 
 getSolverInfo :: StarExecConnection -> Int -> Handler (Maybe SolverInfo)
 getSolverInfo _ _solverId = do
@@ -324,7 +331,7 @@ getSolverInfo _ _solverId = do
                 , queryString = "id=" +> (BSC.pack $ show _solverId)
                 }
   resp <- sendRequest req
-  let cursor = cursorFromDOM $ responseBody resp
+  let cursor = cursorFromDOM $ remove_invalid_html $ responseBody resp
       solverTitle = getFirstTitle cursor
   if "http" == T.take 4 solverTitle
     then return Nothing
