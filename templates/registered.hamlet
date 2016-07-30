@@ -13,9 +13,9 @@
 <h2>by competition category    
 <p>
   colors:
-  <span class="conf">works,
-  <span class="oldconf">works, config seems to be from last year,
-  <span class="noconf">something missing (contact organizer).
+  <span class="conf">recent config,
+  <span class="oldconf">old config,
+  <span class="noconf">no config.
 
 <p>
  <ul>
@@ -38,9 +38,10 @@
                        ,<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{co}">#{co}</a>
                        )
                   $nothing
-                      <span class="noconf">#{participantName part}
+                      <span class="noconf">
+                         #{participantName part}
                   | 
-      one participant 
+      exactly one participant 
       <ul>
         $forall cat <- demonstration_categories mecat
           <li>
@@ -49,12 +50,34 @@
                  <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{h}">#{show h}
             $forall part <- participants (contents cat)
                   $maybe conf@(sp,so,co) <- solver_config part
-                       <span class="conf"> #{participantName part}
+                    <span class="#{partclass conf}">
+                       #{participantName part}
                        (<a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{sp}">#{sp}</a>
                        ,<a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{so}">#{so}</a>
                        ,<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{co}">#{co}</a>
                        )
                   $nothing
-                      <span class="noconf">#{participantName part}
+                      <span class="noconf">
+                         #{participantName part}
                   | 
+      participants without configurations
+      <ul>
+        $forall cat <- unreal_categories mecat
+          <li>
+            #{categoryName cat}:
+            $forall Hierarchy h <- Presenter.Registration.benchmarks (contents cat)
+                 <a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{h}">#{show h}
+            $forall part <- participants (contents cat)
+                  $maybe conf@(sp,so,co) <- solver_config part
+                    <span class="#{partclass conf}">
+                       #{participantName part}
+                       (<a href="https://www.starexec.org/starexec/secure/explore/spaces.jsp?id=#{sp}">#{sp}</a>
+                       ,<a href="https://www.starexec.org/starexec/secure/details/solver.jsp?id=#{so}">#{so}</a>
+                       ,<a href="https://www.starexec.org/starexec/secure/details/configuration.jsp?id=#{co}">#{co}</a>
+                       )
+                  $nothing
+                      <span class="noconf">
+                         #{participantName part}
+                  | 
+
 

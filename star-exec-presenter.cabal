@@ -1,5 +1,5 @@
 name:              star-exec-presenter
-version:           0.2.0
+version:           0.3.0
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -91,7 +91,8 @@ library
                      Presenter.Registration
                      Presenter.Registration.Data
                      Presenter.Registration.Code
-                     Presenter.Registration.Form
+                     Presenter.Registration.Form_2015
+                     Presenter.Registration.Form_2016
                      Presenter.StarExec.Commands
                      Presenter.StarExec.Concurrent
                      Presenter.StarExec.Connection

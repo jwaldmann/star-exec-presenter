@@ -14,6 +14,7 @@ module Presenter.Registration.Code
 , Participant (..)
 
 , full_categories
+, unreal_categories
 , all_categories
 , demonstration_categories
 , real_participants
@@ -67,14 +68,22 @@ all_categories :: MetaCategory Catinfo -> [Category Catinfo]
 all_categories mc =
     filter ( \ c -> length (real_participants c) >= 1 ) $  categories mc
 
+-- | categories that have at least two real participants
 full_categories :: MetaCategory Catinfo -> [Category Catinfo]
 full_categories mc =
     filter ( \ c -> length (real_participants c) >= 2 ) $  categories mc
 
+-- | categories that have one real participant
 demonstration_categories :: MetaCategory Catinfo -> [Category Catinfo]
 demonstration_categories mc =
     filter ( \ c -> length (real_participants c) == 1 ) $  categories mc
 
+-- | categories that have no real participants
+unreal_categories :: MetaCategory Catinfo -> [Category Catinfo]
+unreal_categories mc =
+    filter ( \ c -> length (real_participants c) == 0 ) $  categories mc
+
+-- |  a real participant has a config
 real_participants :: Category Catinfo -> [Participant]
 real_participants c
   = filter ( \ p -> case solver_config p of

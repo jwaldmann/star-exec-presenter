@@ -16,7 +16,7 @@ data Scoring =
 instance Output Scoring where output = text . show
 
 -- | this is for managing registrations (which are in the source) FIXME
-data Year = Y2014 | Y2015 | E
+data Year = Y2014 | Y2015 | Y2016 | E
   deriving (Show, Eq, Read)
 
 instance PathPiece Year where
@@ -24,7 +24,6 @@ instance PathPiece Year where
   fromPathPiece t = case reads (T.unpack t) of
     [(y, "")] -> return y
     _ -> Nothing
-
 
 -- | solver sorted by YES/CERTIFIED/NO, maybe with scoring -> SolverResult
 data Category = Category
