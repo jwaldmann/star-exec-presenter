@@ -104,7 +104,7 @@ tc = collect tc_skeleton
                          -- ,tc_Wanda
                          ,tc_cycsrs
                          ,tc_matchbox
-                         -- ,tc_muterm
+                         ,tc_muterm
                          ]
 
 tc_Loopus :: Competition [Participant]
@@ -314,15 +314,15 @@ tc_matchbox = Competition "Termination Competition 2016"
 tc_muterm :: Competition [Participant]
 tc_muterm = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "TRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]
-     ,Category "SRS Standard"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]
-     ,Category "TRS Equational"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]
-     ,Category "TRS Conditional"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]
-     ,Category "TRS Context Sensitive"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]
-     ,Category "TRS Innermost"
-          [Participant {participantName = "muterm" , solver_config = Just (34565, 3897,24307)}]]]
+          [Category "TRS Standard"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
+          ,Category "SRS Standard"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
+          ,Category "TRS Equational"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
+          ,Category "TRS Conditional"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
+          ,Category "TRS Context Sensitive"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
+          ,Category "TRS Innermost"
+               [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]]]
