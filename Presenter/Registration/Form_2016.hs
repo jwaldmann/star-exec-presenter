@@ -110,7 +110,7 @@ tc = collect tc_skeleton
                          ,tc_matchbox -- Johannes Waldmann
                          ,tc_muterm -- Raul Gutierrez
                          , tc_verymax -- Daniel Larraz
-                         , tc_nonterm -- Alexander Fedotov
+                         , tc_cycnta -- Alexander Fedotov
                          , tc_kflmnm -- Dieter Hofbauer
                          ]
 
@@ -345,8 +345,8 @@ tc_verymax = Competition "Termination Competition 2016"
         [Participant {participantName = "VeryMax" ,solver_config = Just (184540,8917,163036)}]]
      ]
 
-tc_nonterm :: Competition [Participant]
-tc_nonterm = Competition "Termination Competition 2016"
+tc_cycnta :: Competition [Participant]
+tc_cycnta = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-                [Category "Cycles"
-                                [Participant {participantName = "nonterm" , solver_config = Just (184626,8923,163048)}]]]
+      [Category "Cycles"
+       [Participant {participantName = "CycNTA" , solver_config = Just (184626,8923,163048)}]]]
