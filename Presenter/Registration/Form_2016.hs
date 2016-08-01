@@ -92,19 +92,20 @@ tc = collect tc_skeleton
                          [ tc_AProVE
                          , tc_Loopus
                          -- ,tc_AutoNon
-                         -- ,tc_Ctrl
+                         ,tc_Ctrl
                          -- ,tc_HipTNT
                          -- ,tc_NaTT
                          -- ,tc_T2
                          -- ,tc_TCT2
-                         ,tc_TCT3
-                         -- ,tc_TTT2
+                         ,tc_TCT
+                         ,tc_TTT2
                          -- ,tc_UltimateBuchiAutomizer
                          -- ,tc_UltimateBuchiAutomizerJoogie
-                         -- ,tc_Wanda
+                         ,tc_Wanda
                          ,tc_cycsrs
                          ,tc_matchbox
                          ,tc_muterm
+                         , tc_verymax
                          ]
 
 tc_Loopus :: Competition [Participant]
@@ -221,57 +222,48 @@ tc_T2 = Competition "Termination Competition 2016"
      [Category "Integer Transition Systems"
      [Participant {participantName = "T2" , solver_config = Just (57120, 3509,23138)}]]]
 
-tc_TCT2 :: Competition [Participant]
-tc_TCT2 = Competition "Termination Competition 2016"
-     [MetaCategory "Complexity Analysis of Term Rewriting"
-     [Category "Derivational Complexity - Full Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24076)}]
-     ,Category "Runtime Complexity - Full Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24071)}]
-     ,Category "Runtime Complexity - Innermost Rewriting"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24070)}]
-     ,Category "Derivational Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24074)}]
-     ,Category "Runtime Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24069)}]
-     ,Category "Runtime Complexity - Innermost Rewriting certified"
-          [Participant {participantName = "TCT2" , solver_config = Just (52530, 3797,24072)}]]]
-
-tc_TCT3 :: Competition [Participant]
-tc_TCT3 = Competition "Termination Competition 2016"
-     [MetaCategory "Complexity Analysis of Term Rewriting"
-     [Category "Derivational Complexity - Full Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24249)}]
-     ,Category "Runtime Complexity - Full Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24243)}]
-     ,Category "Runtime Complexity - Innermost Rewriting"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24244)}]
-     ,Category "Derivational Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24245)}]
-     ,Category "Runtime Complexity - Full Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24247)}]
-     ,Category "Runtime Complexity - Innermost Rewriting certified"
-          [Participant {participantName = "TCT3" , solver_config = Just (52530, 3866,24250)}]]]
+tc_TCT :: Competition [Participant]
+tc_TCT = Competition "Termination Competition 2016"
+  [MetaCategory "Complexity Analysis of Term Rewriting"
+    [Category "Derivational Complexity - Full Rewriting"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162422)}]
+    ,Category "Runtime Complexity - Full Rewriting"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162424)}]
+    ,Category "Runtime Complexity - Innermost Rewriting"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162423)}]
+    ,Category "Derivational Complexity - Full Rewriting certified"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162425)}]
+    ,Category "Runtime Complexity - Full Rewriting certified"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162426)}]
+    ,Category "Runtime Complexity - Innermost Rewriting certified"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162421)}]]
+  ,MetaCategory "Complexity Analysis of Term Rewriting"
+    [Category "Integer Transition Systems"
+      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162420)}]]
+  ,MetaCategory "Complexity Analysis of Programming Languages"
+    [Category "C Integer Programs"
+      [Participant {participantName = "TcT", solver_config = Nothing}]]]
 
 tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "TRS Standard"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23357)}]
-     ,Category "SRS Standard"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23357)}]
-     ,Category "TRS Relative"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23357)}]
-     ,Category "SRS Relative"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23357)}]
-     ,Category "TRS Standard certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]
-     ,Category "SRS Standard certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]
-     ,Category "TRS Relative certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]
-     ,Category "SRS Relative certified"
-          [Participant {participantName = "TTT2" , solver_config = Just (100695, 3558,23358)}]]]
+          [Category "TRS Standard"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+          ,Category "SRS Standard"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+          ,Category "TRS Relative"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+          ,Category "SRS Relative"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+          ,Category "TRS Standard certified"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+          ,Category "SRS Standard certified"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+          ,Category "TRS Relative certified"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+          ,Category "SRS Relative certified"
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]]]
+
 
 tc_UltimateBuchiAutomizer :: Competition [Participant]
 tc_UltimateBuchiAutomizer = Competition "Termination Competition 2016"
@@ -298,8 +290,8 @@ tc_Wanda = Competition "Termination Competition 2016"
 tc_cycsrs :: Competition [Participant]
 tc_cycsrs = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "Cycles"
-     [Participant {participantName = "cycsrs" , solver_config = Just (98142,3869,24259)}]]]
+          [Category "Cycles"
+               [Participant {participantName = "cycsrs" , solver_config = Just (98142,7324,154807)}]]]
 
 tc_matchbox :: Competition [Participant]
 tc_matchbox = Competition "Termination Competition 2016"
@@ -326,3 +318,13 @@ tc_muterm = Competition "Termination Competition 2016"
                [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]
           ,Category "TRS Innermost"
                [Participant {participantName = "muterm" , solver_config = Just (34565,3897,24307)}]]]
+
+tc_verymax :: Competition [Participant]
+tc_verymax = Competition "Termination Competition 2016"
+     [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+       [Category "Integer Transition Systems"
+        [Participant {participantName = "VeryMax" , solver_config = Just (184540,8917,163035)}]]
+     , MetaCategory "Termination of Programming Languages"
+       [Category "C Integer Programs"
+        [Participant {participantName = "VeryMax" ,solver_config = Just (184540,8917,163036)}]]
+     ]
