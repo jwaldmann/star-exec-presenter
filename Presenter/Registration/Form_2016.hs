@@ -98,7 +98,7 @@ tc = collect tc_skeleton
                          -- ,tc_AutoNon
                          ,tc_Ctrl -- Cynthia Kop
                          -- ,tc_HipTNT
-                         -- ,tc_NaTT
+                         , tc_NaTT -- Akihisa Yamada
                          -- ,tc_T2
                          -- ,tc_TCT2
                          ,tc_TCT -- Michael Schaper
@@ -220,7 +220,10 @@ tc_NaTT = Competition "Termination Competition 2016"
      ,Category "TRS Relative"
           [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]
      ,Category "SRS Relative"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]]]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]
+     ,Category "TRS Equational"
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22689)}]
+     ]]
 
 tc_T2 :: Competition [Participant]
 tc_T2 = Competition "Termination Competition 2016"
@@ -299,7 +302,7 @@ tc_cycsrs :: Competition [Participant]
 tc_cycsrs = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "Cycles"
-               [Participant {participantName = "cycsrs" , solver_config = Just (98142,7324,154807)}]]]
+               [Participant {participantName = "cycsrs" , solver_config = Just (98142,8976,163191)}]]]
 
 tc_matchbox :: Competition [Participant]
 tc_matchbox = Competition "Termination Competition 2016"
