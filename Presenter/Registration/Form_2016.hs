@@ -112,6 +112,7 @@ tc = collect tc_skeleton
                          , tc_verymax -- Daniel Larraz
                          , tc_cycnta -- Alexander Fedotov
                          , tc_kflmnm -- Dieter Hofbauer
+                         , tc_cofloco -- Antonio Flores Montoya
                          ]
 
 tc_Loopus :: Competition [Participant]
@@ -353,3 +354,14 @@ tc_cycnta = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
       [Category "Cycles"
        [Participant {participantName = "CycNTA" , solver_config = Just (184626,8923,163048)}]]]
+
+tc_cofloco :: Competition [Participant]
+tc_cofloco = Competition "Termination Competition 2016"
+   [ MetaCategory "Complexity Analysis of Term Rewriting"
+     [ Category "Integer Transition Systems"
+       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,8972,163117)}]]
+   , MetaCategory "Complexity Analysis of Programming Languages"
+     [ Category "C Integer Programs"
+       [ Participant {participantName = "CoFloCo" , solver_config = Nothing}]
+     ]
+   ] 
