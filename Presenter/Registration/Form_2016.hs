@@ -9,8 +9,8 @@ import Data.Maybe
 tc_skeleton :: Competition Catinfo
 tc_skeleton = tc_skeleton_10_3
 
-plain = 234
-ceta  = 315
+plain = 317
+ceta  = 318
 
 tc_skeleton_10_3 :: Competition Catinfo
 tc_skeleton_10_3 = Competition "Termination Competition 2016"
