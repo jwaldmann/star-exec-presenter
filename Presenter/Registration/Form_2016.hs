@@ -18,9 +18,9 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
           [Category "TRS Standard"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102127] , participants = []}
           ,Category "SRS Standard"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166] , participants = []}
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166, Hierarchy 182728] , participants = []}
           ,Category "Cycles"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166] , participants = []}
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166, Hierarchy 182727] , participants = []}
           ,Category "TRS Relative"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102162] , participants = []}
           ,Category "SRS Relative"
@@ -86,7 +86,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
           ]
      , MetaCategory "Complexity Analysis of Programming Languages"
           [ Category "C Integer Programs"
-               Catinfo { postproc = ceta, benchmarks = [Hierarchy 101979], participants = [] }
+               Catinfo { postproc = plain, benchmarks = [Hierarchy 101979, Hierarchy 184687], participants = [] }
           ]
      ]
 
@@ -119,11 +119,11 @@ tc_Loopus :: Competition [Participant]
 tc_Loopus = Competition "Termination Competition 2016"
     [ MetaCategory "Complexity Analysis of Term Rewriting"
         [ Category "Integer Transition Systems"
-          [Participant { participantName = "Loopus", solver_config = Nothing } ]
+          [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163333)  } ]
         ]
     , MetaCategory "Complexity Analysis of Programming Languages"
           [ Category "C Integer Programs"
-          [Participant { participantName = "Loopus", solver_config = Nothing } ]
+          [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163334) } ]
           ]
     ]
 
