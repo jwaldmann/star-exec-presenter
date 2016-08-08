@@ -67,7 +67,9 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
           ,Category "Runtime Complexity - Innermost Rewriting certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102228] , participants = []}
           ,Category "Integer Transition Systems"
-               Catinfo { postproc = plain, benchmarks = [Hierarchy 101982], participants = []}
+               Catinfo { postproc = plain
+                       , benchmarks = [Hierarchy 101982, All 184632 ]
+                       , participants = []}
           ]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"

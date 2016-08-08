@@ -1,9 +1,9 @@
 <h1>Termination Competitions
 
 <p>The 
-  <a href="http://termination-portal.org/wiki/Termination_Competition_2015">
-     International Termination Competition 2015
-  will be run on 
+  <a href="http://termination-portal.org/wiki/Termination_Competition">
+     International Termination Competitions
+  are run on 
   <a href="http://www.starexec.org">
      Star-Exec.
 
@@ -19,21 +19,21 @@
 
 This site:
 <ul>
-  <li><a href=@{RegisteredR Y2015}>registered participants</a>
+  <li><a href=@{RegisteredR Y2016}>registered participants for 2016</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
 
 $if authorized
   only for authorized users:
   <ul>
-    <li><a href=@{InstallSolversR Y2015}>install solvers</a>
-    <li><a href=@{ControlR Y2015}>start jobs</a>
+    <li><a href=@{InstallSolversR Y2016}>install solvers</a>
+    <li><a href=@{ControlR Y2016}>start jobs</a>
     <li><a href=@{ListHiddenCompetitionsR}>hidden test runs</a>
     
 
 Meta-information for this site:
 <ul>
-  <li>programmers: Stefan von der Krone and Johannes Waldmann
+  <li>programmers: Stefan von der Krone, René Muhl, Johannes Waldmann
   <li>using the <a href="http://www.yesodweb.com/">Yesod</a> web framework,
     implementation language: <a href="http://haskell.org/">Haskell</a>,
-    compiler: <a href="http://haskell.org/ghc">ghc-7.10.2</a>.
-  <li><a href="https://github.com/stefanvonderkrone/star-exec-presenter">source code, issue tracker</a>
+    compiler: <a href="http://haskell.org/ghc">ghc-7.10.3</a>.
+  <li><a href="https://github.com/jwaldmann/star-exec-presenter">source code, issue tracker</a>
