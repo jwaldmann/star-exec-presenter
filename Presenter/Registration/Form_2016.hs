@@ -68,7 +68,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102228] , participants = []}
           ,Category "Integer Transition Systems"
                Catinfo { postproc = plain
-                       , benchmarks = [Hierarchy 101982, All 184632 ]
+                       , benchmarks = [Hierarchy 101982, Hierarchy 184632 ]
                        , participants = []}
           ]
      ,MetaCategory "Termination of Programming Languages"
@@ -315,9 +315,9 @@ tc_matchbox :: Competition [Participant]
 tc_matchbox = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "SRS Standard"
-               [Participant {participantName = "matchbox" , solver_config = Just (62397, 8817,161727)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9006,163521)}]
           ,Category "Cycles"
-               [Participant {participantName = "matchbox" , solver_config = Just (62397, 8817,161728)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9006,163522)}]
           ]
      ]
 
