@@ -29,7 +29,7 @@ beware: depending on parameter settings below, you can burn a lot of cpu cycles 
                   $forall s <- alls $ R.benchmarks (R.contents cat)
                     All #{s},
                   $forall s <- hierarchies $ R.benchmarks (R.contents cat)
-                    Hier #{s},
+                    <input type=submit name=control value="hier:#{s}">,
                 <li>Solvers:
                   $forall part <- R.participants (R.contents cat)
                     $maybe conf@(sp,so,co) <- R.solver_config part

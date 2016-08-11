@@ -30,8 +30,11 @@ inputForm = renderTable $ JobControl
                   , ("all.q",1)
                   , ("all2.q",4)
                   ]) "queue" (Just 36291)
-        <*> areq (radioFieldList [("autotest":: T.Text, 99354)]) "space" (Just 99354)
-        <*> areq (radioFieldList [("60"::T.Text, 60),("300", 300), ("900", 900)]) "wallclock_timeout" (Just 60)
+        <*> areq (radioFieldList
+                  [("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
+                 "space" (Just 184694)
+        <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
+                 "wallclock_timeout" (Just 30)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)]) 
                  "family_lower_bound (selection parameter a)" (Just 1)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)]) 
@@ -92,7 +95,8 @@ postControlR year = do
 
 startjobs :: Year -> JobControl -> Text -> Handler (Maybe Competition)
 startjobs year input con = 
-      checkPrefix "cat:"  con (startCat year input)
+      checkPrefix "hier:" con (startHier year input)  
+    $ checkPrefix "cat:"  con (startCat year input)
     $ checkPrefix "mc:" con (startMC year input)
     $ checkPrefix "comp:" con (startComp year input)
     $ return Nothing
@@ -113,6 +117,10 @@ select input comp = case selection input of
     SelectionDemonstration -> 
         comp { R.metacategories = map ( \ mc -> mc { R.categories = R.demonstration_categories mc } ) 
                               $ R.metacategories comp }
+
+startHier :: Year -> JobControl -> Name -> Handler (Maybe Competition)
+startHier year input t = do
+    return Nothing
 
 startCat :: Year -> JobControl -> Name -> Handler (Maybe Competition)
 startCat year input t = do
