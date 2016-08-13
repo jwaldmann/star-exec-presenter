@@ -35,14 +35,14 @@ inputForm = renderTable $ JobControl
                  "space" (Just 184694)
         <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
                  "wallclock_timeout" (Just 30)
-        <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)]) 
+        <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)])
                  "family_lower_bound (selection parameter a)" (Just 1)
-        <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)]) 
+        <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)])
                  "family_upper_bound (selection parameter b)" (Just 1)
-        <*> areq (radioFieldList [("0.1", 0.1), ("0.3"::T.Text,0.3), ("0.5", 0.5), ("1.0", 1.0)]) 
+        <*> areq (radioFieldList [("0.1", 0.1), ("0.3"::T.Text,0.3), ("0.5", 0.5), ("1.0", 1.0)])
                  "family_factor (selection parameter c)" (Just 0.1)
-        <*> formToAForm ( do 
-            e <- askParams 
+        <*> formToAForm ( do
+            e <- askParams
             return ( FormSuccess $ maybe M.empty id e, [] ) )
 
 benches :: Monad m => m R.Benchmark_Source -> m Int
@@ -67,7 +67,7 @@ postControlR year = do
   ((result, widget), enctype) <- runFormPost inputForm
 
   let comp = R.the_competition year
-      public = case result of 
+      public = case result of
                   FormSuccess input-> isPublic input
                   _ -> False
   mc <- case result of
@@ -94,28 +94,28 @@ postControlR year = do
     $(widgetFile "control")
 
 startjobs :: Year -> JobControl -> Text -> Handler (Maybe Competition)
-startjobs year input con = 
-      checkPrefix "hier:" con (startHier year input)  
+startjobs year input con =
+      checkPrefix "hier:" con (startHier year input)
     $ checkPrefix "cat:"  con (startCat year input)
     $ checkPrefix "mc:" con (startMC year input)
     $ checkPrefix "comp:" con (startComp year input)
     $ return Nothing
 
 checkPrefix :: T.Text -> T.Text -> ( T.Text -> a ) -> a ->  a
-checkPrefix s con action next = 
+checkPrefix s con action next =
     let (pre, post) = T.splitAt (T.length s) con
     in  if pre == s then action post else next
 
 select :: JobControl -> R.Competition R.Catinfo -> R.Competition R.Catinfo
 select input comp = case selection input of
-    SelectionAll -> 
-        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.all_categories mc } ) 
+    SelectionAll ->
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.all_categories mc } )
                               $ R.metacategories comp }
-    SelectionCompetition -> 
-        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.full_categories mc } ) 
+    SelectionCompetition ->
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.full_categories mc } )
                               $ R.metacategories comp }
-    SelectionDemonstration -> 
-        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.demonstration_categories mc } ) 
+    SelectionDemonstration ->
+        comp { R.metacategories = map ( \ mc -> mc { R.categories = R.demonstration_categories mc } )
                               $ R.metacategories comp }
 
 startHier :: Year -> JobControl -> Name -> Handler (Maybe Competition)
@@ -124,14 +124,14 @@ startHier year input t = do
 
 startCat :: Year -> JobControl -> Name -> Handler (Maybe Competition)
 startCat year input t = do
-    let cats = do 
+    let cats = do
             mc <- R.metacategories $ select input $ R.the_competition year
             c <- R.categories mc
             guard $ R.categoryName c == t
             return c
     case cats of
         [ cat ] -> do
-            cat_with_jobs <- pushcat input cat    
+            cat_with_jobs <- pushcat input cat
             let m = params input t
                 c = Competition m [ MetaCategory (metaToName m) [ convertC cat_with_jobs]]
             return $ Just c
@@ -139,7 +139,7 @@ startCat year input t = do
 
 startMC :: Year -> JobControl -> Name -> Handler (Maybe Competition)
 startMC year input t = do
-    let mcs = do 
+    let mcs = do
             mc <- R.metacategories $ select input $ R.the_competition year
             guard $ R.metaCategoryName mc == t
             return mc
@@ -154,8 +154,8 @@ startMC year input t = do
 startComp :: Year -> JobControl -> Text -> Handler (Maybe Competition)
 startComp year input t = do
     comp_with_jobs <- pushcomp input $ select input $ R.the_competition year
-    let Competition name mcs = convertComp comp_with_jobs 
-        m = params input t 
+    let Competition name mcs = convertComp comp_with_jobs
+        m = params input t
         c = Competition m mcs
     return $ Just c
 
