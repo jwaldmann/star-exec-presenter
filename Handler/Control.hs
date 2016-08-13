@@ -11,7 +11,7 @@ import Presenter.STM
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import Data.Time.Clock
-import Control.Monad ( guard )
+import Control.Monad ( guard, forM )
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
@@ -120,7 +120,23 @@ select input comp = case selection input of
 
 startHier :: Year -> JobControl -> Name -> Handler (Maybe Competition)
 startHier year input t = do
-    return Nothing
+    let cats = do
+            mc <- R.metacategories $ select input $ R.the_competition year
+            c <- R.categories mc
+            let cc = R.contents c
+            let bms = filter ( \ bm -> case bm of
+                                 R.Hierarchy h -> show h == T.unpack t
+                                 _ -> False
+                             ) $ R.benchmarks cc
+            return $ c { R.contents = cc { R.benchmarks = bms } }
+    case cats of
+        [] -> return Nothing
+        _ -> do
+            cats_with_jobs <- forM cats $ pushcat input
+            let m = params input t
+                c = Competition m [ MetaCategory (metaToName m) $ map convertC cats_with_jobs ]
+            return $ Just c
+        _ -> return Nothing
 
 startCat :: Year -> JobControl -> Name -> Handler (Maybe Competition)
 startCat year input t = do
