@@ -105,8 +105,7 @@ tc = collect tc_skeleton
                          -- ,tc_TCT2
                          ,tc_TCT -- Michael Schaper
                          ,tc_TTT2 -- Christian Sternagel
-                         -- ,tc_UltimateBuchiAutomizer
-                         -- ,tc_UltimateBuchiAutomizerJoogie
+                         ,tc_UltimateBuchiAutomizer
                          ,tc_Wanda -- Cynthia Kop
                          ,tc_cycsrs -- David Sabel
                          ,tc_matchbox -- Johannes Waldmann
@@ -287,15 +286,9 @@ tc_UltimateBuchiAutomizer :: Competition [Participant]
 tc_UltimateBuchiAutomizer = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 3942,24757)}]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9031,163794)}]
      ,Category "C Integer Programs"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 3942,24757)}]]]
-
-tc_UltimateBuchiAutomizerJoogie :: Competition [Participant]
-tc_UltimateBuchiAutomizerJoogie = Competition "Termination Competition 2016"
-     [MetaCategory "Termination of Programming Languages"
-     [Category "Java Bytecode"
-     [Participant {participantName = "UltimateBuchiAutomizer+Joogie" , solver_config = Just (51412, 3942,24758)}]]]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9031,163794)}]]]
 
 tc_Wanda :: Competition [Participant]
 tc_Wanda = Competition "Termination Competition 2016"
