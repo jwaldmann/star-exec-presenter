@@ -309,15 +309,15 @@ tc_cycsrs :: Competition [Participant]
 tc_cycsrs = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "Cycles"
-               [Participant {participantName = "cycsrs" , solver_config = Just (98142,8976,163191)}]]]
+               [Participant {participantName = "cycsrs" , solver_config = Just (98142,9005,163520)}]]]
 
 tc_matchbox :: Competition [Participant]
 tc_matchbox = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "SRS Standard"
-               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9006,163521)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9025,163786)}]
           ,Category "Cycles"
-               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9006,163522)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (62397, 9025,163787)}]
           ]
      ]
 

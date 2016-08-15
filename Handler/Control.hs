@@ -128,6 +128,7 @@ startHier year input t = do
                                  R.Hierarchy h -> show h == T.unpack t
                                  _ -> False
                              ) $ R.benchmarks cc
+            guard $ not $ null bms
             return $ c { R.contents = cc { R.benchmarks = bms } }
     case cats of
         [] -> return Nothing
