@@ -68,7 +68,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102228] , participants = []}
           ,Category "Integer Transition Systems"
                Catinfo { postproc = plain
-                       , benchmarks = [Hierarchy 101982, Hierarchy 184632 ]
+                       , benchmarks = [Hierarchy 101982, Hierarchy 184632, Hierarchy 184696 ]
                        , participants = []}
           ]
      ,MetaCategory "Termination of Programming Languages"
@@ -88,7 +88,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
           ]
      , MetaCategory "Complexity Analysis of Programming Languages"
           [ Category "C Integer Programs"
-               Catinfo { postproc = plain, benchmarks = [Hierarchy 101979, Hierarchy 184687, Hierarchy 184696 ], participants = [] }
+               Catinfo { postproc = plain, benchmarks = [Hierarchy 101979, Hierarchy 184687 ], participants = [] }
           ]
      ]
 
@@ -105,7 +105,7 @@ tc = collect tc_skeleton
                          -- ,tc_TCT2
                          ,tc_TCT -- Michael Schaper
                          ,tc_TTT2 -- Christian Sternagel
-                         ,tc_UltimateBuchiAutomizer
+                         ,tc_UltimateBuchiAutomizer -- Matthias Heizmann
                          ,tc_Wanda -- Cynthia Kop
                          ,tc_cycsrs -- David Sabel
                          ,tc_matchbox -- Johannes Waldmann
@@ -358,7 +358,7 @@ tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2016"
    [ MetaCategory "Complexity Analysis of Term Rewriting"
      [ Category "Integer Transition Systems"
-       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,8972,163117)}]]
+       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9046,163946)}]]
    , MetaCategory "Complexity Analysis of Programming Languages"
      [ Category "C Integer Programs"
        [ Participant {participantName = "CoFloCo" , solver_config = Nothing}]
