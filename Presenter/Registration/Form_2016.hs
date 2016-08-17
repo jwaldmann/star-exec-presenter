@@ -68,7 +68,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102096] , participants = []}
           ,Category "Runtime Complexity - Innermost Rewriting certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102228] , participants = []}
-          ,Category "Integer Transition Systems"
+          ,Category "Complexity - Integer Transition Systems"
                Catinfo { postproc = plain
                        , benchmarks = [Hierarchy 101982, Hierarchy 184632, Hierarchy 184696 ]
                        , participants = []}
@@ -89,7 +89,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 101968] , participants = []}
           ]
      , MetaCategory "Complexity Analysis of Programming Languages"
-          [ Category "C Integer Programs"
+          [ Category "Complexity - C Integer Programs"
                Catinfo { postproc = plain, benchmarks = [Hierarchy 101979, Hierarchy 184687 ], participants = [] }
           ]
      ]
@@ -121,11 +121,11 @@ tc = collect tc_skeleton
 tc_Loopus :: Competition [Participant]
 tc_Loopus = Competition "Termination Competition 2016"
     [ MetaCategory "Complexity Analysis of Term Rewriting"
-        [ Category "Integer Transition Systems"
+        [ Category "Complexity - Integer Transition Systems"
           [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163333)  } ]
         ]
     , MetaCategory "Complexity Analysis of Programming Languages"
-          [ Category "C Integer Programs"
+          [ Category "Complexity - C Integer Programs"
           [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163334) } ]
           ]
     ]
@@ -174,7 +174,7 @@ tc_AProVE = Competition "Termination Competition 2016"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163932)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163933)}]
-          ,Category "Integer Transition Systems"
+          ,Category "Complexity - Integer Transition Systems"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163932)}]]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"
@@ -248,11 +248,11 @@ tc_TCT = Competition "Termination Competition 2016"
       [Participant {participantName = "TcT", solver_config = Just (1128,8861,162426)}]
     ,Category "Runtime Complexity - Innermost Rewriting certified"
       [Participant {participantName = "TcT", solver_config = Just (1128,8861,162421)}]
-    ,Category "Integer Transition Systems"
+    ,Category "Complexity - Integer Transition Systems"
       [Participant {participantName = "TcT", solver_config = Just (1128,8861,162420)}]
     ]
   ,MetaCategory "Complexity Analysis of Programming Languages"
-    [Category "C Integer Programs"
+    [Category "Complexity - C Integer Programs"
       [Participant {participantName = "TcT", solver_config = Nothing}]
     ]
   ]
@@ -353,10 +353,10 @@ tc_cycnta = Competition "Termination Competition 2016"
 tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2016"
    [ MetaCategory "Complexity Analysis of Term Rewriting"
-     [ Category "Integer Transition Systems"
+     [ Category "Complexity - Integer Transition Systems"
        [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9066,164108)}]]
    , MetaCategory "Complexity Analysis of Programming Languages"
-     [ Category "C Integer Programs"
+     [ Category "Complexity - C Integer Programs"
        [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9066,164109)}]
      ]
    ] 
