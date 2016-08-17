@@ -142,13 +142,13 @@ tc_AProVE = Competition "Termination Competition 2016"
           ,Category "SRS Relative"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
           ,Category "TRS Standard certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "SRS Standard certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "TRS Relative certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "SRS Relative certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "TRS Equational"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
           ,Category "TRS Conditional"
@@ -160,9 +160,9 @@ tc_AProVE = Competition "Termination Competition 2016"
           ,Category "TRS Outermost"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
           ,Category "TRS Innermost certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "TRS Outermost certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163936)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "Integer Transition Systems"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163934)}]
           ,Category "Integer TRS"
