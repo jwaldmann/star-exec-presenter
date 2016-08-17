@@ -28,7 +28,7 @@ inputForm = renderTable $ JobControl
         <*> areq (radioFieldList
                   [ ("Termination.q"::T.Text,36291)
                   , ("all.q",1)
-                  , ("all2.q",4)
+                  , ("all2.q",37611)
                   ]) "queue" (Just 36291)
         <*> areq (radioFieldList
                   [("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
