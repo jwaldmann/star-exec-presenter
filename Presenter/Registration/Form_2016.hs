@@ -190,7 +190,10 @@ tc_AProVE = Competition "Termination Competition 2016"
           ,Category "Logic Programming"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
           ,Category "Functional Programming"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]]]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]]
+     ,MetaCategory "Complexity Analysis of Programming Languages"
+          [Category "Complexity - C Integer Programs"
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9082,164151)}]]]
   
 tc_AutoNon :: Competition [Participant]
 tc_AutoNon = Competition "Termination Competition 2016"
@@ -265,21 +268,21 @@ tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163047)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
           ,Category "TRS Standard certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
           ,Category "SRS Standard certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
           ,Category "TRS Relative certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
           ,Category "SRS Relative certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,8921,163046)}]]]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]]]
 
 
 tc_UltimateBuchiAutomizer :: Competition [Participant]
