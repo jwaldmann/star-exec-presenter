@@ -34,6 +34,8 @@ b5 :: Bounds
 b5 = Bounds { lower = Poly $ Just 1, upper = Poly $ Just 3 }
 b6 :: Bounds
 b6 = Bounds { lower = Finite , upper = Poly Nothing }
+b7 :: Bounds
+b7 = Bounds { lower = Expo, upper = Infinite }
 
 instance Show Bounds where
     showsPrec p b =
@@ -84,6 +86,7 @@ quest q p = do { token "?" ; return q } +++ p
 -- | NOTE: Ord instance is required for keys in maps (?)
 -- but otherwise useless
 data Function = Poly { degree :: Maybe Int } -- ^ nothing: unknown degree
+              | Expo -- ^ unknown exponential
               | Finite -- ^ some unspecified function (each value is finite)
               | Infinite -- ^ some function that has infinite values somewhere
      deriving (Eq, Ord)
@@ -91,10 +94,10 @@ data Function = Poly { degree :: Maybe Int } -- ^ nothing: unknown degree
 -- * comparison of functions for bounds.
 -- need to know the context (is it for upper or lower bounds).
 -- lower bounds, from bad to good:
--- Finite = Poly Nothing = Poly (Just 0) < Poly (Just 1) < .. < Infinite
+-- Finite = Poly Nothing = Poly (Just 0) < Poly (Just 1) < .. < Expo < Infinite
 -- where Infinite means nontermination.
 -- upper bounds, from good to bad (NOTE the order)
--- Poly (Just 0) < Poly (Just 1) < .. < Poly Nothing < Finite < Infinite
+-- Poly (Just 0) < Poly (Just 1) < .. < Poly Nothing < Expo < Finite < Infinite
 -- these orders are computed by the following comparison functions.
 
 
@@ -106,6 +109,8 @@ compare_for_lower_bounds f g = case (f,g) of
   ( _ , _ ) | f == g -> EQ
   ( Infinite, _ ) -> GT
   ( _ , Infinite ) -> LT
+  ( Expo , _ ) -> GT
+  ( _ , Expo ) -> LT
   ( Poly (Just p), Poly (Just q)) -> compare p q
   ( Poly (Just p), _ ) | p > 0 -> GT
   ( _, Poly (Just q) ) | q > 0 -> LT
@@ -122,6 +127,8 @@ compare_for_upper_bounds f g = case (f,g) of
   ( _ , Infinite ) -> LT
   ( Finite, _ ) -> GT
   ( _ , Finite ) -> LT
+  ( Expo, _ ) -> GT
+  ( _, Expo ) -> LT
   ( Poly Nothing, Poly (Just _) ) -> GT
   ( Poly (Just _), Poly Nothing ) -> LT
   ( Poly (Just p), Poly (Just q)) -> compare p q
@@ -130,7 +137,7 @@ isPoly :: Function -> Bool
 isPoly f = case f of Poly {} -> True ; _ -> False
 
 readP_FunctionL :: ReadP Function
-readP_FunctionL = do { token "NON_POLY" ; return $ Finite }
+readP_FunctionL = do { token "NON_POLY" ; return Expo }
     +++ do { token "Omega" ; parens $ ( Poly . Just ) <$> readP_degreeL }
 
 readP_degreeL :: ReadP Int
@@ -160,7 +167,7 @@ showLower f = case f of
   Poly {} -> case degree f of
     Nothing -> "POLY"
     Just d -> "Omega(n^" ++ show d ++ ")"
-  Finite -> "NON_POLY"
+  Expo -> "NON_POLY"
   Infinite -> "?"
 
 showUpper :: Function -> String
