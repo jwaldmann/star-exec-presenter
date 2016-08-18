@@ -53,9 +53,11 @@ instance Short Bounds where
   short b =
     let sslower f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
+          Expo -> "e"
           Finite -> "?" ; Infinite -> "-"
         ssupper f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
+          Expo -> "e"
           Finite -> "-" ; Infinite -> "?"
     in  T.pack $ sslower (lower b) ++ "/" ++ ssupper (upper b)
 
