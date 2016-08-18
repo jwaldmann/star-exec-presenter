@@ -100,9 +100,10 @@ instance Yesod App where
         let menuElements = [MenuEntry ("Home", HomeR)
                            , MenuDropdown
                            ("Competition Results"
-                           , [MenuEntry ("2015", ListCompetitionsR)
-                           , MenuEntry ("2014", ListCompetitionsR)
-                           ])
+                           , [ MenuEntry ("2016", ListCompetitionsR)
+                             , MenuEntry ("2015", ListCompetitionsR)
+                             , MenuEntry ("2014", ListCompetitionsR)
+                             ])
                            , MenuDropdown
                            ("Analysis"
                            , [MenuEntry ("Concepts example", ConceptsR 0 (Ids []) (JobIds [StarExecJobID 9515, StarExecJobID 10299]))
@@ -110,8 +111,8 @@ instance Yesod App where
                            , MenuDropdown
                                ("StarExec Interaction"
                                , [MenuEntry ("Import", ImportR)
-                               , MenuEntry ("Install Solver", InstallSolversR Y2015)
-                               , MenuEntry ("Job Control", ControlR Y2015)
+                               , MenuEntry ("Install Solver", InstallSolversR Y2016)
+                               , MenuEntry ("Job Control", ControlR Y2016)
                              ])
                            ]
 
