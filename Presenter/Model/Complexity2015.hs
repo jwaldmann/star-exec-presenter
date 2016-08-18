@@ -170,6 +170,7 @@ showLower f = case f of
     Nothing -> "POLY"
     Just d -> "Omega(n^" ++ show d ++ ")"
   Expo -> "NON_POLY"
+  Finite -> "?"
   Infinite -> "?"
 
 showUpper :: Function -> String
