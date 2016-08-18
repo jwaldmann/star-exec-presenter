@@ -37,6 +37,8 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 102223] , participants = []}
           ,Category "TRS Equational"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102180] , participants = []}
+          ,Category "TRS Equational certified"
+               Catinfo {postproc = ceta , benchmarks = [Hierarchy 102180] , participants = []}
           ,Category "TRS Conditional"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102081] , participants = []}
           ,Category "TRS Context Sensitive"
@@ -151,6 +153,8 @@ tc_AProVE = Competition "Termination Competition 2016"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "TRS Equational"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
+          ,Category "TRS Equational certified"
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164103)}]
           ,Category "TRS Conditional"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]
           ,Category "TRS Context Sensitive"
