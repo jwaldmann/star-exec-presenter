@@ -10,7 +10,7 @@ tc_skeleton :: Competition Catinfo
 tc_skeleton = tc_skeleton_10_3
 
 plain = 317
-ceta  = 318
+ceta  = 323
 
 tc_skeleton_10_3 :: Competition Catinfo
 tc_skeleton_10_3 = Competition "Termination Competition 2016"
@@ -223,15 +223,15 @@ tc_NaTT :: Competition [Participant]
 tc_NaTT = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22689)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164525)}]
      ,Category "SRS Standard"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22691)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164527)}]
      ,Category "TRS Relative"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]
-     ,Category "SRS Relative"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22690)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164529)}]
      ,Category "TRS Equational"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 3430,22689)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164526)}]
+     ,Category "TRS Equational certified"
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164528)}]
      ]]
 
 tc_T2 :: Competition [Participant]
@@ -268,21 +268,21 @@ tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164385)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164385)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164385)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164144)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164385)}]
           ,Category "TRS Standard certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164384)}]
           ,Category "SRS Standard certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164384)}]
           ,Category "TRS Relative certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164384)}]
           ,Category "SRS Relative certified"
-               [Participant {participantName = "TTT2" , solver_config = Just (184625,9080,164143)}]]]
+               [Participant {participantName = "TTT2" , solver_config = Just (184625,9092,164384)}]]]
 
 
 tc_UltimateBuchiAutomizer :: Competition [Participant]
@@ -355,7 +355,7 @@ tc_cycnta :: Competition [Participant]
 tc_cycnta = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
       [Category "Cycles"
-       [Participant {participantName = "CycNTA" , solver_config = Just (184626,8923,163048)}]]]
+       [Participant {participantName = "CycNTA" , solver_config = Just (184626,9101,164525)}]]]
 
 tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2016"
