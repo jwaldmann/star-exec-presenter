@@ -352,7 +352,7 @@ tc_cycnta :: Competition [Participant]
 tc_cycnta = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
       [Category "Cycles"
-       [Participant {participantName = "CycNTA" , solver_config = Just (184626,9101,164525)}]]]
+       [Participant {participantName = "CycNTA" , solver_config = Just (184626,9119,164547)}]]]
 
 tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2016"
