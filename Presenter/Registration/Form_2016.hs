@@ -361,9 +361,9 @@ tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2016"
    [ MetaCategory "Complexity Analysis of Term Rewriting"
      [ Category "Complexity - Integer Transition Systems"
-       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9066,164108)}]]
+       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9105,164532)}]]
    , MetaCategory "Complexity Analysis of Programming Languages"
      [ Category "Complexity - C Integer Programs"
-       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9066,164109)}]
+       [ Participant {participantName = "CoFloCo" , solver_config = Just (184632,9105,164533)}]
      ]
    ] 
