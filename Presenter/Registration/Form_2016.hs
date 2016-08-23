@@ -242,27 +242,24 @@ tc_T2 = Competition "Termination Competition 2016"
 
 tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2016"
-  [MetaCategory "Complexity Analysis of Term Rewriting"
-    [Category "Derivational Complexity - Full Rewriting"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162422)}]
-    ,Category "Runtime Complexity - Full Rewriting"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162424)}]
-    ,Category "Runtime Complexity - Innermost Rewriting"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162423)}]
-    ,Category "Derivational Complexity - Full Rewriting certified"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162425)}]
-    ,Category "Runtime Complexity - Full Rewriting certified"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162426)}]
-    ,Category "Runtime Complexity - Innermost Rewriting certified"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162421)}]
-    ,Category "Complexity - Integer Transition Systems"
-      [Participant {participantName = "TcT", solver_config = Just (1128,8861,162420)}]
-    ]
-  ,MetaCategory "Complexity Analysis of Programming Languages"
-    [Category "Complexity - C Integer Programs"
-      [Participant {participantName = "TcT", solver_config = Nothing}]
-    ]
-  ]
+     [MetaCategory "Complexity Analysis of Term Rewriting"
+          [Category "Derivational Complexity - Full Rewriting"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164519)}]
+          ,Category "Runtime Complexity - Full Rewriting"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164521)}]
+          ,Category "Runtime Complexity - Innermost Rewriting"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164523)}]
+          ,Category "Derivational Complexity - Full Rewriting certified"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164520)}]
+          ,Category "Runtime Complexity - Full Rewriting certified"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164522)}]
+          ,Category "Runtime Complexity - Innermost Rewriting certified"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164524)}]
+          ,Category "Complexity - Integer Transition Systems"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164518)}]]
+     ,MetaCategory "Complexity Analysis of Programming Languages"
+          [Category "Complexity - C Integer Programs"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164517)}]]]
 
 tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2016"
