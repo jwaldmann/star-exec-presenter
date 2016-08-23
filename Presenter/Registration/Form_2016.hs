@@ -223,7 +223,7 @@ tc_NaTT :: Competition [Participant]
 tc_NaTT = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
      [Category "TRS Standard"
-          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164525)}]
+          [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164526)}]
      ,Category "SRS Standard"
           [Participant {participantName = "NaTT" , solver_config = Just (20344, 9102,164527)}]
      ,Category "TRS Relative"
