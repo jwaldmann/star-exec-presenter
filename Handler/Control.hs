@@ -26,12 +26,12 @@ inputForm = renderTable $ JobControl
                   ,("Everything (>= 1 participant)",SelectionAll)
                   ]) "categories" (Just SelectionCompetition)
         <*> areq (radioFieldList
-                  [ ("Termination.q"::T.Text,36291)
-                  , ("all.q",1)
+                  [ ("all.q"::T.Text,1)
                   , ("all2.q",37611)
+                  -- , ("Termination.q"::T.Text,36291)
                   ]) "queue" (Just 36291)
         <*> areq (radioFieldList
-                  [("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
+                  [("tc2016/secret",184885),("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
                  "space" (Just 184694)
         <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
                  "wallclock_timeout" (Just 30)
