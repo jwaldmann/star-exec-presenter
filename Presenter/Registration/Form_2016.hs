@@ -21,7 +21,7 @@ tc_skeleton_10_3 = Competition "Termination Competition 2016"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102166, Hierarchy 182728]
                        , participants = []}
           ,Category "Cycles"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166, Hierarchy 182727, Hierarchy 184732]
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 102166, Hierarchy 182727, Hierarchy 184944]
                        , participants = []}
           ,Category "TRS Relative"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 102162] , participants = []}
