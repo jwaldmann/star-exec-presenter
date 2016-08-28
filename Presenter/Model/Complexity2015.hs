@@ -37,6 +37,10 @@ b6 = Bounds { lower = Finite , upper = Poly Nothing }
 b7 :: Bounds
 b7 = Bounds { lower = Expo, upper = Infinite }
 
+
+-- | this is the show function that produces read-able output,
+-- so it must use official syntax. (this is used for storing results
+-- in the results data base)
 instance Show Bounds where
     showsPrec p b =
         let parens c = ("(" ++) . c . (")" ++)
@@ -49,15 +53,16 @@ instance Show Bounds where
                       else ""
         in  maybe_parens (out ++)
 
+-- | this is the instance that produces text for the results tables
 instance Short Bounds where
   short b =
     let sslower f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
-          Expo -> "e"
+          Expo -> "exp"
           Finite -> "?" ; Infinite -> "-"
         ssupper f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
-          Expo -> "e"
+          Expo -> "exp"
           Finite -> "-" ; Infinite -> "?"
     in  T.pack $ sslower (lower b) ++ "/" ++ ssupper (upper b)
 
