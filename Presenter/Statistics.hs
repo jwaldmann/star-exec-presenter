@@ -28,7 +28,7 @@ jobStat i =
 instance ToMarkup Statistics where
     toMarkup s = [shamlet|
       <span>
-        #{pairsCompleted s}
+        #{pairsCompleted s} #
         $if not (complete s)
            of #{pairs s} #
         pairs,
