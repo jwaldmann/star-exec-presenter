@@ -143,11 +143,13 @@ readP_FunctionL = do { token "NON_POLY" ; return Expo }
     +++ do { token "Omega" ; parens $ ( Poly . Just ) <$> readP_degreeL }
 
 readP_degreeL :: ReadP Int
-readP_degreeL =
-  do { token "n" ; token "^"
-     ; ds <- many1 $ satisfy isDigit ; skipSpaces
-     ; return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds
-     }
+readP_degreeL = token "n" *> readP_exponent
+
+readP_exponent = return 1 +++ (token "^" *> readP_natural)
+
+readP_natural = do
+  ds <- many1 $ satisfy isDigit ; skipSpaces
+  return $ foldl ( \ n d -> 10*n + fromEnum d - fromEnum '0' ) 0 ds
 
 readP_FunctionU :: ReadP Function
 readP_FunctionU = do { token "POLY" ; return $ Poly $ Nothing }
