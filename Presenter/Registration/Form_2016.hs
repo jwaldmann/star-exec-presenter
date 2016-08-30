@@ -173,11 +173,11 @@ tc_AProVE = Competition "Termination Competition 2016"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163935)}]]
      ,MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Runtime Complexity - Full Rewriting"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163932)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164592)}]
           ,Category "Runtime Complexity - Innermost Rewriting"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163932)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164592)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163933)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,164593)}]
           ,Category "Complexity - Integer Transition Systems"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,9040,163932)}]]
      ,MetaCategory "Termination of Programming Languages"
