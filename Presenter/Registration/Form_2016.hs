@@ -244,22 +244,22 @@ tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2016"
      [MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Derivational Complexity - Full Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164519)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165442)}]
           ,Category "Runtime Complexity - Full Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164521)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165444)}]
           ,Category "Runtime Complexity - Innermost Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164523)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165446)}]
           ,Category "Derivational Complexity - Full Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164520)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165443)}]
           ,Category "Runtime Complexity - Full Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164522)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165445)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164524)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165447)}]
           ,Category "Complexity - Integer Transition Systems"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164518)}]]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165441)}]]
      ,MetaCategory "Complexity Analysis of Programming Languages"
           [Category "Complexity - C Integer Programs"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9100,164517)}]]]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165440)}]]]
 
 tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2016"
