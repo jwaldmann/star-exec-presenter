@@ -124,11 +124,11 @@ tc_Loopus :: Competition [Participant]
 tc_Loopus = Competition "Termination Competition 2016"
     [ MetaCategory "Complexity Analysis of Term Rewriting"
         [ Category "Complexity - Integer Transition Systems"
-          [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163333)  } ]
+          [Participant { participantName = "Loopus", solver_config = Just (184687, 9317, 165483)  } ]
         ]
     , MetaCategory "Complexity Analysis of Programming Languages"
           [ Category "Complexity - C Integer Programs"
-          [Participant { participantName = "Loopus", solver_config = Just (184687, 8987, 163334) } ]
+          [Participant { participantName = "Loopus", solver_config = Just (184687, 9317, 165484) } ]
           ]
     ]
 
