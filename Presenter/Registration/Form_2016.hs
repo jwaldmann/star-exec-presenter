@@ -318,9 +318,9 @@ tc_kflmnm :: Competition [Participant]
 tc_kflmnm = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "SRS Standard"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509, 9193, 164969)}]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509, 9304, 165455)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509, 9193, 164969)}]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509, 9304, 165455)}]
           ]
      ]
 
