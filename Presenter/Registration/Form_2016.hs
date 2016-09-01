@@ -286,9 +286,9 @@ tc_UltimateBuchiAutomizer :: Competition [Participant]
 tc_UltimateBuchiAutomizer = Competition "Termination Competition 2016"
      [MetaCategory "Termination of Programming Languages"
      [Category "C"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9258,165362)}]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9354,165938)}]
      ,Category "C Integer Programs"
-          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9258,165362)}]]]
+          [Participant {participantName = "UltimateBuchiAutomizer" , solver_config = Just (51412, 9354,165938)}]]]
 
 tc_Wanda :: Competition [Participant]
 tc_Wanda = Competition "Termination Competition 2016"
