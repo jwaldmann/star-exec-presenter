@@ -195,7 +195,7 @@ library
                  , hashable
                  , stm
                  , SafeSemaphore
-                 , MonadCatchIO-transformers
+                 -- , MonadCatchIO-transformers
                  , conduit-extra
                  , fgl
                  , graphviz >= 2999.18.0.2
