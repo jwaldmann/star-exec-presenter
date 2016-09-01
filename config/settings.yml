@@ -1,12 +1,10 @@
 Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
-  #approot: "http://localhost:3000"
-  copyright: Stefan von der Krone, Johannes Waldmann | HTWK | IMN
-  #analytics: UA-YOURCODE
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devil"
+  copyright: Stefan von der Krone, René Muhl, Johannes Waldmann | HTWK | IMN
 
 Development:
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
   port: 3000
   <<: *defaults
 
@@ -16,10 +14,10 @@ Testing:
 
 Staging:
   port: 3002
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-staging"
   <<: *defaults
 
 Production:
   port: 3003
-  approot: "http://termcomp.imn.htwk-leipzig.de"
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
+  # approot: "http://termcomp.imn.htwk-leipzig.de"
   <<: *defaults
