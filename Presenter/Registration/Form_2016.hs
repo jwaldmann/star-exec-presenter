@@ -18,9 +18,9 @@ tc_skeleton_10_4 = Competition "Termination Competition 2016"
           [Category "TRS Standard"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 185245] , participants = []}
           ,Category "SRS Standard"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 185159] , participants = []}
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 185159, Hierarchy 182728] , participants = []}
           ,Category "Cycles"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 185159] , participants = []}
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 185159, Hierarchy 182727] , participants = []}
           ,Category "TRS Relative"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 185331] , participants = []}
           ,Category "SRS Relative"
@@ -28,7 +28,7 @@ tc_skeleton_10_4 = Competition "Termination Competition 2016"
           ,Category "TRS Standard certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 185245] , participants = []}
           ,Category "SRS Standard certified"
-               Catinfo {postproc = ceta , benchmarks = [Hierarchy 185159] , participants = []}
+               Catinfo {postproc = ceta , benchmarks = [Hierarchy 1851599, Hierarchy 182728] , participants = []}
           ,Category "TRS Relative certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 185331] , participants = []}
           ,Category "SRS Relative certified"
@@ -69,7 +69,7 @@ tc_skeleton_10_4 = Competition "Termination Competition 2016"
           ,Category "Runtime Complexity - Innermost Rewriting certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 185033] , participants = []}
           ,Category "Complexity - Integer Transition Systems"
-               Catinfo { postproc = plain, benchmarks = [Hierarchy 185064], participants = []}
+               Catinfo { postproc = plain, benchmarks = [Hierarchy 185121], participants = []}
           ]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"
