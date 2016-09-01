@@ -47,7 +47,7 @@ tpdb_10_3 :: FilePath
 tpdb_10_3 = "TPDB-10.3_XML.zip"
 
 tpdb_10_4 :: FilePath
-tpdb_10_4 = "TPDB-10.4.zip"
+tpdb_10_4 = "TPDB-10.4_XML.zip"
 
 default_space :: FilePath
 default_space = tpdb_10_4
