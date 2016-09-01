@@ -344,10 +344,10 @@ tc_verymax :: Competition [Participant]
 tc_verymax = Competition "Termination Competition 2016"
      [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [Category "Integer Transition Systems"
-        [Participant {participantName = "VeryMax" , solver_config = Just (184540,8917,163035)}]]
+        [Participant {participantName = "VeryMax" , solver_config = Just (184540,9339,165578)}]]
      , MetaCategory "Termination of Programming Languages"
        [Category "C Integer Programs"
-        [Participant {participantName = "VeryMax" ,solver_config = Just (184540,8917,163036)}]]
+        [Participant {participantName = "VeryMax" ,solver_config = Just (184540,9339,165578)}]]
      ]
 
 tc_cycnta :: Competition [Participant]
