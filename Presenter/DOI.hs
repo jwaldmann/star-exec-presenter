@@ -72,3 +72,6 @@ makeDOI_for_2014_2015 =
 
 makeDOI_for_2014_2015_extra =
   makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip", "johannes_waldmann_tpdb-8.0.7_XML.zip" ]
+
+makeDOI_for_2016 =
+  makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip", "johannes_waldmann_tpdb-8.0.7_XML.zip", "TPDB-10.4.zip" ]

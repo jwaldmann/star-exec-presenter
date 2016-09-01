@@ -145,7 +145,7 @@ makeFoundation conf = do
     conS <- Lock.new
 
     -- resolver
-    doiS <- makeDOI_for_2014_2015_extra
+    doiS <- makeDOI_for_2016
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
         foundation = App conf s p manager dbconf logger session crCache dbS conS doiS

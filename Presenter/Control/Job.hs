@@ -46,8 +46,11 @@ tpdb_10_2 = "TPDB-10.2_XML.zip"
 tpdb_10_3 :: FilePath
 tpdb_10_3 = "TPDB-10.3_XML.zip"
 
+tpdb_10_4 :: FilePath
+tpdb_10_4 = "TPDB-10.4.zip"
+
 default_space :: FilePath
-default_space = tpdb_10_3
+default_space = tpdb_10_4
 
 type SpaceMap = M.Map Int Space
 
