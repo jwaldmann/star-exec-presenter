@@ -28,7 +28,7 @@ tc_skeleton_10_4 = Competition "Termination Competition 2016"
           ,Category "TRS Standard certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 185245] , participants = []}
           ,Category "SRS Standard certified"
-               Catinfo {postproc = ceta , benchmarks = [Hierarchy 1851599, Hierarchy 182728] , participants = []}
+               Catinfo {postproc = ceta , benchmarks = [Hierarchy 185159, Hierarchy 182728] , participants = []}
           ,Category "TRS Relative certified"
                Catinfo {postproc = ceta , benchmarks = [Hierarchy 185331] , participants = []}
           ,Category "SRS Relative certified"
