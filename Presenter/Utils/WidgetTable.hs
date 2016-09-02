@@ -223,12 +223,13 @@ summary sc jids previous tab = do
         row_type_stats = M.fromListWith (M.unionWith (+)) $ do
             row <- rows tab
 	    let tags = map tag row
-	    let height = length $ filter ( \ t -> t /= "nothing" && t /= "solver-maybe" ) tags
+	    let keep t = t /= "nothing" && t /= "solver-maybe" && t /= "solver-other"
+	        height = length $ filter keep tags
             return (height, M.singleton tags 1)
         row_type_table =
 	   for (M.toAscList row_type_stats) $ \ (h, s) -> 
 	    ( h
-	    , for ( sortBy (compare `on` snd) $ M.toList s )
+	    , for ( sortBy (flip compare `on` snd) $ M.toList s )
               	 $ \ (rt, n) ->
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] )
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] )
