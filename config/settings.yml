@@ -1,11 +1,11 @@
 Default: &defaults
   host: "*4" # any IPv4 host
   port: 3000
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devil"
   copyright: Stefan von der Krone, René Muhl, Johannes Waldmann | HTWK | IMN
 
 Development:
   port: 3000
+  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devil"
   <<: *defaults
 
 Testing:

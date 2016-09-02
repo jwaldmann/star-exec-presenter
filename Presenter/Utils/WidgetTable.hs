@@ -220,14 +220,20 @@ summary sc jids previous tab = do
                     others =  Query $ previous ++ [ Filter_Rows (Not p) ]
                 in  (t,i,n, (these, others))
         positive n = n > 0
-        row_type_stats = M.fromListWith (+) $ do
+        row_type_stats = M.fromListWith (M.unionWith (+)) $ do
             row <- rows tab
-            return (map tag row, 1)
-        row_type_table = for ( sortBy (compare `on` snd) $ M.toList row_type_stats )
-            $ \ (rt, n) ->
+	    let tags = map tag row
+	    let height = length $ filter ( \ t -> t /= "nothing" && t /= "solver-maybe" ) tags
+            return (height, M.singleton tags 1)
+        row_type_table =
+	   for (M.toAscList row_type_stats) $ \ (h, s) -> 
+	    ( h
+	    , for ( sortBy (compare `on` snd) $ M.toList s )
+              	 $ \ (rt, n) ->
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] )
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] )
                 )
+	    )
 
     [whamlet|
         <h3>summary
@@ -256,15 +262,20 @@ summary sc jids previous tab = do
              $forall h <- header tab
                 <th> ^{contents h}
           <tbody>
-            $forall (rt, n, these,others) <- row_type_table
+            $forall (h, tab) <- row_type_table
               <tr>
-                $forall t <- rt
-                    <td class="#{t}"> #{t}
-                <td> #{show n}
                 <td>
-                   <a href=@{ShowManyJobResultsR sc these jids}>these
-                <td>
-                   <a href=@{ShowManyJobResultsR sc others jids}>others
+                <td colspan="#{width}">
+                  answered by #{h} solvers
+              $forall (rt, n, these,others) <- tab
+                <tr>
+                  $forall t <- rt
+                      <td class="#{t}"> #{t}
+                  <td> #{show n}
+                  <td>
+                     <a href=@{ShowManyJobResultsR sc these jids}>these
+                  <td>
+                     <a href=@{ShowManyJobResultsR sc others jids}>others
     |]
 
 apply :: Transform -> Table -> Table
