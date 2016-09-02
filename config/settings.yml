@@ -17,7 +17,6 @@ Staging:
   <<: *defaults
 
 Production:
-  port: 3003
   approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devel"
   # approot: "http://termcomp.imn.htwk-leipzig.de"
   <<: *defaults
