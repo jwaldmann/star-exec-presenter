@@ -122,6 +122,7 @@ summary jids previous tab = do
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] ) 
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] ) 
                 )
+
 {-
         concept_stats = M.fromListWith (+) $ do
           row <- rows tab
