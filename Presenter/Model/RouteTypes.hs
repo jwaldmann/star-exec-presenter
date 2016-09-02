@@ -3,7 +3,7 @@ module Presenter.Model.RouteTypes where
 import Prelude
 import Yesod
 import qualified Data.Text as T
-import Presenter.Model.Query
+-- import Presenter.Model.Query
 import Presenter.Internal.Stringish
 
 import Presenter.Output
@@ -255,14 +255,6 @@ instance PathMultiPiece JobIds where
                           _ -> fromPathMultiPiece js
     return $ JobIds (job:jobs)
   fromPathMultiPiece _ = Nothing
-
-instance PathPiece Query where
-  fromPathPiece "noquery" = return NoQuery
-  fromPathPiece t = case reads (T.unpack t) of
-    [ (q, "") ] -> return q
-    _ -> Nothing
-  toPathPiece NoQuery = "noquery"
-  toPathPiece q = T.pack $ show q
 
 data ComplementIds =
   Ids [ConceptId]
