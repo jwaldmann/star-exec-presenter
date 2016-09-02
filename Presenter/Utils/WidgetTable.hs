@@ -1,3 +1,5 @@
+{-# language LambdaCase #-}
+
 module Presenter.Utils.WidgetTable where
 
 import Import
@@ -13,9 +15,11 @@ import Presenter.Internal.Stringish
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
+import Control.Monad ( when, guard)
 
 import Data.Function (on)
 import Data.List (sortBy, inits, tails)
+import Prelude (init)
 
 import qualified Data.Graph.Inductive as G
 import Data.Double.Conversion.Text
@@ -48,11 +52,7 @@ getManyJobCells iss = do
         headers = M.keys cells
         benchmarks' = M.keys $ foldr M.union M.empty $ M.elems cells
     return $ Table
-           { header = Cell { contents = [whamlet| Benchmark |]
-                           , url = "nothing"
-                           , tag = "nothing"
-                           , tdclass = ""
-                           , mjr = Nothing
+           { header = empty_cell { contents = [whamlet| Benchmark |]
                            } : map cell_for_solver headers
            , rows = for benchmarks' $ \ bench ->
                ( cell_for_bench bench : ) $ for headers $ \ h ->
@@ -68,7 +68,13 @@ empty_cell =
          , url = fromString "nothing"
          , tag = fromString "OTHER"
          , mjr = Nothing
+         , mjid = Nothing
          }
+
+cell_for_job jid =
+    empty_cell { contents = [whamlet|
+         virtual best of <a href=@{ShowJobInfoR jid}>#{show jid}
+        |] }
 
 cell_for_bench
   :: (BenchmarkKey, Name)
@@ -88,7 +94,7 @@ $case bkey
   }
 
 cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (ConfigID, b)) -> Cell
-cell_for_solver (j,(sid, sname),(cid, cname)) = Cell
+cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
   { contents = [whamlet|
 <table>
   <tr>
@@ -103,12 +109,13 @@ cell_for_solver (j,(sid, sname),(cid, cname)) = Cell
           #{cname}
   <tr>
     <td>
-      Job <a href=@{ShowJobInfoR j}>#{show j}</a>
+      Job <a href=@{ShowJobInfoR jid}>#{show jid}</a>
 |]
   , tdclass = fromString "solver"
   , url = fromString ""
   , tag = fromString "nothing"
   , mjr = Nothing
+  , mjid = Just jid
   }
 
 cell_for_job_pair :: JobResult -> Cell
@@ -126,23 +133,31 @@ cell_for_job_pair result =
          , tag = getClass result
          }
 
+-- | old behaviour was: True
+show_intermediate_transforms :: Bool
+show_intermediate_transforms = False
+
 display :: Scoring -> JobIds -> [Transform] -> [Transform] -> Table -> Widget
 display sc jids previous ts tab  = do
-  summary sc jids previous tab
-  [whamlet|
-      <a href=@{ShowManyJobResultsR sc (Query []) jids}>remove following #{show (length ts)} transformations
-  |]
   case ts of
     (t:later) -> do
-
-        [whamlet|
+        when show_intermediate_transforms $ do
+          summary sc jids previous tab
+          [whamlet|
+            <a href=@{ShowManyJobResultsR sc (Query []) jids}>remove following #{show (length ts)} transformations
             <h3>apply transformation
                <pre>#{show t}
-        |]
-
+          |]
         display sc jids (previous ++ [t]) later $ apply t tab
 
     [] -> do
+        let q f = FlexibleTableR (Query $ previous ++ [Joins $ f $ getIds jids]) jids
+        [whamlet|
+            <h3>use virtual best solvers
+            <a href=@{q id}>for all jobs
+            <a href=@{q init}>for all jobs except last
+        |]
+        summary sc jids previous tab
     -- no more transformers, display actual data
         let rs = rows tab
         [whamlet|
@@ -279,10 +294,46 @@ summary sc jids previous tab = do
                      <a href=@{ShowManyJobResultsR sc others jids}>others
     |]
 
+data Pick = Best JobID [Int] | Copy Int deriving (Eq, Ord, Show)
+
 apply :: Transform -> Table -> Table
 apply t tab = case t of
     Filter_Rows p ->
             tab { rows = filter ( \ row -> predicate p $ map tag row ) $ rows tab }
+    Joins jids ->
+        let transformed = S.fromList jids
+            -- maps column index (in output table) to list of indices (in input table)
+            collector = M.fromListWith (++) $ do
+              (k, c @ Cell { mjid = Just jid }) <- zip [0..] $ header tab
+              guard $ S.member jid transformed
+              return (jid, [k])
+            u : naffected = S.toList
+                       $ S.difference
+                         (S.fromList $ take (length $ header tab) [0..])
+                       $ S.unions (map S.fromList $ M.elems collector )
+            plan = Copy u : map (\(jid,ks) -> Best jid ks) (M.toList collector) ++ map Copy naffected
+            app f cs = for plan $ \ case
+              Copy k -> cs !! k
+              Best t ks -> f t $ map (cs !!) ks
+        in  Table { header = app ( \ j _ -> cell_for_job j ) $ header tab 
+                  , rows = map (app ( \ j cs -> best cs )) $ rows tab
+                  }
+
+best :: [Cell] -> Cell
+best [c] = c
+best (c : cs) =
+  let b = best cs
+  in case mjr c of
+       -- FIXME: does not handle complexity statements correctly
+       Just jr | looksgood ( getSolverResult jr) -> c
+       _ -> b
+
+looksgood r = case r of
+  YES -> True
+  NO -> True
+  CERTIFIED -> True
+  BOUNDS {} -> True
+  _ -> False
 
 predicate :: Predicate -> [Text] -> Bool
 predicate p tags = case p of

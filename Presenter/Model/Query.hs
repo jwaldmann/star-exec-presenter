@@ -1,9 +1,19 @@
 module Presenter.Model.Query where
 
 import Prelude
+import Yesod (PathPiece(..))
 import Presenter.Model.Types
+import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
 import qualified Data.Text as T
+
+instance PathPiece Query where
+  fromPathPiece "noquery" = return NoQuery
+  fromPathPiece t = case reads (T.unpack t) of
+    [ (q, "") ] -> return q
+    _ -> Nothing
+  toPathPiece NoQuery = "noquery"
+  toPathPiece q = T.pack $ show q
 
 data Query =
   NoQuery
@@ -13,6 +23,7 @@ data Query =
 data Transform =
   Choose_Columns [ Int ]
   | Filter_Rows Predicate
+  | Joins [ JobID ]
   deriving (Read,Show, Eq)
 
 data Predicate =
