@@ -18,7 +18,7 @@ data Cell =
      Cell { contents :: Widget -- ^ this is shown
           , tdclass :: T.Text
           , tag :: T.Text -- ^ used for sorting (e.g., YES, NO, CERTIFIED)
-
+          , msolver :: Maybe T.Text -- ^ who made this?
           , mjr :: Maybe JobResult
           , mjid :: Maybe JobID
           , url :: T.Text -- ^ FIXME replace with proper type

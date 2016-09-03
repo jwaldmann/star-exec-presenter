@@ -23,7 +23,7 @@ data Query =
 data Transform =
   Choose_Columns [ Int ]
   | Filter_Rows Predicate
-  | Joins [ JobID ]
+  | VBestAll | VBestInit
   deriving (Read,Show, Eq)
 
 data Predicate =

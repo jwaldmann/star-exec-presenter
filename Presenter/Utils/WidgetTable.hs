@@ -15,10 +15,11 @@ import Presenter.Internal.Stringish
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import qualified Data.Set as S
-import Control.Monad ( when, guard)
+import Control.Monad ( when, guard, mzero)
+import Data.Maybe (catMaybes)
 
 import Data.Function (on)
-import Data.List (sortBy, inits, tails)
+import Data.List (sortBy, inits, tails, minimumBy, maximumBy)
 import Prelude (init)
 
 import qualified Data.Graph.Inductive as G
@@ -67,6 +68,7 @@ empty_cell =
          , tdclass = fromString "empty"
          , url = fromString "nothing"
          , tag = fromString "OTHER"
+         , msolver = Nothing
          , mjr = Nothing
          , mjid = Nothing
          }
@@ -93,7 +95,7 @@ $case bkey
   , mjr = Nothing
   }
 
-cell_for_solver :: (ToMarkup a, ToMarkup b) => (JobID, (SolverID, a), (ConfigID, b)) -> Cell
+cell_for_solver :: (JobID, (SolverID, Text), (ConfigID, Text)) -> Cell
 cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
   { contents = [whamlet|
 <table>
@@ -112,6 +114,7 @@ cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
       Job <a href=@{ShowJobInfoR jid}>#{show jid}</a>
 |]
   , tdclass = fromString "solver"
+  , msolver = Just sname
   , url = fromString ""
   , tag = fromString "nothing"
   , mjr = Nothing
@@ -129,6 +132,7 @@ cell_for_job_pair result =
                     #{toFixed 1 $ toWallclockTime result}
              |]
          , tdclass = getClass result
+         , msolver = Just $ toSolverName result
          , url = fromString "nothing"
          , tag = getClass result
          }
@@ -148,14 +152,15 @@ display sc jids previous ts tab  = do
             <h3>apply transformation
                <pre>#{show t}
           |]
-        display sc jids (previous ++ [t]) later $ apply t tab
+        display sc jids (previous ++ [t]) later $ apply (getIds jids) t tab
 
     [] -> do
-        let q f = FlexibleTableR (Query $ previous ++ [Joins $ f $ getIds jids]) jids
+        let q f = FlexibleTableR (Query $ previous ++ [f]) jids
         [whamlet|
-            <h3>use virtual best solvers
-            <a href=@{q id}>for all jobs
-            <a href=@{q init}>for all jobs except last
+            <h3>use virtual best solvers #
+              (<a href=@{q VBestAll}>for all jobs</a> #
+              | <a href=@{q VBestInit}>for all jobs except last</a>
+              )
         |]
         summary sc jids previous tab
     -- no more transformers, display actual data
@@ -296,11 +301,17 @@ summary sc jids previous tab = do
 
 data Pick = Best JobID [Int] | Copy Int deriving (Eq, Ord, Show)
 
-apply :: Transform -> Table -> Table
-apply t tab = case t of
+apply :: [JobID] -> Transform -> Table -> Table
+apply jids t tab = case t of
     Filter_Rows p ->
-            tab { rows = filter ( \ row -> predicate p $ map tag row ) $ rows tab }
-    Joins jids ->
+      tab { rows = filter ( \ row -> predicate p $ map tag row )
+                 $ rows tab }
+    VBestAll -> virtual_best jids t tab
+    VBestInit -> virtual_best (init' jids) t tab
+
+init' = reverse . drop 1 . reverse
+
+virtual_best jids t tab =
         let transformed = S.fromList jids
             -- maps column index (in output table) to list of indices (in input table)
             collector = M.fromListWith (++) $ do
@@ -315,25 +326,57 @@ apply t tab = case t of
             app f cs = for plan $ \ case
               Copy k -> cs !! k
               Best t ks -> f t $ map (cs !!) ks
+            snames = catMaybes $ map msolver $ header tab
         in  Table { header = app ( \ j _ -> cell_for_job j ) $ header tab 
                   , rows = map (app ( \ j cs -> best cs )) $ rows tab
                   }
 
+-- | build cell for result of one benchmark by best virtual solver
 best :: [Cell] -> Cell
-best [c] = c
-best (c : cs) =
-  let b = best cs
-  in case mjr c of
-       -- FIXME: does not handle complexity statements correctly
-       Just jr | looksgood ( getSolverResult jr) -> c
-       _ -> b
+best [] = empty_cell
+best cs =
+  ( \ c ->  c { contents = do
+                  case msolver c of
+                    Just s | interesting c -> [whamlet|#{s}|]
+                    _ -> return ()
+                  contents c 
+                }
+  ) $ foldr1 ( \ x y -> if interesting x
+                      then if interesting y then merge x y
+                           else x else y ) cs
 
-looksgood r = case r of
-  YES -> True
-  NO -> True
-  CERTIFIED -> True
-  BOUNDS {} -> True
-  _ -> False
+-- FIXME: need to do something better here,
+-- compare bounds, add times, etc.
+merge b c =
+  let tags = catMaybes $ map msolver [b,c]
+  in  b { msolver = case tags of
+            [] -> Nothing
+            ts -> Just $ T.intercalate "," ts
+        }
+
+interesting c =
+  case mjr c of
+    Nothing -> False
+    Just jr -> case getSolverResult jr of
+      YES -> True ; NO -> True ; BOUNDS {} -> True
+      _ -> False
+      
+
+normalize b = case (lower b, upper b) of
+  (Infinite , _ ) -> NO
+  (Finite, Finite) -> YES
+  _ -> BOUNDS b
+
+getlower r = case getSolverResult r of
+  NO -> return Infinite
+  BOUNDS ( Bounds { lower = l } ) -> return l
+  _ -> mzero
+
+getupper r = case getSolverResult r of
+  YES -> return Finite
+  BOUNDS ( Bounds { upper = u } ) -> return u
+  _ -> mzero
+    
 
 predicate :: Predicate -> [Text] -> Bool
 predicate p tags = case p of
