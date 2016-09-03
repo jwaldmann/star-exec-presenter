@@ -45,7 +45,7 @@ instance Show Bounds where
     showsPrec p b =
         let parens c = ("(" ++) . c . (")" ++)
             ( par, prefix, interesting) = case (lower b, upper b) of
-               ( Infinite , Infinite ) -> (False, "MAYBE", False)
+               ( Finite , Infinite ) -> (False, "MAYBE", False)
                ( l, u ) -> (True, "WORST_CASE", True ) -- l is at least FINITE here
             maybe_parens c = if par && p > 0 then parens c else c
             out = prefix ++ if interesting
@@ -59,11 +59,11 @@ instance Short Bounds where
     let sslower f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
           Expo -> "exp"
-          Finite -> "?" ; Infinite -> "-"
+          Finite -> "?" ; Infinite -> "inf"
         ssupper f = case f of
           Poly Nothing -> "n^?" ; Poly (Just d) -> "n^" ++ show d
           Expo -> "exp"
-          Finite -> "-" ; Infinite -> "?"
+          Finite -> "fin" ; Infinite -> "?"
     in  T.pack $ sslower (lower b) ++ "/" ++ ssupper (upper b)
 
 instance Read Bounds where
@@ -78,6 +78,7 @@ readP_Bounds = parens readP_Bounds_bare +++ readP_Bounds_bare
 readP_Bounds_bare :: ReadP Bounds
 readP_Bounds_bare =
         do { token "WORST_CASE" ; pair Finite Infinite }
+    +++ do { token "YES" ; pair Finite Finite } -- issue #120
     +++ do { token "MAYBE" ; pair Finite Infinite }
 
 pair :: Function -> Function -> ReadP Bounds
@@ -171,6 +172,8 @@ token s = do
 
 parens = between (token "(") (token ")")
 
+-- | FIXME: this function does not distinguish Finite from Infinite.
+-- Hopefully, it's never used where this matters.
 showLower :: Function -> String
 showLower f = case f of
   Poly {} -> case degree f of
@@ -178,8 +181,10 @@ showLower f = case f of
     Just d -> "Omega(n^" ++ show d ++ ")"
   Expo -> "NON_POLY"
   Finite -> "?"
-  Infinite -> "?"
+  Infinite -> "INF"
 
+-- | FIXME: this function does not distinguish Finite from Infinite.
+-- Hopefully, it's never used where this matters.
 showUpper :: Function -> String
 showUpper f = case f of
   Poly {} -> case degree f of
@@ -187,5 +192,5 @@ showUpper f = case f of
     Just d -> case d of
       0 -> "O(1)"
       k -> "O(n^" ++ show k ++ ")"
-  Finite -> "?"
+  Finite -> "FIN"
   Infinite -> "?"
