@@ -147,6 +147,7 @@ isPoly f = case f of Poly {} -> True ; _ -> False
 readP_FunctionL :: ReadP Function
 readP_FunctionL = do { token "NON_POLY" ; return Expo }
     +++ do { token "Omega" ; parens $ ( Poly . Just ) <$> readP_degreeL }
+    +++ do { token "O" ; parens $ token "1" ; return Finite }
 
 readP_degreeL :: ReadP Int
 readP_degreeL = token "n" *> readP_exponent
