@@ -8,6 +8,10 @@ import Presenter.Internal.Stringish
 
 import Presenter.Output
 
+import qualified Text.ParserCombinators.ReadP as R
+import qualified Data.Char as C
+import Control.Applicative ((<|>))
+
 type Prefix = T.Text
 
 lriResultPrefix :: Prefix
@@ -56,7 +60,17 @@ data JobID =
   StarExecJobID Int
   | LriJobID Int
   | UibkJobID Int
-  deriving (Show, Read, Eq, Ord)
+  deriving (Show, Eq, Ord)
+
+instance Read JobID where
+  readsPrec _ = R.readP_to_S $
+         ( R.string "StarExecJobID" >> StarExecJobID <$> decimal )
+     <|> ( R.string "LriJobID" >> LriJobID <$> decimal )
+     <|> ( R.string "UibkJobID" >> UibkJobID <$> decimal )
+     <|> ( StarExecJobID <$> decimal )
+
+decimal = R.skipSpaces
+        *> ( foldl (\x y -> 10*x + fromEnum y - fromEnum '0') 0 <$> R.many1 (R.satisfy C.isDigit) )
 
 instance Output JobID where output = text . show
 
