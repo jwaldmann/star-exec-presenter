@@ -106,6 +106,7 @@ library
                      Presenter.Utils.WidgetTable
                      Presenter.DOI
                      Presenter.DOI.Type
+                     Presenter.History
                      Importer.Parser.LRI
                      Importer.Interpreter.LRI
                      Importer.Internal
