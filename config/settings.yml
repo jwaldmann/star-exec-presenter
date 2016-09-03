@@ -10,7 +10,6 @@ Development:
 
 Testing:
   port: 3001
-  approot: "http://termcomp.imn.htwk-leipzig.de"
   <<: *defaults
 
 Staging:
