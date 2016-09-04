@@ -22,6 +22,8 @@ This site:
   <li><a href=@{RegisteredR Y2016}>registered participants for 2016</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
 
+  <li><a href=@{ControlR Y2016}>job control</a>
+
 $if authorized
   only for authorized users:
   <ul>
