@@ -97,13 +97,16 @@ instance Yesod App where
         -- you to use normal widget features in default-layout.
 
         -- navigation bar elements
-        let menuElements = [MenuEntry ("Home", HomeR)
-                           , MenuDropdown
-                           ("Competition Results"
-                           , [ MenuEntry ("2016", ListCompetitionsR)
-                             , MenuEntry ("2015", ListCompetitionsR)
-                             , MenuEntry ("2014", ListCompetitionsR)
-                             ])
+        let menuElements = [ MenuEntry ("Home", HomeR)
+                           ]
+            unused_menuElements = 
+                           [ MenuDropdown
+                             ( "Competition Results"
+                             , [ MenuEntry ("2016", ListCompetitionsR)
+                               , MenuEntry ("2015", ListCompetitionsR)
+                               , MenuEntry ("2014", ListCompetitionsR)
+                               ]
+                             )
                            , MenuDropdown
                            ("Analysis"
                            , [MenuEntry ("Concepts example", ConceptsR 0 (Ids []) (JobIds [StarExecJobID 9515, StarExecJobID 10299]))
