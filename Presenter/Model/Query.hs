@@ -37,7 +37,7 @@ data Cell_Filter =
   | Not_Equals T.Text
   deriving (Read,Show, Eq)
 
--- draft for a more generic querrying
+-- draft for a more generic querying
 
 data NQuery =
   NNoQuery
