@@ -111,7 +111,7 @@ cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
           #{cname}
   <tr>
     <td>
-      Job <a href=@{ShowJobInfoR jid}>#{show jid}</a>
+      <a href=@{ShowJobInfoR jid}>#{show jid}</a>
 |]
   , tdclass = fromString "solver"
   , msolver = Just sname
@@ -171,12 +171,16 @@ display sc jids previous ts tab  = do
               <thead>
                 <tr>
                     $forall h <- header tab
-                        <th> ^{contents h}
+                        <th>^{contents h}
               <tbody>
-                    $forall row <- rs
+                    $forall (i,row) <- zip (enumFrom 1) rs
                         <tr>
                           $forall cell <- row
                             <td class="#{tdclass cell}"> ^{contents cell}
+                        $if (0 == mod i 20)
+                          <tr>
+                            $forall h <- header tab
+                              <th>^{contents h}
             |]
 
 displayConcept :: JobIds -> Table -> Widget
