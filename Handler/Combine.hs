@@ -22,10 +22,11 @@ getCombineR comps = do
 combines [] = do
   fail "need at least one argument"
 combines comps = do
-  let m = M.fromListWith (++) $ do
+  let m = M.unionsWith (++) $ do
         comp <- comps
-        cat <- cats comp
-        return ( key cat , children cat )
+        return $ M.fromListWith (++) $ do
+          cat <- cats comp
+          return ( key cat , children cat )
   let scoring k = if T.isInfixOf "omplexi" k
                   then Complexity else Standard
   [whamlet|
@@ -36,7 +37,7 @@ combines comps = do
         compare jobs
         : <a href=@{ShowManyJobResultsR (scoring $ key c) NoQuery $ JobIds v}>all expanded</a>
         | <a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestInit]) $ JobIds v}>last expanded</a>
-        | <a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestAll]) $ JobIds v}>all folded</>
+        | <a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestAll]) $ JobIds v}>all folded</a>
 |]
 
 
