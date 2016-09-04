@@ -9,5 +9,5 @@ getHomeR = do
     maid <- maybeAuthId
     let authorized = isJust maid
     defaultLayout $ do
-        setTitle "Welcome To Star-Exec-Presenter!"
+        setTitle "Welcome to Star-Exec-Presenter"
         $(widgetFile "homepage")
