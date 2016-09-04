@@ -54,6 +54,8 @@
 /competitions/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
 
+/combine/*[CompetitionInfoId] CombineR GET
+
 /control/#Year ControlR GET POST
 /registered/#Year RegisteredR GET
 /participant/#Year/#Text ParticipantR GET
