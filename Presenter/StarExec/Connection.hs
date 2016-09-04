@@ -3,7 +3,7 @@ module Presenter.StarExec.Connection
     -- , index
     , getLoginCredentials
     , killmenothing
-    , initial_login
+    , initial_login, LoginMethod (..)
     ) where
 
 import Import
@@ -28,9 +28,12 @@ import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
 import Data.Maybe (listToMaybe)
 
+data LoginMethod = Fake | Real deriving (Eq, Ord, Show, Read)
+
 -- | we're doing this at the very beginning (not inside a Handler)
-initial_login :: Manager -> IO CookieJar
-initial_login man = do
+initial_login :: LoginMethod -> Manager -> IO CookieJar
+initial_login Fake man = return $ createCookieJar [ killmenothing ]
+initial_login Real man = do
   let cj0 = createCookieJar [ killmenothing ]
       Just base = parseUrl starExecUrl
   let send req = do

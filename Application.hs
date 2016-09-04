@@ -73,10 +73,11 @@ import Handler.InstallSolvers
 import Handler.CompetitionText
 import Handler.Resolve
 import Handler.Concepts
+import Handler.Combine
 
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
-import Presenter.StarExec.Connection (initial_login)
+import Presenter.StarExec.Connection (initial_login, LoginMethod(..))
 import Presenter.DOI
 
 -- import Control.Concurrent.SSem
@@ -121,7 +122,7 @@ makeFoundation conf = do
           { managerResponseTimeout = Just $ 60 * 10^6
           , managerConnCount = 10
           }
-    cj <- initial_login manager
+    cj <- initial_login Real manager
     -- Session for Connections to starexec.org
     now <- getCurrentTime
     session <- atomically $ newTVar
