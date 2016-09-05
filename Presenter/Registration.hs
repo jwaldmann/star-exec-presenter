@@ -1,7 +1,10 @@
+{-# language OverloadedStrings #-}
+
 module Presenter.Registration
 
 ( module Presenter.Registration.Code
 , the_competition, extract
+, catcat, Catcat (..)
 )
 
 where
@@ -11,7 +14,7 @@ import Presenter.Registration.Data
 import qualified Presenter.Registration.Form_2016 as Form_2016
 import qualified Presenter.Registration.Form_2015 as Form_2015
 import Presenter.Model (Name, Year (..) )
-import Prelude (($), fmap, (==))
+import Prelude (($), fmap, (==), elem, Show)
 
 the_competition :: Year -> Competition Catinfo
 the_competition year = case year of
@@ -25,3 +28,16 @@ extract year name = prune
            $ fmap participants
            $ filterP ( \p -> name == participantName p )
            $ the_competition year
+
+data Catcat = Rewriting | Programs deriving (Show)
+
+catcat :: Category a -> Catcat
+catcat c =
+  if categoryName c `elem`
+     [ "C", "C Integer Programs", "Java Bytecode", "Logic Programming", "Functional Programming"
+     , "Complexity - C Integer Programs"
+     ]
+  then Programs else Rewriting
+                    
+
+    

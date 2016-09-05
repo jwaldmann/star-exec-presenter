@@ -27,7 +27,8 @@ data JobControl = JobControl
    , selection :: Selection
    , queue :: Int
    , space :: Int
-   , wallclock :: Int
+   , wallclock_for_rewriting :: Int -- ^ HACK ( issue #122 )
+   , wallclock_for_programs :: Int
    , family_lower_bound :: Int
    , family_upper_bound :: Int
    , family_factor :: Double
@@ -159,14 +160,17 @@ mkJobs sm config cat now = do
 
     -- FIXME: too many separate jobs give problems
 
+    let wallclock = case R.catcat cat of
+          R.Rewriting -> wallclock_for_rewriting config
+          R.Programs  -> wallclock_for_programs  config
     return $ return $ SEJob
          { postproc_id = R.postproc ci
          , description = repair $ R.categoryName cat
          , job_name = compact $ repair $ R.categoryName cat +> "@" +> T.pack (show $ hash (bss, show now) )
          , queue_id = queue config
          , mem_limit = 128.0
-         , wallclock_timeout = wallclock config
-         , cpu_timeout = num_cores * wallclock config
+         , wallclock_timeout = wallclock
+         , cpu_timeout = num_cores * wallclock
          , start_paused = startPaused config
          , jobpairs = case jobCreationMethod config of
             PushJobXML -> do

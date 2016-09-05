@@ -34,7 +34,9 @@ inputForm = renderTable $ JobControl
                   [("tc2016/secret",184885),("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
                  "space" (Just 184694)
         <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
-                 "wallclock_timeout" (Just 30)
+                 "wallclock_timeout (for rewriting)" (Just 30)
+        <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
+                 "wallclock_timeout (for programs)" (Just 300)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)])
                  "family_lower_bound (selection parameter a)" (Just 1)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)])
@@ -183,7 +185,8 @@ params conf t = CompetitionMeta
         SelectionDemonstration -> " (Demonstration)"
         SelectionAll -> " (Competition + Demonstration)"
   , getMetaDescription =
-      T.unwords [ "wc", "=", T.pack $ show $ wallclock conf
+      T.unwords [ "wc_r", "=", T.pack $ show $ wallclock_for_rewriting conf
+                , "wc_p", "=", T.pack $ show $ wallclock_for_programs conf
                 , "a", "=", T.pack $ show $ family_lower_bound conf
                 , "b", "=", T.pack $ show $ family_upper_bound conf
                 , "c", "=", T.pack $ show $ family_factor conf
