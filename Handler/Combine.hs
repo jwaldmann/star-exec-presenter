@@ -5,39 +5,74 @@ module Handler.Combine ( getCombineR ) where
 import Import hiding (children)
 import Presenter.Model.Competition
 import Presenter.Model.RouteTypes
+import Database.Persist.Sql (fromSqlKey)
+import Text.Lucius (luciusFile)
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 
-import Control.Monad ( forM )
+import Control.Monad ( forM, when )
 import Data.Maybe ( catMaybes )
-import Prelude (last)
+import Prelude (init,last)
 
--- | gets list of jobs. compares last one with previous ones
-getCombineR comps = do
-  cs <- catMaybes <$> runDB ( forM comps get )
-  defaultLayout $ combines
-        $ map competitionInfoCompetition cs
-
-combines [] = do
-  fail "need at least one argument"
-combines comps = do
-  let m = M.unionsWith (++) $ do
-        comp <- comps
-        return $ M.fromListWith (++) $ do
+-- | gets list of competitions. compares last one with previous ones.
+-- display result in order of categories of last competition.
+getCombineR compids = do
+  when (null compids) $ fail "need at least one argument"
+  icomps <- forM compids $ \ ci -> do
+    Just c <- runDB $ get ci
+    return (fromSqlKey ci, competitionInfoCompetition c)
+  let (t,arget) = Prelude.last icomps
+  let m = M.unionsWith (M.unionWith (++)) $ do
+        (i,comp) <- icomps
+        return $ M.fromListWith (M.unionWith (++)) $ do
           cat <- cats comp
-          return ( key cat , children cat )
+          return ( key cat , M.singleton i $ children cat )
+      jobids v = JobIds $ concat $ M.elems v
   let scoring k = if T.isInfixOf "omplexi" k
                   then Complexity else Standard
-  [whamlet|
-<ul>
-  $forall c <- cats (last comps)
-    $maybe v <- M.lookup (key c) m
-      <li>#{key c} #{show v} #
-        compare jobs
-        : <a href=@{ShowManyJobResultsR (scoring $ key c) NoQuery $ JobIds v}>all expanded</a>
-        | <a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestInit]) $ JobIds v}>last expanded</a>
-        | <a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestAll]) $ JobIds v}>all folded</a>
+  let smallheader = [whamlet|
+      <tr>
+        <th>category
+        $forall (i,comp) <- icomps
+          <th>comp #{i}
+        <th colspan="3">virtual best for
+        |]
+  defaultLayout $ do
+    toWidget $(luciusFile "templates/combine.lucius")
+    [whamlet|
+<h1>Combine Results of Several Competitions
+<p>
+  <table>
+    <thead>
+      <tr>
+        <th>index
+        <th>competition
+        <th>info
+    <tbody>
+      $forall (i,comp) <- icomps
+        <tr>
+          <td>#{i}
+          <td>#{getMetaName $ key comp}
+          <td>#{getMetaDescription $ key comp}
+<p>          
+  <table>
+    <tbody>
+      $forall mc <- children arget
+        <tr>
+          <td colspan="#{4 + length compids}">meta-category #{key mc}
+        ^{smallheader}
+        $forall c <- children mc
+          $maybe v <- M.lookup (key c) m
+            <tr>
+              <td>#{key c}
+              $forall (i,comp) <- icomps
+                <td>
+                  $maybe j <- M.lookup i v
+                    <a href=@{ShowManyJobResultsR (scoring $ key c) NoQuery $ JobIds j}>#{show j}
+              <td><a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestInit]) $ jobids v}>all but last</a>
+              <td><a href=@{ShowManyJobResultsR (scoring $ key c) (Query [VBestAll]) $ jobids v}>all</a>
+              <td><a href=@{ShowManyJobResultsR (scoring $ key c) NoQuery $ jobids v}>none</a>
 |]
 
 
