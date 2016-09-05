@@ -19,11 +19,14 @@ import Prelude (init,last)
 -- display result in order of categories of last competition.
 getCombineR compids = do
   when (null compids) $ fail "need at least one argument"
-  icomps <- forM compids $ \ ci -> do
+  let keys = map fromSqlKey compids
+  comps <- forM compids $ \ ci -> do
     Just c <- runDB $ get ci
-    return (fromSqlKey ci, competitionInfoCompetition c)
-  let (t,arget) = Prelude.last icomps
+    return $ competitionInfoCompetition c
+  let icomps = zip [0 :: Int .. ] comps
+  let target = Prelude.last comps
   let m = M.unionsWith (M.unionWith (++)) $ do
+        -- the competition ids might have wrong order
         (i,comp) <- icomps
         return $ M.fromListWith (M.unionWith (++)) $ do
           cat <- cats comp
@@ -35,7 +38,7 @@ getCombineR compids = do
       <tr>
         <th>category
         $forall (i,comp) <- icomps
-          <th>comp #{i}
+          <th>comp #{keys !! i}
         <th colspan="3">virtual best for
         |]
   defaultLayout $ do
@@ -52,13 +55,13 @@ getCombineR compids = do
     <tbody>
       $forall (i,comp) <- icomps
         <tr>
-          <td>#{i}
+          <td>#{keys !! i}
           <td>#{getMetaName $ key comp}
           <td>#{getMetaDescription $ key comp}
 <p>          
   <table>
     <tbody>
-      $forall mc <- children arget
+      $forall mc <- children target
         <tr>
           <td colspan="#{4 + length compids}">meta-category #{key mc}
         ^{smallheader}
