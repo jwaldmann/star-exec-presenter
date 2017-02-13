@@ -1,22 +1,20 @@
-# For more information, see: http://docs.haskellstack.org/en/stable/yaml_configuration.html
+resolver: lts-8.0
 
-# Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: nightly-2016-09-01
-
-# Local packages, usually specified by relative directory name
 packages:
 - '.'
 - location:
     git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
     commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
+  extra-dep: true
 
-# Packages to be pulled from upstream that are not in the resolver (e.g., acme-missiles-0.3)
 extra-deps:
 # - MonadCatchIO-transformers-0.3.1.3
 
-# Override default flag values for local packages and extra-deps
 flags: {}
 
-# Extra package databases containing global packages
 extra-package-dbs: []
 
+system-ghc: true
+compiler-check:
+  newer-minor
+  
