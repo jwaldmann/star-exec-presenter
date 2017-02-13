@@ -459,7 +459,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
     sec <- parseUrl starExecUrl
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId )
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
-         ] $ sec { method = "POST", path = pushjobxmlPath, responseTimeout = Nothing }
+         ] $ sec { method = "POST", path = pushjobxmlPath, responseTimeout = responseTimeoutNone }
 
     let info = mconcat $ do
           job <- jobs

@@ -119,7 +119,7 @@ makeFoundation conf = do
           -- http://hackage.haskell.org/package/connection-0.2.3/docs/Network-Connection.html#t:TLSSettings
           tlsset = TLSSettingsSimple True False False
       in  ( mkManagerSettings tlsset Nothing )
-          { managerResponseTimeout = Just $ 60 * 10^6
+          { managerResponseTimeout = responseTimeoutMicro $ 60 * 10^6
           , managerConnCount = 10
           }
     cj <- initial_login Real manager
