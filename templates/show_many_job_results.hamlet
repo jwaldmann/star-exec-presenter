@@ -1,13 +1,13 @@
 <h1>Overview of job-results
-  <a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental)
+<a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental)
 |
-  <a href=@{ProblemsR jids}> consistency check
+<a href=@{ProblemsR jids}> consistency check
 | view original jobs on star-exec:
-  $forall jid <- getIds jids
-    $if isStarExecID jid
-      <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid},
+$forall jid <- getIds jids
+  $if isStarExecID jid
+    <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid},
 |
-  <a href=@{ConceptsR 0 (Ids []) jids}>concepts
+<a href=@{ConceptsR 0 (Ids []) jids}>concepts
 
 <h2>Statistics
 #{stat}
