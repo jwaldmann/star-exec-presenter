@@ -1,11 +1,13 @@
 <h1>Overview of job-results
-<a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental)
-| <a href=@{ProblemsR jids}>consistency check</a>
+  <a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental)
+|
+  <a href=@{ProblemsR jids}> consistency check
 | view original jobs on star-exec:
   $forall jid <- getIds jids
     $if isStarExecID jid
       <a href="https://www.starexec.org/starexec/secure/details/job.jsp?id=#{getStarExecId jid}">#{getStarExecId jid},
-| <a href=@{ConceptsR 0 (Ids []) jids}>concepts</a>
+|
+  <a href=@{ConceptsR 0 (Ids []) jids}>concepts
 
 <h2>Statistics
 #{stat}
@@ -39,11 +41,13 @@
     <tr>
       <th>Jobs
       $forall (jobInfo,i) <- zip jobInfos $ map length groupedSolvers
-        <th colspan="#{i}"><a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}</a>
+        <th colspan="#{i}">
+          <a href=@{ShowJobInfoR $ toJobID jobInfo}>#{toJobName jobInfo}
     <tr>
       <th>Solver
       $forall (_, (sId, sName)) <- jobSolvers
-        <th><a href=@{ShowSolverInfoR sId}>#{sName}</a>
+        <th>
+          <a href=@{ShowSolverInfoR sId}>#{sName}
     <tr>
       <th>Scores
       $forall (solvers, scores) <- zip groupedSolvers scores
@@ -59,9 +63,9 @@
         <td>
           $case bKey
             $of Left bId
-              <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}</a>
+              <a href=@{ShowBenchmarkInfoR bId}>#{shorten bName}
             $of Right doi
-             <a href=@{ResolveR doi}>#{shorten bName}</a>
+             <a href=@{ResolveR doi}>#{shorten bName}
 
         $forall mResult <- results
           $maybe result <- mResult
