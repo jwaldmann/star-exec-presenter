@@ -10,7 +10,7 @@ module Presenter.StarExec.Concurrent
   , runQueryInfo
   ) where
 
-import Import
+import Import hiding (getEntity)
 import Control.Exception.Base
 import Presenter.PersistHelper
 import Presenter.StarExec.Commands

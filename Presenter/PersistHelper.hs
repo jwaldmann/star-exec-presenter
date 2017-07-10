@@ -1,6 +1,6 @@
 module Presenter.PersistHelper where
 
-import Import hiding (runDB)
+import Import hiding (runDB, getEntity)
 import qualified Import
 
 import qualified Data.ByteString.Lazy as BSL
