@@ -5,7 +5,7 @@ Default: &defaults
 
 Development:
   port: 3000
-  approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devil"
+  # approot: "http://nfa.imn.htwk-leipzig.de/termcomp-devil"
   <<: *defaults
 
 Testing:
@@ -18,5 +18,5 @@ Staging:
 
 Production:
   port: 3003
-  approot: "http://termcomp.imn.htwk-leipzig.de"
+  approot: "https://termcomp.imn.htwk-leipzig.de"
   <<: *defaults

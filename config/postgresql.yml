@@ -7,16 +7,17 @@ Default: &defaults
   poolsize: 1000
 
 Development:
+  database: star-exec-presenter_development
   <<: *defaults
 
 Testing:
-  # database: star-exec-presenter_test
+  database: star-exec-presenter_testing
   <<: *defaults
 
 Staging:
-  # database: star-exec-presenter_staging
+  database: star-exec-presenter_staging
   <<: *defaults
 
 Production:
-  # database: star-exec-presenter_production
+  database: star-exec-presenter_production
   <<: *defaults

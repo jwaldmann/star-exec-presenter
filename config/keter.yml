@@ -1,8 +1,17 @@
-exec: ../dist/build/star-exec-presenter/star-exec-presenter
-args:
-    - production
-host: <<HOST-NOT-SET>>
-
-# Use the following to automatically copy your bundle upon creation via `yesod
-# keter`. Uses `scp` internally, so you can set it to a remote destination
-# copy-to: user@host:/opt/keter/incoming
+stanzas:
+  - type: webapp
+    env:
+      APPROOT: "https://termcomp.imn.htwk-leipzig.de"
+      LANG: "en_US.utf8"
+      HOME: /home/keter
+    exec: ../.stack-work/install/x86_64-linux/lts-8.22/8.0.2/bin/star-exec-presenter
+    args:
+      - production
+    hosts:
+      - termcomp.imn.htwk-leipzig.de
+      - localhost
+      - "127.0.0.1"
+  - type: static-files
+    hosts:
+      - termcomp.imn.htwk-leipzig.de
+    root: ../static
