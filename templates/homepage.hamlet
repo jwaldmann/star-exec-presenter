@@ -19,16 +19,16 @@
 
 This site:
 <ul>
-  <li><a href=@{RegisteredR Y2016}>registered participants for 2016</a>
+  <li><a href=@{RegisteredR Y2017}>registered participants for 2017</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
 
-  <li><a href=@{ControlR Y2016}>job control</a>
+  <li><a href=@{ControlR Y2017}>job control</a>
 
 $if authorized
   only for authorized users:
   <ul>
-    <li><a href=@{InstallSolversR Y2016}>install solvers</a>
-    <li><a href=@{ControlR Y2016}>start jobs</a>
+    <li><a href=@{InstallSolversR Y2017}>install solvers</a>
+    <li><a href=@{ControlR Y2017}>start jobs</a>
     <li><a href=@{ListHiddenCompetitionsR}>hidden test runs</a>
     
 
@@ -37,5 +37,5 @@ Meta-information for this site:
   <li>programmers: Stefan von der Krone, René Muhl, Johannes Waldmann
   <li>using the <a href="http://www.yesodweb.com/">Yesod</a> web framework,
     implementation language: <a href="http://haskell.org/">Haskell</a>,
-    compiler: <a href="http://haskell.org/ghc">ghc-7.10.3</a>.
+    compiler: <a href="http://haskell.org/ghc">ghc-8.0.2</a>.
   <li><a href="https://github.com/jwaldmann/star-exec-presenter">source code, issue tracker</a>

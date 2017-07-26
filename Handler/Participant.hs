@@ -14,7 +14,7 @@ getParticipantR year name = do
      <pre>#{show $ extract year name}
      <em>or
      fork <a href="https://github.com/jwaldmann/star-exec-presenter">star-exec-presenter</a>,
-     edit <tt>Presenter/Registration/Form_2016.hs</tt>,
+     edit <tt>Presenter/Registration/Form_2017.hs</tt>,
      and send a pull request.
      <p>
      solver_config must be Just (sp,so,co) where

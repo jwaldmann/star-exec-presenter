@@ -16,7 +16,7 @@ data Scoring =
 instance Output Scoring where output = text . show
 
 -- | this is for managing registrations (which are in the source) FIXME
-data Year = Y2014 | Y2015 | Y2016 | E
+data Year = Y2014 | Y2015 | Y2016 | Y2017 | E
   deriving (Show, Eq, Read)
 
 instance PathPiece Year where
