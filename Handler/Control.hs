@@ -30,10 +30,10 @@ inputForm = renderTable $ JobControl
                   , ("all.q"::T.Text,1)
                   ]) "queue" (Just 54723)
         <*> areq (radioFieldList
-                  [("tc2016/secret",184885),("tc2016/tmp":: T.Text, 184694),("tc2016/test",184693), ("tc2016/run",184692) ])
-                 "space" (Just 184694)
+                  [("tc2017/secret",276095),("tc2017/tmp":: T.Text, 276096),("tc2017/test",274864), ("tc2017/run",274865) ])
+                 "space" (Just 274864)
         <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
-                 "wallclock_timeout (for rewriting)" (Just 30)
+                 "wallclock_timeout (for rewriting)" (Just 300)
         <*> areq (radioFieldList [("10",10),("30",30),("60"::T.Text, 60),("300", 300), ("900", 900)])
                  "wallclock_timeout (for programs)" (Just 300)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100)])
