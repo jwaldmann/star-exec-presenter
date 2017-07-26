@@ -192,7 +192,7 @@ getMetaResults metaCat = do
       startTime = if null catResults
                     then Nothing
                     else minimum $ map categoryStartTime catResults
-      endTime = if complete
+      endTime = if complete && not (null catResults)
                   then maximum $ map categoryFinishTime catResults
                   else Nothing
       stat = mconcat $ map categoryStatistics catResults
@@ -216,7 +216,7 @@ getMetaResults_ procs infos results metaCat =
       startTime = if null catResults
                     then Nothing
                     else minimum $ map categoryStartTime catResults
-      endTime = if complete
+      endTime = if complete && not (null catResults)
                   then maximum $ map categoryFinishTime catResults
                   else Nothing
       stat = mconcat $ map categoryStatistics catResults
@@ -358,7 +358,7 @@ getCompetitionResults comp = do
       startTime = if null metaResults
                     then Nothing
                     else minimum $ map metaCategoryStarTime metaResults
-      endTime = if complete
+      endTime = if complete && not (null metaResults)
                   then maximum $ map metaCategoryFinishTime metaResults
                   else Nothing
       stat = mconcat $ map metaCategoryStatistics metaResults
