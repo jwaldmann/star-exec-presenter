@@ -241,6 +241,8 @@ tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2017"
      [MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Runtime Complexity - Innermost Rewriting"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165446)}]
+          ,Category "Runtime Complexity - Innermost Rewriting certified"
                [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165447)}]]]
 
 tc_TTT2 :: Competition [Participant]
