@@ -240,23 +240,10 @@ tc_T2 = Competition "Termination Competition 2017"
 tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2017"
      [MetaCategory "Complexity Analysis of Term Rewriting"
-          [Category "Derivational Complexity - Full Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
-          ,Category "Runtime Complexity - Full Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
-          ,Category "Runtime Complexity - Innermost Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
-          ,Category "Derivational Complexity - Full Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
-          ,Category "Runtime Complexity - Full Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
+          [Category "Runtime Complexity - Innermost Rewriting"
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165446)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]
-          ,Category "Complexity - Integer Transition Systems"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]]
-     ,MetaCategory "Complexity Analysis of Programming Languages"
-          [Category "Complexity - C Integer Programs"
-               [Participant {participantName = "TcT" , solver_config = Nothing}]]]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165447)}]]]
 
 tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2017"
