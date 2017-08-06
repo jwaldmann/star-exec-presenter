@@ -310,19 +310,19 @@ tc_kflmnm = Competition "Termination Competition 2017"
 
 tc_muterm :: Competition [Participant]
 tc_muterm = Competition "Termination Competition 2017"
-     [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-          [Category "TRS Standard"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]
-          ,Category "SRS Standard"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]
-          ,Category "TRS Equational"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]
-          ,Category "TRS Conditional"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]
-          ,Category "TRS Context Sensitive"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]
-          ,Category "TRS Innermost"
-               [Participant {participantName = "muterm" , solver_config = Nothing}]]]
+    [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+         [Category "TRS Standard"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]
+         ,Category "SRS Standard"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]
+         ,Category "TRS Equational"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]
+         ,Category "TRS Conditional"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]
+         ,Category "TRS Context Sensitive"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]
+         ,Category "TRS Innermost"
+              [Participant {participantName = "muterm" , solver_config = Just (34565,9061,163986)}]]]
 
 tc_verymax :: Competition [Participant]
 tc_verymax = Competition "Termination Competition 2017"
