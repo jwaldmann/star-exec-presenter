@@ -112,7 +112,7 @@ tc = collect tc_skeleton $
                          , tc_cycsrs -- David Sabel
                          , tc_matchbox -- Johannes Waldmann
                          , tc_muterm -- Raul Gutierrez
-                         , tc_verymax -- Daniel Larraz
+                         , tc_verymax -- Albert Rubio
                          , tc_cycnta -- Alexander Fedotov
                          , tc_kflmnm -- Dieter Hofbauer
                          ]
@@ -332,10 +332,10 @@ tc_verymax :: Competition [Participant]
 tc_verymax = Competition "Termination Competition 2017"
      [ MetaCategory "Termination of Term Rewriting (and Transition Systems)"
        [Category "Integer Transition Systems"
-        [Participant {participantName = "VeryMax" , solver_config = Nothing}]]
+        [Participant {participantName = "VeryMax" , solver_config = Just (184540,9339,165578)}]]
      , MetaCategory "Termination of Programming Languages"
        [Category "C Integer Programs"
-        [Participant {participantName = "VeryMax" ,solver_config = Nothing}]]
+        [Participant {participantName = "VeryMax" ,solver_config = Just (184540,9339,165578)}]]
      ]
 
 tc_cycnta :: Competition [Participant]
