@@ -88,8 +88,14 @@ all_in_hierarchy :: Space -> [Int]
 all_in_hierarchy s =
   benchmarks s ++ (children s >>= all_in_hierarchy)
 
+data Bench_Framework = Runsolver | Benchexec
+  deriving (Eq)
+instance Show Bench_Framework where
+  show Runsolver = "runsolver" ; show Benchexec = "benchexec"
+
 data StarExecJob = SEJob
   { postproc_id :: Int
+  , bench_framework :: ! Bench_Framework
   , description :: Text
   , job_name :: Text
   , queue_id :: Int

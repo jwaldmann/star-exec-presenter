@@ -165,6 +165,7 @@ mkJobs sm config cat now = do
           R.Programs  -> wallclock_for_programs  config
     return $ return $ SEJob
          { postproc_id = R.postproc ci
+         , bench_framework = Benchexec
          , description = repair $ R.categoryName cat
          , job_name = compact $ repair $ R.categoryName cat +> "@" +> T.pack (show $ hash (bss, show now) )
          , queue_id = queue config

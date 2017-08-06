@@ -215,6 +215,7 @@ jobs_to_XML js = Document (Prologue [] Nothing []) root [] where
                <wallclock-timeout value="#{t $ wallclock_timeout j}">
                <mem-limit value="#{t $ mem_limit j}">
                <postproc-id value="#{t $ postproc_id j}">
+               <bench-framework value="#{t $ bench_framework j}">
              $forall p <- jobpairs j
                $if isSEJobPair p
                  <JobPair job-space-path="#{path_sanitize $ jobPairSpace p}" bench-id="#{t $ jobPairBench p}" config-id="#{t $ jobPairConfig p}">
