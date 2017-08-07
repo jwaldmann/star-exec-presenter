@@ -12,7 +12,7 @@ tc_skeleton = tc_skeleton_10_4
 
 -- Postprocessors:
 plain = 355
-ceta  = 359 
+ceta  = 361
 
 tc_skeleton_10_4 :: Competition Catinfo
 tc_skeleton_10_4 = Competition "Termination Competition 2017"
