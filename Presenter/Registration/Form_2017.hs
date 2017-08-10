@@ -203,10 +203,10 @@ tc_AutoNon = Competition "Termination Competition 2017"
 tc_Ctrl :: Competition [Participant]
 tc_Ctrl = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "Integer Transition Systems"
-          [Participant {participantName = "Ctrl" , solver_config = Nothing}]
-     ,Category "Integer TRS"
-          [Participant {participantName = "Ctrl" , solver_config = Nothing}]]]
+          [Category "Integer Transition Systems"
+               [Participant {participantName = "Ctrl" , solver_config = Just (55489,3723,23757)}]
+          ,Category "Integer TRS"
+               [Participant {participantName = "Ctrl" , solver_config = Just (55489,3723,23758)}]]]
 
 tc_HipTNT :: Competition [Participant]
 tc_HipTNT = Competition "Termination Competition 2017"
@@ -278,10 +278,10 @@ tc_UltimateBuchiAutomizer = Competition "Termination Competition 2017"
 tc_Wanda :: Competition [Participant]
 tc_Wanda = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "TRS Standard"
-          [Participant {participantName = "Wanda" , solver_config = Nothing}]
-     ,Category "Higher-Order rewriting (union beta)"
-          [Participant {participantName = "Wanda" , solver_config = Nothing}]]]
+          [Category "TRS Standard"
+               [Participant {participantName = "Wanda" , solver_config = Just (55489,1542,2389)}]
+          ,Category "Higher-Order rewriting (union beta)"
+               [Participant {participantName = "Wanda" , solver_config = Just (55489,1542,2390)}]]]
 
 tc_cycsrs :: Competition [Participant]
 tc_cycsrs = Competition "Termination Competition 2017"
