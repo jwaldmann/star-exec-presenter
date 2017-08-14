@@ -115,6 +115,7 @@ tc = collect tc_skeleton $
                          , tc_verymax -- Albert Rubio
                          , tc_cycnta -- Alexander Fedotov
                          , tc_kflmnm -- Dieter Hofbauer
+                         , tc_sol -- Makoto Hamana
                          ]
 
 tc_Loopus :: Competition [Participant]
@@ -349,3 +350,10 @@ tc_cofloco = Competition "Termination Competition 2017"
      ,MetaCategory "Complexity Analysis of Programming Languages"
           [Category "Complexity - C Integer Programs"
                [Participant {participantName = "CoFloCo" , solver_config = Just (184632,9105,164533)}]]] 
+
+tc_sol :: Competition [Participant]
+tc_sol = Competition "Termination Competition 2017"
+ [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
+   [Category "Higher-Order rewriting (union beta)"
+      [Participant {participantName = "SOL" ,
+                    solver_config = Just (277287,12832,225845)}]]]
