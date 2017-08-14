@@ -105,7 +105,7 @@ tc = collect tc_skeleton $
                          , tc_NaTT -- Akihisa Yamada
                          -- , tc_T2
                          -- , tc_TCT2
-                         , tc_TCT -- Michael Schaper
+                         , tc_TCT -- Georg Moser
                          , tc_TTT2 -- Christian Sternagel
                          , tc_UltimateBuchiAutomizer -- Matthias Heizmann
                          , tc_Wanda -- Cynthia Kop
@@ -242,9 +242,9 @@ tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2017"
      [MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Runtime Complexity - Innermost Rewriting"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165446)}]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,12837,225852)}]
           ,Category "Runtime Complexity - Innermost Rewriting certified"
-               [Participant {participantName = "TcT" , solver_config = Just (24022,9299,165447)}]]]
+               [Participant {participantName = "TcT" , solver_config = Just (24022,12837,225853)}]]]
 
 tc_TTT2 :: Competition [Participant]
 tc_TTT2 = Competition "Termination Competition 2017"
