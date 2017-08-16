@@ -416,15 +416,32 @@ getJobPairInfo _ _pairId = do
                             Nothing -> JobResultUndetermined
                             Just jr -> getResultStatus jr
           stdout = responseBody respStdout
-          htmlProof = getHtmlProof stdout
+          htmlProof = do
+            guard $ not $ BSL.null stdout
+            if looks_timestamped stdout
+              then getHtmlProof_runsolver stdout
+              else getHtmlProof_benchexec stdout
       return $ Just $ JobPairInfo _pairId
                                   (BSL.toStrict $ compress stdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
                                   htmlProof
                                   resultStatus
   where
-    getHtmlProof :: BSL.ByteString -> Maybe BS.ByteString
-    getHtmlProof bsl =
+    looks_timestamped bsl = and $ do
+      l <- take 10 $ T.lines $ TE.decodeUtf8 $ BSL.toStrict bsl
+      w <- take 1 $ T.words l
+      return $ and $ do c <- T.unpack w ; return $ elem c ("0123456789./" :: String)
+    -- drastically simple: if "\n<" occurs among the first 1000 characters,
+    -- this this is the start of the "html proof"
+    getHtmlProof_benchexec :: BSL.ByteString -> Maybe BS.ByteString
+    getHtmlProof_benchexec bsl = do
+      let bs = BSL.toStrict bsl
+          (early, later) = BS.splitAt 1000 bs
+          (pre, post) = BS.breakSubstring "\n<" early
+      guard $ BS.length post >= 2
+      return $ BSL.toStrict $ compress $ BSL.fromStrict $ BS.drop 1 post <> later
+    getHtmlProof_runsolver :: BSL.ByteString -> Maybe BS.ByteString
+    getHtmlProof_runsolver bsl =
       let text = TE.decodeUtf8 $ BSL.toStrict bsl
           tLines = T.lines text
           tContent = drop 1 $ takeWhile isNoSuffixOf tLines
