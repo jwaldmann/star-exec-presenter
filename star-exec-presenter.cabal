@@ -182,6 +182,7 @@ library
                  , blaze-markup, blaze-builder
                  , containers
                  , html-conduit
+                 , safe-exceptions
                  , time
                  -- , wl-pprint-text
                  , wl-pprint

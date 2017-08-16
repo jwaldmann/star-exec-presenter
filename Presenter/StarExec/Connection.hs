@@ -1,5 +1,5 @@
 module Presenter.StarExec.Connection
-    ( sendRequest
+    ( sendRequest, sendRequestMaybe
     -- , index
     , getLoginCredentials
     , killmenothing
@@ -23,6 +23,7 @@ import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Exception (throw)
+import Control.Exception.Safe (tryAny)
 import Control.Monad.Catch (bracket_)
 import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
@@ -82,10 +83,17 @@ setSessionData cj sid d = do
   app <- getYesod
   lift $ atomically $ writeTVar (sessionData app) $ SessionData cj sid d
 
+-- | this will fail with a pattern match error if something went wrong
+sendRequestRaw :: Request -> Handler (Response BSL.ByteString)
+sendRequestRaw req = do
+  Just resp <- sendRequestRawMaybe req
+  return resp
+
 -- | raw request.
 --  will silently set cookies to session state.
-sendRequestRaw :: Request -> Handler (Response BSL.ByteString)
-sendRequestRaw req0 = do
+-- will always return (with Nothing, if something happened)
+sendRequestRawMaybe :: Request -> Handler (Maybe (Response BSL.ByteString))
+sendRequestRawMaybe req0 = do
   man <- httpManager <$> getYesod
   SessionData cj sid d <- getSessionData
   -- https://github.com/snoyberg/http-client/issues/117
@@ -101,48 +109,64 @@ sendRequestRaw req0 = do
     RequestBodyLBS s ->
       logWarnN  $ T.pack  $ "sendRequestRaw: " <> show s
   start <- liftIO getCurrentTime
-  resp <- httpLbs req man
+  eresp <- tryAny $ httpLbs req man
   end <- liftIO getCurrentTime
   logWarnN  $  "done sendRequestRaw: " <> reqInfo
-                       <> "response status: " <> T.pack (show $ responseStatus resp)
+                       <> "response status: " <> T.pack (either show (show . responseStatus) eresp)
                        --    <> "response cookies: " <> show (responseCookieJar resp)
          <> "time: " <> T.pack (show $ diffUTCTime end start)
-  when False $ logWarnN $ T.pack $ show resp
-  when False $ logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
-  let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
+  case eresp of
+    Left e -> do
+      logWarnN $ T.pack $ show e
+      return Nothing
+    Right resp -> do
+      when False $ logWarnN $ T.pack $ show resp
+      when False $ logWarnN $ T.pack $ "responseHeaders " <> show (responseHeaders resp)
+      let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
              getJsessionidFromCJ $ responseCookieJar resp
-  logWarnN $ T.pack $ "current sid: " <> show sid'
-  setSessionData (responseCookieJar resp) (case sid' of Nothing -> sid ; _ -> sid' ) end
-  return resp
+      logWarnN $ T.pack $ "current sid: " <> show sid'
+      setSessionData (responseCookieJar resp) (case sid' of Nothing -> sid ; _ -> sid' ) end
+      return $ Just resp
 
 
 -- | managed requests: will execute Login if necessary.
+-- will raise pattern match error if something happened
 sendRequest ::  Request -> Handler (Response BSL.ByteString)
-sendRequest req0 = do
-  logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
-  resp0 <- runCon_exclusive $ sendRequestRaw  $ req0
-  if not $ needs_login resp0
-     then do
-       logWarnN  $ T.pack  $ "sendRequest: OK"
-       return resp0
-    else do
-       logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
+sendRequest req = do
+  Just resp <- sendRequestMaybe req
+  return resp
 
-       runCon_exclusive $ do
-         base <- parseUrl starExecUrl
-         resp1 <- sendRequestRaw  $ base { method = "GET", path = indexPath }
-         creds <- getLoginCredentials
-         resp2 <- sendRequestRaw
-           $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
+-- | managed requests: will execute Login if necessary.
+-- will always return (with Nothing, if something happened)
+sendRequestMaybe ::  Request -> Handler (Maybe (Response BSL.ByteString))
+sendRequestMaybe req0 = do
+  logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
+  eresp0 <- runCon_exclusive $ sendRequestRawMaybe  $ req0
+  case eresp0 of
+    Nothing -> return Nothing
+    Just resp0 -> do
+      if not $ needs_login resp0
+        then do
+          logWarnN  $ T.pack  $ "sendRequest: OK"
+          return $ Just resp0
+        else do
+          logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
+
+          runCon_exclusive $ do
+            base <- parseUrl starExecUrl
+            resp1 <- sendRequestRaw  $ base { method = "GET", path = indexPath }
+            creds <- getLoginCredentials
+            resp2 <- sendRequestRaw
+              $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
                            ]
                  $ base { method = "POST" , path = loginPath }
-         resp3 <- sendRequestRaw $ base { method = "GET", path = indexPath }
-         return ()
+            resp3 <- sendRequestRaw $ base { method = "GET", path = indexPath }
+            return ()
 
-       logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
-       sendRequest req0
+          logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
+          sendRequestMaybe req0
 
 getJsessionidFromCJ :: CookieJar -> Maybe BSC.ByteString
 getJsessionidFromCJ cj = listToMaybe $ do

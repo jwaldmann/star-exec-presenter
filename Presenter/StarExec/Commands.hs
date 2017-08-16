@@ -724,12 +724,15 @@ addJob c = do
     RequestBodyStream {} -> logWarnN "RequestBodyStream"
     RequestBodyStreamChunked {} -> logWarnN "RequestBodyStreamChunked"
 
-  resp <- sendRequest req
+  mresp <- sendRequestMaybe req
 
-  when False $ logWarnN $ T.pack $ show resp
-  let cs = destroyCookieJar $ responseCookieJar resp
-      vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
-  return $ case vs of
+  case mresp of
+    Nothing -> return Nothing
+    Just resp -> do
+      when False $ logWarnN $ T.pack $ show resp
+      let cs = destroyCookieJar $ responseCookieJar resp
+          vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+      return $ case vs of
           [ s ] -> Just $ read $ BSC.unpack s
           _ -> Nothing
 
