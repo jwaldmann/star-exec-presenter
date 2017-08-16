@@ -45,6 +45,7 @@ library
                      Handler.LegacyShowJobResults
                      Handler.FlexibleTable
                      Handler.Competition
+                     Handler.CompetitionYear
                      Handler.CompetitionWithConfig
                      Handler.Import
                      Handler.ListJobPairs

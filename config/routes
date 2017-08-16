@@ -51,8 +51,10 @@
 
 
 -- displays competitions
-/competitions/#CompetitionInfoId CompetitionR GET
+/competitions/#Year CompetitionYearR GET
+!/competitions/#CompetitionInfoId CompetitionR GET
 /competition_with_config/#Competition CompetitionWithConfigR GET
+
 
 /combine/*[CompetitionInfoId] CombineR GET
 

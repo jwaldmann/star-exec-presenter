@@ -52,6 +52,7 @@ import Handler.LegacyShowManyJobResults
 import Handler.LegacyShowJobResults
 import Handler.FlexibleTable
 import Handler.Competition
+import Handler.CompetitionYear
 import Handler.CompetitionWithConfig
 import Handler.Import
 import Handler.ListJobPairs
