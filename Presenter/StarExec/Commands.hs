@@ -448,14 +448,15 @@ pushJobXML meth sId jobs = case meth of
 
 pushJobXML_bulk :: Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXML_bulk sId jobs = do
-  js <- pushJobXMLStarExec sId jobs
+  mjs <- pushJobXMLStarExec sId jobs
+  let js = maybe [] id mjs
   registerJobs $ concat $ catMaybes $ map jobids js
   return js
 
 
-pushJobXMLStarExec :: Int -> [StarExecJob] -> Handler [StarExecJob]
+pushJobXMLStarExec :: Int -> [StarExecJob] -> Handler (Maybe [StarExecJob])
 pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
-  Nothing -> return jobs
+  Nothing -> return $ Just jobs
   Just (bs, remap) -> do
     sec <- parseUrl starExecUrl
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId )
@@ -473,19 +474,22 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
 
     -- liftIO $ print req
 
-    resp <- sendRequest req
-    let ids = findJobNumber resp
+    mresp <- sendRequestMaybe req
+    case mresp of
+      Nothing -> return Nothing
+      Just resp -> do
+        let ids = findJobNumber resp
 
-    logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show ids)
+        logWarnN $ "done sending JobXML for " <> info <> " received vs = " <> T.pack (show ids)
 
-    return $ do
-      (j, mpos) <- zip jobs remap
-      let ji = case mpos of
-            Nothing -> Nothing
-            Just pos ->
-              let i = ids !! pos in
-              if i > 0 then Just [i] else Nothing
-      return $ j { jobids = ji }
+        return $ Just $ do
+          (j, mpos) <- zip jobs remap
+          let ji = case mpos of
+                Nothing -> Nothing
+                Just pos ->
+                  let i = ids !! pos in
+                  if i > 0 then Just [i] else Nothing
+          return $ j { jobids = ji }
 
 findJobNumber :: Read t => Response body -> [t]
 findJobNumber resp =

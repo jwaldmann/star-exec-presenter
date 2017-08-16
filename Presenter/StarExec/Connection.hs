@@ -103,15 +103,15 @@ sendRequestRawMaybe req0 = do
                   }
       reqInfo = T.pack $ BSC.unpack
                 $ method req <> " " <> path req <> "?" <> queryString req
-  logWarnN  $ "sendRequestRaw: " <> reqInfo
+  logWarnN  $ "sendRequestRawMaybe: " <> reqInfo
   logWarnN  $ T.pack  $ "using sid: " <> show (getJsessionidFromCJ cj)
   when False $ case requestBody req of
     RequestBodyLBS s ->
-      logWarnN  $ T.pack  $ "sendRequestRaw: " <> show s
+      logWarnN  $ T.pack  $ "sendRequestRawMaybe: " <> show s
   start <- liftIO getCurrentTime
   eresp <- tryAny $ httpLbs req man
   end <- liftIO getCurrentTime
-  logWarnN  $  "done sendRequestRaw: " <> reqInfo
+  logWarnN  $  "done sendRequestRawMaybe: " <> reqInfo
                        <> "response status: " <> T.pack (either show (show . responseStatus) eresp)
                        --    <> "response cookies: " <> show (responseCookieJar resp)
          <> "time: " <> T.pack (show $ diffUTCTime end start)
@@ -140,17 +140,17 @@ sendRequest req = do
 -- will always return (with Nothing, if something happened)
 sendRequestMaybe ::  Request -> Handler (Maybe (Response BSL.ByteString))
 sendRequestMaybe req0 = do
-  logWarnN  $ T.pack  $ "sendRequest: " <> show (path req0)
+  logWarnN  $ T.pack  $ "sendRequestMaybe: " <> show (path req0)
   eresp0 <- runCon_exclusive $ sendRequestRawMaybe  $ req0
   case eresp0 of
     Nothing -> return Nothing
     Just resp0 -> do
       if not $ needs_login resp0
         then do
-          logWarnN  $ T.pack  $ "sendRequest: OK"
+          logWarnN  $ T.pack  $ "sendRequestMaybe: OK"
           return $ Just resp0
         else do
-          logWarnN  $ T.pack  $ "sendRequest: not OK, need to login"
+          logWarnN  $ T.pack  $ "sendRequestMaybe: not OK, need to login"
 
           runCon_exclusive $ do
             base <- parseUrl starExecUrl
@@ -165,7 +165,7 @@ sendRequestMaybe req0 = do
             resp3 <- sendRequestRaw $ base { method = "GET", path = indexPath }
             return ()
 
-          logWarnN  $ T.pack  $ "repeat original sendRequest (RECURSE)"
+          logWarnN  $ T.pack  $ "repeat original sendRequestMaybe (RECURSE)"
           sendRequestMaybe req0
 
 getJsessionidFromCJ :: CookieJar -> Maybe BSC.ByteString
