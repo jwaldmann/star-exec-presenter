@@ -58,3 +58,8 @@ clear db:
 access db:
 
     sudo -u postgres psql -d yesod
+
+how to build documentation (locally)
+
+    stack haddock --haddock-arguments="--hyperlinked-source --ignore-all-exports" --haddock-deps
+
