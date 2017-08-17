@@ -31,6 +31,8 @@ JobResultInfo
     cpuTime Double
     wallclockTime Double
     result SolverResult
+    certificationTime Double Maybe
+    outputSize Int Maybe
     deriving Eq Ord Read Show
 
 LriResultInfo

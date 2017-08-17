@@ -86,6 +86,8 @@ cell_for_job_pair result =
             <a class="pair-link" href=@{ShowJobPairR (jobResultInfoPairId result)}>
                 #{toFixed 1 $ jobResultInfoCpuTime result} /
                 #{toFixed 1 $ jobResultInfoWallclockTime result}
+                $maybe os <- jobResultInfoOutputSize result
+                  / #{os}
              |]
          , tdclass = getClass result
          , url = T.pack $ "nothing"

@@ -3,6 +3,7 @@ module Presenter.Model.PersistInstances where
 import Model
 import Prelude
 import qualified Data.Csv as CSV
+import Control.Applicative ((<|>))
 import qualified Data.Text as T
 import Data.Text.Encoding
 import Presenter.Model.StarExec
@@ -10,7 +11,8 @@ import Presenter.Output
 
 instance CSV.FromNamedRecord JobResultInfo where
   parseNamedRecord r =
-    JobResultInfo (-1) Nothing
+    let may p = ( Just <$> p ) <|> return Nothing
+    in  JobResultInfo (-1) Nothing
                   <$> r CSV..: "pair id"
                   <*> r CSV..: "benchmark"
                   <*> r CSV..: "benchmark id"
@@ -23,6 +25,8 @@ instance CSV.FromNamedRecord JobResultInfo where
                   <*> r CSV..: "cpu time"
                   <*> r CSV..: "wallclock time"
                   <*> r CSV..: "result"
+                  <*> may ( r CSV..: "certification-time" )
+                  <*> may ( r CSV..: "output-size" )
 
 instance CSV.FromField SolverResult where
   parseField result = parseResult s

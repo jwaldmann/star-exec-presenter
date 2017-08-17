@@ -25,6 +25,10 @@ class ResultEntity a where
   toScore :: a -> Maybe Int
   toCpuTime :: a -> Double
   toWallclockTime :: a -> Double
+  toOutputSize :: a -> Maybe Int
+  toOutputSize _ = Nothing
+  toCertificationTime :: a -> Maybe Double
+  toCertificationTime _ = Nothing
 
 class BenchmarkEntity a where
   toBenchmarkID :: a -> BenchmarkID
@@ -153,6 +157,10 @@ instance ResultEntity JobResult where
   toWallclockTime (LriResult r) = toWallclockTime r
   toWallclockTime (UibkResult r) = toWallclockTime r
 
+  toOutputSize (StarExecResult r) = toOutputSize r
+
+  toCertificationTime (StarExecResult r) = toCertificationTime r
+
 instance ResultEntity JobResultInfo where
   getSolverResult = jobResultInfoResult
 
@@ -173,6 +181,9 @@ instance ResultEntity JobResultInfo where
   toCpuTime = jobResultInfoCpuTime
 
   toWallclockTime = jobResultInfoWallclockTime
+
+  toOutputSize = jobResultInfoOutputSize
+  toCertificationTime = jobResultInfoCertificationTime
 
 instance ResultEntity LriResultInfo where
   getSolverResult = lriResultInfoResult

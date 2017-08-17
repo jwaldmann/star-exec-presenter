@@ -130,6 +130,8 @@ cell_for_job_pair result =
                <span style="opacity:0.5">
                     #{toFixed 1 $ toCpuTime result} /
                     #{toFixed 1 $ toWallclockTime result}
+                    $maybe os <- toOutputSize result
+                      &nbsp;(#{os})
              |]
          , tdclass = getClass result
          , msolver = Just $ toSolverName result
