@@ -221,17 +221,17 @@ tc_NaTT :: Competition [Participant]
 tc_NaTT = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225848)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225848)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225850)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225850)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
           ,Category "TRS Equational"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225848)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
           ,Category "TRS Equational certified"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12835,225849)}]]]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227233)}]]]
 
 tc_T2 :: Competition [Participant]
 tc_T2 = Competition "Termination Competition 2017"
@@ -302,13 +302,13 @@ tc_kflmnm :: Competition [Participant]
 tc_kflmnm = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "SRS Standard"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12689,225454)}]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12864,227325)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12689,225454)}]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12864,227325)}]
           ,Category "SRS Standard certified"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12689,225454)}]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Nothing}]
           ,Category "SRS Relative certified"
-               [Participant {participantName = "MultumNonMulta" , solver_config = Just (184509,12689,225454)}]]]
+               [Participant {participantName = "MultumNonMulta" , solver_config = Nothing}]]]
 
 tc_muterm :: Competition [Participant]
 tc_muterm = Competition "Termination Competition 2017"
