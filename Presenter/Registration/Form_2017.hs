@@ -11,7 +11,7 @@ tc_skeleton :: Competition Catinfo
 tc_skeleton = tc_skeleton_10_5
 
 -- Postprocessors:
-plain = 355
+plain = 363
 ceta  = 362
 
 tc_skeleton_10_5 :: Competition Catinfo
