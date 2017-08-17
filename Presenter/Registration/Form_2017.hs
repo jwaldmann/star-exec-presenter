@@ -177,7 +177,9 @@ tc_AProVE =  Competition "Termination Competition 2017"
           ,Category "Runtime Complexity - Innermost Rewriting certified"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,12843,225866)}]
           ,Category "Complexity - Integer Transition Systems"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,12843,225863)}]]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,12843,225863)}]
+          ,Category "Complexity - Integer Transition Systems certified"
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,12843,225861)}]]
      ,MetaCategory "Termination of Programming Languages"
           [Category "C"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,12843,225867)}]
