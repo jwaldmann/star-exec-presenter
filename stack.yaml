@@ -1,4 +1,6 @@
-resolver: lts-8.22
+# if you change this, be sure to change keter.sh as well
+# resolver: lts-8.22
+resolver: nightly-2017-08-15
 
 packages:
 - '.'
@@ -6,6 +8,9 @@ packages:
     git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
     commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
   extra-dep: true
+
+extra-deps:
+ - SafeSemaphore-0.10.1
 
 system-ghc: true
 compiler-check: newer-minor
