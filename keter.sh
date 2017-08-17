@@ -2,7 +2,7 @@
 
 ARCH=x86_64-linux
 
-# if you change this, be sure to change stack.yaml as well
+# if you change this, be sure to change stack.yaml and config/keter.yml as well
 # RESOLVER=lts-8.22
 # GHC=8.0.2
 RESOLVER=nightly-2017-08-15
