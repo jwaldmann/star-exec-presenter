@@ -67,11 +67,18 @@ makeDOI fs = do
     , toBench = flip M.lookup mm
     }
 
+makeDOI_for_2014_2015 :: IO DOIService
 makeDOI_for_2014_2015 =
   makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip" ]
 
+makeDOI_for_2014_2015_extra :: IO DOIService
 makeDOI_for_2014_2015_extra =
   makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip", "johannes_waldmann_tpdb-8.0.7_XML.zip" ]
 
+makeDOI_for_2016 :: IO DOIService
 makeDOI_for_2016 =
   makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip", "johannes_waldmann_tpdb-8.0.7_XML.zip", "TPDB-10.4_XML.zip" ]
+
+makeDOI_for_2017 :: IO DOIService
+makeDOI_for_2017 =
+  makeDOI [ "TPDB-65df8a308dd6_XML.zip" , "TPDB-10.3_XML.zip", "johannes_waldmann_tpdb-8.0.7_XML.zip", "TPDB-10.4_XML.zip", "TPDB-10.5_XML.zip" ]
