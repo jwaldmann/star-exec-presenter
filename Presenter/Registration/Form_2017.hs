@@ -296,9 +296,9 @@ tc_matchbox :: Competition [Participant]
 tc_matchbox = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "SRS Standard"
-               [Participant {participantName = "matchbox" , solver_config = Just (62205,12788,225711)}]
+               [Participant {participantName = "matchbox" , solver_config = Just (62205,12788,225710)}]
           ,Category "Cycles"
-               [Participant {participantName = "matchbox" , solver_config = Just (62205,12788,225710)}]]]
+               [Participant {participantName = "matchbox" , solver_config = Just (62205,12788,225711)}]]]
 
 tc_kflmnm :: Competition [Participant]
 tc_kflmnm = Competition "Termination Competition 2017"
