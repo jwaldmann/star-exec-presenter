@@ -79,7 +79,7 @@ tc_skeleton_10_5 = Competition "Termination Competition 2017"
           [Category "C"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 277822] , participants = []}
           ,Category "C Integer Programs"
-               Catinfo {postproc = plain , benchmarks = [Hierarchy 277918] , participants = []}
+               Catinfo {postproc = plain , benchmarks = [Hierarchy 277726] , participants = []}
           ,Category "Java Bytecode"
                Catinfo {postproc = plain , benchmarks = [Hierarchy 277810, Hierarchy 277719] , participants = []}
           ,Category "Logic Programming"
