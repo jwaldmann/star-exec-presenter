@@ -19,7 +19,7 @@ import Control.Monad ( when, guard, mzero)
 import Data.Maybe (catMaybes)
 
 import Data.Function (on)
-import Data.List (sortBy, inits, tails, minimumBy, maximumBy)
+import Data.List (sort, sortBy, inits, tails, minimumBy, maximumBy, transpose)
 import Prelude (init)
 
 import qualified Data.Graph.Inductive as G
@@ -68,6 +68,7 @@ empty_cell =
          , tdclass = fromString "empty"
          , url = fromString "nothing"
          , tag = fromString "nothing"
+         , nums = M.empty
          , msolver = Nothing
          , mjr = Nothing
          , mjid = Nothing
@@ -91,8 +92,11 @@ $case bkey
 |]
   , tdclass = fromString "bench"
   , url = fromString ""
+  , msolver = Nothing
   , tag = fromString "nothing"
+  , nums = M.empty
   , mjr = Nothing
+  , mjid = Nothing
   }
 
 cell_for_solver :: (JobID, (SolverID, Text), (ConfigID, Text)) -> Cell
@@ -117,6 +121,7 @@ cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
   , msolver = Just sname
   , url = fromString ""
   , tag = fromString "nothing"
+  , nums = M.empty
   , mjr = Nothing
   , mjid = Just jid
   }
@@ -137,6 +142,13 @@ cell_for_job_pair result =
          , msolver = Just $ toSolverName result
          , url = fromString "nothing"
          , tag = getClass result
+         , nums = M.fromList $ do
+             (t, Just d) <- [ (CPU, Just $ toCpuTime result)
+                   , (Wall, Just $ toWallclockTime result)
+                   , (Size, fromIntegral <$> toOutputSize result)
+                   ]
+             return (t, d)
+         , mjid = Nothing
          }
 
 -- | old behaviour was: True
@@ -245,6 +257,22 @@ summary sc jids previous tab = do
                     these = Query $ previous ++ [ Filter_Rows p ]
                     others =  Query $ previous ++ [ Filter_Rows (Not p) ]
                 in  (t,i,n, (these, others))
+        column_nums_table :: [ M.Map Numtag (M.Map Level Double) ]
+        column_nums_table = for (cols tab) $ \ col ->
+          M.fromList $ do
+            nt <- [ CPU , Wall, Size ]
+            let values = Data.List.sort $ catMaybes $ do
+                  c <- col
+                  return $ M.lookup nt $ nums c
+                n = length values
+                m = M.fromList $ (Sum, sum values) : do
+                  (level, pos) <- [ (Min,0), (Bot, div n 5)
+                           , (Med, div n 2), (Top, div (4*n) 5)
+                           , (Max, n-1)
+                           ]
+                  return (level, values !! pos)                  
+            guard $ not $ null values
+            return (nt, m)
         positive n = n > 0
         row_type_stats = M.fromListWith (M.unionWith (+)) $ do
             row <- rows tab
@@ -261,7 +289,11 @@ summary sc jids previous tab = do
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] )
                 )
 	    )
-
+        shorten d =
+          if d < 1e3 then show (round d :: Int)
+          else if d < 1e6 then show (round (d / 1e3) :: Int) ++ "k"
+          else if d < 1e9 then show (round (d / 1e6) :: Int) ++ "m"
+          else show (round (d / 1e9) :: Int) ++ "g"
     [whamlet|
         <h3>summary
         total number of rows: #{show total}
@@ -282,6 +314,32 @@ summary sc jids previous tab = do
                           | <a href=@{ShowManyJobResultsR sc others jids}>others
                     $else
                         <td>
+             <tr>
+               <td>
+                 <table class="table">
+                   <thead>
+                     <tr>
+                       <th>
+                         X
+                   <tbody>
+                     $forall l <- reverse levels
+                       <tr>
+                         <td>
+                           #{show l}
+               $forall c <- drop 1 (column_nums_table)
+                 <td>
+                   <table class="table">
+                     <thead>
+                       <tr>
+                         $forall (k,v) <- M.toList c
+                           <th>#{show k}
+                     <tbody>
+                       $forall l <- reverse levels
+                         <tr>
+                           $forall (k,v) <- M.toList c
+                             <td>
+                               $maybe d <- M.lookup l v
+                                 #{shorten d}
         <h3>row types
         <table class="table">
           <thead>
