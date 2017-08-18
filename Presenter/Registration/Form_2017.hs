@@ -103,7 +103,7 @@ tc = collect tc_skeleton $
                          , tc_Ctrl -- Cynthia Kop
                          -- , tc_HipTNT
                          , tc_NaTT -- Akihisa Yamada
-                         -- , tc_T2
+                         , tc_T2 -- Marc Brockschmidt
                          -- , tc_TCT2
                          , tc_TCT -- Georg Moser
                          -- , tc_TTT2 -- Christian Sternagel
@@ -238,8 +238,11 @@ tc_NaTT = Competition "Termination Competition 2017"
 tc_T2 :: Competition [Participant]
 tc_T2 = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
-     [Category "Integer Transition Systems"
-     [Participant {participantName = "T2" , solver_config = Nothing}]]]
+        [Category "Integer Transition Systems"
+           [Participant {participantName = "T2Full" , solver_config = Just (24018,12888,227973)}]
+        ,Category "Integer Transition Systems certified"
+           [Participant {participantName = "T2Cert" , solver_config = Just (24018,12887,227972)}]
+        ]]
 
 tc_TCT :: Competition [Participant]
 tc_TCT = Competition "Termination Competition 2017"
