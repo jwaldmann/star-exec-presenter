@@ -6,6 +6,17 @@ import Presenter.Model.Types
 import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
 import qualified Data.Text as T
+import qualified Prelude as P
+
+data Numtag = CPU | Wall | Size
+  deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
+
+data Level = Min | Bot | Med | Top | Max | Sum
+  deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
+
+levels :: [ Level ]
+levels = [ P.minBound .. P.maxBound ]
+
 
 instance PathPiece Query where
   fromPathPiece "noquery" = return NoQuery
@@ -20,15 +31,20 @@ data Query =
   | Query [ Transform ]
   deriving (Read,Show, Eq)
 
+data Direction = Up | Down
+  deriving (Read,Show, Eq)
+
 data Transform =
   Choose_Columns [ Int ]
   | Filter_Rows Predicate
   | VBestAll | VBestInit
+  | Sort Direction Int (Maybe Numtag) -- ^ no numtag: sort by result
   deriving (Read,Show, Eq)
 
 data Predicate =
   And [ Cell_Filter ]
   | Not Predicate
+  | Compare Int Numtag Ordering Double
   deriving (Read,Show, Eq)
 
 data Cell_Filter =

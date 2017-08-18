@@ -1,6 +1,7 @@
 module Presenter.Model.Additional.Table where
 
 import Presenter.Model.Entities
+import Presenter.Model.Query
 import Presenter.Model.RouteTypes (JobID)
 import Prelude (Maybe)
 import Foundation (Widget)
@@ -22,10 +23,6 @@ type Col = [ Cell ]
 cols :: Table -> [ Col ] 
 cols t = Data.List.transpose (rows t)
 
-
-data Numtag = CPU | Wall | Size
-  deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
-
 data Cell =
      Cell { contents :: ! Widget -- ^ this is shown
           , tdclass :: ! T.Text
@@ -37,8 +34,3 @@ data Cell =
           , url :: ! T.Text -- ^ FIXME replace with proper type
           }
 
-data Level = Min | Bot | Med | Top | Max | Sum
-  deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
-
-levels :: [ Level ]
-levels = [ P.minBound .. P.maxBound ]

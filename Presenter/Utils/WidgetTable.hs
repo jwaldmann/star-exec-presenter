@@ -19,7 +19,7 @@ import Control.Monad ( when, guard, mzero)
 import Data.Maybe (catMaybes)
 
 import Data.Function (on)
-import Data.List (sort, sortBy, inits, tails, minimumBy, maximumBy, transpose)
+import Data.List (sort, sortOn, sortBy, inits, tails, minimumBy, maximumBy, transpose)
 import Prelude (init)
 
 import qualified Data.Graph.Inductive as G
@@ -266,13 +266,16 @@ summary sc jids previous tab = do
                   return $ M.lookup nt $ nums c
                 n = length values
                 m = M.fromList $ (Sum, sum values) : do
-                  (level, pos) <- [ (Min,0), (Bot, div n 5)
-                           , (Med, div n 2), (Top, div (4*n) 5)
+                  (level, pos) <- [ (Min,0), (Bot, div n cut)
+                           , (Med, div n 2), (Top, div ((cut-1)*n) cut)
                            , (Max, n-1)
                            ]
                   return (level, values !! pos)                  
             guard $ not $ null values
             return (nt, m)
+        sorter direction i nt = Query $ previous ++ [ Sort direction i nt ]
+        comparer i nt ordering bound =
+          Query $ previous ++ [ Filter_Rows (Compare i nt ordering bound) ]
         positive n = n > 0
         row_type_stats = M.fromListWith (M.unionWith (+)) $ do
             row <- rows tab
@@ -314,32 +317,6 @@ summary sc jids previous tab = do
                           | <a href=@{ShowManyJobResultsR sc others jids}>others
                     $else
                         <td>
-             <tr>
-               <td>
-                 <table class="table">
-                   <thead>
-                     <tr>
-                       <th>
-                         X
-                   <tbody>
-                     $forall l <- reverse levels
-                       <tr>
-                         <td>
-                           #{show l}
-               $forall c <- drop 1 (column_nums_table)
-                 <td>
-                   <table class="table">
-                     <thead>
-                       <tr>
-                         $forall (k,v) <- M.toList c
-                           <th>#{show k}
-                     <tbody>
-                       $forall l <- reverse levels
-                         <tr>
-                           $forall (k,v) <- M.toList c
-                             <td>
-                               $maybe d <- M.lookup l v
-                                 #{shorten d}
         <h3>row types
         <table class="table">
           <thead>
@@ -361,17 +338,82 @@ summary sc jids previous tab = do
                      <a href=@{ShowManyJobResultsR sc these jids}>these
                   <td>
                      <a href=@{ShowManyJobResultsR sc others jids}>others
+        <h3>statistics
+        <table class="table">
+          <thead>
+           <tr>
+             $forall h <- header tab
+                <th> ^{contents h}
+          <tbody>
+             <tr>
+               <td>
+                 <table class="table">
+                   <thead>
+                     <tr>
+                       <th>
+                         sort (inc)
+                   <tbody>
+                     $forall l <- levels
+                       <tr>
+                         <td>
+                           #{explain l}
+                   <thead>
+                     <tr>
+                       <th>
+                         sort (dec)
+               $forall (i, c) <- drop 1 (zip (enumFrom 0) column_nums_table)
+                 <td>
+                   <table class="table">
+                     <thead>
+                       <tr>
+                         $forall (k,v) <- M.toList c
+                           <th>
+                             <a href=@{ShowManyJobResultsR sc (sorter Up i (Just k)) jids}>
+                               #{show k}
+                     <tbody>
+                       $forall l <- levels
+                         <tr>
+                           $forall (k,v) <- M.toList c
+                             <td>
+                               $maybe d <- M.lookup l v
+                                 <a href=@{ShowManyJobResultsR sc (comparer i k LT d) jids}>&lt;
+                                 #{shorten d}
+                                 <a href=@{ShowManyJobResultsR sc (comparer i k GT d) jids}>&gt;
+
+                     <thead>
+                       <tr>
+                         $forall (k,v) <- M.toList c
+                           <th>
+                             <a href=@{ShowManyJobResultsR sc (sorter Down i (Just k)) jids}>
+                               #{show k}        
     |]
 
+cut :: Int
+cut = 10
+
+explain :: Level -> T.Text
+explain l = case l of
+  Sum -> "sum"
+  Max -> "maximum"
+  Top -> "top "    <> T.pack (show cut) <> "%"
+  Med -> "median"
+  Bot -> "bottom " <> T.pack (show cut) <> "%"
+  Min -> "minimum"
+      
 data Pick = Best JobID [Int] | Copy Int deriving (Eq, Ord, Show)
 
 apply :: [JobID] -> Transform -> Table -> Table
 apply jids t tab = case t of
     Filter_Rows p ->
-      tab { rows = filter ( \ row -> predicate p $ map tag row )
-                 $ rows tab }
+      tab { rows = filter ( predicate p ) $ rows tab }
     VBestAll -> virtual_best jids t tab
     VBestInit -> virtual_best (init' jids) t tab
+    Sort dir col (Just sub) ->
+      let val :: Row -> Either Double ()
+          val row = case M.lookup sub $ nums $ row !! col of
+            Nothing -> Right () -- late in the order
+            Just d -> Left $ ( case dir of Up -> id ; Down -> negate ) d
+      in  tab { rows = sortOn val $ rows tab }
 
 init' = reverse . drop 1 . reverse
 
@@ -442,10 +484,15 @@ getupper r = case getSolverResult r of
   _ -> mzero
     
 
-predicate :: Predicate -> [Text] -> Bool
-predicate p tags = case p of
-    And fs -> and $ zipWith matches fs tags
-    Not q -> not $ predicate q tags
+predicate :: Predicate -> Row -> Bool
+predicate p row = case p of
+    And fs -> and $ zipWith matches fs $ map tag row
+    Not q -> not $ predicate q row
+    Compare i nt ordering bound ->
+      case M.lookup nt $ nums $ row !! i of
+        Nothing -> False
+        Just v -> (case ordering of LT -> (<=) ; GT -> (>=) ) v bound
+
 
 matches :: Cell_Filter -> Text -> Bool
 matches f c = case f of
