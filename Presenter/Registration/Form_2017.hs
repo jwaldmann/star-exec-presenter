@@ -361,4 +361,4 @@ tc_sol = Competition "Termination Competition 2017"
  [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
    [Category "Higher-Order rewriting (union beta)"
       [Participant {participantName = "SOL" ,
-                    solver_config = Just (277287,12832,225845)}]]]
+                    solver_config = Just (277287,12842,225860)}]]]
