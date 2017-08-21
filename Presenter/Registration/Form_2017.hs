@@ -351,10 +351,10 @@ tc_cofloco :: Competition [Participant]
 tc_cofloco = Competition "Termination Competition 2017"
      [MetaCategory "Complexity Analysis of Term Rewriting"
           [Category "Complexity - Integer Transition Systems"
-               [Participant {participantName = "CoFloCo" , solver_config = Just (184632,9105,164532)}]]
+               [Participant {participantName = "CoFloCo" , solver_config = Just (184632,12909,228009)}]]
      ,MetaCategory "Complexity Analysis of Programming Languages"
           [Category "Complexity - C Integer Programs"
-               [Participant {participantName = "CoFloCo" , solver_config = Just (184632,9105,164533)}]]] 
+               [Participant {participantName = "CoFloCo" , solver_config = Just (184632,12909,228010)}]]]
 
 tc_sol :: Competition [Participant]
 tc_sol = Competition "Termination Competition 2017"
