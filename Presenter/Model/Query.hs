@@ -17,7 +17,6 @@ data Level = Min | Bot | Med | Top | Max | Sum
 levels :: [ Level ]
 levels = [ P.minBound .. P.maxBound ]
 
-
 instance PathPiece Query where
   fromPathPiece "noquery" = return NoQuery
   fromPathPiece t = case reads (T.unpack t) of

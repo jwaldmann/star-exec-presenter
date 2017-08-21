@@ -27,7 +27,8 @@ data Cell =
      Cell { contents :: ! Widget -- ^ this is shown
           , tdclass :: ! T.Text
           , tag :: ! T.Text -- ^ used for sorting (e.g., YES, NO, CERTIFIED)
-          , nums :: ! (M.Map Numtag P.Double) 
+          , nums :: ! (M.Map Numtag P.Double)
+          , mbench :: ! (Maybe T.Text) -- ^  if this is cell for a benchmark
           , msolver :: ! (Maybe T.Text) -- ^ who made this?
           , mjr :: ! (Maybe JobResult)
           , mjid :: ! (Maybe JobID)

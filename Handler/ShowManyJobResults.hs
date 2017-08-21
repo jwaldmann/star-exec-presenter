@@ -3,6 +3,7 @@
 
 module Handler.ShowManyJobResults
   ( getShowManyJobResultsR
+  , getShowManyJobResultsCSVR
   -- , getShowManyJobResultsLegacyR
   , shorten
   ) where
@@ -85,7 +86,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
       else return ()
     $(widgetFile "show_many_job_results")
 
-getShowManyJobResultsR sc q@(Query ts) jids @ (JobIds ids) = do
+getShowManyJobResultsR sc q@(Query ts) jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
   tab <- getManyJobCells $ map (snd . queryResult) qJobs
   defaultLayout $ do
@@ -98,3 +99,10 @@ getShowManyJobResultsR sc q@(Query ts) jids @ (JobIds ids) = do
             <pre>#{show q}
         |]
     display sc jids [] ts tab
+
+getShowManyJobResultsCSVR
+  :: Bool -> Query -> JobIds -> Handler TypedContent
+getShowManyJobResultsCSVR verbose q jids@(JobIds ids) = do
+  qJobs <- queryManyJobs ids
+  tab <- getManyJobCells $ map (snd . queryResult) qJobs
+  displayCSV verbose Standard q jids tab

@@ -1,4 +1,4 @@
-{-# language LambdaCase #-}
+{-# language LambdaCase, RankNTypes #-}
 
 module Presenter.Utils.WidgetTable where
 
@@ -21,9 +21,12 @@ import Data.Maybe (catMaybes)
 import Data.Function (on)
 import Data.List (sort, sortOn, sortBy, inits, tails, minimumBy, maximumBy, transpose)
 import Prelude (init)
+import qualified Data.List as L
 
 import qualified Data.Graph.Inductive as G
 import Data.Double.Conversion.Text
+
+import Data.Csv (toRecord, encode, ToField(..))
 
 bminfo dois (key,name) = case key of
   Left bid -> (Left bid, name)
@@ -70,6 +73,7 @@ empty_cell =
          , tag = fromString "nothing"
          , nums = M.empty
          , msolver = Nothing
+         , mbench = Nothing
          , mjr = Nothing
          , mjid = Nothing
          }
@@ -82,7 +86,7 @@ cell_for_job jid =
 cell_for_bench
   :: (BenchmarkKey, Name)
   -> Cell
-cell_for_bench (bkey, bname) = Cell
+cell_for_bench (bkey, bname) = empty_cell
   { contents = [whamlet|
 $case bkey
   $of Left bId
@@ -92,15 +96,11 @@ $case bkey
 |]
   , tdclass = fromString "bench"
   , url = fromString ""
-  , msolver = Nothing
-  , tag = fromString "nothing"
-  , nums = M.empty
-  , mjr = Nothing
-  , mjid = Nothing
+  , mbench = Just bname
   }
 
 cell_for_solver :: (JobID, (SolverID, Text), (ConfigID, Text)) -> Cell
-cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
+cell_for_solver (jid,(sid, sname),(cid, cname)) = empty_cell
   { contents = [whamlet|
 <table>
   <tr>
@@ -120,15 +120,12 @@ cell_for_solver (jid,(sid, sname),(cid, cname)) = Cell
   , tdclass = fromString "solver"
   , msolver = Just sname
   , url = fromString ""
-  , tag = fromString "nothing"
-  , nums = M.empty
-  , mjr = Nothing
   , mjid = Just jid
   }
 
 cell_for_job_pair :: JobResult -> Cell
-cell_for_job_pair result =
-    Cell { mjr = Just result
+cell_for_job_pair result = empty_cell
+         { mjr = Just result
          , contents = [whamlet|
             <a class="pair-link" href=@{ShowJobPairR (getPairID result)}>
                #{short $ getSolverResult result }
@@ -140,7 +137,6 @@ cell_for_job_pair result =
              |]
          , tdclass = getClass result
          , msolver = Just $ toSolverName result
-         , url = fromString "nothing"
          , tag = getClass result
          , nums = M.fromList $ do
              (t, Just d) <- [ (CPU, Just $ toCpuTime result)
@@ -148,12 +144,50 @@ cell_for_job_pair result =
                    , (Size, fromIntegral <$> toOutputSize result)
                    ]
              return (t, d)
-         , mjid = Nothing
          }
 
 -- | old behaviour was: True
 show_intermediate_transforms :: Bool
 show_intermediate_transforms = False
+
+displayCSV verbose sc NoQuery jids tab0 =
+  displayCSV verbose sc (Query []) jids tab0
+
+displayCSV verbose sc (Query ts) jids tab0 = do
+  let jobname = T.pack $ concat $ L.intersperse "-" $ do
+        id <- getIds jids
+        return $ case id of
+          StarExecJobID i -> show i
+          _ -> "X"
+      tab = foldl (flip $ apply $ getIds jids) tab0 ts
+      compact :: forall a . [a] -> [a]
+      compact = if verbose then id else take 1
+  let head = 
+        [ do c <- header tab
+             map toField $ case msolver c of
+               Nothing -> [ "benchmark" ]
+               Just s ->  compact [ s, s, s, s ]
+        , do c <- header tab
+             case msolver c of
+               Nothing -> [ " " ]
+               Just s ->  compact [ "result", "cpu", "wall", "size" ] 
+        ]
+      show_tag t = case T.stripPrefix "solver-" t of
+        Just s -> s
+        _ -> t
+      body = do
+        b : cs <- rows tab
+        return $ toField (maybe "" id $ mbench b) : do
+          c <- cs
+          compact $ toField (show_tag $ tag c) : do
+            k <- [ CPU, Wall, Size ]
+            return $ case M.lookup k $ nums c of
+              Nothing -> " "
+              Just v -> toField v
+  let csv = encode $ map toRecord $ head ++ body
+  addHeader "Content-Disposition"
+    ( "attachment;filename=results-" <> jobname <> ".csv" )
+  return $ TypedContent "text/csv" $ toContent csv
 
 display :: Scoring -> JobIds -> [Transform] -> [Transform] -> Table -> Widget
 display sc jids previous ts tab  = do
@@ -180,7 +214,15 @@ display sc jids previous ts tab  = do
     -- no more transformers, display actual data
         let rs = rows tab
         [whamlet|
-             <h3>data
+           <h3>data
+           <p>
+             also available in CSV format:
+             <a href=@{ShowManyJobResultsCSVR False (Query previous) jids}>
+               terse (just results)
+             ,
+             <a href=@{ShowManyJobResultsCSVR True (Query previous) jids}>
+               verbose (results, times, size)
+           <p>
              <table class="table">
               <thead>
                 <tr>

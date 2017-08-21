@@ -46,6 +46,7 @@
 /show_job_results/*JobIds LegacyShowJobResultsR GET
 /show_many_job_results/*JobIds LegacyShowManyJobResultsR GET
 /flexible-table/#Query/*JobIds FlexibleTableR GET
+/flexible-table-csv/#Bool/#Query/*JobIds ShowManyJobResultsCSVR GET
 
 /problems/*JobIds ProblemsR GET
 

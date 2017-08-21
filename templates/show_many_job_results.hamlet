@@ -14,6 +14,14 @@ $forall jid <- getIds jids
 
 <h2>Results
 
+<p>
+  also available in CSV format:
+  <a href=@{ShowManyJobResultsCSVR False NoQuery jids}>
+    terse (just results)
+  ,
+  <a href=@{ShowManyJobResultsCSVR True NoQuery jids}>
+    verbose (results, times, size)
+
 <div class="container">
   <input type="checkbox" id="legend">
   <div class="container">
