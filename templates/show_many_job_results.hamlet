@@ -1,7 +1,7 @@
 <h1>Overview of job-results
 <a href=@{FlexibleTableR (Query []) jids}>flexible query (experimental)
 |
-<a href=@{ProblemsR jids}> consistency check
+<a href=@{ProblemsR False jids}>consistency check
 | view original jobs on star-exec:
 $forall jid <- getIds jids
   $if isStarExecID jid

@@ -48,7 +48,7 @@
 /flexible-table/#Query/*JobIds FlexibleTableR GET
 /flexible-table-csv/#Bool/#Query/*JobIds ShowManyJobResultsCSVR GET
 
-/problems/*JobIds ProblemsR GET
+/problems/#Bool/*JobIds ProblemsR GET
 
 
 -- displays competitions

@@ -8,7 +8,7 @@ $else
             <li>
                <a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
                #{show $ competitionInfoDate $ entityVal ci}
-               <a href=@{ProblemsR $ JobIds $ allJobIDs $ competitionInfoCompetition $ entityVal ci}>errors
+               <a href=@{ProblemsR False $ JobIds $ allJobIDs $ competitionInfoCompetition $ entityVal ci}>errors
                $if authorized 
                  <a href=@{CompetitionTextR $ entityKey ci}>edit
                

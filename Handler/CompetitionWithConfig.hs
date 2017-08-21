@@ -58,7 +58,7 @@ getCompetitionWithConfigR comp = do
             |
               <a href=@{ResumeR $ JobIds js}>Re
             |
-              <a href=@{ProblemsR $ JobIds js}>Ch
+              <a href=@{ProblemsR False $ JobIds js}>Ch
         |]
   
   defaultLayout $ do

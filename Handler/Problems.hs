@@ -25,8 +25,8 @@ incompatible lower upper = case (lower,upper) of
 -- | display all job pairs with strange results (not YES, NO, MAYBE, WORST_CASE),
 -- as these are the most interesting to look at before competition.
 -- https://github.com/stefanvonderkrone/star-exec-presenter/issues/86
-getProblemsR :: JobIds -> Handler Html
-getProblemsR jids @ (JobIds ids) = do
+getProblemsR :: Bool -> JobIds -> Handler Html
+getProblemsR full jids @ (JobIds ids) = do
   qJobs <- queryManyJobs ids
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       jobResults = concat $ map (snd . queryResult) qJobs
@@ -51,6 +51,9 @@ getProblemsR jids @ (JobIds ids) = do
          return $ StarExecJobID $ jobResultInfoJobId p
   let solver_result_cell me = [whamlet|
                <td>
+                 <a href=@{FlexibleTableR NoQuery (JobIds [getJobID me])}>
+                   #{show $ getJobID me}
+               <td>
                  <a href=@{ShowSolverInfoR (toSolverID me)}>
                    #{toSolverName me}
                <td>
@@ -74,15 +77,17 @@ getProblemsR jids @ (JobIds ids) = do
        $forall j <- jobInfos
            <a href=@{ShowJobInfoR $ toJobID j}>#{toJobName j}</a>,
        <p>the subset of these jobs that actually have problems:
-          <a href=@{ProblemsR $ JobIds $ S.toList problematic}>#{show problematic}
+          <a href=@{ProblemsR full $ JobIds $ S.toList problematic}>#{show problematic}
        <h2>Incompatible Lower and Upper Bounds
        <table class="table">
          <thead>
            <tr>
              <th>Benchmark
+             <th>Job A
              <th>Solver A
              <th>Config A
              <th>Lower Bound A
+             <th>Job B
              <th>Solver B
              <th>Config B
              <th>Upper Bound B
@@ -110,16 +115,37 @@ getProblemsR jids @ (JobIds ids) = do
            <li>
              <span class="solver-error">ERROR
              (indicating an error in the postprocessor).
+       <h3>Strange Completed Job Pairs
        <table class="table">
          <thead>
            <tr>
              <th>Benchmark
+             <th>Job
              <th>Solver
              <th>Config
              <th>Result
          <tbody>
-           $forall me <- others
+           $forall me <- filter isResultComplete others
              <tr>
                ^{benchmark_cell me}
                ^{solver_result_cell me}
+       <h3>Incomplete Job Pairs
+         $if full
+           <a href=@{ProblemsR False jids}>(hide)
+         $else
+           <a href=@{ProblemsR True jids}>(show)
+       $if full    
+           <table class="table">
+             <thead>
+               <tr>
+                 <th>Benchmark
+                 <th>Job
+                 <th>Solver
+                 <th>Config
+                 <th>Result
+             <tbody>
+               $forall me <- filter isResultComplete others
+                 <tr>
+                   ^{benchmark_cell me}
+                   ^{solver_result_cell me}
     |]
