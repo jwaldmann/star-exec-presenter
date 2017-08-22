@@ -223,17 +223,17 @@ tc_NaTT :: Competition [Participant]
 tc_NaTT = Competition "Termination Competition 2017"
      [MetaCategory "Termination of Term Rewriting (and Transition Systems)"
           [Category "TRS Standard"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228408)}]
           ,Category "SRS Standard"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228408)}]
           ,Category "TRS Relative"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228408)}]
           ,Category "SRS Relative"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228408)}]
           ,Category "TRS Equational"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227231)}]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228408)}]
           ,Category "TRS Equational certified"
-               [Participant {participantName = "NaTT" , solver_config = Just (20344,12862,227233)}]]]
+               [Participant {participantName = "NaTT" , solver_config = Just (20344,12933,228409)}]]]
 
 tc_T2 :: Competition [Participant]
 tc_T2 = Competition "Termination Competition 2017"
