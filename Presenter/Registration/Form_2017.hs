@@ -168,7 +168,7 @@ tc_AProVE =  Competition "Termination Competition 2017"
           ,Category "Integer Transition Systems"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,12921,228207)}]
           ,Category "Integer Transition Systems certified"
-               [Participant {participantName = "AProVE" , solver_config = Just (18956,12921,228204)}]
+               [Participant {participantName = "AProVE" , solver_config = Just (18956,12946,228450)}]
           ,Category "Integer TRS Innermost"
                [Participant {participantName = "AProVE" , solver_config = Just (18956,12921,228208)}]]
      ,MetaCategory "Complexity Analysis of Term Rewriting"
