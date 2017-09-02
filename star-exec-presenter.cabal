@@ -189,6 +189,7 @@ library
                  , parsec
                  , blaze-html
                  , xml-hamlet
+                 , data-default-class
                  , case-insensitive
                  , http-client
                  , http-client-tls
