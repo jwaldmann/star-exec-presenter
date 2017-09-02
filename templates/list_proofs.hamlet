@@ -21,5 +21,5 @@
             $nothing
               no result
           <td>
-            <a href=@{DisplayProofR $ id2Text pair}>view proof</a> /
+            <a href=@{DisplayProofR $ getPairID_ pair}>view proof</a> /
             <a href=@{ShowJobPairR $ getPairID_ pair}>view job-pair</a>

@@ -14,8 +14,8 @@
 
 -- displays proofs of job-pairs
 /proofs ListProofsR GET
-/proofs/#Text DisplayProofR GET
-/display_proof/#Text LegacyDisplayProofR GET
+/proofs/#JobPairID DisplayProofR GET
+/display_proof/#JobPairID LegacyDisplayProofR GET
 
 -- displays job-infos
 /jobs ListJobsR GET
@@ -26,7 +26,7 @@
 /benchmarks ListBenchmarksR GET
 /benchmarks/#BenchmarkID ShowBenchmarkInfoR GET
 /render/benchmarks/#BenchmarkID RenderBenchmarkR GET
-/xml/#Text RenderXmlR GET
+-- /xml/#Text RenderXmlR GET
 /show_benchmark_info/#BenchmarkID LegacyShowBenchmarkInfoR GET
 
 -- displays solver-infos

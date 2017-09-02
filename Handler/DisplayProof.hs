@@ -17,59 +17,39 @@ import Data.Default.Class (def)
 typeXSL :: ContentType
 typeXSL = "text/xsl"
 
-getDisplayProofR :: Text -> Handler TypedContent
-getDisplayProofR path = do
-  case TRead.decimal path of
-    Right (_pairId, _) -> getProof _pairId
-    Left _ -> getFile path
-
-getFile :: Text -> Handler TypedContent
-getFile path = do
-  let filePath = "static/xsl/" ++ (T.unpack path)
-  fileExists <- liftIO $ doesFileExist filePath
-  if fileExists
-    then do
-      file <- liftIO $ TIO.readFile filePath
-      return $ toTypedContent (typeXSL, toContent file)
-    else notFound
-
-getProof :: Int -> Handler TypedContent
-getProof _pairId = do
-  mPersistJobPair <- runDB $ getBy $ UniqueJobPairInfo _pairId
+getDisplayProofR :: JobPairID -> Handler TypedContent
+getDisplayProofR pairId @ (StarExecPairID pid) = do
+  mPersistJobPair <- runDB $ getBy $ UniqueJobPairInfo pid
   case mPersistJobPair of
-    Nothing -> renderFail _pairId "no such job pair"
+    Nothing -> renderFail pairId "no such job pair"
     Just jp -> case jobPairInfoHtmlProof $ entityVal jp of
-      Nothing -> renderFail _pairId "job pair output has no html/xml contents"
+      Nothing -> renderFail pairId "job pair output has no html/xml contents"
       Just hp -> do
-        let proof = decompress $ BSL.fromStrict hp
-        case  Text.XML.parseLBS def proof of
-          Right xml_doc -> do
-            logWarnN $ T.pack $ "------------" ++ show ( documentPrologue xml_doc )
-            let xml_doc' = repair_stylesheet xml_doc
-            return $ toTypedContent ( typeXml, toContent $ repXml $ renderLBS def xml_doc )
-          Left exc -> do
-            let html_doc = Text.HTML.DOM.parseLBS proof
-                cursor = fromDocument html_doc
-            if isHTML cursor
-              then return $ toTypedContent $ (typeHtml, toContent proof)
-              else renderFail _pairId "job pair output has invalid html contents"
+        return $ with_prologue cpfHTML $ decompress $ BSL.fromStrict hp
 
-cpfHTML_prologue = Prologue
+cpfHTML = Prologue
     { prologueBefore =
         [MiscInstruction
          (Instruction { instructionTarget = "xml-stylesheet"
-                      , instructionData = "type=\"text/xsl\" href=\"cpfHTML.xsl\""})
+                      , instructionData = "type=\"text/xsl\" href=\"/static/xsl/cpfHTML.xsl\""})
         ]
     , prologueDoctype = Nothing, prologueAfter = []
     }
 
-repair_stylesheet doc = doc { documentPrologue = cpfHTML_prologue }
+with_prologue prolog proof = case Text.XML.parseLBS def proof of
+  Right doc -> 
+    let doc' = doc { documentPrologue = prolog }
+    in  toTypedContent ( typeXml, toContent $ repXml $ renderLBS def doc' )
+  Left exc -> 
+    toTypedContent $ (typeHtml, toContent proof)
 
-renderFail :: Int -> Text -> Handler TypedContent
-renderFail _pairId msg = do
+
+
+renderFail :: JobPairID -> Text -> Handler TypedContent
+renderFail pid msg = do
           html <- defaultLayout $ do
                     [whamlet| 
-                      <p>job pair #{show _pairId}: #{msg}
+                      <p>job pair #{show pid}: #{msg}
                     |]
           return $ toTypedContent $ (typeHtml, toContent html)
 
