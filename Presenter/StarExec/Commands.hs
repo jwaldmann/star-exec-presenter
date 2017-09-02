@@ -55,7 +55,7 @@ import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
 import Data.List (mapAccumL )
 import Data.Maybe
-import Data.Char ( isAlphaNum )
+import Data.Char ( isAlphaNum, toUpper )
 import Control.Monad.Logger
 
 defaultDate :: UTCTime
@@ -658,6 +658,7 @@ data AddJob = AddJob
    , bench :: [Int] -- ^  The list of benchmarks to use in the job. Only applies if benchChoice is "runChosenFromSpace".
    , traversal :: Traversal
    , suppressTimestamp :: Bool
+   , benchFramework :: ! Bench_Framework
    }
    deriving Show
 
@@ -730,7 +731,8 @@ addJob c = do
         [ ( "traversal", toLowerHead $ show $ traversal c )
           -- NOTE: source code says they check for "yes" (not "true"!)
         , ( "suppressTimestamp", if suppressTimestamp c then "yes" else "no" )
-        ]
+        ] ++
+        [ ( "benchmarkingFramework", map toUpper $ show $ benchFramework c ) ] 
         ) $ base { method = "POST" , path = addJobPath
                  -- , queryString = "sid=" <> BSC.pack (show $ spaceId c)
                  }
@@ -801,9 +803,9 @@ createJob spId js = forM js $ \ j -> do
          , configs = jobGroupConfigs g
          , bench = []
          , traversal = Robin
-
          -- error in API doc: following is required parameter
          , suppressTimestamp = False
+         , benchFramework = Benchexec
          }
         logWarnN $ "createJob " <> T.pack (show j) <> " result: " <> T.pack (show mc)
         return mc
