@@ -2,9 +2,10 @@
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform" version="1.0">
     <xsl:output method="html" doctype-public="-//W3C//DTD HTML 4.01 Transitional//EN" encoding="UTF-8" doctype-system="http://www.w3.org/TR/html4/loose.dtd"/>
     <xsl:strip-space elements="*"/>
-    
+  <xsl:include href="lts.xsl"/>
     <!-- TO ADAPT / INTEGRATE
       - handling of assumptions
+      - better output for split / splitProc
     -->
 
     <xsl:variable name="cdot">&#183;</xsl:variable>
@@ -28,7 +29,7 @@
     <xsl:template match="/certificationProblem">
         <xsl:variable name="mode">
             <xsl:choose>
-                <xsl:when test="proof/trsTerminationProof">Termination Proof</xsl:when>
+                <xsl:when test="proof/trsTerminationProof">TRS Termination Proof</xsl:when>
                 <xsl:when test="proof/acTerminationProof">AC Termination Proof</xsl:when>
                 <xsl:when test="proof/trsNonterminationProof">Nontermination Proof</xsl:when>
                 <xsl:when test="proof/dpProof">Finiteness Proof</xsl:when>
@@ -43,7 +44,13 @@
                 <xsl:when test="proof/complexityProof">Complexity Proof</xsl:when>
                 <xsl:when test="proof/quasiReductiveProof">Quasi Reductive Proof</xsl:when>
                 <xsl:when test="proof/conditionalCrProof">Confluence Proof for Conditional TRS</xsl:when>
+                <xsl:when test="proof/conditionalCrDisproof">Non-Confluence Proof for Conditional TRS</xsl:when>
                 <xsl:when test="proof/treeAutomatonClosedProof">Automaton which is Closed under Rewriting</xsl:when>
+                <xsl:when test="proof/infeasibilityProof">Infeasibility Proof</xsl:when>
+                <xsl:when test="proof/nonreachabilityProof">Non-Reachability Proof</xsl:when>
+                <xsl:when test="proof/nonjoinabilityProof">Non-Joinability Proof</xsl:when>
+                <xsl:when test="proof/ltsTerminationProof">LTS Termination Proof</xsl:when>
+                <xsl:when test="proof/ltsSafetyProof">LTS Safety Proof</xsl:when>
                 <xsl:when test="proof/unknownInputProof">Proof for unsupported input</xsl:when>
                 <xsl:otherwise><xsl:message terminate="yes">unknown proof type</xsl:message></xsl:otherwise>
             </xsl:choose>
@@ -54,6 +61,7 @@
                     <xsl:value-of select="$mode"/>
                 </title>
                 <style type="text/css">
+                  * { font-family: "Times New Roman", Times, serif; }
                   .dp_fun { color: darkgreen; }
                   .error { color: red; }
                   .fun { color: darkblue; }
@@ -78,6 +86,7 @@
                   }
                   .matrixbrak td { line-height: 1.4; }                                                        
                 </style>
+                <xsl:call-template name="ltsStyles"/>
             </head>
             <body>
                 <h1>
@@ -87,7 +96,7 @@
                 <xsl:call-template name="inputOrigin"/>
                 <xsl:apply-templates select="input"/>
                 
-                <h2>Proof</h2>                
+                <h2>Proof</h2>
                     <xsl:apply-templates select="proof/*">
                         <xsl:with-param name="indent" select="1"/>
                     </xsl:apply-templates>
@@ -204,9 +213,30 @@
 
     <xsl:template match="equationalDisproof">
         <xsl:param name="indent"/>
-        <xsl:apply-templates select="*" mode="neq">
-            <xsl:with-param name="indent" select="$indent"/>
-        </xsl:apply-templates>
+        <xsl:choose>
+            <xsl:when test="convertibleInstance">
+                <xsl:apply-templates select="current()" mode="conversion">
+                    <xsl:with-param name="indent" select="$indent"/>
+                </xsl:apply-templates>                
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:apply-templates select="*" mode="neq">
+                    <xsl:with-param name="indent" select="$indent"/>
+                </xsl:apply-templates>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+    
+    <xsl:template match="convertibleInstance" mode="conversion">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/>Convertible Instance Proof</h3>
+        We provide a series of conversions that follow from the set of equations. Each conversion may be used in upcoming
+        conversions, and an instance of the negated goal is contained in the conversions.
+        <ul><li>
+            <xsl:apply-templates select=".">
+                <xsl:with-param name="rules">conversions</xsl:with-param>
+            </xsl:apply-templates>
+        </li></ul>
     </xsl:template>
     
     <xsl:template match="trsTerminationProof">
@@ -244,6 +274,13 @@
     <xsl:template match="conditionalCrProof">
         <xsl:param name="indent"/>
         <xsl:apply-templates select="*" mode="cr">
+            <xsl:with-param name="indent" select="$indent"/>
+        </xsl:apply-templates>
+    </xsl:template>    
+
+    <xsl:template match="conditionalCrDisproof">
+        <xsl:param name="indent"/>
+        <xsl:apply-templates select="*" mode="ncr">
             <xsl:with-param name="indent" select="$indent"/>
         </xsl:apply-templates>
     </xsl:template>    
@@ -292,6 +329,664 @@
         <xsl:apply-templates select="./trsTerminationProof">
             <xsl:with-param name="indent" select="concat($indent,'.1')"/>
         </xsl:apply-templates>
+    </xsl:template>    
+
+    <xsl:template match="al94" mode="cr">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Quasi-reductive SDTRS where all CCPs are joinable</h3>
+      The given strongly deterministic oriented 3-CTRS is quasi-reductive and all CCPs are joinable.
+      <h3><xsl:value-of select="concat($indent, '.1')"/> Quasi-Reductive CTRS</h3>
+      The given CTRS is quasi-reductive
+      <xsl:apply-templates select="./quasiReductiveProof">
+        <xsl:with-param name="indent" select="concat($indent, '.1.1')"/>
+      </xsl:apply-templates>
+      <h3><xsl:value-of select="concat($indent, '.2')"/> All CCPs are joinable</h3>
+      A CCP is joinable if it is context-joinable, infeasible, or unfeasible.
+      <xsl:apply-templates select="./contextJoinableCCPs">
+        <xsl:with-param name="indent" select="concat($indent, '.2')"/>
+      </xsl:apply-templates>
+      <xsl:apply-templates select="./infeasibleConditions">
+        <xsl:with-param name="indent" select="concat($indent, '.2')"/>
+      </xsl:apply-templates>
+      <xsl:apply-templates select="./unfeasibleCCPs">
+        <xsl:with-param name="indent" select="concat($indent, '.2')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template name="inlineConditions">
+      <xsl:param name="indent"/>
+      <xsl:param name="proof"/>
+      <h3><xsl:value-of select="$indent"/> Inlining of Conditions</h3>
+      Inlining of conditions results in the following transformed CTRS having the
+      same multistep rewrite relation.
+      <xsl:apply-templates select="./rules"/>
+      <xsl:apply-templates select="$proof">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="inlineConditions" mode="cr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="inlineConditions">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./conditionalCrProof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="inlineConditions" mode="ncr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="inlineConditions">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./conditionalCrDisproof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="infeasibleRuleRemoval">
+      <xsl:param name="indent"/>
+      <xsl:param name="proof"/>
+      <h3><xsl:value-of select="$indent"/> Removal of Infeasible Rules</h3>
+      We may safely remove rules with infeasible conditions. They do not
+      influence the rewrite relation in any way.
+      <h3><xsl:value-of select="concat($indent, '.1')"/> Rules with Infeasible Conditions</h3>
+      <xsl:apply-templates select="infeasibleRules">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+      <xsl:apply-templates select="$proof">
+        <xsl:with-param name="indent" select="concat($indent, '.2')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="infeasibleRuleRemoval" mode="cr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="infeasibleRuleRemoval">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./conditionalCrProof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="infeasibleRuleRemoval" mode="ncr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="infeasibleRuleRemoval">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./conditionalCrDisproof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template name="unconditional">
+      <xsl:param name="indent"/>
+      <xsl:param name="proof"/>
+      <h3><xsl:value-of select="$indent"/> CTRS without Conditions</h3>
+      Switching from confluence of a CTRS without conditions to confluence
+      of the corresponding TRS.
+      <xsl:apply-templates select="$proof">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="unconditional" mode="cr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="unconditional">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./crProof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="unconditional" mode="ncr">
+      <xsl:param name="indent"/>
+      <xsl:call-template name="unconditional">
+        <xsl:with-param name="indent" select="$indent"/>
+        <xsl:with-param name="proof" select="./crDisproof"/>
+      </xsl:call-template>
+    </xsl:template>
+
+    <xsl:template match="almostOrthogonalModuloInfeasibility" mode="cr">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Almost-orthogonal modulo infeasibility</h3>
+      The given (extended) properly oriented, right-stable, oriented 3-CTRS
+      is almost-orthogonal modulo infeasibility,
+      since all its conditional critical pairs are infeasible.
+      <xsl:apply-templates select="./aoInfeasibleConditions">
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="almostOrthogonal" mode="cr">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Almost-orthogonal</h3>
+      The given (extended) properly oriented, right-stable, oriented 3-CTRS
+      is almost-orthogonal,
+      since there are no conditional critical pairs.
+    </xsl:template>
+
+    <xsl:template match="aoInfeasibleConditions">
+      <xsl:param name="indent"/>
+      <xsl:variable name="all" select="count(aoInfeasibleCondition)"/>
+      <!--<h3><xsl:value-of select="$indent"/> Infeasible Conditional Critical Pairs</h3>
+      <p>All <xsl:value-of select="$all"/> CCPs can be shown to be infeasible.</p>-->
+      <xsl:choose>
+        <xsl:when test="$all &gt; 0">
+          <ul>
+            <xsl:apply-templates select="." mode="iterate">
+              <xsl:with-param name="count" select="1"/>
+              <xsl:with-param name="indent" select="$indent"/>
+              <xsl:with-param name="index" select="1"/>
+              <xsl:with-param name="n" select="$all"/>
+            </xsl:apply-templates>
+          </ul>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="infeasibleConditions">
+      <xsl:param name="indent"/>
+      <xsl:variable name="all" select="count(infeasibleCondition)"/>
+      <xsl:choose>
+        <xsl:when test="$all &gt; 0">
+          <ul>
+            <xsl:apply-templates select="." mode="iterate">
+              <xsl:with-param name="count" select="1"/>
+              <xsl:with-param name="indent" select="$indent"/>
+              <xsl:with-param name="index" select="1"/>
+              <xsl:with-param name="n" select="$all"/>
+            </xsl:apply-templates>
+          </ul>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="infeasibleRules">
+      <xsl:param name="indent"/>
+      <xsl:variable name="all" select="count(infeasibleRule)"/>
+      <xsl:choose>
+        <xsl:when test="$all &gt; 0">
+          <ul>
+            <xsl:apply-templates select="." mode="iterate">
+              <xsl:with-param name="count" select="1"/>
+              <xsl:with-param name="indent" select="$indent"/>
+              <xsl:with-param name="index" select="1"/>
+              <xsl:with-param name="n" select="$all"/>
+            </xsl:apply-templates>
+          </ul>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="contextJoinableCCPs">
+      <xsl:param name="indent"/>
+      <xsl:variable name="all" select="count(contextJoinableCCP)"/>
+      <xsl:choose>
+        <xsl:when test="$all &gt; 0">
+          <ul>
+            <xsl:apply-templates select="." mode="iterate">
+              <xsl:with-param name="count" select="1"/>
+              <xsl:with-param name="indent" select="$indent"/>
+              <xsl:with-param name="index" select="1"/>
+              <xsl:with-param name="n" select="$all"/>
+            </xsl:apply-templates>
+          </ul>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="unfeasibleCCPs">
+      <xsl:param name="indent"/>
+      <xsl:variable name="all" select="count(unfeasibleCCP)"/>
+      <xsl:choose>
+        <xsl:when test="$all &gt; 0">
+          <ul>
+            <xsl:apply-templates select="." mode="iterate">
+              <xsl:with-param name="count" select="1"/>
+              <xsl:with-param name="indent" select="$indent"/>
+              <xsl:with-param name="index" select="1"/>
+              <xsl:with-param name="n" select="$all"/>
+            </xsl:apply-templates>
+          </ul>
+        </xsl:when>
+      </xsl:choose>
+    </xsl:template>
+
+    <xsl:template name="condition">
+      <xsl:apply-templates select="lhs"/>
+      <xsl:text> </xsl:text>
+      <xsl:value-of select="$arrow"/><sup>*</sup>
+      <xsl:text> </xsl:text>
+      <xsl:apply-templates select="rhs"/>
+    </xsl:template>
+
+    <xsl:template mode="conditions" match="rules">
+      <xsl:text> </xsl:text>
+      <xsl:for-each select="./rule">
+        <xsl:if test="position() &gt; 1">
+            <xsl:text>, </xsl:text>
+        </xsl:if>
+        <xsl:call-template name="condition"/>
+      </xsl:for-each>
+    </xsl:template>
+
+    <xsl:template mode="iterate" match="aoInfeasibleConditions">
+      <xsl:param name="indent"/>
+      <xsl:param name="count"/>
+      <xsl:param name="index"/>
+      <xsl:param name="n"/>
+      <xsl:variable name="newindex" select="$index + count(aoInfeasibleCondition[$count])"/>
+      <xsl:if test="$index != $newindex">
+        <xsl:variable name="num" select="$index"/>
+        <li>
+          The
+          <xsl:choose>
+            <xsl:when test="$num mod 10 = 1 and $num != 11"><xsl:value-of select="$num"/><sup>st</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 2 and $num != 12"><xsl:value-of select="$num"/><sup>nd</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 3 and $num != 13"><xsl:value-of select="$num"/><sup>rd</sup></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$num"/><sup>th</sup></xsl:otherwise>
+          </xsl:choose>
+          CCP contains
+          <xsl:choose>
+            <xsl:when test="count(aoInfeasibleCondition[$count]/rules[1]/rule) = 0">no conditions</xsl:when>
+            <xsl:otherwise>
+              the condition<xsl:if test="count(aoInfeasibleCondition[$count]/rules[1]/rule) &gt; 1">s</xsl:if>
+
+              <xsl:apply-templates mode="conditions" select="aoInfeasibleCondition[$count]/rules[1]"/>
+            </xsl:otherwise>
+          </xsl:choose>
+          from the first rule
+          and
+          <xsl:choose>
+            <xsl:when test="count(aoInfeasibleCondition[$count]/rules[2]/rule) = 0">no conditions</xsl:when>
+            <xsl:otherwise>
+              the condition<xsl:if test="count(aoInfeasibleCondition[$count]/rules[2]/rule) &gt; 1">s</xsl:if>
+
+              <xsl:apply-templates mode="conditions" select="./aoInfeasibleCondition[$count]/rules[2]"/>
+            </xsl:otherwise>
+          </xsl:choose>
+
+          from the second rule.
+
+          <xsl:apply-templates select="aoInfeasibleCondition[$count]/*[3]">
+            <xsl:with-param name="indent" select="concat($indent, '.', $index)"/>
+          </xsl:apply-templates>
+          <br/>
+          <br/>
+        </li>
+      </xsl:if>
+      <xsl:if test="$count &lt; $n">
+        <xsl:apply-templates select="." mode="iterate">
+          <xsl:with-param name="indent" select="$indent"/>
+          <xsl:with-param name="count" select="$count + 1"/>
+          <xsl:with-param name="index" select="$newindex"/>
+          <xsl:with-param name="n" select="$n"/>
+        </xsl:apply-templates>
+      </xsl:if>
+    </xsl:template>
+
+    <xsl:template mode="iterate" match="contextJoinableCCPs">
+      <xsl:param name="indent"/>
+      <xsl:param name="count"/>
+      <xsl:param name="index"/>
+      <xsl:param name="n"/>
+      <xsl:variable name="newindex" select="$index + count(contextJoinableCCP[$count])"/>
+      <xsl:if test="$index != $newindex">
+        <xsl:variable name="num" select="$index"/>
+        <li>
+          The
+          <xsl:choose>
+            <xsl:when test="$num mod 10 = 1 and $num != 11"><xsl:value-of select="$num"/><sup>st</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 2 and $num != 12"><xsl:value-of select="$num"/><sup>nd</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 3 and $num != 13"><xsl:value-of select="$num"/><sup>rd</sup></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$num"/><sup>th</sup></xsl:otherwise>
+          </xsl:choose>
+          CCP
+          <xsl:apply-templates select="contextJoinableCCP[$count]/*[1]"/>
+          =
+          <xsl:apply-templates select="contextJoinableCCP[$count]/*[2]"/>
+          <xsl:choose>
+            <xsl:when test="count(contextJoinableCCP[$count]/rules/rule) = 0"/>
+            <xsl:otherwise>
+              <xsl:text> | </xsl:text>
+              <xsl:apply-templates mode="conditions" select="contextJoinableCCP[$count]/rules"/>
+            </xsl:otherwise>
+          </xsl:choose>
+
+          is context-joinable.
+
+          <br/>
+          <br/>
+        </li>
+      </xsl:if>
+      <xsl:if test="$count &lt; $n">
+        <xsl:apply-templates select="." mode="iterate">
+          <xsl:with-param name="indent" select="$indent"/>
+          <xsl:with-param name="count" select="$count + 1"/>
+          <xsl:with-param name="index" select="$newindex"/>
+          <xsl:with-param name="n" select="$n"/>
+        </xsl:apply-templates>
+      </xsl:if>
+    </xsl:template>
+    
+    <xsl:template mode="iterate" match="infeasibleConditions">
+      <xsl:param name="indent"/>
+      <xsl:param name="count"/>
+      <xsl:param name="index"/>
+      <xsl:param name="n"/>
+      <xsl:variable name="newindex" select="$index + count(infeasibleCondition[$count])"/>
+      <xsl:if test="$index != $newindex">
+        <xsl:variable name="num" select="$index + count(../contextJoinableCCPs/contextJoinableCCP)"/>
+        <li>
+          The
+          <xsl:choose>
+            <xsl:when test="$num mod 10 = 1 and $num != 11"><xsl:value-of select="$num"/><sup>st</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 2 and $num != 12"><xsl:value-of select="$num"/><sup>nd</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 3 and $num != 13"><xsl:value-of select="$num"/><sup>rd</sup></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$num"/><sup>th</sup></xsl:otherwise>
+          </xsl:choose>
+          CCP contains
+          <xsl:choose>
+            <xsl:when test="count(infeasibleCondition[$count]/rules/rule) = 0">no conditions</xsl:when>
+            <xsl:otherwise>
+              the condition<xsl:if test="count(infeasibleCondition[$count]/rules/rule) &gt; 1">s</xsl:if>
+
+              <xsl:apply-templates mode="conditions" select="infeasibleCondition[$count]/rules"/>
+            </xsl:otherwise>
+          </xsl:choose>
+
+          <xsl:apply-templates select="infeasibleCondition[$count]/*[2]">
+            <xsl:with-param name="indent" select="concat($indent, '.', $index)"/>
+          </xsl:apply-templates>
+          <br/>
+          <br/>
+        </li>
+      </xsl:if>
+      <xsl:if test="$count &lt; $n">
+        <xsl:apply-templates select="." mode="iterate">
+          <xsl:with-param name="indent" select="$indent"/>
+          <xsl:with-param name="count" select="$count + 1"/>
+          <xsl:with-param name="index" select="$newindex"/>
+          <xsl:with-param name="n" select="$n"/>
+        </xsl:apply-templates>
+      </xsl:if>
+    </xsl:template>
+
+    <xsl:template mode="iterate" match="infeasibleRules">
+      <xsl:param name="indent"/>
+      <xsl:param name="count"/>
+      <xsl:param name="index"/>
+      <xsl:param name="n"/>
+      <xsl:variable name="newindex" select="$index + count(infeasibleRule[$count])"/>
+      <xsl:if test="$index != $newindex">
+        <xsl:variable name="num" select="$index"/>
+        <li>
+          <xsl:apply-templates mode="iterate" select="infeasibleRule[$count]">
+            <xsl:with-param name="indent" select="concat($indent, '.', $index)"/>
+          </xsl:apply-templates>
+          <br/>
+          <br/>
+        </li>
+      </xsl:if>
+      <xsl:if test="$count &lt; $n">
+        <xsl:apply-templates select="." mode="iterate">
+          <xsl:with-param name="indent" select="$indent"/>
+          <xsl:with-param name="count" select="$count + 1"/>
+          <xsl:with-param name="index" select="$newindex"/>
+          <xsl:with-param name="n" select="$n"/>
+        </xsl:apply-templates>
+      </xsl:if>
+    </xsl:template>
+
+    <xsl:template mode="iterate" match="infeasibleRule">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Rule with Infeasible Conditions</h3>
+      The rule
+      <xsl:apply-templates select="rule"/>
+      has infeasible conditions.
+      <xsl:apply-templates select="infeasibilityProof">
+        <xsl:with-param name="indent" select="concat($indent, '.1')"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template mode="iterate" match="unfeasibleCCPs">
+      <xsl:param name="indent"/>
+      <xsl:param name="count"/>
+      <xsl:param name="index"/>
+      <xsl:param name="n"/>
+      <xsl:variable name="newindex" select="$index + count(unfeasibleCCP[$count])"/>
+      <xsl:if test="$index != $newindex">
+        <xsl:variable name="num" select="$index + count(../contextJoinableCCPs/contextJoinableCCP) + count(../unfeasibleCCPs/unfeasibleCCP)"/>
+        <li>
+          The
+          <xsl:choose>
+            <xsl:when test="$num mod 10 = 1 and $num != 11"><xsl:value-of select="$num"/><sup>st</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 2 and $num != 12"><xsl:value-of select="$num"/><sup>nd</sup></xsl:when>
+            <xsl:when test="$num mod 10 = 3 and $num != 13"><xsl:value-of select="$num"/><sup>rd</sup></xsl:when>
+            <xsl:otherwise><xsl:value-of select="$num"/><sup>th</sup></xsl:otherwise>
+          </xsl:choose>
+          CCP stemming from the overlap of rules
+          <xsl:apply-templates select="unfeasibleCCP[$count]/unfeasibilityProof/rules/*[1]"/>
+          and
+          <xsl:apply-templates select="unfeasibleCCP[$count]/unfeasibilityProof/rules/*[2]"/>
+          with mgu
+          <xsl:apply-templates select="unfeasibleCCP[$count]/*[1]"/>
+          is unfeasible.
+          <br/>
+          <br/>
+        </li>
+      </xsl:if>
+      <xsl:if test="$count &lt; $n">
+        <xsl:apply-templates select="." mode="iterate">
+          <xsl:with-param name="indent" select="$indent"/>
+          <xsl:with-param name="count" select="$count + 1"/>
+          <xsl:with-param name="index" select="$newindex"/>
+          <xsl:with-param name="n" select="$n"/>
+        </xsl:apply-templates>
+      </xsl:if>
+    </xsl:template>
+    
+
+    <xsl:template match="infeasibleCompoundConditions">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Infeasible Compound Conditions</h3>
+      <p>
+        We collect the conditions in the fresh compound-symbol 
+        <xsl:apply-templates select="*[1]"/>.
+      </p>
+      <xsl:apply-templates select="*[2]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="aoInfeasibilityProof">
+      <xsl:param name="indent"/>
+      <!--<h3><xsl:value-of select="$indent"/> Infeasibility Proof for Almost-Orthogonality</h3>
+      We are allowed to reduce non-meetability to non-joinability for almost-orthogonality
+      modulo infeasibility.-->
+      <xsl:apply-templates select="*">
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="infeasibilityProof">
+      <xsl:param name="indent"/>
+      <xsl:apply-templates select="*[1]">
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="infeasibleEquation">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Infeasible Equation</h3>
+      The equation
+      <xsl:for-each select="rule"><xsl:call-template name="condition"/></xsl:for-each>
+      is infeasible.
+      <xsl:apply-templates select="*[2]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="infeasibleSubset">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Infeasible Subset</h3>
+      We only consider the following subset of conditions:
+      <xsl:apply-templates select="rules[1]"/>
+      <xsl:apply-templates select="*[2]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="infeasibleRhssEqual">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Equal Right-Hand Sides</h3>
+      There are two conditions with right-hand side
+      <xsl:apply-templates select="*[3]"/>
+      and respective left-hand sides
+      <xsl:apply-templates select="*[1]"/>
+      and
+      <xsl:apply-templates select="*[2]"/>.
+      <xsl:apply-templates select="*[4]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="nonreachabilityProof">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-reachability</h3>
+      We show non-reachability w.r.t. the underlying TRS.
+      <xsl:apply-templates select="*[1]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template name="symbol">
+      <xsl:param name="symbol" select="."/>
+      <xsl:apply-templates select="$symbol/name"/>
+      <xsl:text>/</xsl:text>
+      <xsl:apply-templates select="$symbol/arity"/>
+    </xsl:template>
+
+    <xsl:template match="signature">
+      <xsl:text>{</xsl:text>
+      <xsl:for-each select="symbol">
+        <xsl:if test="position() &gt; 1">, </xsl:if>
+        <xsl:call-template name="symbol"/>
+      </xsl:for-each>
+      <xsl:text>}</xsl:text>
+    </xsl:template>
+
+    <xsl:template match="nonreachableReverse">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-reachability with reversed Rules</h3>
+      In the following we consider non-reachability w.r.t. reversed rewrite rules
+      and further swapping source and target term.
+      <xsl:apply-templates select="*[1]/*">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="nonreachableTcap">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-reachability by TCAP</h3>
+      Non-reachability is shown by the TCAP approximation.
+    </xsl:template>
+
+    <xsl:template match="nonreachableEtac">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-reachability via Exact Tree Automata Completion</h3>
+      Considering the signature 
+      <xsl:apply-templates select="signature"/>
+      as well as the fresh constant
+      <xsl:apply-templates select="name[2]"/>
+      the following tree automaton (overapproximating the set of ancestors of the ground
+      instances of the target term) certifies non-reachability.
+      <xsl:apply-templates select="treeAutomaton">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+      States correspond to terms as follows:
+      <xsl:apply-templates select="stateMap"/>
+    </xsl:template>
+
+    <xsl:template match="stateMap">
+      <p>
+      <table>
+      <xsl:for-each select="entry">
+        <tr>
+        <td align="right">
+        <xsl:apply-templates select="state"/>
+        </td>
+        <td align="center">
+        <xsl:value-of select="$mapsto"/>
+        </td>
+        <td align="left">
+        <xsl:apply-templates select="*[2]"/>
+        </td>
+        </tr>
+      </xsl:for-each>
+      </table>
+      </p>
+    </xsl:template>
+
+    <xsl:template match="left">
+      Inl(<xsl:apply-templates select="*[1]"/>)
+    </xsl:template>
+
+    <xsl:template match="right">
+      Inr(<xsl:apply-templates select="*[1]"/>)
+    </xsl:template>
+
+    <xsl:template match="nonreachableSubstApprox">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-reachability via Substitution Approximation</h3>
+      The following TRS
+      <xsl:apply-templates select="rules"/>
+      is a substitution approximation of the above TRS.
+      <xsl:apply-templates select="nonreachabilityProof/*[1]">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="aoLhssEqual">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Equal Left-Hand Sides</h3>
+      There are two conditions with left-hand side
+      <xsl:apply-templates select="*[1]"/>
+      and respective right-hand sides
+      <xsl:apply-templates select="*[2]"/>
+      and
+      <xsl:apply-templates select="*[3]"/>.
+      <xsl:apply-templates select="nonjoinabilityProof">
+        <xsl:with-param name="indent" select="concat($indent, '.', 1)"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="nonjoinabilityProof">
+      <xsl:param name="indent"/>
+      <xsl:apply-templates select="*[1]">
+        <xsl:with-param name="indent" select="$indent"/>
+      </xsl:apply-templates>
+    </xsl:template>
+
+    <xsl:template match="nonjoinableTcap">
+      <xsl:param name="indent"/>
+      <h3><xsl:value-of select="$indent"/> Non-joinability by TCAP</h3>
+      Non-joinability is shown by the TCAP approximation.
+    </xsl:template>
+
+    <xsl:template match="nonJoinableFork" mode="ncr">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Non-Joinable Fork</h3>
+        The system is not confluent due to the following forking derivations.  
+        <table>
+          <tr>
+            <td><xsl:apply-templates select="terms/*[1]"/></td>
+            <td><xsl:value-of select="$arrow"/></td>
+            <td><xsl:apply-templates select="terms/*[2]"/></td>
+          </tr>
+        </table>
+        <table>
+          <tr>
+            <td><xsl:apply-templates select="terms/*[1]"/></td>
+            <td><xsl:value-of select="$arrow"/></td>
+            <td><xsl:apply-templates select="terms/*[3]"/></td>
+          </tr>
+        </table>
+        The two resulting terms cannot be joined for the following reason:
+        <ul><xsl:apply-templates select="*[4]"/></ul>        
     </xsl:template>    
 
     <xsl:template match="nonJoinableFork">
@@ -447,6 +1142,16 @@
             The joins can be performed by approximating rewrite sequences by a parallel rewrite step.
           </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+    <xsl:template match="criticalPairClosingSystem">
+        <xsl:param name="indent"/>
+        <h3><xsl:value-of select="$indent"/> Critical Pair Closing System</h3>
+        <p>Confluence is proven using the following terminating critical-pair-closing-system R:</p>
+        <xsl:apply-templates select="./trs/rules"/>
+        <xsl:apply-templates select="./trsTerminationProof">
+          <xsl:with-param name="indent" select="concat($indent,'.1')"/>
+        </xsl:apply-templates>
     </xsl:template>
 
     <xsl:template match="ruleLabeling">
@@ -905,7 +1610,7 @@
                                         <xsl:apply-templates select="../startTerm"/>
                                     </xsl:when>
                                     <xsl:otherwise>
-                                        <xsl:apply-templates select="../rewriteSequence[$i]"/>
+                                        <xsl:apply-templates select="../rewriteStep[$i]/*[3]"/>
                                     </xsl:otherwise>
                                 </xsl:choose>
                             </xsl:for-each>                            
@@ -1083,7 +1788,7 @@
     
     <xsl:template match="ctrsInput">        
             <p>The rewrite relation of the following conditional TRS is considered.</p>
-            <xsl:apply-templates select="conditionalRules"/>                                        
+            <xsl:apply-templates select="rules"/>                                        
     </xsl:template>
     
     <xsl:template match="acRewriteSystem">        
@@ -1168,15 +1873,29 @@
     <xsl:template match="equationalReasoningInput">
         <p> We consider the equations E</p> 
             <xsl:apply-templates select="equations"/>
-         <p>   the equation
-            <table align="center">
-                <tr>
-                    <td align="right"><xsl:apply-templates select="equation/*[1]"/></td>
-                    <td align="center">=</td>
-                    <td align="left"><xsl:apply-templates select="equation/*[2]"/></td>
-                </tr>
-            </table>
-            and the question, whether the equation is a consequence of E.
+        <p>
+        <xsl:variable name="goal">
+            <xsl:choose>
+                <xsl:when test="inequality">inequality</xsl:when>
+                <xsl:otherwise>equation</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        <xsl:variable name="op">
+            <xsl:choose>
+                <xsl:when test="inequality">&#8800;</xsl:when>
+                <xsl:otherwise>=</xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+        the <xsl:copy-of select="$goal"/>
+        <table align="center">
+            <tr>
+                <td align="right"><xsl:apply-templates select="*[2]/*[1]"/></td>
+                <td align="center"><xsl:copy-of select="$op"/></td>
+                <td align="right"><xsl:apply-templates select="*[2]/*[2]"/></td>
+            </tr>
+        </table>
+        and the question, whether the <xsl:copy-of select="$goal"/>
+        is a consequence of E.
         </p>        
     </xsl:template>
     
@@ -2312,7 +3031,7 @@
     <xsl:template match="unraveling">
         <xsl:param name="indent"/>
         <h3><xsl:value-of select="$indent"/> Unraveling</h3>
-        <p>To prove that the CTRS is quasi reductive, we show termination of the following 
+        <p>To prove that the CTRS is quasi-reductive, we show termination of the following 
             unraveled system.
         </p>
         <xsl:apply-templates select="unravelingInformation"/>
@@ -4422,21 +5141,42 @@
     </xsl:template>
     
     <xsl:template match="rule">
-        <xsl:apply-templates select="lhs"/>
-        <xsl:value-of select="$rewrite"/>
-        <xsl:apply-templates select="rhs"/>
-    </xsl:template>
-    
-    <xsl:template match="rule" mode="centered">
         <table align="center">
-            <tr>
-                <td><xsl:apply-templates select="lhs"/></td>
-                <td><xsl:value-of select="$rewrite"/></td>
-                <td><xsl:apply-templates select="rhs"/></td>
-            </tr>
-        </table>
+            <xsl:call-template name="rule"/>
+       </table>
     </xsl:template>
-    
+
+    <xsl:template name="rule">
+      <xsl:param name="arr"/>
+      <tr>
+        <td>
+          <xsl:apply-templates select="lhs"/>
+        </td>
+        <td>
+          <xsl:value-of select="$arr"/>
+        </td>
+        <td>
+          <xsl:apply-templates select="rhs"/>
+        </td>
+        <xsl:for-each select="conditions">
+          <td>
+            <xsl:text> | </xsl:text>
+            <xsl:for-each select="condition">
+              <xsl:if test="position() &gt; 2">
+                <xsl:text>, </xsl:text>
+              </xsl:if>
+              <xsl:apply-templates select="lhs"/>
+              <xsl:value-of select="$arrow"/>
+              <xsl:if test="position() != 1">
+                <sup>*</sup>
+              </xsl:if>
+              <xsl:apply-templates select="rhs"/>
+            </xsl:for-each>
+          </td>
+        </xsl:for-each>
+      </tr>
+    </xsl:template>
+
     <xsl:template match="equations">
         <xsl:for-each select="rules">
             <xsl:call-template name="rules">
@@ -4452,53 +5192,10 @@
             <xsl:with-param name="name">rules</xsl:with-param>
         </xsl:call-template>
     </xsl:template>
-
-    <xsl:template match="conditionalRule">
-        <xsl:for-each select="rule">
-            <xsl:if test="position() = 2">
-                <xsl:text> | </xsl:text>
-            </xsl:if>
-            <xsl:if test="position() &gt; 2">
-                <xsl:text>, </xsl:text>
-            </xsl:if>
-            <xsl:apply-templates select="lhs"/>
-            <xsl:value-of select="$arrow"/>
-            <xsl:if test="position() != 1"><sup>*</sup></xsl:if>
-            <xsl:apply-templates select="rhs"/>
-        </xsl:for-each>
-    </xsl:template>
-    
-    <xsl:template match="conditionalRules">
-        <table>
-            <xsl:attribute name="align">center</xsl:attribute>
-            <xsl:for-each select="conditionalRule">
-                <tr>
-                    <xsl:for-each select="rule">
-                        <xsl:if test="position() = 2">
-                            <td>|</td>
-                        </xsl:if>
-                        <xsl:if test="position() &gt; 2">
-                            <td>,</td>
-                        </xsl:if>
-                        <td align="right">
-                            <xsl:apply-templates select="lhs"/>
-                        </td>
-                        <td align="center">
-                            <xsl:value-of select="$arrow"/>
-                            <xsl:if test="position() != 1"><sup>*</sup></xsl:if>
-                        </td>
-                        <td align="left">
-                            <xsl:apply-templates select="rhs"/>
-                        </td>
-                    </xsl:for-each>
-                </tr>
-            </xsl:for-each>
-        </table>
-    </xsl:template>
     
     <xsl:template name="rules">
         <xsl:param name="arr"/>
-        <xsl:param name="name"/>        
+        <xsl:param name="name"/>
             <xsl:choose>
                 <xsl:when test="count(rule) = 0">
                     <p>
@@ -4508,20 +5205,12 @@
                     </p>
                 </xsl:when>
                 <xsl:otherwise>
-                    <table>
-                        <xsl:attribute name="align">center</xsl:attribute>
+                    <table align="center">
                         <xsl:for-each select="rule">
-                            <tr>
-                                <td align="right">
-                                    <xsl:apply-templates select="lhs"/>
-                                </td>
-                                <td align="center">
-                                    <xsl:value-of select="$arr"/>
-                                </td>
-                                <td align="left">
-                                    <xsl:apply-templates select="rhs"/>
-                                </td>
-                            </tr>
+                          <xsl:call-template name="rule">
+                            <xsl:with-param name="arr" select="$arr"/>
+                            <xsl:with-param name="name" select="$name"/>
+                          </xsl:call-template>
                         </xsl:for-each>
                     </table>
                 </xsl:otherwise>
