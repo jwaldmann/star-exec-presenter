@@ -88,4 +88,4 @@ addJobPath :: ByteString
 addJobPath = "starexec/secure/add/job"
 
 addSpacePath :: ByteString
-addSpacePath = "starexec/add/space"
+addSpacePath = "starexec/secure/add/space"

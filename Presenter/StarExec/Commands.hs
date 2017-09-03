@@ -474,8 +474,10 @@ createSpaceJob sId job = do
 -- | make fresh space, copy benchmarks (with sampling), return fresh space id
 makeJobSpace :: SpaceID -> StarExecJob -> Handler StarExecJob
 makeJobSpace sId job = do
-  let name = T.unpack $ "S-" <> description job 
-  jobspace <- addSpace sId name name False False False
+  logWarnN $ T.pack $ "makeJobSpace " ++ show job
+  now <- lift getCurrentTime
+  let name = T.unpack $ "S-" <> description job <> "-" <> T.pack (show now)
+  jobspace <- addSpace sId name "none" False False False
   forM_ (jobpairs job) $ \ case
     jg @ SEJobGroup {} -> do
       logWarnN $ T.pack $ "copy " ++ show jg
@@ -544,6 +546,7 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
                   if i > 0 then Just [i] else Nothing
           return $ j { jobids = ji }
 
+-- | FIXME this should be called New_IDs or similar
 findJobNumber :: Read t => Response body -> [t]
 findJobNumber resp =
     -- the job ids are in the returned cookie.
@@ -675,11 +678,10 @@ addSpace parent name desc locked users sticky = do
     _ -> return ()
 
   resp <- sendRequest req
-  when False $ logWarnN $ T.pack $ show resp
-  let cs = destroyCookieJar $ responseCookieJar resp
-      vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
-  return $ case vs of
-    [ s ] -> read $ BSC.unpack s
+  when True $ logWarnN $ T.pack $ show resp
+
+  case findJobNumber resp of
+    [s] -> return s
 
 {-
 
@@ -711,7 +713,7 @@ copySpaces spaceId selectedIds copyPrimitives copyHierarchy sampleRate = do
   base <- parseUrl starExecUrl
   let req = urlEncodedBody
             ( encodeArrayInt "selectedIds" selectedIds ++
-              [ ("copyPrimitives", boolean copyPrimitives)
+              [ ("copyPrimitives", "NO_JOBS_LINK_SOLVERS_SAMPLE_BENCHMARKS")
               , ("copyHierarchy", boolean copyHierarchy)
               , ("sampleRate", BSC.pack $ Text.Printf.printf "%3.2f" sampleRate )
               ]
@@ -728,6 +730,7 @@ copySpaces spaceId selectedIds copyPrimitives copyHierarchy sampleRate = do
     _ -> return ()
 
   resp <- sendRequest req
+  logWarnN $ T.pack $ show resp
   return $ findJobNumber resp
 
           
@@ -900,16 +903,14 @@ addJob c = do
     RequestBodyStreamChunked {} -> logWarnN "RequestBodyStreamChunked"
 
   mresp <- sendRequestMaybe req
-
   case mresp of
     Nothing -> return Nothing
     Just resp -> do
-      when False $ logWarnN $ T.pack $ show resp
-      let cs = destroyCookieJar $ responseCookieJar resp
-          vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
-      return $ case vs of
-          [ s ] -> Just $ read $ BSC.unpack s
-          _ -> Nothing
+      logWarnN $ "addJob returns " <> T.pack (show resp)
+      case findJobNumber resp of
+        [s] -> return $ Just s
+        _ -> return Nothing
+
 
 encodeArrayIntS :: BSC.ByteString -> [Int ] -> [(BSC.ByteString,String)]
 encodeArrayIntS name xs = do
