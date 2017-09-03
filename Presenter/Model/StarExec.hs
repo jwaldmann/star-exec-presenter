@@ -93,6 +93,8 @@ data Bench_Framework = Runsolver | Benchexec
 instance Show Bench_Framework where
   show Runsolver = "runsolver" ; show Benchexec = "benchexec"
 
+
+
 data StarExecJob = SEJob
   { postproc_id :: Int
   , bench_framework :: ! Bench_Framework
@@ -114,8 +116,9 @@ data StarExecJobPair
     , jobPairConfig :: ! Int
     }
   | SEJobGroup
-    { jobGroupBench :: ! Int
+    { jobGroupBench :: ! Int -- ^ root space of benchmark hierarchy
     , jobGroupConfigs :: ! [Int]
+    , jobGroupSampleRate :: ! Double
     }
                      deriving ( Show )
 

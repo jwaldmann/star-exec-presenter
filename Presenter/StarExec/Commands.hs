@@ -3,6 +3,8 @@
   starexec-cluster
 -}
 
+{-# language LambdaCase #-}
+
 module Presenter.StarExec.Commands
   ( getJobResults
   , getJobPairInfo
@@ -16,6 +18,7 @@ module Presenter.StarExec.Commands
   , getDefaultSpaceXML
   , pauseJobs , resumeJobs, rerunJobs
   , addJob, addSolver
+  , addSpace
   ) where
 
 import Import hiding (spaceId)
@@ -44,6 +47,7 @@ import Codec.Compression.GZip
 import qualified Data.Map as M
 import Data.Time.Clock
 import Data.Time.Calendar
+import Text.Printf
 
 import Text.Hamlet.XML
 import Text.XML
@@ -53,7 +57,7 @@ import Data.Char (toLower)
 import Control.Monad ( guard, when, forM, forM_)
 import qualified Network.HTTP.Client.MultipartFormData as M
 import qualified Network.HTTP.Client as C
-import Data.List (mapAccumL )
+import Data.List (mapAccumL, nub )
 import Data.Maybe
 import Data.Char ( isAlphaNum, toUpper )
 import Control.Monad.Logger
@@ -455,10 +459,41 @@ getJobPairInfo _ _pairId = do
 -- | description of the request object: see
 -- org.starexec.command.Connection:uploadXML
 
+-- | FIXME the method name is wrong because we use pushJobXML *or* createJob
 pushJobXML :: JobCreationMethod -> Int -> [StarExecJob] -> Handler [StarExecJob]
 pushJobXML meth sId jobs = case meth of
   PushJobXML -> concat <$> (forM jobs $ \ job -> pushJobXML_bulk sId [job] )
-  CreateJob ->   createJob sId jobs
+  CreateJob  -> concat <$> (forM jobs $ \ job -> createSpaceJob sId job )
+    -- createJob sId jobs
+
+createSpaceJob sId job = do
+  logWarnN $ T.pack $ "createSpaceJob : " ++ show job
+  job' <- makeJobSpace sId job
+  createJob sId [ job' ]
+
+-- | make fresh space, copy benchmarks (with sampling), return fresh space id
+makeJobSpace :: SpaceID -> StarExecJob -> Handler StarExecJob
+makeJobSpace sId job = do
+  let name = T.unpack $ "S-" <> description job 
+  jobspace <- addSpace sId name name False False False
+  forM_ (jobpairs job) $ \ case
+    jg @ SEJobGroup {} -> do
+      logWarnN $ T.pack $ "copy " ++ show jg
+      copySpaces jobspace [jobGroupBench jg] False True (jobGroupSampleRate jg)
+      return ()
+    other -> do
+      logWarnN $ T.pack $ "ignore" ++ show other
+  -- FIXME: data StarExecJob / StarExecJobPair is wrong
+  -- because it does not model correctly that configs must be identical
+  let allconfigs = nub $ do
+        jg @ SEJobGroup {} <- jobpairs job
+        jobGroupConfigs jg
+  return $ job { jobpairs = [ SEJobGroup { jobGroupBench = jobspace
+                                         , jobGroupConfigs = allconfigs
+                                         , jobGroupSampleRate = 1
+                                         }
+                            ]
+               }
 
 -- FIXME: for large jobs, this is risky (it will no return, but time-out)
 -- so we should send jobs one-by-one
@@ -470,7 +505,6 @@ pushJobXML_bulk sId jobs = do
   registerJobs $ concat $ catMaybes $ map jobids js
   return js
 
-
 pushJobXMLStarExec :: Int -> [StarExecJob] -> Handler (Maybe [StarExecJob])
 pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
   Nothing -> return $ Just jobs
@@ -478,8 +512,10 @@ pushJobXMLStarExec sId jobs = case jobs_to_archive jobs of
     sec <- parseUrl starExecUrl
     req <- M.formDataBody [ M.partBS "space" ( BSC.pack $ show sId )
          , M.partFileRequestBody "f" "command.zip" $ C.RequestBodyLBS bs
-         ] $ sec { method = "POST", path = pushjobxmlPath, responseTimeout = responseTimeoutNone }
-
+         ] $ sec { method = "POST"
+                 , path = pushjobxmlPath
+                 , responseTimeout = responseTimeoutNone
+                 }
     let info = mconcat $ do
           job <- jobs
           return $ "Job " <> description job
@@ -579,6 +615,122 @@ rerunJob (StarExecJobID jid) = do
   logWarnN $ T.pack $ show resp
   return ()
 
+data Permission = PaddBench | PremoveBench 
+                | PaddJob | PremoveJob
+                | PaddSolver | PremoveSolver
+                | PaddSpace  | PremoveSpace
+                | PaddUser | PremoveUser
+                | IsLeader
+                deriving (Eq, Ord, Show)
+
+toText :: Permission -> Text
+toText p = case show p of
+  'P' : cs -> T.pack $ cs
+  
+
+{-
+
+2.1 Add Space
+URL: add/space
+Method: POST
+Parameter Encoding: application/x-www-form-urlencoded
+Parameters
+parent : Integer – The ID of the parent space of this new space.
+name : String – The new space name
+desc : String – The new space description
+locked : Boolean – Whether the space should be locked
+users : Boolean – True to inherit all users from the parent space and false otherwise.sticky : Boolean – Whether the new space should have sticky leaders set
++ all permissions parameters except isLeader ( see the permissions section) : Specifies the default permissions
+for new users being added to the space.
+Description: Creates a new space using the given attributes.
+Returns: An HTTP message with 200 status on success, and an HTTP message with an error status on failure.
+Return Cookies
+New_ID : Integer – On success, contains the ID of the newly created space.
+STATUS_MESSAGE_STRING: String – On failure, contains an error message.
+
+-}
+
+addSpace :: SpaceID
+  -> String -> String
+  -> Bool -> Bool -> Bool
+  -> Handler SpaceID
+addSpace parent name desc locked users sticky = do
+  base <- parseUrl starExecUrl
+  let req = urlEncodedBody
+            [ ("parent", BSC.pack $ show parent)
+            , ("name", BSC.pack name)
+            , ("desc", BSC.pack desc)
+            , ("locked", boolean locked)
+            , ("users", boolean users)
+            , ("sticky", boolean sticky)
+            ]
+            $ base
+            { method = "POST"
+            , path = getURL addSpacePath []
+            }
+
+  logWarnN $ T.pack $ show req
+  case requestBody req of
+    RequestBodyLBS bs -> logWarnN $ T.pack $ show bs
+    _ -> return ()
+
+  resp <- sendRequest req
+  when False $ logWarnN $ T.pack $ show resp
+  let cs = destroyCookieJar $ responseCookieJar resp
+      vs = do c <- cs ; guard $ cookie_name c == "New_ID" ; return $ cookie_value c
+  return $ case vs of
+    [ s ] -> read $ BSC.unpack s
+
+{-
+
+2.5 Copy Spaces
+URL: services/spaces/{spaceId}/copySpace
+URL Variables
+{spaceId} : Integer – The ID of the space that you want to copy other spaces into
+Method: POST
+Parameter Encoding: application/x-www-form-urlencoded
+Parameters
+selectedIds : [Integer] – A list of space IDs, where each space will be copied into the destination space
+copyHierarchy : Boolean – True to copy entire space hierarchies into the destination space. False to copy only
+the spaces in selectedIds without their hierarchies.
+Description: Copies spaces into a single destination space. All benchmarks, solvers, and jobs will be linked
+into the newly created spaces.
+Returns: A jSON string containing a status object.
+Return Cookies
+New_ID : [Integer] –A comma-separated list of the new space IDs.
+
+-}
+
+copySpaces :: SpaceID
+  -> [SpaceID]
+  -> Bool
+  -> Bool
+  -> Double
+  -> Handler [SpaceID]
+copySpaces spaceId selectedIds copyPrimitives copyHierarchy sampleRate = do
+  base <- parseUrl starExecUrl
+  let req = urlEncodedBody
+            ( encodeArrayInt "selectedIds" selectedIds ++
+              [ ("copyPrimitives", boolean copyPrimitives)
+              , ("copyHierarchy", boolean copyHierarchy)
+              , ("sampleRate", BSC.pack $ Text.Printf.printf "%3.2f" sampleRate )
+              ]
+            )
+            $ base
+            { method = "POST"
+            , path = getURL "/starexec/services/spaces/{spaceId}/copySpace"
+                     [("{spaceId}", show spaceId)]
+            }
+
+  logWarnN $ T.pack $ show req
+  case requestBody req of
+    RequestBodyLBS bs -> logWarnN $ T.pack $ show bs
+    _ -> return ()
+
+  resp <- sendRequest req
+  return $ findJobNumber resp
+
+          
 {-
 
 copy : Boolean – If true, deep copies of all the given solvers are made first, and then the new solvers are

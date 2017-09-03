@@ -193,6 +193,7 @@ mkJobs sm config cat now = do
                   , jobGroupConfigs = do
                        R.Participant { R.solver_config = Just (_,_,co)} <- R.participants ci
                        return co
+                  , jobGroupSampleRate = family_factor config -- FIXME
                   }
 
          , jobids = Nothing

@@ -87,3 +87,5 @@ removeSolverPath = "starexec/services/remove/solver/{spaceId}"
 addJobPath :: ByteString
 addJobPath = "starexec/secure/add/job"
 
+addSpacePath :: ByteString
+addSpacePath = "starexec/add/space"
