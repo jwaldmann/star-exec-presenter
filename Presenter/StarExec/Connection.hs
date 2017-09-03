@@ -125,7 +125,8 @@ sendRequestRawMaybe req0 = do
       let sid' = -- getJsessionidFromHeaders $ responseHeaders resp
              getJsessionidFromCJ $ responseCookieJar resp
       logWarnN $ T.pack $ "current sid: " <> show sid'
-      setSessionData (responseCookieJar resp) (case sid' of Nothing -> sid ; _ -> sid' ) end
+      setSessionData cj -- (responseCookieJar resp)
+         (case sid' of Nothing -> sid ; _ -> sid' ) end
       return $ Just resp
 
 
