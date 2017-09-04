@@ -95,6 +95,7 @@ real_participants c
 -- HACK, FIXME (must be configurable)
 hors_concours :: SolverID -> Bool
 hors_concours (StarExecSolverID id) = hoco id
+hors_concours _ = False
 
 hoco id = id == 3797
 

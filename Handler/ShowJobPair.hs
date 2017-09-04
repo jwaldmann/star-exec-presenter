@@ -45,4 +45,9 @@ getShowJobPairR pid@(StarExecPairID _id) = do
       Latest -> return ()
       Pending _ -> insertWidgetMetaRefresh
     $(widgetFile "se_show_job_pair")
-getShowJobPairR _ = error "Not yet implemented: getShowJobPairR"
+    
+getShowJobPairR pid@(LriPairID id) = do
+  qr @ (QueryResult qStatus mPair) <- queryJobPair pid
+  defaultLayout $ do
+    [whamlet|#{show qr}
+    |]

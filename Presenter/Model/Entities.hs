@@ -83,6 +83,7 @@ newtype JobResults = JobResults
 
 data Pair  =
   StarExecPair JobPairInfo
+  | LriPair JobPairInfo
   deriving (Eq, Ord, Read, Show)
 
 data Benchmark =
@@ -158,6 +159,7 @@ instance ResultEntity JobResult where
   toWallclockTime (UibkResult r) = toWallclockTime r
 
   toOutputSize (StarExecResult r) = toOutputSize r
+  toOutputSize _ = Nothing
 
   toCertificationTime (StarExecResult r) = toCertificationTime r
 

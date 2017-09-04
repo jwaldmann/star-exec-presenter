@@ -98,7 +98,7 @@ getPersistJobPair = runDB_readlocked . getPersistJobPair'
 
 getPersistJobPair' :: JobPairID -> YesodDB App (Maybe Pair)
 getPersistJobPair' (StarExecPairID _id) = getEntityVal' (UniqueJobPairInfo _id) StarExecPair
-getPersistJobPair' _ = error "getPersistJobPair': not yet implemented"
+getPersistJobPair' (LriPairID _id) = getEntityVal' (UniqueJobPairInfo _id) LriPair
 
 getPersistSolverInfo :: SolverID -> Handler (Maybe Solver)
 getPersistSolverInfo = runDB_readlocked . getPersistSolverInfo'

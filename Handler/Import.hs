@@ -24,6 +24,8 @@ import Presenter.Internal.Stringish
 import qualified Importer.LRI as LRI
 import qualified Importer.UIBK as UIBK
 
+import Control.Monad.Logger
+
 data SourceSelection = LRIResultsSelection
   | LRIOutputsSelection
   | UIBKResultsSelection
@@ -226,7 +228,11 @@ importLRI uc = do
         , map validateParsing solvers
         , map validateParsing benchmarks
         ]
-  if all isRight parsings
+  let invalids = filter isLeft parsings
+  logWarnN $ T.pack $ "One or more errors occurred: " ++ (show invalids)
+  logWarnN $ "but we do the import anyway"
+  if True
+     -- all isRight parsings
     then runDB $ do
       clearLRI
       let jobs = zip [0..] entryNames
@@ -283,8 +289,9 @@ insertLRIResults solversMap benchmarksMap pairs = do
         (LRI.lrirCheckWallclockTime r)
     getResult LRI.LRIYES    = YES
     getResult LRI.LRINO     = NO
-    getResult LRI.LRIERROR  = ERROR
+    getResult LRI.LRIERROR  = MAYBE
     getResult LRI.LRIMAYBE  = MAYBE
+    getResult LRI.LRITIMEOUT= MAYBE
     getResult r             = OTHER $ T.pack $ show r
 
 insertLRISolvers :: [(Int, LRI.LRISolver)] -> YesodDB App ()
