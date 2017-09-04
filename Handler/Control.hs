@@ -40,8 +40,8 @@ inputForm = renderTable $ JobControl
                  "family_lower_bound (selection parameter a)" (Just 1)
         <*> areq (radioFieldList [("1", 1), ("10"::T.Text,10), ("25", 25), ("100", 100),("250",250),("1000",1000)])
                  "family_upper_bound (selection parameter b)" (Just 1)
-        <*> areq (radioFieldList [("0.1", 0.1), ("0.3"::T.Text,0.3), ("0.5", 0.5), ("1.0", 1.0)])
-                 "family_factor (selection parameter c)" (Just 0.1)
+        <*> areq (radioFieldList [("0.01", 0.01), ("0.03", 0.03), ("0.1", 0.1), ("0.3"::T.Text,0.3), ("1.0", 1.0)])
+                 "family_factor (selection parameter c)" (Just 0.01)
         <*> formToAForm ( do
             e <- askParams
             return ( FormSuccess $ maybe M.empty id e, [] ) )
