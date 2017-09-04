@@ -425,7 +425,9 @@ getJobPairInfo _ _pairId = do
             if looks_timestamped stdout
               then getHtmlProof_runsolver stdout
               else getHtmlProof_benchexec stdout
-      return $ Just $ JobPairInfo _pairId
+      return $ if BSLC.isPrefixOf "not available" stdout
+        then Nothing
+        else Just $ JobPairInfo _pairId
                                   (BSL.toStrict $ compress stdout)
                                   (BSL.toStrict $ compress $ responseBody respLog)
                                   htmlProof
