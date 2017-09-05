@@ -38,6 +38,7 @@ data Transform =
   | Filter_Rows Predicate
   | VBestAll | VBestInit
   | Sort Direction Int (Maybe Numtag) -- ^ no numtag: sort by result
+  | Common -- ^ restrict to intersection of benchmarks
   deriving (Read,Show, Eq)
 
 data Predicate =

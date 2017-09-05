@@ -31,6 +31,10 @@ toTuples (i, solvers) = map ((,) i) solvers
 shorten :: Text -> Text
 shorten t = T.takeEnd 50 t
 
+combi_modus :: Query -> CombineJobs
+combi_modus (Query (Common : _)) = Intersection
+combi_modus _ = Union
+
 getShowManyJobResultsR
   :: Scoring -> Query -> JobIds -> Handler Html
 getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
@@ -88,7 +92,7 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
 
 getShowManyJobResultsR sc q@(Query ts) jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
-  tab <- getManyJobCells $ map (snd . queryResult) qJobs
+  tab <- getManyJobCellsCombined (combi_modus q) $ map (snd . queryResult) qJobs
   defaultLayout $ do
     setTitle "Flexible Table"
     toWidget $(luciusFile "templates/solver_result.lucius")
@@ -104,5 +108,5 @@ getShowManyJobResultsCSVR
   :: Bool -> Query -> JobIds -> Handler TypedContent
 getShowManyJobResultsCSVR verbose q jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
-  tab <- getManyJobCells $ map (snd . queryResult) qJobs
+  tab <- getManyJobCellsCombined (combi_modus q) $ map (snd . queryResult) qJobs
   displayCSV verbose Standard q jids tab

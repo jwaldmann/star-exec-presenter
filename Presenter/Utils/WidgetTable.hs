@@ -32,16 +32,19 @@ bminfo dois (key,name) = case key of
   Left bid -> (Left bid, name)
   Right doi -> (Right doi , maybe ( T.pack $ show doi ) id $ DOI.toName dois doi)
 
+data CombineJobs = Union | Intersection
+
 getManyJobCells :: [[ JobResult ]] -> Handler Table
-getManyJobCells iss = do
+getManyJobCells = getManyJobCellsCombined Union
+
+getManyJobCellsCombined combi iss = do
     --iss <- getManyJobResults ids
 
     dois <- doiService <$> getYesod
-  
-    let cells :: M.Map (JobID, (SolverID,Name),(ConfigID,Name))
-                       (M.Map (BenchmarkKey,Name) Cell)
-        cells = M.fromListWith M.union $ do
-          p <- concat iss
+
+    let cells_per_group = map cpg iss
+        cpg is = M.fromListWith M.union $ do
+          p <- is
           return ( ( getJobID p
                    , ( toSolverID p
                      , toSolverName p
@@ -53,8 +56,21 @@ getManyJobCells iss = do
                , M.singleton ( bminfo dois $ getBenchmark p )
                      $ cell_for_job_pair p
                )
+        common_benchmarks = if null cells_per_group then S.empty else
+          foldl1 S.intersection $ do
+            cs <- cells_per_group
+            return $ S.fromList $ do
+              m <- M.elems cs
+              M.keys m
+              
+        cells :: M.Map (JobID, (SolverID,Name),(ConfigID,Name))
+                       (M.Map (BenchmarkKey,Name) Cell)
+        cells = M.unionsWith M.union cells_per_group
+
         headers = M.keys cells
-        benchmarks' = M.keys $ foldr M.union M.empty $ M.elems cells
+        benchmarks' = case combi of
+          Union -> M.keys $ foldr M.union M.empty $ M.elems cells
+          Intersection -> S.toList common_benchmarks
     return $ Table
            { header = empty_cell { contents = [whamlet| Benchmark |]
                            } : map cell_for_solver headers
@@ -209,6 +225,10 @@ display sc jids previous ts tab  = do
               (<a href=@{q VBestAll}>for all jobs</a> #
               | <a href=@{q VBestInit}>for all jobs except last</a>
               )
+            $if null previous && null ts
+              <h3>
+                <a href=@{q Common}>
+                  restrict to benchmarks common to all jobs 
         |]
         summary sc jids previous tab
     -- no more transformers, display actual data
@@ -456,6 +476,7 @@ apply jids t tab = case t of
             Nothing -> Right () -- late in the order
             Just d -> Left $ ( case dir of Up -> id ; Down -> negate ) d
       in  tab { rows = sortOn val $ rows tab }
+    Common -> tab -- because we filtered this earlier already
 
 init' = reverse . drop 1 . reverse
 
