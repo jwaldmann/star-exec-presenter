@@ -13,6 +13,6 @@ KET=star-exec-presenter.keter
 
 strip $APP
 rm -fv $KET
-tar -c --dereference --hard-dereference -z -v -f $KET $APP static config TPDB*.zip johannes_waldmann_tpdb-8.0.7_XML.zip
+tar -c --dereference --hard-dereference -z -v -f $KET $APP static config TPDB-*_XML.zip mario_wenzel_XML.zip 
 # scp $KET termcomp.imn.htwk-leipzig.de:/opt/keter/incoming
 cp -v $KET /opt/keter/incoming
