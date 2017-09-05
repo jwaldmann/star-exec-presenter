@@ -6,6 +6,7 @@ import Presenter.Internal.Stringish
 import Presenter.Utils.WidgetMetaRefresh
 import Presenter.PersistHelper
 
+import Control.Monad (when)
 import Control.Monad.Logger
 import qualified Data.Text as T
 

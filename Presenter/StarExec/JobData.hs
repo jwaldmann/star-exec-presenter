@@ -14,6 +14,7 @@ import Presenter.PersistHelper
 import Presenter.Prelude
 import Data.Time.Clock
 
+import Control.Monad (when)
 import Control.Monad.Logger
 import qualified Data.Text as T
 
