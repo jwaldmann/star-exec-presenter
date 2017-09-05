@@ -3,6 +3,7 @@ module Presenter.History where
 import Presenter.Model.RouteTypes (JobID (..))
 import Presenter.Model.Competition
 
+termcomp2014 :: Competition
 termcomp2014 = Competition
      { getMetaData =    CompetitionMeta
                              { getMetaName =    "Termination Competition 2014"
@@ -133,6 +134,7 @@ termcomp2014 = Competition
                                    }]
      }
 
+termcomp2014_demonstration :: Competition
 termcomp2014_demonstration = Competition
      { getMetaData =    CompetitionMeta
                              { getMetaName =    "Termination Competition 2014 (Demonstration)"
@@ -197,6 +199,7 @@ termcomp2014_demonstration = Competition
                                    }]
      }
 
+termcomp2015 :: Competition
 termcomp2015 = Competition
      { getMetaData =    CompetitionMeta
                              { getMetaName =    "Termination Competition 2015"
@@ -346,6 +349,7 @@ termcomp2015 = Competition
                                    }]
      }
 
+termcomp2015_demonstration :: Competition
 termcomp2015_demonstration = Competition
      { getMetaData =    CompetitionMeta
                              { getMetaName =    "Termination Competition 2015 (Demonstration)"
@@ -412,6 +416,7 @@ termcomp2015_demonstration = Competition
                                    }]
      }
 
+termcomp2016 :: Competition
 termcomp2016 = Competition
      { getMetaData =    CompetitionMeta
                              { getMetaName =    "Termination Competition 2016"
@@ -568,4 +573,146 @@ termcomp2016 = Competition
                                                              }]
                                    }]
      }
+     
+termcomp2017 :: Competition
+termcomp2017 = Competition
+     { getMetaData =    CompetitionMeta
+                             { getMetaName =    "Termination Competition 2017"
+                             , getMetaDescription =    "wc_r = 300 wc_p = 300 a = 1 b = 1 c = 1.0 ( 2017-09-05 10:59:30.624054853 UTC )"
+                             }
+     , getMetaCategories =    [MetaCategory
+                                   { getMetaCategoryName =    "Termination of Term Rewriting (and Transition Systems)"
+                                   , getCategories =    [Category
+                                                             { getCategoryName =    "TRS Standard"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24388]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "SRS Standard"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24389]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Cycles"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24390]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Relative"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24391]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "SRS Relative"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24392]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Equational"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24393]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Equational certified"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    362
+                                                             , getJobIds =    [StarExecJobID 24394]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Conditional"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24395]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Context Sensitive"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24396]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "TRS Innermost"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24397]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Higher-Order rewriting (union beta)"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24398]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Integer Transition Systems"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24399]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Integer Transition Systems certified"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    362
+                                                             , getJobIds =    [StarExecJobID 24400]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Integer TRS Innermost"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24401]
+                                                             }]
+                                   }
+                              ,MetaCategory
+                                   { getMetaCategoryName =    "Complexity Analysis of Term Rewriting"
+                                   , getCategories =    [Category
+                                                             { getCategoryName =    "Runtime Complexity - Innermost Rewriting"
+                                                             , getCategoryScoring =    Complexity
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24402]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Runtime Complexity - Innermost Rewriting certified"
+                                                             , getCategoryScoring =    Complexity
+                                                             , getPostProcId =    362
+                                                             , getJobIds =    [StarExecJobID 24403]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "Complexity - Integer Transition Systems"
+                                                             , getCategoryScoring =    Complexity
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24404]
+                                                             }]
+                                   }
+                              ,MetaCategory
+                                   { getMetaCategoryName =    "Termination of Programming Languages"
+                                   , getCategories =    [Category
+                                                             { getCategoryName =    "C"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24405]
+                                                             }
+                                                        ,Category
+                                                             { getCategoryName =    "C Integer Programs"
+                                                             , getCategoryScoring =    Standard
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24406]
+                                                             }]
+                                   }
+                              ,MetaCategory
+                                   { getMetaCategoryName =    "Complexity Analysis of Programming Languages"
+                                   , getCategories =    [Category
+                                                             { getCategoryName =    "Complexity - C Integer Programs"
+                                                             , getCategoryScoring =    Complexity
+                                                             , getPostProcId =    363
+                                                             , getJobIds =    [StarExecJobID 24407]
+                                                             }]
+                                   }]
+     }
+
+
      
