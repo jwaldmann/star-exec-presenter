@@ -1,4 +1,4 @@
-{-# language FunctionalDependencies, TypeSynonymInstances #-}
+{-# language FunctionalDependencies, TypeSynonymInstances, LambdaCase #-}
 
 module Handler.Combine ( getCombineR ) where
 
@@ -8,21 +8,28 @@ import Presenter.Model.RouteTypes
 import Database.Persist.Sql (fromSqlKey)
 import Text.Lucius (luciusFile)
 
+import Handler.CompetitionYear (info_for_year)
+
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M
-
+import Text.Blaze (ToMarkup(..))
 import Control.Monad ( forM, when )
 import Data.Maybe ( catMaybes )
 import Prelude (init,last)
 
 -- | gets list of competitions. compares last one with previous ones.
 -- display result in order of categories of last competition.
-getCombineR compids = do
-  when (null compids) $ fail "need at least one argument"
-  let keys = map fromSqlKey compids
-  comps <- forM compids $ \ ci -> do
-    Just c <- runDB $ get ci
-    return $ competitionInfoCompetition c
+getCombineR :: [ CompetitionRef ] -> Handler Html
+getCombineR crefs = do
+  when (null crefs) $ fail "need at least one argument"
+  -- let keys = map fromSqlKey compids
+  comps <- forM crefs $ \ case
+    CRefId ci -> do
+      Just c <- runDB $ get ci
+      return $ competitionInfoCompetition c
+    CRefYear y -> do
+      Just c <- return $ info_for_year y
+      return c
   let icomps = zip [0 :: Int .. ] comps
   let target = Prelude.last comps
   let m = M.unionsWith (M.unionWith (++)) $ do
@@ -38,7 +45,7 @@ getCombineR compids = do
       <tr>
         <th>category
         $forall (i,comp) <- icomps
-          <th>comp #{keys !! i}
+          <th>comp #{crefs !! i}
         <th colspan="3">virtual best for
         |]
   defaultLayout $ do
@@ -55,7 +62,7 @@ getCombineR compids = do
     <tbody>
       $forall (i,comp) <- icomps
         <tr>
-          <td>#{keys !! i}
+          <td>#{crefs !! i}
           <td>#{getMetaName $ key comp}
           <td>#{getMetaDescription $ key comp}
 <p>          
@@ -63,7 +70,7 @@ getCombineR compids = do
     <tbody>
       $forall mc <- children target
         <tr>
-          <td colspan="#{4 + length compids}">meta-category #{key mc}
+          <td colspan="#{4 + length crefs}">meta-category #{key mc}
         ^{smallheader}
         $forall c <- children mc
           $maybe v <- M.lookup (key c) m
@@ -79,6 +86,9 @@ getCombineR compids = do
 |]
 
 
+instance ToMarkup CompetitionRef where
+  toMarkup = toMarkup . toPathPiece
+      
 -- FIXME: this belongs in the module where the types are defined
 class Node n k c | n -> k, n -> c where
   key :: n -> k

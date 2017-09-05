@@ -88,7 +88,7 @@ postControlR year = do
     [whamlet|
       <h2>Result of previous command
       $maybe key <- mKey
-        jobs started, <a href=@{CompetitionR key}>output</a>
+        jobs started, <a href=@{CompetitionR $ CRefId key}>output</a>
       $nothing
         could not start jobs
     |]

@@ -6,7 +6,7 @@ $else
     <ul>
         $forall ci <- competitionInfos
             <li>
-               <a href=@{CompetitionR $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
+               <a href=@{CompetitionR $ CRefId $ entityKey ci}>#{getCompetitionName $ competitionInfoCompetition $ entityVal ci}
                #{show $ competitionInfoDate $ entityVal ci}
                <a href=@{ProblemsR False $ JobIds $ allJobIDs $ competitionInfoCompetition $ entityVal ci}>errors
                $if authorized 

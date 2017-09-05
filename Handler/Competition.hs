@@ -2,17 +2,22 @@ module Handler.Competition where
 
 import Import
 import Handler.CompetitionWithConfig
+import Handler.CompetitionYear
 import Yesod.Auth
 import Data.Maybe
 
 import Control.Monad.Logger
 import qualified Data.Text as T
 
-getCompetitionR :: CompetitionInfoId -> Handler Html
-getCompetitionR compId = do
-  logWarnN $ T.pack $ "getCompetitionR" <> show compId
+getCompetitionR :: CompetitionRef -> Handler Html
+getCompetitionR cr = case cr of
+  CRefId i -> getCompetitionByIdR i
+  CRefYear y -> getCompetitionYearR y
+
+getCompetitionByIdR :: CompetitionInfoId -> Handler Html
+getCompetitionByIdR compId = do
+  logWarnN $ T.pack $ "getCompetitionByIdR" <> show compId
   compInfo <- runDB $ get compId
-  logWarnN $ T.pack $ "getCompetitionR" <> show compInfo
 
   case compInfo of
     Just ci -> do
