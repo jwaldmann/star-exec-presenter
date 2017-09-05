@@ -84,7 +84,7 @@ JobInfo
     postProc Text default='unknown'
     isComplexity Bool default=FALSE
     isPublic Bool default=TRUE
-    startDate UTCTime default=now()
+    startDate UTCTime Maybe
     finishDate UTCTime Maybe
     lastUpdate UTCTime default=now()
     deriving Eq Ord Read Show

@@ -254,10 +254,7 @@ updateJob :: UTCTime -> (Maybe JobInfo, Maybe JobInfo) -> Maybe JobInfo
 updateJob _ (Nothing, Nothing) = Nothing
 updateJob _ ((Just ji), Nothing) = Just ji
 updateJob currentTime (Nothing, (Just ji)) = Just ji
-  { jobInfoFinishDate = if jobInfoStatus ji == Complete
-                          then Just currentTime
-                          else Nothing
-  , jobInfoLastUpdate = currentTime
+  { jobInfoLastUpdate = currentTime
   }
 updateJob currentTime ((Just persist), (Just starexec)) = Just persist
     { jobInfoName = jobInfoName starexec
@@ -266,10 +263,9 @@ updateJob currentTime ((Just persist), (Just starexec)) = Just persist
     , jobInfoPreProc = jobInfoPreProc starexec
     , jobInfoPostProc = jobInfoPostProc starexec
     , jobInfoIsComplexity = jobInfoIsComplexity starexec
+    , jobInfoStartDate = jobInfoStartDate starexec
     , jobInfoFinishDate = case jobInfoFinishDate persist of
-                            Nothing -> if jobInfoStatus starexec == Complete
-                                        then Just currentTime
-                                        else Nothing
+                            Nothing -> jobInfoFinishDate starexec
                             Just fd -> Just fd
     , jobInfoLastUpdate = currentTime
     }

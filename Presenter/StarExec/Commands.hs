@@ -47,6 +47,7 @@ import Codec.Compression.GZip
 import qualified Data.Map as M
 import Data.Time.Clock
 import Data.Time.Calendar
+import Data.Time.Format
 import Text.Printf
 
 import Text.Hamlet.XML
@@ -66,6 +67,7 @@ defaultDate :: UTCTime
 defaultDate = UTCTime
   (fromGregorian 1970 1 1)
   (secondsToDiffTime 0)
+
 
 (+>) :: BSC.ByteString -> BSC.ByteString -> BSC.ByteString
 (+>) = BS.append
@@ -111,6 +113,18 @@ getFieldsetByID c _id = safeHead c $ getFieldsets c >>= attributeIs "id" _id
 getTds :: Cursor -> [Cursor]
 getTds c = descendant c >>= element "td" >>= child
 
+
+-- timezone is missing, cf. https://www.tapatalk.com/groups/starexec/dates-returned-by-starexec-should-include-timezone-t152.html
+-- and formatting changed over the years
+
+get_starexec_time :: Text -> Maybe UTCTime
+get_starexec_time s =
+  if T.isSuffixOf " AM" s || T.isSuffixOf " PM" s
+  then -- example "Sep 04 2017 04:30:17 AM"
+    parseTimeM True defaultTimeLocale "%b %d %Y %I:%M:%S %p %Z" (T.unpack s ++ " CDT")
+  else -- example "2014-07-19 21:21:03.0"
+    parseTimeM True defaultTimeLocale "%Y-%m-%d %H:%M:%S%Q %Z" (T.unpack s ++ " CDT")
+
 constructJobInfo :: Int -> Text -> [Cursor] -> JobInfo
 constructJobInfo _jobId title tds =
   let baseJobInfo = JobInfo _jobId
@@ -121,7 +135,7 @@ constructJobInfo _jobId title tds =
                             "unkown"
                             False
                             True
-                            defaultDate
+                            Nothing
                             Nothing
                             defaultDate
       getJobStatus t = case t of
@@ -133,7 +147,10 @@ constructJobInfo _jobId title tds =
           ("status":t:ts) ->
             parseTDs (info { jobInfoStatus = getJobStatus t }) ts
           ("created":t:ts) ->
-            parseTDs (info { jobInfoDate = t }) ts
+            parseTDs (info { jobInfoDate = t
+                           , jobInfoStartDate = get_starexec_time t }) ts
+          ("completed":t:ts) ->
+            parseTDs (info { jobInfoFinishDate = get_starexec_time t }) ts
           ("postprocessor":t:ts) ->
             parseTDs (info { jobInfoPostProc = t }) ts
           ("preprocessor":t:ts) ->
@@ -266,6 +283,7 @@ getJobInfo _ _jobId = do
     else do
       let fieldset = getJobInfoFieldset cursor
           tds = getTds fieldset
+      when False $ logWarnN $ T.pack $ "getJobInfo.tds " ++ show tds    
       return $ Just $ constructJobInfo _jobId jobTitle tds
 
 

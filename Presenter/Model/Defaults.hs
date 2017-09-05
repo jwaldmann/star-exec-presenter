@@ -22,7 +22,7 @@ defaultJobInfo = JobInfo
   , jobInfoPostProc = ""
   , jobInfoIsComplexity = False
   , jobInfoIsPublic = True
-  , jobInfoStartDate = baseDate
+  , jobInfoStartDate = Nothing
   , jobInfoFinishDate = Nothing
   , jobInfoLastUpdate = baseDate
   }

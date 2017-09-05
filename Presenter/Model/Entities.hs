@@ -403,9 +403,9 @@ instance JobEntity JobInfo where
   toJobStatus = jobInfoStatus
 
   toJobDuration j =
-    diffTime <$> (jobInfoFinishDate j) <*> Just (jobInfoStartDate j)
+    diffTime <$> (jobInfoFinishDate j) <*> (jobInfoStartDate j)
 
-  toJobStartDate = Just . jobInfoStartDate
+  toJobStartDate = jobInfoStartDate
 
   toJobFinishDate = jobInfoFinishDate
 

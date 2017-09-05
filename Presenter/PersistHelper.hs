@@ -133,35 +133,35 @@ registerJobs ids = do
   where
     insertJob now _id = runDB_writelocked $ insertUnique $ defaultJobInfo
       { jobInfoStarExecId = _id
-      , jobInfoStartDate = now
       , jobInfoLastUpdate = now
       }
 
 -- ###### persist updater ######
 
 updateJobInfo :: (Maybe JobInfo) -> JobInfo -> YesodDB App ()
-updateJobInfo mJobInfo jobInfo = do
-  -- liftIO $ putStrLn "#### updateJobInfo: jobInfo"
-  -- liftIO $ putStrLn $ show jobInfo
+updateJobInfo mold new = do
+  liftIO $ putStrLn "#### updateJobInfo: new"
+  liftIO $ putStrLn $ show new
   currentTime <- liftIO getCurrentTime
-  case mJobInfo of
-    Just ji -> updateWhere
-      [ JobInfoStarExecId ==. jobInfoStarExecId ji ]
-      [ JobInfoName =. jobInfoName jobInfo
-      , JobInfoStatus =. jobInfoStatus jobInfo
-      , JobInfoDate =. jobInfoDate jobInfo
-      , JobInfoPreProc =. jobInfoPreProc jobInfo
-      , JobInfoPostProc =. jobInfoPostProc jobInfo
-      , JobInfoIsComplexity =. jobInfoIsComplexity jobInfo
-      , JobInfoFinishDate =. case jobInfoFinishDate ji of
-                              Nothing -> if jobInfoStatus jobInfo == Complete
+  case mold of
+    Just old -> updateWhere
+      [ JobInfoStarExecId ==. jobInfoStarExecId old ]
+      [ JobInfoName =. jobInfoName new
+      , JobInfoStatus =. jobInfoStatus new
+      , JobInfoDate =. jobInfoDate new
+      , JobInfoPreProc =. jobInfoPreProc new
+      , JobInfoPostProc =. jobInfoPostProc new
+      , JobInfoIsComplexity =. jobInfoIsComplexity new
+      , JobInfoStartDate =. jobInfoStartDate new
+      , JobInfoFinishDate =. case jobInfoFinishDate old of
+                              Nothing -> if jobInfoStatus new == Complete
                                           then Just currentTime
                                           else Nothing
                               Just fd -> Just fd
       , JobInfoLastUpdate =. currentTime
       ]
     Nothing -> do
-      _ <- insertUnique $ jobInfo { jobInfoLastUpdate = currentTime }
+      _ <- insertUnique $ new { jobInfoLastUpdate = currentTime }
       return ()
 
 updatePostProcInfo :: PostProcInfo -> YesodDB App ()
