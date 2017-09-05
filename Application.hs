@@ -79,7 +79,7 @@ import Handler.Combine
 import qualified Data.Map.Strict as M
 import Control.Concurrent.STM
 import Presenter.StarExec.Connection (initial_login, LoginMethod(..))
-import Presenter.DOI
+import qualified Presenter.DOI as DOI
 
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
@@ -147,7 +147,17 @@ makeFoundation conf = do
     conS <- Lock.new
 
     -- resolver
-    doiS <- makeDOI_for_2017
+    doiS <- DOI.makeResolverfrom
+      -- you should only ever extend this list at the end,
+      -- so that DOIs for old benchmarks remain stable.
+      -- if DOIs change, you need to   "delete from job_result_info ;"
+      [ "TPDB-65df8a308dd6_XML.zip"
+      , "TPDB-10.3_XML.zip"
+      , "johannes_waldmann_tpdb-8.0.7_XML.zip"
+      , "TPDB-10.4_XML.zip"
+      , "TPDB-10.5_XML.zip"
+      , "mario_wenzel_XML.zip"
+      ]
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
         foundation = App conf s p manager dbconf logger session crCache dbS conS doiS

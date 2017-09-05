@@ -13,6 +13,7 @@ where
 import Prelude
 import Yesod
 import qualified Data.Text as T
+import Data.Char (isSpace)
 
 data DOI = TPI Int
   deriving (Eq, Ord)
@@ -21,11 +22,13 @@ instance Show DOI where
   show (TPI i) = "tpi:" ++ show i
 
 instance Read DOI where
-  readsPrec p ('t':'p':'i':':':s) = do
-    (n,rest) <- readsPrec p s
-    return (TPI n, rest)
+  readsPrec p s = case dropWhile isSpace s of
+      ('t':'p':'i':':':s) -> do
+        (n,rest) <- readsPrec p s
+        return (TPI n, rest)
+      _ -> []
 
-makeTPI :: Int ->DOI
+makeTPI :: Int -> DOI
 makeTPI = TPI
 
 $(derivePersistField "DOI")

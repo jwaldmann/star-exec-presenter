@@ -8,7 +8,7 @@ import Presenter.Model.RouteTypes
 import Database.Persist.Sql (fromSqlKey)
 import Text.Lucius (luciusFile)
 
-import Handler.CompetitionYear (info_for_year)
+import Presenter.History (info_for_year)
 
 import qualified Data.Text as T
 import qualified Data.Map.Strict as M

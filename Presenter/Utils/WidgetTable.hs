@@ -90,6 +90,7 @@ empty_cell =
          , nums = M.empty
          , msolver = Nothing
          , mbench = Nothing
+         , mbenchkey = Nothing
          , mjr = Nothing
          , mjid = Nothing
          }
@@ -113,6 +114,7 @@ $case bkey
   , tdclass = fromString "bench"
   , url = fromString ""
   , mbench = Just bname
+  , mbenchkey = Just bkey
   }
 
 cell_for_solver :: (JobID, (SolverID, Text), (ConfigID, Text)) -> Cell
@@ -477,6 +479,8 @@ apply jids t tab = case t of
             Just d -> Left $ ( case dir of Up -> id ; Down -> negate ) d
       in  tab { rows = sortOn val $ rows tab }
     Common -> tab -- because we filtered this earlier already
+    Filter_Benchmarks p ->
+      tab { rows = filter ( benchmark_predicate p ) $ rows tab }
 
 init' = reverse . drop 1 . reverse
 
@@ -556,6 +560,13 @@ predicate p row = case p of
         Nothing -> False
         Just v -> (case ordering of LT -> (<=) ; GT -> (>=) ) v bound
 
+benchmark_predicate p row = case p of
+  EqDOI doi -> or $ do
+    leader <- take 1 row
+    return $ Just (Right doi) == mbenchkey leader
+  EqID id -> or $ do
+    leader <- take 1 row
+    return $ Just (Left id) == mbenchkey leader
 
 matches :: Cell_Filter -> Text -> Bool
 matches f c = case f of

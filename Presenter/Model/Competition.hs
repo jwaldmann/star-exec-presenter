@@ -4,7 +4,8 @@ import Yesod
 import Presenter.Model.Types
 import Presenter.Model.RouteTypes
 import Presenter.Output
-import Prelude (Show, Read, Eq, Ord, ($), (.), show, reads, return, Maybe (..))
+import Prelude (Show, Read, Eq, Ord, Enum, Bounded
+               , ($), (.), show, reads, return, Maybe (..))
 import qualified Data.Text as T
 import Control.Monad ((>=>))
 
@@ -17,7 +18,7 @@ instance Output Scoring where output = text . show
 
 -- | this is for managing registrations (which are in the source) FIXME
 data Year = Y2014 | Y2015 | Y2016 | Y2017 | E
-  deriving (Show, Eq, Ord, Read)
+  deriving (Show, Eq, Ord, Read, Enum, Bounded)
 
 instance PathPiece Year where
   toPathPiece year = T.pack $ show year

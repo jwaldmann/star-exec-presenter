@@ -5,6 +5,8 @@ import Yesod (PathPiece(..))
 import Presenter.Model.Types
 import Presenter.Model.RouteTypes
 import Presenter.Model.StarExec
+import Presenter.DOI
+
 import qualified Data.Text as T
 import qualified Prelude as P
 
@@ -36,10 +38,14 @@ data Direction = Up | Down
 data Transform =
   Choose_Columns [ Int ]
   | Filter_Rows Predicate
+  | Filter_Benchmarks Bench_Predicate
   | VBestAll | VBestInit
   | Sort Direction Int (Maybe Numtag) -- ^ no numtag: sort by result
   | Common -- ^ restrict to intersection of benchmarks
   deriving (Read,Show, Eq)
+
+data Bench_Predicate = EqDOI DOI | EqID BenchmarkID
+  deriving (Read, Show, Eq)
 
 data Predicate =
   And [ Cell_Filter ]

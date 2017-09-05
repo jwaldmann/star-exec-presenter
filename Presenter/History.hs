@@ -1,7 +1,26 @@
+{-# language TupleSections #-}
+
 module Presenter.History where
 
 import Presenter.Model.RouteTypes (JobID (..))
 import Presenter.Model.Competition
+
+import Prelude (Maybe(..), (<$>), ($), Bounded(..))
+import Data.Maybe (maybeToList)
+
+info_for_year :: Year -> Maybe Competition
+info_for_year year = case year of
+  Y2014 -> Just termcomp2014
+  Y2015 -> Just termcomp2015
+  Y2016 -> Just termcomp2016
+  Y2017 -> Just termcomp2017
+  _     -> Nothing 
+
+allCompetitionJobIDs :: [ (Year, JobID) ]
+allCompetitionJobIDs = do
+  y <- [ minBound .. maxBound ]
+  c <- maybeToList $ info_for_year y
+  ( (y,) <$> allJobIDs c )
 
 termcomp2014 :: Competition
 termcomp2014 = Competition

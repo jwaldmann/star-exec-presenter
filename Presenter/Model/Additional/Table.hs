@@ -2,7 +2,8 @@ module Presenter.Model.Additional.Table where
 
 import Presenter.Model.Entities
 import Presenter.Model.Query
-import Presenter.Model.RouteTypes (JobID)
+import Presenter.Model.RouteTypes (JobID, BenchmarkID)
+import Presenter.Processing (BenchmarkKey)
 import Prelude (Maybe)
 import Foundation (Widget)
 
@@ -29,6 +30,7 @@ data Cell =
           , tag :: ! T.Text -- ^ used for sorting (e.g., YES, NO, CERTIFIED)
           , nums :: ! (M.Map Numtag P.Double)
           , mbench :: ! (Maybe T.Text) -- ^  if this is cell for a benchmark
+          , mbenchkey :: ! (Maybe BenchmarkKey) 
           , msolver :: ! (Maybe T.Text) -- ^ who made this?
           , mjr :: ! (Maybe JobResult)
           , mjid :: ! (Maybe JobID)
