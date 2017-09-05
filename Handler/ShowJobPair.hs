@@ -23,7 +23,7 @@ getShowJobPairR pid@(StarExecPairID _id) = do
   logWarnN $ T.pack $ "getShowJobPairR.pid = " ++ show pid
   -- ?? why are there two queries?
   qr @ (QueryResult qStatus mPair) <- queryJobPair pid
-  logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
+  when False $ logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
   mJobResult <- getPersistJobResult pid
   logWarnN $ T.pack $ "getShowJobPairR.mJobResult =" ++ show mJobResult
   (mj, mb, ms) <- case mJobResult of

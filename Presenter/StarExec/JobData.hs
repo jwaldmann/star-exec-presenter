@@ -100,7 +100,7 @@ queryJobPair :: JobPairID -> Handler (QueryResult QueryInfo (Maybe Pair))
 queryJobPair _pairId@(StarExecPairID pid) = do
   logWarnN $ T.pack $ "queryJobPairR._pairId = " ++ show _pairId
   mPersistPairInfo <- getPersistJobPair _pairId
-  logWarnN $ T.pack $ "queryJobPairR.mPersistPairInfo = " ++ show mPersistPairInfo
+  when False $ logWarnN $ T.pack $ "queryJobPairR.mPersistPairInfo = " ++ show mPersistPairInfo
   case mPersistPairInfo of
     Just (StarExecPair persistPairInfo) -> do
       if jobPairInfoResultStatus persistPairInfo == JobResultComplete
