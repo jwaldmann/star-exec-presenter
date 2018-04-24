@@ -495,7 +495,7 @@ createSpaceJob sId job = do
 makeJobSpace :: SpaceID -> StarExecJob -> Handler StarExecJob
 makeJobSpace sId job = do
   logWarnN $ T.pack $ "makeJobSpace " ++ show job
-  now <- lift getCurrentTime
+  now <- liftIO getCurrentTime
   let name = T.unpack $ "S-" <> description job <> "-" <> T.pack (show now)
   jobspace <- addSpace sId name "none" False False False
   forM_ (jobpairs job) $ \ case

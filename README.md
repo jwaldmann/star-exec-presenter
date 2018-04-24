@@ -19,7 +19,7 @@ This branch is running at the moment [here](http://termcomp.imn.htwk-leipzig.de/
 1 Getting source
 ----------------
 
-    git clone git@github.com:rm--/star-exec-presenter.git
+    git clone https://github.com/jwaldmann/star-exec-presenter
 
 
 2 Installation

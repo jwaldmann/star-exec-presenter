@@ -77,7 +77,7 @@ splitBy p xs = case L.dropWhile p xs of
       (w, xs') = break p x
 
 handleError :: SomeException -> Handler ()
-handleError e = lift $ do
+handleError e = liftIO $ do
   putStrLn "An error occurred while importing into the DB!"
   print e
 

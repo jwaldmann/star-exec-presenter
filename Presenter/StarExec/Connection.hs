@@ -1,3 +1,5 @@
+{-# language ScopedTypeVariables #-}
+
 module Presenter.StarExec.Connection
     ( sendRequest, sendRequestMaybe
     -- , index
@@ -68,20 +70,21 @@ runCon_exclusive :: Handler b -> Handler b
 runCon_exclusive action = do
   lock <- conSem <$> getYesod
   -- Lock.withWrite lock action
-  bracket_
-    ( lift $ Lock.acquireWrite lock )
-    ( lift $ (Lock.releaseWrite >=> either throw return) lock)
-    action
+  -- FIXME:
+  -- bracket_
+    -- ( liftIO $ Lock.acquireWrite lock )
+    -- ( liftIO $ (Lock.releaseWrite >=> either throw return) lock)
+  action
 
 getSessionData :: Handler SessionData
 getSessionData = do
   app <- getYesod
-  lift $ atomically $ readTVar $ sessionData app
+  liftIO $ atomically $ readTVar $ sessionData app
 
 setSessionData :: CookieJar -> Maybe BS.ByteString -> UTCTime -> Handler ()
 setSessionData cj sid d = do
   app <- getYesod
-  lift $ atomically $ writeTVar (sessionData app) $ SessionData cj sid d
+  liftIO $ atomically $ writeTVar (sessionData app) $ SessionData cj sid d
 
 -- | this will fail with a pattern match error if something went wrong
 sendRequestRaw :: Request -> Handler (Response BSL.ByteString)
@@ -109,7 +112,8 @@ sendRequestRawMaybe req0 = do
     RequestBodyLBS s ->
       logWarnN  $ T.pack  $ "sendRequestRawMaybe: " <> show s
   start <- liftIO getCurrentTime
-  eresp <- tryAny $ httpLbs req man
+  eresp :: Either () (Response BSL.ByteString) <- -- FIXME: tryAny $
+    Right <$> httpLbs req man
   end <- liftIO getCurrentTime
   logWarnN  $  "done sendRequestRawMaybe: " <> reqInfo
                        <> "response status: " <> T.pack (either show (show . responseStatus) eresp)

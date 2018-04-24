@@ -140,6 +140,9 @@ library
                 ViewPatterns
 
     build-depends: base
+                 , classy-prelude
+                 , classy-prelude-conduit
+                 , classy-prelude-yesod
                  , cereal
                  , yesod
                  , yesod-core

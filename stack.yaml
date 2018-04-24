@@ -1,6 +1,6 @@
 # if you change this, be sure to change keter.sh as well
-# resolver: lts-8.22
-resolver: nightly-2017-08-15
+resolver: lts-11.6
+# resolver: nightly-2017-08-15
 
 packages:
 - '.'
@@ -11,6 +11,8 @@ packages:
 
 extra-deps:
  - SafeSemaphore-0.10.1
-
+ - graphviz-2999.19.0.0
+ - fgl-5.5.4.0
+ 
 system-ghc: true
 compiler-check: newer-minor

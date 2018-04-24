@@ -1,5 +1,5 @@
-GHC_VERSION = 7.10.3
-LTS_VERSION = 6.0
+GHC_VERSION = 8.2.2
+LTS_VERSION = 11.6
 
 .PHONY: clean create-db deploy install run
 
@@ -13,7 +13,7 @@ help:
 
 
 clean:
-	rm stack.yaml
+	# rm stack.yaml
 	rm -R .stack-work/
 
 create-db:
@@ -23,7 +23,7 @@ create-db:
 
 install:
 	stack setup
-	stack build yesod-bin --verbosity silent
+	# stack build yesod-bin --verbosity silent
 	stack build --verbosity silent
 
 

@@ -1,5 +1,7 @@
 -- | authentication relative to the data in $HOME/.star_exec
 
+{-# language FlexibleContexts, TypeFamilies #-}
+
 module Presenter.Auth where
 
 -- source copied from
@@ -17,7 +19,7 @@ import qualified Yesod.Auth.Message as Msg
 
 -- moved here to break cyclic import
 -- getLoginCredentials :: Handler Login
-getLoginCredentials :: (MonadIO m, Read a) => m a
+getLoginCredentials :: (MonadIO w, Read a) => w a
 getLoginCredentials = liftIO $ do
   home <- getHomeDirectory
   slogin <- readFile $ home ++ "/.star_exec"
@@ -29,11 +31,11 @@ authSE =
     AuthPlugin "authSE" dispatch login
   where
     dispatch "POST" [] = do
-        ident <- lift $ runInputPost $ ireq textField "ident"
-        pass  <- lift $ runInputPost $ ireq textField "pass"
-        cred <- lift $ getLoginCredentials
+        ident <- runInputPost $ ireq textField "ident"
+        pass  <- runInputPost $ ireq textField "pass"
+        cred  <- getLoginCredentials
         if cred == Login ident pass
-                then lift $ setCredsRedirect $ Creds "authSE" ident []
+                then setCredsRedirect $ Creds "authSE" ident []
                 else loginErrorMessageI LoginR Msg.PassMismatch
     dispatch _ _ = notFound
     url = PluginR "authSE" []

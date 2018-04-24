@@ -128,7 +128,7 @@ insertJobResultInfo resultInfo = runDB_writelocked $ do
 
 registerJobs :: [Int] -> Handler ()
 registerJobs ids = do
-  now <- lift getCurrentTime
+  now <- liftIO getCurrentTime
   mapM_ (insertJob now) ids
   where
     insertJob now _id = runDB_writelocked $ insertUnique $ defaultJobInfo
@@ -190,8 +190,13 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
 
+runDB_writelocked q = Import.runDB q
+runDB_readlocked  q = Import.runDB q
+
+{-
+
 runDB_writelocked :: YesodDB App b -> Handler b
-runDB_writelocked query = do
+runDB_writelocked query = liftHandle $ do
   lock <- dbSem <$> getYesod
   bracket_
     ( lift $ Lock.acquireWrite lock )
@@ -205,3 +210,5 @@ runDB_readlocked query = do
     ( lift $ Lock.acquireRead lock )
     ( lift $ (Lock.releaseRead >=> either throw return) lock)
     $ Import.runDB query
+
+-}

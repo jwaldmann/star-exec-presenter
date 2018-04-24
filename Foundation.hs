@@ -1,4 +1,4 @@
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE StandaloneDeriving, RankNTypes, InstanceSigs #-}
 module Foundation where
 
 import Prelude
@@ -71,6 +71,8 @@ mkMessage "App" "messages" "en"
 -- explanation for this split.
 mkYesodData "App" $(parseRoutesFile "config/routes")
 
+-- | A convenient synonym for creating forms.
+-- type Form x = Html -> MForm (HandlerFor App) (FormResult x, Widget)
 type Form x = Html -> MForm (HandlerT App IO) (FormResult x, Widget)
 
 -- Please see the documentation for the Yesod typeclass. There are a number
@@ -86,6 +88,17 @@ instance Yesod App where
 
     maximumContentLength _ _ = Nothing
 
+    -- Yesod Middleware allows you to run code before and after each handler function.
+    -- The defaultYesodMiddleware adds the response header "Vary: Accept, Accept-Language" and performs authorization checks.
+    -- Some users may also want to add the defaultCsrfMiddleware, which:
+    --   a) Sets a cookie with a CSRF token in it.
+    --   b) Validates that incoming write requests include that token in either a header or POST parameter.
+    -- To add it, chain it together with the defaultMiddleware: yesodMiddleware = defaultYesodMiddleware . defaultCsrfMiddleware
+    -- For details, see the CSRF documentation in the Yesod.Core.Handler module of the yesod-core package.
+    yesodMiddleware :: ToTypedContent res => Handler res -> Handler res
+    yesodMiddleware = defaultYesodMiddleware
+
+    defaultLayout :: Widget -> Handler Html
     defaultLayout widget = do
         master <- getYesod
         --mmsg <- getMessage
@@ -131,9 +144,9 @@ instance Yesod App where
 
     -- This is done to provide an optimization for serving static files from
     -- a separate domain. Please see the staticRoot setting in Settings.hs
-    urlRenderOverride y (StaticR s) =
+    urlParamRenderOverride y (StaticR s) _ =
         Just $ uncurry (joinPath y (Settings.staticRoot $ settings y)) $ renderRoute s
-    urlRenderOverride _ _ = Nothing
+    urlParamRenderOverride _ _ _ = Nothing
 
     -- The page to be redirected to when authentication is required.
     authRoute _ = Just $ AuthR LoginR
@@ -167,8 +180,8 @@ instance Yesod App where
 
     -- What messages should be logged. The following includes all messages when
     -- in development, and warnings and errors in production.
-    shouldLog _ _source level =
-        development || level == LevelWarn || level == LevelError
+    shouldLogIO _ _source level =
+        return $ development || level == LevelWarn || level == LevelError
 
     makeLogger = return . appLogger
 
@@ -198,12 +211,11 @@ instance YesodAuth App where
     -- Where to send a user after logout
     logoutDest _ = HomeR
 
-    getAuthId creds = runDB $ do
+    authenticate creds = liftHandler $ runDB $ do
         x <- getBy $ UniqueUser $ credsIdent creds
         case x of
-            Just (Entity uid _) -> return $ Just uid
-            Nothing -> do
-                fmap Just $ insert User
+            Just (Entity uid _) -> return $ Authenticated uid
+            Nothing -> Authenticated <$> insert User
                     { userIdent = credsIdent creds
                     , userPassword = Nothing
                     }
@@ -212,7 +224,8 @@ instance YesodAuth App where
     authPlugins _ = [ authSE ]
     --authPlugins _ = [authBrowserId def]
 
-    authHttpManager = httpManager
+    authHttpManager = -- httpManager FIXME
+      error "authHttpManager"
 
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.

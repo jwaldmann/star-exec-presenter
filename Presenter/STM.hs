@@ -31,7 +31,7 @@ that holds a map from competition ids to TVars with results.
 lookupCache :: Competition -> Handler (Maybe CompetitionResults)
 lookupCache comp = do
   app <- getYesod
-  (mCompResults, start) <- lift $ atomically $ do
+  (mCompResults, start) <- liftIO $ atomically $ do
     crc <- readTVar $ compResultsCache app
     case M.lookup (getMetaData comp) crc of
         Nothing -> do
@@ -47,7 +47,7 @@ lookupCache comp = do
 startWorker :: Competition -> Handler ()
 startWorker comp = do
   app <- getYesod
-  mSink <- lift $ atomically $ do
+  mSink <- liftIO $ atomically $ do
     crc <- readTVar $ compResultsCache app
     case M.lookup (getMetaData comp) crc of
       Nothing -> do
@@ -70,8 +70,8 @@ startWorker comp = do
           logWarnN $  T.pack $ "runWorker: getCompetitionResults."
           compResults <- getCompetitionResults comp
           logWarnN $  T.pack $ "runWorker: got CompetitionResults."
-          lift $ atomically $ writeTVar sink $ Just compResults
-          lift $ threadDelay defaultWorkerDelay
+          liftIO $ atomically $ writeTVar sink $ Just compResults
+          liftIO $ threadDelay defaultWorkerDelay
           when (not $ competitionComplete compResults) runWorker
 
 exceptionHandler :: SomeException -> Handler ()

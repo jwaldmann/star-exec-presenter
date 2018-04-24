@@ -329,7 +329,7 @@ getCompetitionResults comp = do
   jobResults <- if jobsComplete
                   then mapM (getPersistJobResults) jobIds
                   else getJobResults' con jobIds
-  currentTime <- lift getCurrentTime
+  currentTime <- liftIO getCurrentTime
   let updatedJobs = if jobsComplete
                     then jobInfos
                     else updateJobs currentTime $ zip persistJobInfos jobInfos
