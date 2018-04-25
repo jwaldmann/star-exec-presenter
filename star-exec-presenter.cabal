@@ -152,6 +152,7 @@ library
                  , yesod-form
                  , bytestring
                  , text
+                 , mtl
                  , persistent
                  , persistent-postgresql
                  , persistent-template
