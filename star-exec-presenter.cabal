@@ -152,7 +152,7 @@ library
                  , yesod-form
                  , bytestring
                  , text
-                 , mtl
+                 , unliftio
                  , persistent
                  , persistent-postgresql
                  , persistent-template

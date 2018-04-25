@@ -25,9 +25,9 @@ import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
 import Control.Exception (throw)
-import Control.Exception.Safe (tryAny, tryIO, bracket_)
+import Control.Exception.Safe (tryAny)
 -- import Control.Monad.Catch (bracket_)
-import Control.Monad.Except
+import UnliftIO.Exception (bracket_)
 import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
 import Data.Maybe (listToMaybe)
@@ -70,22 +70,10 @@ initial_login Real man = do
 runCon_exclusive :: Handler b -> Handler b
 runCon_exclusive action = do
   lock <- conSem <$> getYesod
-{-  
-  liftIO $ Lock.acquireWrite lock
-  r <- tryIO action
-  liftIO $ Lock.releaseWrite lock
-  case r of
-    Left e -> throw e
-    Right x -> return x
--}
-  -- Lock.withWrite lock action
-  -- FIXME:
-{-
+  -- see https://github.com/jwaldmann/star-exec-presenter/issues/185
   bracket_
     ( liftIO $ Lock.acquireWrite lock )
     ( liftIO $ (Lock.releaseWrite >=> either throw return) lock)
--}
-  id
     action
 
 

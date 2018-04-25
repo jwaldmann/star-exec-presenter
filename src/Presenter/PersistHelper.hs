@@ -12,7 +12,8 @@ import Data.Time.Clock
 import qualified Data.List as L
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
-import Control.Monad.Catch (bracket_)
+-- import Control.Monad.Catch (bracket_)
+import UnliftIO.Exception (bracket_)
 import Control.Exception (throw)
 import Control.Monad ((>=>))
 
@@ -190,25 +191,18 @@ decompressText = TL.toStrict . decodeUtf8 . decompress . BSL.fromStrict
 compressBS :: BS.ByteString -> BS.ByteString
 compressBS = BSL.toStrict . compress . BSL.fromStrict
 
-runDB_writelocked q = Import.runDB q
-runDB_readlocked  q = Import.runDB q
-
-{-
-
 runDB_writelocked :: YesodDB App b -> Handler b
-runDB_writelocked query = liftHandle $ do
+runDB_writelocked query = do
   lock <- dbSem <$> getYesod
   bracket_
-    ( lift $ Lock.acquireWrite lock )
-    ( lift $ (Lock.releaseWrite >=> either throw return) lock)
+    ( liftIO $ Lock.acquireWrite lock )
+    ( liftIO $ (Lock.releaseWrite >=> either throw return) lock)
     $ Import.runDB query
 
 runDB_readlocked :: YesodDB App b -> Handler b
 runDB_readlocked query = do
   lock <- dbSem <$> getYesod
   bracket_
-    ( lift $ Lock.acquireRead lock )
-    ( lift $ (Lock.releaseRead >=> either throw return) lock)
+    ( liftIO $ Lock.acquireRead lock )
+    ( liftIO $ (Lock.releaseRead >=> either throw return) lock)
     $ Import.runDB query
-
--}
