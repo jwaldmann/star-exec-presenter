@@ -1,6 +1,7 @@
 module Presenter.Output
 
-( Output (..), showp
+( Output (..)
+, show_strict, show_lazy, show_string
 , (<+>), (<#>)
 , text, braces, hsep, equals
 , dutch_record
@@ -14,11 +15,28 @@ import Data.String
 import Data.Time.Clock
 import Data.Time.Format
 
-import Text.PrettyPrint.Leijen as P hiding ((<$>), fill) 
+import qualified Data.Text.Prettyprint.Doc as P
+import qualified Data.Text.Prettyprint.Doc.Render.Text as PRT
+import qualified Data.Text.Prettyprint.Doc.Render.String as PRS
 import qualified Data.Text as T
+import qualified Data.Text.Lazy as TL
+
+type Doc = P.Doc ()
 
 class Output t where output :: t -> Doc
-instance IsString Doc where fromString = text
+-- instance IsString Doc where fromString = text
+
+braces = P.braces
+empty = mempty
+vcat = P.vcat
+align = P.align
+(<+>) = (P.<+>)
+fillBreak = P.fillBreak
+(<>) = (P.<>)
+text = fromString
+list = P.list
+hsep = P.hsep
+equals = P.equals
 
 instance Output () where 
     output = text . show
@@ -48,8 +66,14 @@ instance (Output a, Output b,Output c) => Output (a,b,c) where
 (<#>) :: Doc -> Doc -> Doc
 p <#> q = fillBreak 4 p <+> align q
 
-showp :: Output a => a -> String
-showp = ( \ d -> displayS d "" ) . renderPretty 1.0 80 . output
+show_string :: Output a => a -> ShowS
+show_string = PRS.renderShowS .  P.layoutPretty P.defaultLayoutOptions . output
+
+show_strict :: Output a => a -> T.Text
+show_strict = PRT.renderStrict .  P.layoutPretty P.defaultLayoutOptions . output
+
+show_lazy :: Output a => a -> TL.Text
+show_lazy = PRT.renderLazy . P.layoutPretty P.defaultLayoutOptions . output
 
 dutch_record :: [Doc] -> Doc
 dutch_record [] = braces empty

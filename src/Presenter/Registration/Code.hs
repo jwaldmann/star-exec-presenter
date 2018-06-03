@@ -39,7 +39,6 @@ import GHC.Generics
 import Presenter.Model.RouteTypes
 import Presenter.Output
 
-import Text.PrettyPrint.Leijen as P hiding ((<$>), fill)
 import Data.List ( intersperse )
 import Text.Parsec
 import Text.Parsec.String
@@ -281,23 +280,23 @@ instance Output a => Output (Category a) where
         ("Category" <+> text (show n)) <#> output ps
 instance Output Participant where
     output p =
-        "Participant" <+> P.braces ( hsep $ intersperse ","
+        "Participant" <+> dutch_record
              [ "participantName" <+> equals <+> output (participantName p)
              , "solver_config" <+> equals <+> output (solver_config p)
-             ] )
+             ] 
 instance Output Catinfo where
-    output i = "Catinfo" <+> P.braces ( hsep $ intersperse ","
+    output i = "Catinfo" <+> dutch_record
              [ "postproc" <+> equals <+> output (postproc i)
              , "benchmarks" <+>  equals <+> output (benchmarks i)
              , "participants" <+> equals <+> output ( participants i)
-             ] )
+             ] 
 instance Output Benchmark_Source where
     output s = case s of
         Bench { bench = i } -> "Bench" <+> output i
         All { space = s' } -> "All" <+> output s'
         Hierarchy { space = s' } -> "Hierarchy" <+> output s'
 
-instance Output a => Show ( Competition a) where show = showp
-instance Output a => Show ( MetaCategory a) where show = showp
-instance Output a => Show ( Category a ) where show = showp
-instance Show Participant where show = showp
+instance Output a => Show ( Competition a) where showsPrec _ = show_string
+instance Output a => Show ( MetaCategory a) where showsPrec _ = show_string
+instance Output a => Show ( Category a ) where showsPrec _ = show_string
+instance Show Participant where showsPrec _ = show_string

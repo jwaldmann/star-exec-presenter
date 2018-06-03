@@ -1,5 +1,5 @@
 name:              star-exec-presenter
-version:           2017.0.0
+version:           2018.0.0
 cabal-version:     >= 1.8
 build-type:        Simple
 
@@ -190,7 +190,8 @@ library
                  , safe-exceptions
                  , time
                  -- , wl-pprint-text
-                 , wl-pprint
+                 -- , wl-pprint
+                 , prettyprinter
                  , parsec
                  , blaze-html
                  , xml-hamlet
