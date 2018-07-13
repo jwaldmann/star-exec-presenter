@@ -32,7 +32,6 @@ vcat = P.vcat
 align = P.align
 (<+>) = (P.<+>)
 fillBreak = P.fillBreak
-(<>) = (P.<>)
 text = fromString
 list = P.list
 hsep = P.hsep
