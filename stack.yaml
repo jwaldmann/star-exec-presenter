@@ -1,7 +1,4 @@
-# if you change this, be sure to change keter.sh as well
-# resolver: lts-11.11
-resolver: lts-12.0
-# resolver: nightly-2017-08-15
+resolver: lts-13.3
 
 packages:
 - '.'
@@ -11,7 +8,7 @@ packages:
   extra-dep: true
 
 extra-deps:
-
+- graphviz-2999.20.0.3
 
 system-ghc: true
 compiler-check: newer-minor
