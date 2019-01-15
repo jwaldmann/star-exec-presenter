@@ -12,6 +12,7 @@ import qualified Data.Text as T
 import qualified Data.Map.Strict as M
 import Data.Time.Clock
 import Control.Monad ( guard, forM )
+import Control.Monad.Fail
 
 inputForm = renderTable $ JobControl
         <$> areq checkBoxField "is public" (Just False)
@@ -52,7 +53,7 @@ benches bs = do R.Bench b <- bs ; return b
 alls :: Monad m => m R.Benchmark_Source -> m Int
 alls bs = do R.All b <- bs ; return b
 
-hierarchies :: Monad m => m R.Benchmark_Source -> m Int
+hierarchies :: MonadFail m => m R.Benchmark_Source -> m Int
 hierarchies bs = do R.Hierarchy b <- bs ; return b
 
 getControlR :: Year -> Handler Html
