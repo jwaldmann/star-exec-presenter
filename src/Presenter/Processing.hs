@@ -83,15 +83,15 @@ getBenchmarkResults solvers jobInfos = map getBenchmarkRow
 compareBenchmarks :: UniqueBenchmark -> UniqueBenchmark -> Ordering
 compareBenchmarks (_,n0) (_,n1) = compare n0 n1
 
-getScore :: JobResult -> Int
+getScore :: JobResult -> Score
 getScore jr = case toScore jr of
-                  Just i -> i
+                  Just i -> fromIntegral i
                   _      -> 0
 
 
 -- | this is called to compute the total score (for a solver, in a category).
 -- it is applied to results that are already scored (see scoredResults function)
-calculateScores :: Scoring -> [JobResult] -> M.Map SolverID Int
+calculateScores :: Scoring -> [JobResult] -> M.Map SolverID Score
 calculateScores sc jps = M.fromListWith (+) $ do
   jp <- jps ; return ( toSolverID jp, getScore jp )
 

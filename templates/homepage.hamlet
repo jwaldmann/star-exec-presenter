@@ -19,16 +19,16 @@
 
 This site:
 <ul>
-  <li><a href=@{RegisteredR Y2017}>registered participants for 2017</a>
+  <li><a href=@{RegisteredR Y2018}>registered participants for 2018</a>
   <li><a href=@{ListCompetitionsR}>result data from test runs</a>
 
-  <li><a href=@{ControlR Y2017}>job control</a>
+  <li><a href=@{ControlR Y2018}>job control</a>
 
 $if authorized
   only for authorized users:
   <ul>
-    <li><a href=@{InstallSolversR Y2017}>install solvers</a>
-    <li><a href=@{ControlR Y2017}>start jobs</a>
+    <li><a href=@{InstallSolversR Y2018}>install solvers</a>
+    <li><a href=@{ControlR Y2018}>start jobs</a>
     <li><a href=@{ListHiddenCompetitionsR}>hidden test runs</a>
     
 

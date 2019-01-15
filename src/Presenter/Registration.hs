@@ -11,6 +11,7 @@ where
 
 import Presenter.Registration.Code
 import Presenter.Registration.Data
+import qualified Presenter.Registration.Form_2018 as Form_2018
 import qualified Presenter.Registration.Form_2017 as Form_2017
 import qualified Presenter.Registration.Form_2016 as Form_2016
 import qualified Presenter.Registration.Form_2015 as Form_2015
@@ -19,6 +20,7 @@ import Prelude (($), fmap, (==), elem, Show)
 
 the_competition :: Year -> Competition Catinfo
 the_competition year = case year of
+  Y2018 -> Form_2018.tc
   Y2017 -> Form_2017.tc
   Y2016 -> Form_2016.tc
   Y2015 -> Form_2015.tc

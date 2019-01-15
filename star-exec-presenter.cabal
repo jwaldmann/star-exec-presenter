@@ -97,6 +97,7 @@ library
                      Presenter.Registration.Form_2015
                      Presenter.Registration.Form_2016
                      Presenter.Registration.Form_2017
+                     Presenter.Registration.Form_2018
                      Presenter.StarExec.Commands
                      Presenter.StarExec.Concurrent
                      Presenter.StarExec.Connection

@@ -14,6 +14,7 @@ info_for_year year = case year of
   Y2015 -> Just termcomp2015
   Y2016 -> Just termcomp2016
   Y2017 -> Just termcomp2017
+  Y2018 -> Just termcomp2018
   _     -> Nothing 
 
 allCompetitionJobIDs :: [ (Year, JobID) ]
@@ -21,6 +22,170 @@ allCompetitionJobIDs = do
   y <- [ minBound .. maxBound ]
   c <- maybeToList $ info_for_year y
   ( (y,) <$> allJobIDs c )
+
+termcomp2018 :: Competition
+termcomp2018 = Competition {
+        getMetaData = CompetitionMeta {
+                getMetaName = "Termination Competition 2018",
+                getMetaDescription = "wc_r = 300 wc_p = 300 a = 1 b = 1 c = 1.0"
+        },
+        getMetaCategories = [
+                MetaCategory {
+                        getMetaCategoryName = "Termination of Term Rewriting",
+                        getCategories = [
+                                Category {
+                                        getCategoryName = "TRS Standard",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId =  363,
+                                        getJobIds = [StarExecJobID 30034]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Standard Certified",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30038]
+                                },
+                                Category {
+                                        getCategoryName = "SRS Standard",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30035]
+                                },
+                                Category {
+                                        getCategoryName = "SRS Standard Certified",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30039]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Relative",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30036]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Relative Certified",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30040]
+                                },
+                                Category {
+                                        getCategoryName = "SRS Relative",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30037]
+                                },
+                                Category {
+                                        getCategoryName = "SRS Relative Certified",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30041]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Equational",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30042]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Equational certified",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30043]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Conditional",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30044]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Context Sensitive",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30045]
+                                },
+                                Category {
+                                        getCategoryName = "TRS Innermost",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30046]
+                                },
+                                Category {
+                                        getCategoryName = "HRS (union beta)",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30047]
+                                }
+                        ]
+                },
+                MetaCategory {
+                        getMetaCategoryName = "Termination of Programming Languages",
+                        getCategories = [
+                                Category {
+                                        getCategoryName = "C",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30048]
+                                },
+                                Category {
+                                        getCategoryName = "C Integer Programs",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30049]
+                                },
+                                Category {
+                                        getCategoryName = "Integer Transition Systems",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30050]
+                                },
+                                Category {
+                                        getCategoryName = "Integer TRS Innermost",
+                                        getCategoryScoring = Standard,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30051]
+                                }
+                        ]
+                },
+                MetaCategory {
+                        getMetaCategoryName = "Complexity Analysis",
+                        getCategories = [
+                                Category {
+                                        getCategoryName = "Runtime Complexity - Full Rewriting",
+                                        getCategoryScoring = Complexity,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30091]
+                                },
+                                Category {
+                                        getCategoryName = "Runtime Complexity - Innermost Rewriting",
+                                        getCategoryScoring = Complexity,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30092]
+                                },
+                                Category {
+                                        getCategoryName = "Runtime Complexity - Innermost Rewriting Certified",
+                                        getCategoryScoring = Complexity,
+                                        getPostProcId = 399,
+                                        getJobIds = [StarExecJobID 30094]
+                                },
+                                Category {
+                                        getCategoryName = "Complexity - Integer Transition Systems",
+                                        getCategoryScoring = Complexity,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30054]
+                                },
+                                Category {
+                                        getCategoryName = "Complexity - C Integer Programs",
+                                        getCategoryScoring = Complexity,
+                                        getPostProcId = 363,
+                                        getJobIds = [StarExecJobID 30055]
+                                }
+                        ]
+                }
+        ]
+}
+
 
 termcomp2014 :: Competition
 termcomp2014 = Competition
@@ -732,6 +897,3 @@ termcomp2017 = Competition
                                                              }]
                                    }]
      }
-
-
-     

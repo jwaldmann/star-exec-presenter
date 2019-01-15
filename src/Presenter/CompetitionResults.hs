@@ -84,7 +84,11 @@ getRanking scores =
 -- FIXME: as the test case shows, evaluation of x is number of y with score y <= score x
 -- (not  "<"  as the spec says)
 
-calcScores :: [SolverRankEntry] -> [(UniqueSolver, Int)]
+sumScores :: [SolverRankEntry] -> Score
+sumScores [] = 0
+sumScores (r:rs) = score r + sumScores rs
+
+calcScores :: [SolverRankEntry] -> [(UniqueSolver, Score)]
 calcScores [entry] = [(solver entry, 0)]
 calcScores ranking = calcScores' 1 ranking
   where
