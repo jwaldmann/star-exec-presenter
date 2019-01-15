@@ -99,7 +99,12 @@ collect :: Competition Catinfo
 collect base cs =
   let computation = do
         let start = fmap (const[]) base
-            insertC c d = do [e] <- insert [c] [d]; return e
+            insertC c d = do
+              --   [e] <- insert [c] [d]; return e
+              es <- insert [c] [d]
+              case es of
+                [e] -> return e
+                _ -> Left "pattern match failure for [e]"
         c <- foldM insertC start cs
         fill base c
   in  case computation of
