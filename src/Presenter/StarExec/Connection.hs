@@ -32,13 +32,6 @@ import Control.Monad ((>=>), guard, when)
 import Control.Monad.Logger
 import Data.Maybe (listToMaybe)
 
-import qualified Control.Monad.Fail as CMF
-
--- questionable, see https://github.com/yesodweb/yesod/issues/1569
-instance CMF.MonadFail (HandlerFor app) where
-  fail = liftIO . fail
-
-data LoginMethod = Fake | Real deriving (Eq, Ord, Show, Read)
 
 -- | we're doing this at the very beginning (not inside a Handler)
 initial_login :: LoginMethod -> Manager -> IO CookieJar

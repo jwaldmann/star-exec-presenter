@@ -35,6 +35,15 @@ import Control.Concurrent.STM
 -- import Control.Concurrent.SSem
 import qualified Control.Concurrent.FairRWLock as Lock
 
+import qualified Control.Monad.Fail as CMF
+
+-- questionable, see https://github.com/yesodweb/yesod/issues/1569
+instance CMF.MonadFail (HandlerFor app) where
+  fail = liftIO . fail
+
+data LoginMethod = Fake | Real deriving (Eq, Ord, Show, Read)
+
+
 -- navigation bar types
 data MenuElement = MenuEntry (Text, Route App) | MenuDropdown (Text, [MenuElement])
 

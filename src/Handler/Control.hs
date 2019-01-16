@@ -47,10 +47,10 @@ inputForm = renderTable $ JobControl
             e <- askParams
             return ( FormSuccess $ maybe M.empty id e, [] ) )
 
-benches :: Monad m => m R.Benchmark_Source -> m Int
+benches :: MonadFail m => m R.Benchmark_Source -> m Int
 benches bs = do R.Bench b <- bs ; return b
 
-alls :: Monad m => m R.Benchmark_Source -> m Int
+alls :: MonadFail m => m R.Benchmark_Source -> m Int
 alls bs = do R.All b <- bs ; return b
 
 hierarchies :: MonadFail m => m R.Benchmark_Source -> m Int
