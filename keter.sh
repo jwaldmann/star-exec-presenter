@@ -5,7 +5,7 @@ ARCH=x86_64-linux
 # if you change this, be sure to change stack.yaml and config/keter.yml as well
 # RESOLVER=lts-8.22
 # GHC=8.0.2
-RESOLVER=lts-13.3
+RESOLVER=lts-13.9
 GHC=8.6.3
 
 APP=.stack-work/install/$ARCH/$RESOLVER/$GHC/bin/star-exec-presenter
