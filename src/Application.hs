@@ -158,6 +158,7 @@ makeFoundation conf = do
       , "TPDB-10.5_XML.zip"
       , "mario_wenzel_XML.zip"
       , "TPDB-10.6a_XML.zip"
+      , "TPDB-11_XML.zip"
       ]
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
