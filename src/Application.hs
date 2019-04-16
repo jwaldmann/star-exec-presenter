@@ -159,6 +159,7 @@ makeFoundation conf = do
       , "mario_wenzel_XML.zip"
       , "TPDB-10.6a_XML.zip"
       , "TPDB-11_XML.zip"
+      , "termcomp2019_XML.zip" -- contains new benchmarks uploaded by Akihisa, used in competition
       ]
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
