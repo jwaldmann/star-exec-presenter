@@ -1,14 +1,12 @@
 resolver: lts-13.16
 
 packages:
-- '.'
-- location:
-    git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
-    commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
-  extra-dep: true
+- .
 
 extra-deps:
 - graphviz-2999.20.0.3
+- git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
+  commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
 
 system-ghc: true
 compiler-check: newer-minor
