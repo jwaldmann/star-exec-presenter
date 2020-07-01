@@ -1,3 +1,6 @@
+-- | cf. https://github.com/StarExec/StarExec/blob/fb1/src/org/starexec/command/Connection.java
+-- TODO: use exactly their names here (?)
+
 {-# language ScopedTypeVariables #-}
 
 module Presenter.StarExec.Connection
@@ -35,12 +38,15 @@ import Data.Maybe (listToMaybe)
 
 -- | we're doing this at the very beginning (not inside a Handler)
 initial_login :: LoginMethod -> Manager -> IO CookieJar
-initial_login Fake man = return $ createCookieJar [ killmenothing ]
+initial_login Fake man = return $ createCookieJar [ ]
 initial_login Real man = do
-  let cj0 = createCookieJar [ killmenothing ]
+  let cj0 = createCookieJar [ ]
       Just base = parseUrl starExecUrl
   let send req = do
         print req
+        print $ case requestBody req of
+          RequestBodyLBS bs -> bs
+        print $ cookieJar req
         resp <- httpLbs req man
         print resp
         return resp
@@ -55,15 +61,24 @@ initial_login Real man = do
                            , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
                            ]
-                 $ base { method = "POST" , path = loginPath
-                        , cookieJar = Just cj1
+                 $ base { path = loginPath
+                        , cookieJar = Just cj0 -- don't use previous cookie?
                         }
-
   let cj2 = responseCookieJar resp2
-  resp3 <- send $ base { method = "GET", path = indexPath, redirectCount = 1
+
+  resp3 <- send $ base { method = "GET", path = indexPath
+                        -- the orginal code says
+                        -- " On success, starexec will try to redirect, but we don't want that here"
+                        , redirectCount = 0
                        , cookieJar = Just cj2
                        }
-  return $ responseCookieJar resp3
+  let cj3 = responseCookieJar resp3
+           
+  resp4 <- send $ base { method = "GET", path = "starexec/" <> logged_in
+                       , cookieJar = Just cj3
+                       }
+           
+  return $ responseCookieJar resp4
 
 
 runCon_exclusive :: Handler b -> Handler b

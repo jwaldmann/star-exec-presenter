@@ -1,3 +1,6 @@
+-- | cf. https://github.com/StarExec/StarExec/blob/fb1/src/org/starexec/command/C.java
+-- TODO: use exactly their names here
+
 module Presenter.StarExec.Urls where
 
 import Data.ByteString
@@ -6,6 +9,13 @@ import qualified Data.List as List
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString.Char8 as BSC
 import qualified Data.ByteString.Search as BSS
+
+starexec_base = "https://www.starexec.org/starexec/"
+home = "secure/index.jsp"
+login = "secure/j_security_check"
+logout = "services/session/logout"
+
+logged_in = "services/session/logged-in"
 
 starExecUrl :: String
 starExecUrl = "https://www.starexec.org/"
