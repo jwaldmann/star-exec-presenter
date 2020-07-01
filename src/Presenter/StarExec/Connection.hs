@@ -13,7 +13,9 @@ module Presenter.StarExec.Connection
 
 import Import
 import Network.HTTP.Conduit
+import Network.HTTP.Simple (addRequestHeader)
 import Network.HTTP.Types.Status (ok200)
+import qualified Data.CaseInsensitive as CI
 import qualified Data.ByteString.Lazy as BSL
 import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as BSC
@@ -46,25 +48,30 @@ initial_login Real man = do
         print req
         print $ case requestBody req of
           RequestBodyLBS bs -> bs
-        print $ cookieJar req
+        print ("request cookie jar", cookieJar req)
         resp <- httpLbs req man
         print resp
+        print ("response cookie jar", responseCookieJar resp)
         return resp
 
   resp1 <- send
       $ base { method = "GET", path = indexPath , cookieJar = Just cj0 }
   let cj1 = responseCookieJar resp1
-
+  let [ cook ] =  destroyCookieJar cj1
+      cn = cookie_name cook
+      cv = cookie_value cook
   creds <- getLoginCredentials
   resp2 <- send
+           $ addRequestHeader "Cookie" ( cn <> "=" <> cv )
            $ urlEncodedBody [ ("j_username", TE.encodeUtf8 $ user creds)
                            , ("j_password", TE.encodeUtf8 $ password creds)
                            , ("cookieexists", "false")
                            ]
                  $ base { path = loginPath
-                        , cookieJar = Just cj0 -- don't use previous cookie?
+                        , cookieJar = Nothing -- Just cj1
                         }
-  let cj2 = responseCookieJar resp2
+  let -- this contains JSESSIONID?
+      cj2 = responseCookieJar resp2
 
   resp3 <- send $ base { method = "GET", path = indexPath
                         -- the orginal code says
@@ -75,10 +82,10 @@ initial_login Real man = do
   let cj3 = responseCookieJar resp3
            
   resp4 <- send $ base { method = "GET", path = "starexec/" <> logged_in
-                       , cookieJar = Just cj3
+                       , cookieJar = Just cj2
                        }
            
-  return $ responseCookieJar resp4
+  return cj2
 
 
 runCon_exclusive :: Handler b -> Handler b
