@@ -4,7 +4,7 @@ stanzas:
       APPROOT: "https://termcomp.imn.htwk-leipzig.de"
       LANG: "en_US.utf8"
       HOME: /home/keter
-    exec: ../.stack-work/install/x86_64-linux/lts-13.9/8.6.3/bin/star-exec-presenter
+    exec: ../bin/star-exec-presenter
     args:
       - production
     hosts:
