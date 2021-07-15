@@ -1,10 +1,9 @@
-resolver: nightly-2020-06-28
+resolver: lts-18.2
 
 packages:
 - .
 
 extra-deps:
-- graphviz-2999.20.0.3
 - git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
   commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
 

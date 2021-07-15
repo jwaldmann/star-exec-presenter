@@ -161,6 +161,7 @@ makeFoundation conf = do
       , "TPDB-11_XML.zip"
       , "termcomp2019_XML.zip" -- contains new benchmarks uploaded by Akihisa, used in competition
       , "termcomp2020_XML.zip"
+      , "TPDB-11.2_XML.zip"
       ]
 
     let logger = Yesod.Core.Types.Logger loggerSet' getter
