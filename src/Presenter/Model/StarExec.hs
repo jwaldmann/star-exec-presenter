@@ -97,7 +97,7 @@ instance Show Bench_Framework where
 
 data StarExecJob = SEJob
   { postproc_id :: Int
-  , bench_framework :: ! Bench_Framework
+  , bench_framework :: !Bench_Framework
   , description :: Text
   , job_name :: Text
   , queue_id :: Int
@@ -111,14 +111,14 @@ data StarExecJob = SEJob
 
 data StarExecJobPair
   = SEJobPair
-    { jobPairSpace :: ! Text
-    , jobPairBench :: ! Int
-    , jobPairConfig :: ! Int
+    { jobPairSpace :: !Text
+    , jobPairBench :: !Int
+    , jobPairConfig :: !Int
     }
   | SEJobGroup
-    { jobGroupBench :: ! Int -- ^ root space of benchmark hierarchy
-    , jobGroupConfigs :: ! [Int]
-    , jobGroupSampleRate :: ! Double
+    { jobGroupBench :: !Int -- ^ root space of benchmark hierarchy
+    , jobGroupConfigs :: ![Int]
+    , jobGroupSampleRate :: !Double
     }
                      deriving ( Show )
 

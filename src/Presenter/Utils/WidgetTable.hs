@@ -343,19 +343,19 @@ summary sc jids previous tab = do
         positive n = n > 0
         row_type_stats = M.fromListWith (M.unionWith (+)) $ do
             row <- rows tab
-	    let tags = map tag row
-	    let keep t = t /= "nothing" && t /= "solver-maybe" && t /= "solver-other"
-	        height = length $ filter keep tags
+            let tags = map tag row
+            let keep t = t /= "nothing" && t /= "solver-maybe" && t /= "solver-other"
+                height = length $ filter keep tags
             return (height, M.singleton tags 1)
         row_type_table =
-	   for (M.toAscList row_type_stats) $ \ (h, s) -> 
-	    ( h
-	    , for ( sortBy (flip compare `on` snd) $ M.toList s )
-              	 $ \ (rt, n) ->
+           for (M.toAscList row_type_stats) $ \ (h, s) -> 
+            ( h
+            , for ( sortBy (flip compare `on` snd) $ M.toList s )
+                 $ \ (rt, n) ->
                 (rt, n, Query (previous ++ [ Filter_Rows (And (map Equals rt)) ] )
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] )
                 )
-	    )
+            )
         shorten d =
           if d < 1e3 then show (round d :: Int)
           else if d < 1e6 then show (round (d / 1e3) :: Int) ++ "k"
@@ -488,7 +488,7 @@ virtual_best jids t tab =
         let transformed = S.fromList jids
             -- maps column index (in output table) to list of indices (in input table)
             collector = M.fromListWith (++) $ do
-              (k, c @ Cell { mjid = Just jid }) <- zip [0..] $ header tab
+              (k, c@Cell { mjid = Just jid }) <- zip [0..] $ header tab
               guard $ S.member jid transformed
               return (jid, [k])
             u : naffected = S.toList

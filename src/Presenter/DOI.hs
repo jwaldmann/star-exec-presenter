@@ -32,11 +32,11 @@ import Data.Monoid ((<>))
 -- (in order of processing the space XML files)
 
 data DOIService =  DOIService
-   { mapToBench :: ! (M.Map DOI BenchmarkID)
-   , mapToBenches :: ! (M.Map DOI [ BenchmarkID ] )
-   , mapFromBench :: ! (M.Map BenchmarkID  DOI)
-   , mapToName :: ! (M.Map DOI T.Text)
-   , mapFromName :: ! (M.Map T.Text DOI)
+   { mapToBench :: !(M.Map DOI BenchmarkID)
+   , mapToBenches :: !(M.Map DOI [ BenchmarkID ] )
+   , mapFromBench :: !(M.Map BenchmarkID  DOI)
+   , mapToName :: !(M.Map DOI T.Text)
+   , mapFromName :: !(M.Map T.Text DOI)
    }
 
 service0 :: DOIService

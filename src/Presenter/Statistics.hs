@@ -8,10 +8,10 @@ import Data.Time.Clock
 import Data.Double.Conversion.Text (toFixed)
 
 data Statistics = Statistics
-    { complete :: ! Bool
-    , startTime :: ! (Maybe UTCTime), finishTime :: ! (Maybe UTCTime)
-    , pairs :: ! Int, pairsCompleted :: ! Int
-    , cpu :: ! Double, wallclock :: ! Double
+    { complete :: !Bool
+    , startTime :: !(Maybe UTCTime), finishTime :: !(Maybe UTCTime)
+    , pairs :: !Int, pairsCompleted :: !Int
+    , cpu :: !Double, wallclock :: !Double
     } deriving Show
 
 jobStat :: JobResult -> Statistics

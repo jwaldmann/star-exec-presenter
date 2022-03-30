@@ -1,6 +1,6 @@
 name:              star-exec-presenter
-version:           2020.0.0
-cabal-version:     >= 1.8
+version:           2022.0.0
+cabal-version:     >= 1.10
 build-type:        Simple
 
 Flag dev

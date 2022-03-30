@@ -18,7 +18,7 @@ typeXSL :: ContentType
 typeXSL = "text/xsl"
 
 getDisplayProofR :: JobPairID -> Handler TypedContent
-getDisplayProofR pairId @ (StarExecPairID pid) = do
+getDisplayProofR pairId@(StarExecPairID pid) = do
   mPersistJobPair <- runDB $ getBy $ UniqueJobPairInfo pid
   case mPersistJobPair of
     Nothing -> renderFail pairId "no such job pair"

@@ -1,6 +1,6 @@
 -- | authentication relative to the data in $HOME/.star_exec
 
-{-# language FlexibleContexts, TypeFamilies #-}
+{-# language FlexibleContexts, TypeFamilies, RankNTypes #-}
 
 module Presenter.Auth where
 
@@ -12,6 +12,7 @@ import Prelude
 import Yesod.Auth
 import Yesod.Form (runInputPost, textField, ireq)
 import Yesod.Core
+import Data.Text(Text)
 
 import Presenter.Model.Types ( Login (..))
 import System.Directory ( getHomeDirectory )
@@ -29,17 +30,22 @@ getLoginCredentials = liftIO $ do
 authSE :: YesodAuth m => AuthPlugin m
 authSE =
     AuthPlugin "authSE" dispatch login
-  where
-    dispatch "POST" [] = do
+
+dispatch
+  :: forall master
+  . Text -> [Text] -> AuthHandler master TypedContent
+dispatch "POST" [] = do
         ident <- runInputPost $ ireq textField "ident"
         pass  <- runInputPost $ ireq textField "pass"
         cred  <- getLoginCredentials
         if cred == Login ident pass
                 then setCredsRedirect $ Creds "authSE" ident []
                 else loginErrorMessageI LoginR Msg.PassMismatch
-    dispatch _ _ = notFound
-    url = PluginR "authSE" []
-    login authToMaster =
+dispatch _ _ = notFound
+
+url = PluginR "authSE" []
+
+login authToMaster =
         toWidget [hamlet|
 $newline never
 <form method="post" action="@{authToMaster url}">

@@ -23,7 +23,7 @@ getShowJobPairR :: JobPairID -> Handler Html
 getShowJobPairR pid@(StarExecPairID _id) = do
   logWarnN $ T.pack $ "getShowJobPairR.pid = " ++ show pid
   -- ?? why are there two queries?
-  qr @ (QueryResult qStatus mPair) <- queryJobPair pid
+  qr@(QueryResult qStatus mPair) <- queryJobPair pid
   when False $ logWarnN $ T.pack $ "getShowJobPairR.qr =" ++ show qr
   mJobResult <- getPersistJobResult pid
   logWarnN $ T.pack $ "getShowJobPairR.mJobResult =" ++ show mJobResult
@@ -48,7 +48,7 @@ getShowJobPairR pid@(StarExecPairID _id) = do
     $(widgetFile "se_show_job_pair")
     
 getShowJobPairR pid@(LriPairID id) = do
-  qr @ (QueryResult qStatus mPair) <- queryJobPair pid
+  qr@(QueryResult qStatus mPair) <- queryJobPair pid
   defaultLayout $ do
     [whamlet|#{show qr}
     |]

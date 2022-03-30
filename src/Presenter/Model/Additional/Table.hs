@@ -25,15 +25,15 @@ cols :: Table -> [ Col ]
 cols t = Data.List.transpose (rows t)
 
 data Cell =
-     Cell { contents :: ! Widget -- ^ this is shown
-          , tdclass :: ! T.Text
-          , tag :: ! T.Text -- ^ used for sorting (e.g., YES, NO, CERTIFIED)
-          , nums :: ! (M.Map Numtag P.Double)
-          , mbench :: ! (Maybe T.Text) -- ^  if this is cell for a benchmark
-          , mbenchkey :: ! (Maybe BenchmarkKey) 
-          , msolver :: ! (Maybe T.Text) -- ^ who made this?
-          , mjr :: ! (Maybe JobResult)
-          , mjid :: ! (Maybe JobID)
-          , url :: ! T.Text -- ^ FIXME replace with proper type
+     Cell { contents :: !Widget -- ^ this is shown
+          , tdclass :: !T.Text
+          , tag :: !T.Text -- ^ used for sorting (e.g., YES, NO, CERTIFIED)
+          , nums :: !(M.Map Numtag P.Double)
+          , mbench :: !(Maybe T.Text) -- ^  if this is cell for a benchmark
+          , mbenchkey :: !(Maybe BenchmarkKey) 
+          , msolver :: !(Maybe T.Text) -- ^ who made this?
+          , mjr :: !(Maybe JobResult)
+          , mjid :: !(Maybe JobID)
+          , url :: !T.Text -- ^ FIXME replace with proper type
           }
 

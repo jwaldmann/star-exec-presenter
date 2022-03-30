@@ -1,11 +1,11 @@
-resolver: lts-18.2
+resolver: lts-19.1
 
 packages:
 - .
 
 extra-deps:
 - git: https://gitlab.imn.htwk-leipzig.de/waldmann/begriff.git
-  commit: 39c96629fbf6b5fef18277ecfa3bfe1ac9c791f6
+  commit: b23e7a9b795ae276a5db1bf1077a0f2786d79870
 
 system-ghc: true
 compiler-check: newer-minor

@@ -26,7 +26,7 @@ incompatible lower upper = case (lower,upper) of
 -- as these are the most interesting to look at before competition.
 -- https://github.com/stefanvonderkrone/star-exec-presenter/issues/86
 getProblemsR :: Bool -> JobIds -> Handler Html
-getProblemsR full jids @ (JobIds ids) = do
+getProblemsR full jids@(JobIds ids) = do
   qJobs <- queryManyJobs ids
   let jobInfos = catMaybes $ map (fst . queryResult) qJobs
       jobResults = concat $ map (snd . queryResult) qJobs

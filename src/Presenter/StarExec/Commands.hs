@@ -499,7 +499,7 @@ makeJobSpace sId job = do
   let name = T.unpack $ "S-" <> description job <> "-" <> T.pack (show now)
   jobspace <- addSpace sId name "none" False False False
   forM_ (jobpairs job) $ \ case
-    jg @ SEJobGroup {} -> do
+    jg@SEJobGroup {} -> do
       logWarnN $ T.pack $ "copy " ++ show jg
       copySpaces jobspace [jobGroupBench jg] False True (jobGroupSampleRate jg)
       return ()
@@ -508,7 +508,7 @@ makeJobSpace sId job = do
   -- FIXME: data StarExecJob / StarExecJobPair is wrong
   -- because it does not model correctly that configs must be identical
   let allconfigs = nub $ do
-        jg @ SEJobGroup {} <- jobpairs job
+        jg@SEJobGroup {} <- jobpairs job
         jobGroupConfigs jg
   return $ job { jobpairs = [ SEJobGroup { jobGroupBench = jobspace
                                          , jobGroupConfigs = allconfigs
@@ -833,7 +833,7 @@ data AddJob = AddJob
    , bench :: [Int] -- ^  The list of benchmarks to use in the job. Only applies if benchChoice is "runChosenFromSpace".
    , traversal :: Traversal
    , suppressTimestamp :: Bool
-   , benchFramework :: ! Bench_Framework
+   , benchFramework :: !Bench_Framework
    }
    deriving Show
 
