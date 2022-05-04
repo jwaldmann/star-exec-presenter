@@ -231,7 +231,7 @@ display sc jids previous ts tab  = do
             $if null previous && null ts
               <h3>
                 <a href=@{q Common}>
-                  restrict to benchmarks common to all jobs 
+                  restrict to benchmarks common to all jobs
         |]
         summary sc jids previous tab
     -- no more transformers, display actual data

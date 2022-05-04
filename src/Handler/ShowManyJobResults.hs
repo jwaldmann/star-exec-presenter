@@ -3,8 +3,10 @@
 
 module Handler.ShowManyJobResults
   ( getShowManyJobResultsR
-  , getShowManyJobResultsCSVR
+  , getFlexibleTableFilterR
+  , postFlexibleTableFilterR
   -- , getShowManyJobResultsLegacyR
+  , getShowManyJobResultsCSVR
   , shorten
   ) where
 
@@ -35,6 +37,30 @@ combi_modus :: Query -> CombineJobs
 combi_modus (Query (Common : _)) = Intersection
 combi_modus _ = Union
 
+-- | copied from the example in
+-- https://www.yesodweb.com/book/forms
+
+filterForm = 
+  renderDivs $ aopt textField "restrict benchmarks, name must contain infix:" Nothing
+
+getFlexibleTableFilterR :: Scoring -> Query -> JobIds -> Handler Html
+getFlexibleTableFilterR sc q@(Query ts) jids = do
+  postFlexibleTableFilterR sc q jids
+
+postFlexibleTableFilterR :: Scoring -> Query -> JobIds -> Handler Html
+postFlexibleTableFilterR sc q@(Query ts) jids = do
+  ((result, widget), enctype) <- runFormPost filterForm
+  case result of
+    FormSuccess pattern -> case pattern of
+      Nothing -> 
+        getShowManyJobResultsR sc q jids
+      Just pat -> do
+        let q' = Query $ ts <> [ Filter_Benchmarks $ NameMatches pat ]
+        render <- getUrlRender
+	redirect $ render $ ShowManyJobResultsR sc q' jids
+    -- FIXME: better error handling	
+    _ -> getShowManyJobResultsR sc q jids
+    
 getShowManyJobResultsR
   :: Scoring -> Query -> JobIds -> Handler Html
 getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
@@ -91,6 +117,8 @@ getShowManyJobResultsR sc NoQuery  jids@(JobIds ids) = do
     $(widgetFile "show_many_job_results")
 
 getShowManyJobResultsR sc q@(Query ts) jids@(JobIds ids) = do
+  (widget,enctype) <- generateFormPost filterForm
+  dois <- doiService <$> getYesod
   qJobs <- queryManyJobs ids
   tab <- getManyJobCellsCombined (combi_modus q) $ map (snd . queryResult) qJobs
   defaultLayout $ do
@@ -102,6 +130,11 @@ getShowManyJobResultsR sc q@(Query ts) jids@(JobIds ids) = do
     [whamlet|
             <pre>#{show q}
         |]
+    [whamlet|
+      <form method=post action=@{FlexibleTableFilterR sc q jids} enctype=#{enctype}>
+        ^{widget}
+        <button>Submit
+    |]
     display sc jids [] ts tab
 
 getShowManyJobResultsCSVR

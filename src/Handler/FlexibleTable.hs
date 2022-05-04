@@ -5,3 +5,4 @@ import Handler.ShowManyJobResults
 
 getFlexibleTableR :: Query -> JobIds -> Handler Html
 getFlexibleTableR = getShowManyJobResultsR Standard
+
