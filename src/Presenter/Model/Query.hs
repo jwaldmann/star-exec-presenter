@@ -44,7 +44,10 @@ data Transform =
   | Common -- ^ restrict to intersection of benchmarks
   deriving (Read,Show, Eq)
 
-data Bench_Predicate = EqDOI DOI | EqID BenchmarkID
+data Bench_Predicate
+  = EqDOI DOI
+  | EqID BenchmarkID
+  | NameMatches T.Text
   deriving (Read, Show, Eq)
 
 data Predicate =

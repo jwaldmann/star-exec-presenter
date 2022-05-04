@@ -1,4 +1,5 @@
 {-# language LambdaCase, RankNTypes #-}
+{-# options_ghc -Werror=incomplete-patterns #-}
 
 module Presenter.Utils.WidgetTable where
 
@@ -481,6 +482,7 @@ apply jids t tab = case t of
     Common -> tab -- because we filtered this earlier already
     Filter_Benchmarks p ->
       tab { rows = filter ( benchmark_predicate p ) $ rows tab }
+    _ -> tab -- well...  
 
 init' = reverse . drop 1 . reverse
 
@@ -558,7 +560,7 @@ predicate p row = case p of
     Compare i nt ordering bound ->
       case M.lookup nt $ nums $ row !! i of
         Nothing -> False
-        Just v -> (case ordering of LT -> (<=) ; GT -> (>=) ) v bound
+        Just v -> (case ordering of LT -> (<=) ; GT -> (>=); EQ -> (==) ) v bound
 
 benchmark_predicate p row = case p of
   EqDOI doi -> or $ do
@@ -567,6 +569,11 @@ benchmark_predicate p row = case p of
   EqID id -> or $ do
     leader <- take 1 row
     return $ Just (Left id) == mbenchkey leader
+  NameMatches pat -> or $ do
+    leader <- take 1 row
+    return $ case mbench leader of
+      Nothing -> False
+      Just bench -> T.isInfixOf pat bench
 
 matches :: Cell_Filter -> Text -> Bool
 matches f c = case f of
