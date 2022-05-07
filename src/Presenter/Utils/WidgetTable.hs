@@ -574,6 +574,8 @@ benchmark_predicate p row = case p of
     return $ case mbench leader of
       Nothing -> False
       Just bench -> T.isInfixOf pat bench
+  NotNameMatches pat ->
+    not $ benchmark_predicate (NameMatches pat) row
 
 matches :: Cell_Filter -> Text -> Bool
 matches f c = case f of

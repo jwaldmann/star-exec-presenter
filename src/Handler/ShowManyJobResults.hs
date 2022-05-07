@@ -20,6 +20,7 @@ import Presenter.Utils.WidgetMetaRefresh
 import Presenter.Utils.WidgetTable
 import qualified Presenter.DOI as DOI
 
+import Text.Blaze.Internal (Markup)
 import Text.Lucius (luciusFile)
 import Data.Double.Conversion.Text
 import Data.Maybe
@@ -39,9 +40,10 @@ combi_modus _ = Union
 
 -- | copied from the example in
 -- https://www.yesodweb.com/book/forms
-
 filterForm = 
-  renderDivs $ aopt textField "restrict benchmarks, name must contain infix:" Nothing
+  renderDivs $ (,)
+    <$> (areq checkBoxField "benchmark name must contain (unchecked: avoid)" (Just True) )
+    <*> areq textField "infix:" Nothing
 
 getFlexibleTableFilterR :: Scoring -> Query -> JobIds -> Handler Html
 getFlexibleTableFilterR sc q@(Query ts) jids = do
@@ -52,10 +54,14 @@ postFlexibleTableFilterR sc q@(Query ts) jids = do
   ((result, widget), enctype) <- runFormPost filterForm
   case result of
     FormSuccess pattern -> case pattern of
-      Nothing -> 
-        getShowManyJobResultsR sc q jids
-      Just pat -> do
-        let q' = Query $ ts <> [ Filter_Benchmarks $ NameMatches pat ]
+      (polar, pat) -> do
+        let q' = Query $ ts <> [ Filter_Benchmarks
+	                       $ ( case polar of
+			             True -> NameMatches
+			             False -> NotNameMatches
+				 )
+			       pat
+			       ]
         render <- getUrlRender
 	redirect $ render $ ShowManyJobResultsR sc q' jids
     -- FIXME: better error handling	

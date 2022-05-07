@@ -48,6 +48,7 @@ data Bench_Predicate
   = EqDOI DOI
   | EqID BenchmarkID
   | NameMatches T.Text
+  | NotNameMatches T.Text
   deriving (Read, Show, Eq)
 
 data Predicate =
