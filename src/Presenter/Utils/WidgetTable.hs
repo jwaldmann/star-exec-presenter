@@ -330,12 +330,15 @@ summary sc jids previous tab = do
                   c <- col
                   return $ M.lookup nt $ nums c
                 n = length values
-                m = M.fromList $ (Sum, sum values) : do
-                  (level, pos) <- [ (Min,0), (Bot, div n cut)
-                           , (Med, div n 2), (Top, div ((cut-1)*n) cut)
-                           , (Max, n-1)
+		avg = if null values then 0 else sum values / fromIntegral n
+                m = M.fromList $ (Sum, sum values) :
+		           [ (Min, values !! 0)
+			   , (Bot, values !! div n cut)
+                           , (Med, values !! div n 2)
+			   , (Avg, avg)
+			   , (Top, values !! div ((cut-1)*n) cut)
+                           , (Max, values !! (n-1) )
                            ]
-                  return (level, values !! pos)                  
             guard $ not $ null values
             return (nt, m)
         sorter direction i nt = Query $ previous ++ [ Sort direction i nt ]
@@ -461,6 +464,7 @@ explain l = case l of
   Sum -> "sum"
   Max -> "maximum"
   Top -> "top "    <> T.pack (show cut) <> "%"
+  Avg -> "average"
   Med -> "median"
   Bot -> "bottom " <> T.pack (show cut) <> "%"
   Min -> "minimum"

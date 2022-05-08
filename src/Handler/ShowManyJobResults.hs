@@ -41,7 +41,7 @@ combi_modus _ = Union
 -- | copied from the example in
 -- https://www.yesodweb.com/book/forms
 filterForm = 
-  renderDivs $ (,)
+  renderTable $ (,)
     <$> (areq checkBoxField "benchmark name must contain (unchecked: avoid)" (Just True) )
     <*> areq textField "infix:" Nothing
 
@@ -138,7 +138,8 @@ getShowManyJobResultsR sc q@(Query ts) jids@(JobIds ids) = do
         |]
     [whamlet|
       <form method=post action=@{FlexibleTableFilterR sc q jids} enctype=#{enctype}>
-        ^{widget}
+        <table>
+          ^{widget}
         <button>Submit
     |]
     display sc jids [] ts tab
