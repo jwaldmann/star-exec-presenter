@@ -437,7 +437,7 @@ summary sc jids previous tab = do
                          $forall (k,v) <- M.toList c
                            <th>
                              <a href=@{ShowManyJobResultsR sc (sorter Up i (Just k)) jids}>
-                               #{show k} #{unit k}
+                               #{show k} (#{unit k})
                      <tbody>
                        $forall l <- levels
                          <tr>
@@ -453,7 +453,7 @@ summary sc jids previous tab = do
                          $forall (k,v) <- M.toList c
                            <th>
                              <a href=@{ShowManyJobResultsR sc (sorter Down i (Just k)) jids}>
-                               #{show k} #{unit k}
+                               #{show k} (#{unit k})
     |]
 
 cut :: Int
