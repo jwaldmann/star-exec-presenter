@@ -13,6 +13,12 @@ import qualified Prelude as P
 data Numtag = CPU | Wall | Size
   deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
 
+unit :: Numtag -> T.Text
+unit t = case t of
+  CPU -> "seconds"
+  Wall -> "seconds"
+  Size -> "bytes"
+
 data Level = Min | Bot | Med | Avg | Top | Max | Sum
   deriving (P.Eq, P.Ord, P.Show, P.Read, P.Enum, P.Bounded)
 
