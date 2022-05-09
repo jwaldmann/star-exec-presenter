@@ -440,7 +440,7 @@ summary sc jids previous tab = do
                              <td>
                                $maybe d <- M.lookup l v
                                  <a href=@{ShowManyJobResultsR sc (comparer i k LT d) jids}>&lt;
-                                 #{shorten d}
+                                 #{shortdouble d}
                                  <a href=@{ShowManyJobResultsR sc (comparer i k GT d) jids}>&gt;
 
                      <thead>
@@ -466,13 +466,14 @@ explain l = case l of
 
 -- | show with 3 significant digits,
 -- and unit prefix (milli to Tera)
-shorten :: Double -> String
-shorten 0 = "0"
-shorten x | x < 0 = "-" <> shorten x
-shorten x =
+shortdouble :: Double -> String
+shortdouble 0 = "0"
+shortdouble x | x < 0 = "-" <> shortdouble x
+shortdouble x =
   let (y, f) = 
-        if      x < 1e0 then (x *  1e3, "m")
-        else if x < 1e3 then (x       , "" )
+        if   {-   x < 1e0 then (x *  1e3, "m")
+        else if
+	     -} x < 1e3 then (x       , "" )
         else if x < 1e6 then (x /  1e3, "k")
         else if x < 1e9 then (x /  1e6, "M")
         else if x < 1e12 then (x /  1e9, "G")
