@@ -330,13 +330,13 @@ summary sc jids previous tab = do
                   c <- col
                   return $ M.lookup nt $ nums c
                 n = length values
-		avg = if null values then 0 else sum values / fromIntegral n
+                avg = if null values then 0 else sum values / fromIntegral n
                 m = M.fromList $ (Sum, sum values) :
-		           [ (Min, values !! 0)
-			   , (Bot, values !! div n cut)
+                           [ (Min, values !! 0)
+                           , (Bot, values !! div n cut)
                            , (Med, values !! div n 2)
-			   , (Avg, avg)
-			   , (Top, values !! div ((cut-1)*n) cut)
+                           , (Avg, avg)
+                           , (Top, values !! div ((cut-1)*n) cut)
                            , (Max, values !! (n-1) )
                            ]
             guard $ not $ null values
@@ -360,11 +360,6 @@ summary sc jids previous tab = do
                       , Query (previous ++ [ Filter_Rows (Not (And (map Equals rt))) ] )
                 )
             )
-        shorten d =
-          if d < 1e3 then show (round d :: Int)
-          else if d < 1e6 then show (round (d / 1e3) :: Int) ++ "k"
-          else if d < 1e9 then show (round (d / 1e6) :: Int) ++ "m"
-          else show (round (d / 1e9) :: Int) ++ "g"
     [whamlet|
         <h3>summary
         total number of rows: #{show total}
@@ -468,6 +463,32 @@ explain l = case l of
   Med -> "median"
   Bot -> "bottom " <> T.pack (show cut) <> "%"
   Min -> "minimum"
+
+-- | show with 3 significant digits,
+-- and unit prefix (milli to Tera)
+shorten :: Double -> String
+shorten 0 = "0"
+shorten x | x < 0 = "-" <> shorten x
+shorten x =
+  let (y, f) = 
+        if      x < 1e0 then (x *  1e3, "m")
+        else if x < 1e3 then (x       , "" )
+        else if x < 1e6 then (x /  1e3, "k")
+        else if x < 1e9 then (x /  1e6, "M")
+        else if x < 1e12 then (x /  1e9, "G")
+        else                 (x / 1e12, "T")
+      e = truncate $ logBase 10 y
+      off = 2 - e
+      p = 10^^off
+      z = round $ y * p
+      (pre,post) = splitAtEnd off $ show z
+  in     (if null pre then "0" else pre)
+      <> (if null post then "" else "." <> post)
+      <> f
+
+splitAtEnd k xs =
+  let (ys,zs) = splitAt k $ reverse xs
+  in  (reverse zs, reverse ys)
       
 data Pick = Best JobID [Int] | Copy Int deriving (Eq, Ord, Show)
 
