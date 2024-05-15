@@ -200,7 +200,7 @@ library
                  , case-insensitive
                  , http-client
                  , http-client-tls
-                 , connection
+                 , crypton-connection
                  , random
                  , tagsoup
                  -- , esqueleto
